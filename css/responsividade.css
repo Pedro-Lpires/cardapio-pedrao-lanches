@@ -1,0 +1,20 @@
+@media (max-width: 600px) {
+    .abas-navegacao {
+        justify-content: flex-start;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .abas-navegacao a { flex-shrink: 0; }
+    .abas-navegacao::-webkit-scrollbar { display: none; }
+
+    .grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 10px; padding: 10px;
+    }
+
+    .card { min-height: 350px; padding: 10px; }
+    .card h3 { font-size: 0.95rem; }
+    .card .preco { font-size: 1.1rem; }
+    .card img { height: 110px; }
+    .quantidade-controle { gap: 10px; padding: 5px 10px; }
+}

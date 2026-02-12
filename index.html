@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedrão Lanches</title>
+    <link rel="icon" href="images/logo-trailer.png">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsividade.css">
+</head>
+<body>
+
+<header>
+    <h1>🍔 PEDRÃO LANCHES</h1>
+    <p class="subtitulo">O melhor da cidade desde 2014</p>
+</header>
+
+<nav class="abas-navegacao">
+    <a href="#lanches">🍔 Lanches</a>
+    <a href="#combos">🎁 Combos</a> 
+    <a href="#bebidas">🥤 Bebidas</a>
+    <a href="#batatas">🍟 Batatas</a>
+</nav>
+
+<div class="container">
+    <h2 id="lanches">🍔 LANCHES</h2>
+    <div class="grid" id="container-lanches"></div>
+
+    <h2 id="combos">🎁 COMBOS</h2>
+    <div class="grid" id="container-combos"></div>
+
+    <h2 id="bebidas">🥤 BEBIDAS</h2>
+    <div class="grid" id="container-bebidas"></div>
+
+    <h2 id="batatas">🍟 BATATAS</h2>
+    <div class="grid" id="container-batatas"></div>
+
+    <div class="pedido" id="finalizar-pedido">
+        <h3>Observações</h3>
+        <textarea id="observacao" placeholder="Ex: Tirar cebola, partir ao meio, acrescentar bacon..." rows="3"></textarea>
+
+        <h3>Tipo de Pedido</h3>
+        <label><input type="radio" name="tipo" value="Entrega"> Entrega 🚚</label>
+        <label><input type="radio" name="tipo" value="Retirada"> Retirada 🏪</label>
+
+        <button onclick="finalizarPedido()">FINALIZAR PEDIDO</button>
+    </div>
+</div>
+
+<div id="botao-flutuante" class="carrinho-flutuante">
+    <span>Total: R$ <span id="valor-total-flutuante">0,00</span></span>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
