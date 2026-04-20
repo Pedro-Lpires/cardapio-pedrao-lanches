@@ -22,7 +22,7 @@
     <a href="#batatas">🍟 Batatas</a>
 </nav>
 
-<div class="container">
+<main class="container">
     <h2 id="lanches">🍔 LANCHES</h2>
     <div class="grid" id="container-lanches"></div>
 
@@ -35,20 +35,103 @@
     <h2 id="batatas">🍟 BATATAS</h2>
     <div class="grid" id="container-batatas"></div>
 
-    <div class="pedido" id="finalizar-pedido">
-        <h3>Observações</h3>
-        <textarea id="observacao" placeholder="Ex: Tirar cebola, partir ao meio, acrescentar bacon..." rows="3"></textarea>
+    <section class="pedido secao-finalizacao" id="finalizar-pedido">
+        <div class="tipo-pedido-grupo">
+            <h3>Tipo de Pedido</h3>
+            <div class="opcoes-alinhadas">
+                <label><input type="radio" name="tipo" value="Entrega" checked> Entrega 🚚</label>
+                <label><input type="radio" name="tipo" value="Retirada"> Retirada 🏪</label>
+            </div>
+        </div>
 
-        <h3>Tipo de Pedido</h3>
-        <label><input type="radio" name="tipo" value="Entrega"> Entrega 🚚</label>
-        <label><input type="radio" name="tipo" value="Retirada"> Retirada 🏪</label>
+        <div class="grupo-observacoes">
+            <h3>Observações</h3>
+            <textarea id="observacao" placeholder="Ex: Tirar cebola, partir ao meio, acrescentar bacon..." rows="3"></textarea>
+        </div>
+<div class="box-cliente">
+    <input type="text" id="nome-cliente" placeholder="👤 Seu nome" class="input-padrao">
+  <input type="tel" id="telefone-cliente" placeholder="📱 Seu telefone" class="input-padrao" inputmode="numeric">
+</div>
 
-        <button onclick="finalizarPedido()">FINALIZAR PEDIDO</button>
+        <div class="grupo-botoes-acao">
+            <button id="btn-apagar" onclick="limparCarrinho()">🗑️ APAGAR PEDIDO</button>
+            <button id="btn-finalizar" onclick="finalizarPedido()">✅ FINALIZAR PEDIDO</button>
+        </div>
+
+        <div id="revisao-pedido" style="display: none;">
+            <h2>🏁 ÚLTIMA ETAPA: REVISÃO</h2>
+            <div id="lista-conferencia"></div>
+            
+            <div id="detalhe-valores">
+                <p>Subtotal: <span id="resumo-subtotal">R$ 0,00</span></p>
+                <p>Taxa de Entrega: <span id="resumo-taxa">R$ 0,00</span></p>
+                <hr class="divisor-revisao">
+                <h3>TOTAL GERAL: <span id="resumo-total">R$ 0,00</span></h3>
+            </div>
+
+            <h3>Forma de Pagamento:</h3>
+            <div class="grupo-pagamento">
+                <label class="opcao-pagamento"><input type="checkbox" class="check-pagamento" value="Pix"> Pix</label>
+                <label class="opcao-pagamento"><input type="checkbox" class="check-pagamento" value="Cartão"> <span>Cartão (Levamos a maquininha)</span></label>
+                <label class="opcao-pagamento">
+                    <input type="checkbox" class="check-pagamento" value="Dinheiro" id="check-dinheiro" onchange="toggleTroco()"> Dinheiro
+                </label>
+                <input type="number" id="valor-troco" placeholder="Troco para quanto?">
+            </div>
+            <button onclick="confirmarEEnviar()">🚀 ENVIAR PEDIDO PARA O WHATSAPP</button>
+        </div>
+    </section>
+</main>
+
+<div id="botao-flutuante" class="carrinho-flutuante" style="display: none;">
+    <span>Total: R$ <span id="valor-total-flutuante">0,00</span></span>
+</div>
+
+<div id="modal-opcoes" class="modal" style="display: none;">
+    <div class="modal-conteudo">
+        <h2 id="modal-nome-lanche">Nome do Lanche</h2>
+        <p id="modal-desc-lanche"></p>
+        <hr class="divisor-admin">
+        
+        <div class="opcao-carne">
+            <label>🥩 Artesanal</label>
+            <div class="carne-controles">
+                <span id="preco-artesanal">R$ 0,00</span>
+                <div class="seletor-qtd">
+                    <button type="button" onclick="ajustarQtd('qtd-artesanal', -1)">-</button>
+                    <input type="number" id="qtd-artesanal" value="0" readonly>
+                    <button type="button" onclick="ajustarQtd('qtd-artesanal', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="opcao-carne">
+            <label>🏭 Industrial</label>
+            <div class="carne-controles">
+                <span id="preco-industrial">R$ 0,00</span>
+                <div class="seletor-qtd">
+                    <button type="button" onclick="ajustarQtd('qtd-industrial', -1)">-</button>
+                    <input type="number" id="qtd-industrial" value="0" readonly>
+                    <button type="button" onclick="ajustarQtd('qtd-industrial', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
+      <div class="opcao-carne" id="container-opcao-frango" style="display: none;">
+    <label>🍗 Frango</label>
+    <div class="carne-controles">
+        <span id="preco-frango">R$ 20,00</span>
+        <div class="seletor-qtd">
+            <button type="button" onclick="ajustarQtd('qtd-frango', -1)">-</button>
+            <input type="number" id="qtd-frango" value="0" readonly>
+            <button type="button" onclick="ajustarQtd('qtd-frango', 1)">+</button>
+        </div>
     </div>
 </div>
 
-<div id="botao-flutuante" class="carrinho-flutuante">
-    <span>Total: R$ <span id="valor-total-flutuante">0,00</span></span>
+        <button class="btn-confirmar" onclick="confirmarEscolha()">ADICIONAR AO CARRINHO</button>
+        <button class="btn-cancelar" onclick="fecharModal()">CANCELAR</button>
+    </div>
 </div>
 
 <script src="js/script.js"></script>

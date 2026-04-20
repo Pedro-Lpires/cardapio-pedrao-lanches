@@ -18,3 +18,44 @@
     .card img { height: 110px; }
     .quantidade-controle { gap: 10px; padding: 5px 10px; }
 }
+@media (max-width: 480px) {
+    #revisao-pedido {
+        padding: 15px 10px; 
+    }
+    
+    #revisao-pedido h2 {
+        font-size: 1.2rem; 
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-conteudo {
+        width: 95%;        
+        padding: 15px;     
+        max-height: 90vh;  
+        overflow-y: auto;  
+    }
+
+    .modal-conteudo h2 {
+        font-size: 1.2rem; 
+    }
+}
+
+
+@media (max-width: 360px) {
+    .grupo-tipo-pedido {
+        flex-direction: column; 
+        align-items: flex-start; 
+        padding-left: 20%; 
+    }
+       .opcao-carne {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .carne-controles {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+}

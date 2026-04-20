@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Pedrão Lanches</title>
+    <link rel="icon" href="images/logo-trailer.png">
+    <link rel="stylesheet" href="css/style.css"> <link rel="stylesheet" href="css/admin.css"> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="admin-body">
+
+    <header class="admin-header">
+        <h1>📊 Painel de Vendas</h1>
+        <p class="subtitulo">Gestão Estratégica Pedrão Lanches</p>
+    </header>
+
+    <main class="container">
+        <section class="box-grafico">
+            <canvas id="meuGrafico"></canvas>
+        </section>
+
+        <nav class="filtros-admin">
+            <button class="btn-filtro" onclick="processar('hoje')">HOJE</button>
+            <button class="btn-filtro" onclick="processar('semana')">ESTA SEMANA</button>
+            <button class="btn-filtro" onclick="processar('mes')">ESTE MÊS</button>
+        </nav>
+
+       <section class="grid-resumo">
+    <div class="card-total">
+        <p>Faturamento Total</p>
+        <strong id="resumo-geral">R$ 0,00</strong>
+    </div>
+
+    <div class="card-stats">
+        <div class="stat-group">
+            <div class="stat-item"><span>🍔 Lanches:</span> <strong id="resumo-lanches">R$ 0,00</strong></div>
+            <div class="stat-item"><span>🥤 Bebidas:</span> <strong id="resumo-bebidas">R$ 0,00</strong></div>
+            <div class="stat-item"><span>🎁 Combos:</span> <strong id="resumo-combos">R$ 0,00</strong></div>
+            <div class="stat-item"><span>🍟 Batatas:</span> <strong id="resumo-batatas">R$ 0,00</strong></div>
+        </div>
+
+        <hr class="divisor-admin">
+
+        <div class="stat-item destaque-motoboy">
+            <span>🛵 Taxa Motoboy:</span> <strong id="resumo-taxas-motoboy">R$ 0,00</strong>
+        </div>
+
+        <hr class="divisor-admin">
+
+        <div class="stat-group">
+            <div class="stat-item entrega">
+                <span>🚚 Total Entrega:</span> <strong id="resumo-faturamento-entrega">R$ 0,00</strong>
+            </div>
+            <div class="stat-item retirada">
+                <span>🏪 Total Retirada:</span> <strong id="resumo-faturamento-retirada">R$ 0,00</strong>
+            </div>
+        </div>
+    </div>
+</section>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="index.html" style="color: var(--primary-color); text-decoration: none; font-weight: bold;">← Voltar para a Loja</a>
+        </div>
+    </main>
+
+    <script src="js/admin.js"></script> </body>
+</html>
