@@ -1,4 +1,6 @@
-
+* {
+    box-sizing: border-box;
+}
 :root {
     --primary-color: #e50914;     
     --primary-hover: #b30710;
@@ -208,7 +210,7 @@ button:hover { transform: scale(1.05); }
 }
 .modal-conteudo {
     background: var(--modal-bg);
-    width: 90%;            
+    width: calc(100% - 20px);            
     max-width: 380px;      
     padding: 20px;
     border-radius: 15px;

@@ -1,3 +1,32 @@
+
+.grid {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 950px) {
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+    
+    }
+}
+@media (max-width: 650px) {
+    .container {
+        padding: 0 15px;
+    }
+}
+@media (max-width: 620px) {
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 10px 0;
+    }
+
+    .container {
+        padding: 0 12px;
+    }
+}
+
 @media (max-width: 600px) {
     .abas-navegacao {
         justify-content: flex-start;
@@ -7,17 +36,20 @@
     .abas-navegacao a { flex-shrink: 0; }
     .abas-navegacao::-webkit-scrollbar { display: none; }
 
-    .grid {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 10px; padding: 10px;
+  .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
-
     .card { min-height: 350px; padding: 10px; }
     .card h3 { font-size: 0.95rem; }
     .card .preco { font-size: 1.1rem; }
     .card img { height: 110px; }
     .quantidade-controle { gap: 10px; padding: 5px 10px; }
+    .modal-conteudo {
+        width: calc(100% - 20px);
+    }
 }
+
 @media (max-width: 480px) {
     #revisao-pedido {
         padding: 15px 10px; 
@@ -26,23 +58,42 @@
     #revisao-pedido h2 {
         font-size: 1.2rem; 
     }
+    
 }
 
-@media (max-width: 480px) {
+@media (max-width: 400px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
     .modal-conteudo {
-        width: 95%;        
-        padding: 15px;     
-        max-height: 90vh;  
-        overflow-y: auto;  
-    }
-
-    .modal-conteudo h2 {
-        font-size: 1.2rem; 
+        margin: 0 10px;
+        padding: 15px;
     }
 }
-
-
+@media (max-width: 430px) {
+    .opcoes-alinhadas {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .opcoes-alinhadas label {
+        width: 100%;
+        display: flex;            
+        align-items: center;        
+        gap: 10px;                  
+        background: #1e1e1e;
+        padding: 10px;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+    .opcoes-alinhadas input[type="radio"] {
+        flex-shrink: 0;             
+    }
+}
 @media (max-width: 360px) {
+        .grid {
+        grid-template-columns: 1fr;
+    }
     .grupo-tipo-pedido {
         flex-direction: column; 
         align-items: flex-start; 
@@ -57,5 +108,6 @@
         flex-direction: row;
         justify-content: space-between;
         margin-top: 10px;
-    }
+    }   
 }
+

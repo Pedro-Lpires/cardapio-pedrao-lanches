@@ -403,10 +403,10 @@ function finalizarPedido() {
     if (itensPedido.length === 0) return alert("Seu carrinho está vazio!");
     if (!tipoEnvio) return alert("Escolha Entrega ou Retirada!");
 
-    if (tipoEnvio.value === "Retirada") {
-        exibirRevisao(itensPedido, valorLanches, 0, "Retirada", obs);
-        return;
-    }
+    if (tipoEnvio.value === "Retirada" || tipoEnvio.value === "Local") {
+    exibirRevisao(itensPedido, valorLanches, 0, tipoEnvio.value, obs);
+    return;
+}
 
     alert("Por favor, autorize a localização para calcularmos sua taxa de entrega.");
     navigator.geolocation.getCurrentPosition(pos => {
@@ -481,7 +481,8 @@ function confirmarEEnviar() {
      if (!nomeCliente) {
         return alert("Por favor, informe seu nome!");
     }
-
+const precisaTroco = document.getElementById('check-dinheiro')?.checked;
+const valorTroco = document.getElementById('valor-troco')?.value;
     const telefoneLimpo = telefoneCliente.replace(/\D/g, '');
 
 if (telefoneLimpo && telefoneLimpo.length < 10) {
@@ -523,7 +524,8 @@ if (telefoneLimpo && telefoneLimpo.length < 10) {
     }
 
     
-       const pagamento = marcados[0].value;
+      const pagamentosSelecionados = Array.from(marcados).map(el => el.value);
+    const pagamento = pagamentosSelecionados.join(' + ');
 
     
     let msg = `*PEDRÃO LANCHES - NOVO PEDIDO*\n`;
@@ -544,7 +546,8 @@ if (d.obs && d.obs.trim() !== "") {
 }
 
     
-    msg += `*Tipo:* ${d.tipo}\n`;
+   if (d.tipo === "Local") msg += `*Tipo:* Comer no local 🍔\n`;
+else msg += `*Tipo:* ${d.tipo}\n`;
 
     
     if (d.tipo === "Entrega") {
@@ -565,6 +568,10 @@ if (d.obs && d.obs.trim() !== "") {
 
     
     msg += `*Pagamento:* ${pagamento}\n`;
+
+if (precisaTroco && valorTroco) {
+    msg += `*Troco para:* R$ ${Number(valorTroco).toFixed(2)}\n`;
+}
 
     msg += `--------------------------\n`;
 

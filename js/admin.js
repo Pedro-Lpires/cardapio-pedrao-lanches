@@ -53,7 +53,7 @@ function atualizarGrafico(periodo, lista) {
 function processar(periodo) {
     let vendas = JSON.parse(localStorage.getItem('vendas') || '[]');
     let agora = new Date();
-    let soma = { geral: 0, lanches: 0, bebidas: 0, combos: 0, batatas: 0, motoboy: 0, ent: 0, ret: 0 };
+    let soma = { geral: 0, lanches: 0, bebidas: 0, combos: 0, batatas: 0, motoboy: 0, ent: 0, ret: 0, local: 0 };
 
     let filtrados = []; 
 
@@ -107,8 +107,15 @@ function processar(periodo) {
             }
 
             soma.motoboy += Number(v.taxaEntrega) || 0;
-            if (v.tipo === 'Entrega') soma.ent += totalPedido;
-            else soma.ret += totalPedido;
+            if (v.tipo === 'Entrega') {
+    soma.ent += totalPedido;
+} 
+else if (v.tipo === 'Retirada') {
+    soma.ret += totalPedido;
+} 
+else if (v.tipo === 'Local') {
+    soma.local += totalPedido;
+}
         }
     });
 
@@ -124,7 +131,8 @@ function processar(periodo) {
         'resumo-batatas': soma.batatas,
         'resumo-taxas-motoboy': soma.motoboy,
         'resumo-faturamento-entrega': soma.ent,
-        'resumo-faturamento-retirada': soma.ret
+        'resumo-faturamento-retirada': soma.ret,
+        'resumo-faturamento-local': soma.local
     };
 
     for (let id in campos) {

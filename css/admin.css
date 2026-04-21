@@ -88,13 +88,6 @@
     margin: 5px 0;
 }
 
-
-@media (max-width: 600px) {
-    .grid-resumo { grid-template-columns: 1fr; }
-    .card-total strong { font-size: 1.8rem; }
-}
-
-
 .card-stats {
     background: #1a1a1a;
     padding: 20px;
@@ -140,4 +133,23 @@
 .stat-group {
     display: flex;
     flex-direction: column;
+}
+.voltar-loja {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.voltar-loja a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.voltar-loja a:hover {
+    opacity: 0.8;
+}
+@media (max-width: 600px) {
+    .grid-resumo { grid-template-columns: 1fr; }
+    .card-total strong { font-size: 1.8rem; }
 }
