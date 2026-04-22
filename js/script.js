@@ -1,3 +1,15 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyD2ZQbBk5zTlkwh91cQ3HF-ZBpXzFE3IQk",
+  authDomain: "pedrao-lanches.firebaseapp.com",
+  projectId: "pedrao-lanches",
+  storageBucket: "pedrao-lanches.firebasestorage.app",
+  messagingSenderId: "642954187872",
+  appId: "1:642954187872:web:38efbecf53357e57b0df05"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
 
 const LAT_ESTABELECIMENTO = -15.553076945525193;
 const LON_ESTABELECIMENTO = -56.05602240360688;
@@ -392,13 +404,29 @@ function finalizarPedido() {
     const tipoEnvio = document.querySelector('input[name="tipo"]:checked');
     const obs = document.getElementById('observacao').value;
     
-    let itensPedido = [];
-    let valorLanches = 0;
+  let itensPedido = [];
+let valorLanches = 0;
 
-    carrinho.forEach(item => {
-        itensPedido.push(`${item.qtd}x ${item.nome} (R$ ${(item.preco * item.qtd).toFixed(2)})`);
-        valorLanches += (item.preco * item.qtd);
-    });
+const agrupado = {};
+
+carrinho.forEach(item => {
+    const chave = item.nome;
+
+    if (!agrupado[chave]) {
+        agrupado[chave] = {
+            nome: item.nome,
+            quantidade: 0,
+            preco: item.preco
+        };
+    }
+
+    agrupado[chave].quantidade += Number(item.qtd) || 1;
+    valorLanches += item.preco * item.qtd;
+});
+
+Object.values(agrupado).forEach(item => {
+    itensPedido.push(`${item.quantidade}x ${item.nome} (R$ ${(item.preco * item.quantidade).toFixed(2)})`);
+});
 
     if (itensPedido.length === 0) return alert("Seu carrinho está vazio!");
     if (!tipoEnvio) return alert("Escolha Entrega ou Retirada!");
@@ -505,29 +533,29 @@ if (telefoneLimpo && telefoneLimpo.length < 10) {
             categoria: item.categoria || "Lanches" 
         };
     });
-
-    
-    try {
-        const novaVenda = {
-            itens: itensProcessados,
-            valorTotal: (parseFloat(d.subtotal) + parseFloat(d.taxa)) || 0,
-            taxaEntrega: parseFloat(d.taxa) || 0,
-            tipo: d.tipo,
-            data: new Date().toISOString()
-        };
-
-        let vendas = JSON.parse(localStorage.getItem('vendas') || '[]');
-        vendas.push(novaVenda);
-        localStorage.setItem('vendas', JSON.stringify(vendas));
-    } catch (e) {
-        console.error("Erro ao salvar venda:", e);
-    }
-
-    
-      const pagamentosSelecionados = Array.from(marcados).map(el => el.value);
+    const pagamentosSelecionados = Array.from(marcados).map(el => el.value);
     const pagamento = pagamentosSelecionados.join(' + ');
 
-    
+    try {
+    const pedidoFirebase = {
+        nome: nomeCliente,
+        telefone: telefoneCliente,
+        itens: itensProcessados,
+        valorTotal: (parseFloat(d.subtotal) + parseFloat(d.taxa)) || 0,
+        taxaEntrega: parseFloat(d.taxa) || 0,
+        tipo: d.tipo,
+        pagamento: pagamento,
+        trocoPara: (precisaTroco && valorTroco) ? Number(valorTroco) : null,
+        observacao: d.obs || "",
+        data: new Date().toISOString()
+    };
+
+    salvarPedidoFirebase(pedidoFirebase);
+
+} catch (e) {
+    console.error("Erro ao salvar no Firebase:", e);
+}
+
     let msg = `*PEDRÃO LANCHES - NOVO PEDIDO*\n`;
     msg += `--------------------------\n`;
     
@@ -591,6 +619,14 @@ if (precisaTroco && valorTroco) {
     if (typeof fecharModalCheck === 'function') fecharModalCheck();
 }
 
+async function salvarPedidoFirebase(pedido) {
+    try {
+        await db.collection("pedidos").add(pedido);
+        console.log("Pedido salvo no Firebase!");
+    } catch (erro) {
+        console.error("Erro ao salvar:", erro);
+    }
+}
 
 
 

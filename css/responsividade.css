@@ -37,8 +37,9 @@
     .abas-navegacao::-webkit-scrollbar { display: none; }
 
   .grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+        padding: 10px;
+        gap: 10px;
     }
     .card { min-height: 350px; padding: 10px; }
     .card h3 { font-size: 0.95rem; }
@@ -62,8 +63,17 @@
 }
 
 @media (max-width: 400px) {
+    .container {
+        padding: 0 8px;
+    }
+
     .grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 8px;
+    }
+.card img {
+        height: 90px;
     }
     .modal-conteudo {
         margin: 0 10px;

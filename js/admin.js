@@ -1,3 +1,27 @@
+
+
+let vendasFirebase = [];
+const firebaseConfig = {
+  apiKey: "AIzaSyD2ZQbBk5zTlkwh91cQ3HF-ZBpXzFE3IQk",
+  authDomain: "pedrao-lanches.firebaseapp.com",
+  projectId: "pedrao-lanches",
+  storageBucket: "pedrao-lanches.firebasestorage.app",
+  messagingSenderId: "642954187872",
+  appId: "1:642954187872:web:38efbecf53357e57b0df05"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.collection("pedidos").onSnapshot((snapshot) => {
+    vendasFirebase = [];
+
+    snapshot.forEach(doc => {
+        vendasFirebase.push(doc.data());
+    });
+
+    processar('hoje');
+});
+
 let meuChart = null;
 
 function atualizarGrafico(periodo, lista) {
@@ -51,7 +75,8 @@ function atualizarGrafico(periodo, lista) {
     });
 }
 function processar(periodo) {
-    let vendas = JSON.parse(localStorage.getItem('vendas') || '[]');
+    // let vendas = JSON.parse(localStorage.getItem('vendas') || '[]');
+    let vendas = vendasFirebase;
     let agora = new Date();
     let soma = { geral: 0, lanches: 0, bebidas: 0, combos: 0, batatas: 0, motoboy: 0, ent: 0, ret: 0, local: 0 };
 

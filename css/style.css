@@ -102,7 +102,7 @@ h2 {
 
 .grid {
     display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(280px, 320px));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 20px; 
     padding: 20px; 
     justify-content: center;
@@ -180,6 +180,15 @@ button:hover { transform: scale(1.05); }
 #btn-apagar { background-color: #ff4444; }
 #btn-finalizar { background-color: var(--secondary-color); }
 
+#lista-conferencia {
+    width: 100%;
+    text-align: left;
+}
+
+#lista-conferencia div {
+    display: flex;
+    justify-content: space-between;
+}
 
 #revisao-pedido {
     background: var(--modal-bg);
