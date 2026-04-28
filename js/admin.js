@@ -75,7 +75,6 @@ function atualizarGrafico(periodo, lista) {
     });
 }
 function processar(periodo) {
-    // let vendas = JSON.parse(localStorage.getItem('vendas') || '[]');
     let vendas = vendasFirebase;
     let agora = new Date();
     let soma = { geral: 0, lanches: 0, bebidas: 0, combos: 0, batatas: 0, motoboy: 0, ent: 0, ret: 0, local: 0 };

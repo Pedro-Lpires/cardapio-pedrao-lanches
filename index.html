@@ -39,7 +39,7 @@
         <div class="tipo-pedido-grupo">
             <h3>Tipo de Pedido</h3>
             <div class="opcoes-alinhadas">
-                <label><input type="radio" name="tipo" value="Entrega" checked> Entrega 🚚</label>
+                <label><input type="radio" name="tipo" value="Entrega" checked> Entrega 🛵</label>
                 <label><input type="radio" name="tipo" value="Retirada"> Retirada 🏪</label>
                 <label><input type="radio" name="tipo" value="Local"> Comer no Local 🍽️</label>
             </div>
@@ -133,6 +133,21 @@
         <button class="btn-confirmar" onclick="confirmarEscolha()">ADICIONAR AO CARRINHO</button>
         <button class="btn-cancelar" onclick="fecharModal()">CANCELAR</button>
     </div>
+</div>
+<div id="modal-carrinho" class="modal-carrinho">
+  <div class="conteudo-carrinho">
+    
+    <h2>🛒 Seu Pedido</h2>
+
+    <div id="lista-carrinho"></div>
+
+    <div class="acoes-carrinho">
+        <button onclick="limparCarrinho()">🗑 Limpar</button>
+        <button onclick="fecharCarrinho()">🔙 Voltar</button>
+        <button onclick="irParaFinalizar()">✅ Finalizar</button>
+    </div>
+
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
