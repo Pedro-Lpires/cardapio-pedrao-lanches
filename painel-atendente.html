@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Painel Atendente</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<h1>
+👨‍💼 Painel do Atendente
+</h1>
+
+<p id="nome-atendente"></p>
+
+<hr>
+
+<button onclick="abrirConsumoLocal()">
+🍔 Consumo no Local
+</button>
+<div
+    id="area-consumo-local"
+    style="display:none;"
+>
+</div>
+<div
+    id="area-mesa-atendente"
+    style="display:none;"
+></div>
+<div
+    id="area-comanda-atendente"
+    style="
+        display:none;
+        margin-top:20px;
+        padding:15px;
+        border:1px solid #444;
+        border-radius:10px;
+    "
+></div>
+
+<div
+    id="area-produtos-comanda"
+    style="display:none;"
+></div>
+
+<button>
+🛵 Entrega
+</button>
+
+<button>
+📦 Retirada
+</button>
+
+<button>
+📋 Comandas Abertas
+</button>
+
+<button>
+🔔 Chamados
+</button>
+
+<button
+    onclick="logoutAtendente()"
+>
+    Sair
+</button>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="js/script.js"></script>
+<script src="js/produto-comanda.js"></script>
+<script src="js/atendente.js"></script>
+
+</body>
+</html>

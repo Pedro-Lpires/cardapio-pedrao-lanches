@@ -16,13 +16,18 @@
 </header>
 
 <nav class="abas-navegacao">
-    <a href="#lanches">🍔 Lanches</a>
-    <a href="#combos">🎁 Combos</a> 
-    <a href="#bebidas">🥤 Bebidas</a>
-    <a href="#batatas">🍟 Batatas</a>
+    <a href="#" onclick="irParaCategoria('lanches')">🍔 Lanches</a>
+    <a href="#" onclick="irParaCategoria('combos')">🎁 Combos</a> 
+    <a href="#" onclick="irParaCategoria('bebidas')">🥤 Bebidas</a>
+    <a href="#" onclick="irParaCategoria('batatas')">🍟 Batatas</a>
 </nav>
+<div id="horario-funcionamento" class="horario-box">
+    ⏰ Carregando horário...
+</div>
 
 <main class="container">
+ 
+    <section id="tela-inicio" class="tela-app ativa">
     <h2 id="lanches">🍔 LANCHES</h2>
     <div class="grid" id="container-lanches"></div>
 
@@ -34,27 +39,68 @@
 
     <h2 id="batatas">🍟 BATATAS</h2>
     <div class="grid" id="container-batatas"></div>
-
+</section>
+<section id="tela-finalizar" class="tela-app">
     <section class="pedido secao-finalizacao" id="finalizar-pedido">
         <div class="tipo-pedido-grupo">
             <h3>Tipo de Pedido</h3>
             <div class="opcoes-alinhadas">
                 <label><input type="radio" name="tipo" value="Entrega" checked> Entrega 🛵</label>
                 <label><input type="radio" name="tipo" value="Retirada"> Retirada 🏪</label>
-                <label><input type="radio" name="tipo" value="Local"> Comer no Local 🍽️</label>
+                <label><input type="radio" name="tipo" value="Local"> Consumir no Local 🍽️</label>
             </div>
         </div>
+        
+<!-- <div id="box-molhos" style="display:none;">
 
+    <button type="button" onclick="toggleMolhosGratis()">
+        🍶 Escolher molhos grátis
+    </button>
+
+    <div id="area-molhos-gratis" style="display:none;">
+
+        <p>Escolha como deseja receber os molhos.</p>
+
+        <label>
+            <input type="radio" name="modo-molho" value="umdecada" checked>
+            1 de cada escolhido
+        </label>
+
+        <label>
+            <input type="radio" name="modo-molho" value="doisiguais">
+            2 iguais
+        </label>
+
+       <div id="opcoes-molhos-gratis" style="display:none;">
+    <label><input type="radio" name="molho-dois-iguais" value="Maionese temperada"> Maionese temperada</label>
+    <label><input type="radio" name="molho-dois-iguais" value="Ketchup"> Ketchup</label>
+    <label><input type="radio" name="molho-dois-iguais" value="Mostarda"> Mostarda</label>
+    <label><input type="radio" name="molho-dois-iguais" value="Barbecue"> Barbecue</label>
+</div>
+
+        <label>
+            <input type="checkbox" id="molho-personalizado-check">
+            Personalizado
+        </label>
+
+        <textarea
+            id="molho-personalizado"
+            style="display:none;"
+            placeholder="Ex: 1 lanche maionese e ketchup. 1 lanche 2 maioneses..."
+        ></textarea>
+
+    </div>
+</div> -->
         <div class="grupo-observacoes">
             <h3>Observações</h3>
             <textarea id="observacao" placeholder="Ex: Tirar cebola, partir ao meio, acrescentar bacon..." rows="3"></textarea>
         </div>
+        
 <div class="box-cliente">
     <input type="text" id="nome-cliente" placeholder="👤 Seu nome" class="input-padrao">
-  <input type="tel" id="telefone-cliente" placeholder="📱 Seu telefone" class="input-padrao" inputmode="numeric">
+  <input type="tel" id="telefone-cliente" placeholder="📱 Seu telefone" class="input-padrao" inputmode="numeric" maxlength="11">
 </div>
-
-        <div class="grupo-botoes-acao">
+ <div class="grupo-botoes-acao">
             <button id="btn-apagar" onclick="limparCarrinho()">🗑️ APAGAR PEDIDO</button>
             <button id="btn-finalizar" onclick="finalizarPedido()">✅ FINALIZAR PEDIDO</button>
         </div>
@@ -63,12 +109,86 @@
             <h2>🏁 ÚLTIMA ETAPA: REVISÃO</h2>
             <div id="lista-conferencia"></div>
             
+    
             <div id="detalhe-valores">
                 <p>Subtotal: <span id="resumo-subtotal">R$ 0,00</span></p>
                 <p>Taxa de Entrega: <span id="resumo-taxa">R$ 0,00</span></p>
+                   <p>
+    Molhos pagos:
+    <span id="linha-molhos-pagos">
+        R$ 0,00
+    </span>
+</p>
+                <div id="box-cupom-desconto" class="campo-espacado">
+
+    <label class="label-cupom">
+        <input type="checkbox" id="check-cupom" onchange="toggleCupomDesconto()">
+        Possui cupom de desconto?
+    </label>
+
+  
+
+</div>
+  <div id="area-cupom-desconto" style="display:none; margin-top:10px;">
+
+        <input
+            type="text"
+            id="codigo-cupom-desconto"
+            placeholder="Digite o código do cupom"
+            name="pedrao_nome_login" autocomplete="new-password"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"  
+        >
+
+        <button
+            type="button"
+            onclick="aplicarCupomDesconto()"
+            class="btn-cupom"
+        >
+            Aplicar cupom
+        </button>
+      
+
+        <p id="retorno-cupom-desconto"></p>
+
+    </div>
                 <hr class="divisor-revisao">
                 <h3>TOTAL GERAL: <span id="resumo-total">R$ 0,00</span></h3>
             </div>
+<div id="box-condominio" class="campo-espacado" style="display:block;">
+  <label>É condomínio?</label>
+  <select id="condominio">
+    <option value="">Selecione</option>
+    <option value="Sim">Sim</option>
+    <option value="Não">Não</option>
+  </select>
+</div>
+
+<div id="campo-cnh" class="campo-espacado" style="display:block;">
+  <label>Precisa de CNH para entrar?</label>
+  <select id="cnh">
+    <option value="">Selecione</option>
+    <option value="Sim">Sim</option>
+    <option value="Não">Não</option>
+  </select>
+
+
+</div>
+<div id="box-endereco-salvo" class="campo-espacado" style="display:none;">
+    <label>Endereço</label>
+
+    <select id="select-endereco-salvo" onchange="usarEnderecoSalvo()" style="display:none;">
+        <option value="">Usar endereço salvo</option>
+    </select>
+
+    <textarea id="endereco-escrito" placeholder="Digite seu endereço para entrega"></textarea>
+
+    <div class="linha-salvar-endereco">
+        <button type="button" onclick="salvarEnderecoDaRevisao()">Salvar este endereço</button>
+        <small id="aviso-login-endereco"></small>
+    </div>
+</div>
 
             <h3>Forma de Pagamento:</h3>
             <div class="grupo-pagamento">
@@ -77,63 +197,219 @@
                 <label class="opcao-pagamento">
                     <input type="checkbox" class="check-pagamento" value="Dinheiro" id="check-dinheiro" onchange="toggleTroco()"> Dinheiro
                 </label>
-                <input type="number" id="valor-troco" placeholder="Troco para quanto?">
+                <input type="number" id="valor-troco" placeholder="Troco para quanto?"  autocomplete="off"
+    autocorrect="off"
+    autocapitalize="off"
+    spellcheck="false" style="display:none;">
             </div>
             <button onclick="confirmarEEnviar()">🚀 ENVIAR PEDIDO PARA O WHATSAPP</button>
         </div>
-    </section>
+</section>
+</section>
+<section id="tela-perfil" class="tela-app perfil-app">
+
+    <div id="perfil-home" class="perfil-card">
+        <h2>Seu Perfil<br>Pedrão Lanches!</h2>
+
+        <div class="perfil-acoes-iniciais">
+            <button type="button" onclick="abrirPerfilModo('login')">Login</button>
+            <button type="button" onclick="abrirPerfilModo('cadastro')">Criar login</button>
+        </div>
+
+        <img src="images/mascote-burger.png" class="mascote-perfil">
+    </div>
+
+    <div id="perfil-form" class="perfil-card" style="display:none;">
+        <button type="button" class="btn-voltar-perfil" onclick="abrirPerfilModo('home')">← Voltar</button>
+
+        <h2 id="titulo-form-perfil">Login</h2>
+
+        <div id="box-avatar-form" class="box-avatar-cliente" style="display:none;">
+            <img id="avatar-cliente-preview" src="images/avatar1.png" class="avatar-preview">
+
+            <button type="button" onclick="toggleAvatares()">Escolher avatar</button>
+
+            <div id="lista-avatares" class="lista-avatares" style="display:none;">
+                <img src="images/avatar1.png" onclick="selecionarAvatar('images/avatar1.png')">
+                <img src="images/avatar2.png" onclick="selecionarAvatar('images/avatar2.png')">
+                <img src="images/avatar3.png" onclick="selecionarAvatar('images/avatar3.png')">
+                <img src="images/avatar4.png" onclick="selecionarAvatar('images/avatar4.png')">
+                <img src="images/avatar5.png" onclick="selecionarAvatar('images/avatar5.png')">
+            </div>
+        </div>
+
+        <input type="text" id="perfil-nome" placeholder="Nome" autocomplete="new-password">
+        <input type="tel" id="perfil-telefone" placeholder="Telefone"  maxlength="11"
+    inputmode="numeric"  autocomplete="new-password" name="pedrao_telefone_sem_autocomplete">
+
+        <div id="box-codigo-login" class="linha-codigo">
+            <input type="text" id="codigo-ativacao" placeholder="Código de ativação, se tiver" autocomplete="new-password">
+            <button type="button" onclick="explicarCodigo()">?</button>
+        </div>
+
+        <label class="check-salvar-login">
+            <input type="checkbox" id="check-salvar-login">
+            Salvar login neste aparelho
+        </label>
+
+        <button type="button" id="btn-entrar-perfil" onclick="buscarCliente()">Entrar</button>
+    </div>
+
+   <div id="perfil-logado" class="perfil-card" style="display:none;">
+
+    <div class="topo-logado-acoes">
+
+        <button
+            type="button"
+            class="btn-editar-perfil"
+            onclick="abrirPerfilModo('editar')"
+        >
+            Editar perfil
+        </button>
+
+        <button
+            type="button"
+            class="btn-sair-pequeno"
+            onclick="logoutCliente()"
+        >
+            Sair
+        </button>
+
+    </div>
+
+    <h2>
+        Bem-vindo,
+        <span id="perfil-logado-nome">cliente</span>
+    </h2>
+
+    <img
+        id="perfil-logado-avatar"
+        src="images/avatar1.png"
+        class="avatar-preview grande"
+    >
+ <button
+        type="button"
+        class="btn-mensagens-perfil"
+        onclick="abrirMensagensCliente()"
+    >
+        Mensagens
+    </button>
+
+    <div class="dados-logado">
+
+        <p>
+            <strong>Nome:</strong>
+            <span id="perfil-dado-nome"></span>
+        </p>
+
+        <p>
+            <strong>Telefone:</strong>
+            <span id="perfil-dado-telefone"></span>
+        </p>
+
+        <p>
+            <strong>CDA:</strong>
+            <span id="perfil-status-cda" class="status-cda">
+                Desativado
+            </span>
+        </p>
+        <p>
+        <b>Nível:</b>
+    <span id="perfil-dado-nivel">Sem nível</span>
+    </p>    
+    
+
+    </div>
+
+  <div id="ativar-cda-box" class="linha-codigo">
+    <input
+        type="text"
+        id="codigo-ativacao-logado"
+        placeholder="Código CDA, se tiver"
+    >
+
+    <button type="button" onclick="explicarCodigo()">?</button>
+
+    <button type="button" onclick="ativarCodigoClienteLogado()">
+        Ativar
+    </button>
+</div>
+
+    <div class="botoes-perfil">
+
+        <button
+            type="button"
+            onclick="mostrarPedidosCliente()"
+        >
+            Pedidos
+        </button>
+
+        <button
+            type="button"
+            onclick="mostrarEnderecosCliente()"
+        >
+            Endereços
+        </button>
+
+        <button
+            type="button"
+            id="btn-bonus-perfil"
+            onclick="mostrarBonusCliente()"
+        >
+            Bônus
+        </button>
+
+    </div>
+
+   
+
+    <div id="area-perfil"></div>
+
+</div>
+
+</section>
 </main>
 
 <div id="botao-flutuante" class="carrinho-flutuante" style="display: none;">
     <span>Total: R$ <span id="valor-total-flutuante">0,00</span></span>
 </div>
 
-<div id="modal-opcoes" class="modal" style="display: none;">
-    <div class="modal-conteudo">
-        <h2 id="modal-nome-lanche">Nome do Lanche</h2>
-        <p id="modal-desc-lanche"></p>
-        <hr class="divisor-admin">
-        
-        <div class="opcao-carne">
-            <label>🥩 Artesanal</label>
-            <div class="carne-controles">
-                <span id="preco-artesanal">R$ 0,00</span>
-                <div class="seletor-qtd">
-                    <button type="button" onclick="ajustarQtd('qtd-artesanal', -1)">-</button>
-                    <input type="number" id="qtd-artesanal" value="0" readonly>
-                    <button type="button" onclick="ajustarQtd('qtd-artesanal', 1)">+</button>
-                </div>
-            </div>
-        </div>
+<div id="modal-produto" class="modal-produto" style="display:none;">
+  <div class="modal-conteudo">
 
-        <div class="opcao-carne">
-            <label>🏭 Industrial</label>
-            <div class="carne-controles">
-                <span id="preco-industrial">R$ 0,00</span>
-                <div class="seletor-qtd">
-                    <button type="button" onclick="ajustarQtd('qtd-industrial', -1)">-</button>
-                    <input type="number" id="qtd-industrial" value="0" readonly>
-                    <button type="button" onclick="ajustarQtd('qtd-industrial', 1)">+</button>
-                </div>
-            </div>
-        </div>
+    <img id="modal-img" class="modal-img">
 
-      <div class="opcao-carne" id="container-opcao-frango" style="display: none;">
-    <label>🍗 Frango</label>
-    <div class="carne-controles">
-        <span id="preco-frango">R$ 20,00</span>
-        <div class="seletor-qtd">
-            <button type="button" onclick="ajustarQtd('qtd-frango', -1)">-</button>
-            <input type="number" id="qtd-frango" value="0" readonly>
-            <button type="button" onclick="ajustarQtd('qtd-frango', 1)">+</button>
-        </div>
+    <h2 id="modal-nome"></h2>
+    <p id="modal-desc"></p>
+
+    <!-- ESCOLHA -->
+    <div id="modal-opcoes-tipo"></div>
+
+    <!-- ADICIONAIS -->
+    <div id="box-adicionais-produto">
+    <button type="button" id="btn-toggle-adicionais" onclick="toggleAdicionaisProduto()">
+        Adicionais +
+    </button>
+    <div id="lista-adicionais" style="display:none;"></div>
+</div>
+<div class="qtd-produto-modal">
+    <label>Quantidade</label>
+    <div>
+        <button type="button" onclick="alterarQtdProduto(-1)">-</button>
+        <span id="qtd-produto">1</span>
+        <button type="button" onclick="alterarQtdProduto(1)">+</button>
     </div>
 </div>
+    <!-- OBS -->
+    <textarea id="obs-produto" placeholder="Ex: tirar cebola, bem passado..."></textarea>
 
-        <button class="btn-confirmar" onclick="confirmarEscolha()">ADICIONAR AO CARRINHO</button>
-        <button class="btn-cancelar" onclick="fecharModal()">CANCELAR</button>
-    </div>
+    <button onclick="adicionarProdutoFinal()">🛒 Adicionar ao carrinho</button>
+
+    <button onclick="fecharModalProduto()">❌ Fechar</button>
+
+  </div>
 </div>
+
 <div id="modal-carrinho" class="modal-carrinho">
   <div class="conteudo-carrinho">
     
@@ -150,8 +426,131 @@
   </div>
 </div>
 
+<div id="modal-molhos" class="modal" style="display:none;">
+
+    <div class="modal-content">
+
+        <h2>🍶 Configurar molhos</h2>
+
+        <div id="conteudo-molhos"></div>
+
+        <button onclick="fecharModalMolhos()">
+            Fechar
+        </button>
+
+    </div>
+
+</div>
+
+
+<nav class="menu-inferior">
+    <button type="button" onclick="abrirTela('inicio')">
+        🏠<span>Início</span>
+    </button>
+
+    <button type="button" onclick="abrirTela('finalizar')">
+        🛒<span>Finalizar</span>
+    </button>
+
+    <button type="button" onclick="abrirTela('perfil')">
+        👤<span>Repetir</span>
+    </button>
+</nav>
+<div id="modal-mensagens" class="modal-carrinho" style="display:none;">
+
+    <div class="conteudo-carrinho">
+
+        <div class="topo-mensagens">
+
+            <h2>📩 Mensagens</h2>
+
+            <button onclick="fecharMensagensCliente()">
+                ✖
+            </button>
+
+        </div>
+
+        <div class="abas-mensagens">
+
+           <button onclick="abrirAbaMensagens('geral')" class="btn-msg-aba">
+    Geral
+    <span id="badge-geral" class="badge-aba-msg"></span>
+</button>
+
+<button onclick="abrirAbaMensagens('admin')" class="btn-msg-aba">
+    ADM
+    <span id="badge-admin" class="badge-aba-msg"></span>
+</button>
+
+<button onclick="abrirAbaMensagens('suporte')" class="btn-msg-aba">
+    Suporte
+    <span id="badge-suporte" class="badge-aba-msg"></span>
+</button>
+
+        </div>
+
+        <div id="lista-mensagens-cliente"></div>
+
+        <div id="box-enviar-suporte" style="display:none;">
+
+    <div id="lista-chamados-cliente"></div>
+
+    <button type="button" onclick="abrirFormNovoChamado()">
+        Novo suporte
+    </button>
+
+   <div id="form-novo-chamado" style="display:none; margin-top:15px;">
+
+    <select id="categoria-chamado">
+        <option value="">Escolha o tipo</option>
+        <option value="reclamacao">Reclamação</option>
+        <option value="feedback">Feedback</option>
+        <option value="outros">Outros</option>
+    </select>
+
+    <div class="campo-relacao-pedido">
+
+        <label>Tem relação com algum pedido?</label>
+
+        <select id="suporte-tem-pedido" onchange="togglePedidosSuporteCliente()">
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+        </select>
+
+    </div>
+
+    <div id="box-pedidos-suporte" style="display:none;">
+
+        <label>Escolha o pedido</label>
+
+        <select id="pedido-relacionado-suporte">
+            <option value="">Selecione um pedido</option>
+        </select>
+
+    </div>
+
+    <textarea
+        id="mensagem-novo-chamado"
+        placeholder="Descreva o problema ou mensagem..."
+    ></textarea>
+
+    <button type="button" onclick="criarChamadoSuporte()">
+        Enviar suporte
+    </button>
+
+</div>
+
+    <div id="chat-chamado-cliente" style="display:none; margin-top:15px;"></div>
+
+</div>
+
+    </div>
+
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/produtos.js"></script>
 <script src="js/script.js"></script>
 </body>
 </html>
