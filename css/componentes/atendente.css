@@ -1,0 +1,359 @@
+/* section#central-operacao / mesa: categorias, molhos e recebimento.
+ * Edite este arquivo para ajustar este componente.
+ * IDs refletem a estrutura do HTML; ordem: contêiner, filhos e estados.
+ */
+
+#central-operacao.central-etapa-modal {
+  position: fixed !important;
+  inset: 12px !important;
+  width: calc(100% - 24px);
+  max-width: 760px;
+  height: calc(100dvh - 24px);
+  max-height: calc(100dvh - 24px);
+  margin: 0 auto !important;
+  padding: 12px !important;
+  z-index: 14000;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #171717;
+  box-sizing: border-box;
+}
+body:has(#central-operacao.central-etapa-modal:not([hidden]))::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 13999;
+}
+#central-operacao > .ui-navegacao {
+  padding: 8px;
+  margin: -12px -12px 16px;
+  top: -12px;
+}
+/* Entrada da central: título compacto, atualizar separado das categorias. */
+#central-operacao > .operacao-acoes:has(> h2) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+#central-operacao > .operacao-acoes > h2 {
+  margin: 12px 0 4px;
+  font-size: clamp(20px, 5.5vw, 26px);
+}
+#central-operacao > .operacao-acoes:has(> h2) > button {
+  flex: none;
+  width: auto;
+  height: 44px;
+  min-height: 44px;
+  padding: 10px 16px;
+  margin: 0;
+}
+#central-operacao > [aria-label="Tipo de pedido"] {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+}
+#central-operacao > [aria-label="Tipo de pedido"] > button {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 6px;
+  font-size: 14px;
+}
+#central-operacao > p,
+#central-operacao > #registros-operacao {
+  line-height: 1.45;
+}
+.molhos-atendente {
+  background: #181818;
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 12px 0;
+}
+.molhos-atendente h4 {
+  margin: 0 0 10px;
+}
+.molhos-atendente p {
+  margin: 8px 0 4px;
+  font-weight: bold;
+}
+.molhos-atendente ul {
+  padding-left: 20px;
+  margin: 4px 0;
+  line-height: 1.6;
+}
+#central-operacao [aria-label="Tipo de pedido"] button[aria-pressed="true"] {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+#area-mesa-atendente {
+  padding: 20px !important;
+  min-width: 0;
+}
+/* Mesma folga lateral nas listas e nos detalhes do atendimento. */
+#area-entrega-atendente,
+#area-retirada-atendente,
+#area-produtos-comanda,
+#area-comanda-atendente {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 20px !important;
+}
+#area-produtos-comanda #busca-produto-atendente {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  margin: 0 0 12px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  background: #151515;
+  color: white;
+  font-size: 16px;
+}
+#area-produtos-comanda .comanda-categorias {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+}
+#area-produtos-comanda .comanda-categorias > button {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 8px;
+  font-size: 14px;
+}
+/* Produtos de categorias e busca usam a mesma grade de cartões. */
+#area-produtos-comanda #lista-categoria-produtos,
+#area-produtos-comanda #resultado-busca-produtos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+#area-produtos-comanda #lista-categoria-produtos > br,
+#area-produtos-comanda #resultado-busca-produtos > br {
+  display: none;
+}
+#area-produtos-comanda #lista-categoria-produtos > button,
+#area-produtos-comanda #resultado-busca-produtos > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 68px;
+  margin: 0;
+  padding: 12px 10px;
+  border: 1px solid #555;
+  border-radius: 10px;
+  background: #292929;
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.comanda-item-linha {
+  padding: 12px 0;
+  border-bottom: 1px solid #444;
+}
+.comanda-item-resumo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.comanda-item-resumo > strong {
+  min-width: 0;
+}
+.comanda-item-resumo > span {
+  flex: none;
+  white-space: nowrap;
+}
+#area-comanda-atendente .comanda-item-acao,
+.comanda-item-linha > .comanda-item-acao {
+  display: block;
+  width: auto;
+  min-height: 36px;
+  margin: 10px 0 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+.comanda-acoes-itens {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+.comanda-acoes-itens > button {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  height: auto;
+  margin: 0 !important;
+  padding: 10px 8px;
+  font-size: 14px;
+  line-height: 1.3;
+  white-space: normal;
+}
+.comanda-acoes-itens > button:last-child {
+  grid-column: 1 / -1;
+}
+#area-mesa-atendente .mesa-comandas-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 12px 0 18px;
+}
+#area-mesa-atendente .mesa-comandas-grade > button {
+  width: 100%;
+  min-width: 0;
+  min-height: 64px;
+  margin: 0;
+  padding: 12px 8px;
+  border: 1px solid #555;
+  border-radius: 10px;
+  background: #292929;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+#area-mesa-atendente > button {
+  display: block;
+  max-width: 100%;
+  margin: 12px 0 !important;
+  white-space: normal;
+}
+#area-mesa-atendente .operacao-acoes {
+  gap: 12px;
+  margin-top: 18px;
+  clear: both;
+}
+.recebimento-status {
+  padding: 10px;
+  border-radius: 8px;
+  background: #3b2520;
+  color: #ffe3c5;
+}
+.recebimento-status.recebido {
+  background: #183d2a;
+  color: #c5ffdc;
+}
+/* Respiro entre a escolha de pagamento e o primeiro item selecionável. */
+.operacao-acoes.pagamento-separado-modos {
+  margin-bottom: 16px;
+}
+/* Entrada compacta para nova comanda e outros dados do atendimento. */
+dialog.ui-caixa.ui-form-entrada {
+  inset: 0;
+  width: calc(100% - 32px);
+  max-width: 380px;
+  height: fit-content;
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 56px 20px 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.ui-form-entrada h3 {
+  margin: 0 0 18px;
+  font-size: 21px;
+}
+.ui-form-entrada label {
+  display: block;
+  font-size: 14px;
+  text-align: left;
+}
+.ui-form-entrada input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  margin: 8px 0 18px;
+  padding: 10px 12px;
+  border: 1px solid #555;
+  border-radius: 8px;
+  background: #151515;
+  color: white;
+  font-size: 16px;
+}
+.ui-form-entrada .operacao-acoes > button {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 15px;
+}
+#area-consumo-local {
+  padding: 20px !important;
+}
+.mesas-atendente-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: 12px;
+  margin: 14px 0 4px;
+}
+#area-consumo-local .mesas-atendente-grade > .mesa-atendente {
+  width: 100%;
+  min-width: 0;
+  min-height: 56px;
+  margin: 0 !important;
+  padding: 12px 6px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+/* Consulta de raspadinha: campos empilhados e popup compacto. */
+dialog.ui-caixa.raspa-consulta-atendente {
+  inset: 0;
+  box-sizing: border-box;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  height: fit-content;
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 56px 18px 18px;
+  overflow-y: auto;
+}
+.raspa-consulta-atendente > h2 {
+  margin: 0 0 16px;
+  font-size: 21px;
+  line-height: 1.3;
+}
+.raspa-consulta-atendente p {
+  line-height: 1.45;
+}
+.raspa-consulta-atendente label {
+  display: block;
+  margin: 14px 0;
+  font-size: 14px;
+}
+.raspa-consulta-atendente input,
+.raspa-consulta-atendente select {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #555;
+  border-radius: 8px;
+  background: #151515;
+  color: #fff;
+  font-size: 16px;
+}
+.raspa-consulta-atendente form > button {
+  width: 100%;
+  min-height: 44px;
+  margin: 4px 0 0;
+  padding: 10px 14px;
+  font-size: 15px;
+}

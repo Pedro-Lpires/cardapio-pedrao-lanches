@@ -1,0 +1,276 @@
+<!doctype html>
+
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Autoatendimento - Pedrão Lanches</title>
+
+    <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
+    <link rel="stylesheet" href="css/paginas/autoatendimento.css?v=20261019-2" />
+
+    <script src="js/ui-comum.js?v=20261018-1"></script>
+  </head>
+
+  <body>
+    <!-- MAIN — conteúdo principal -->
+    <main id="autoatendimento-app">
+      <div id="area-autoatendimento">
+        <p>Carregando mesa...</p>
+      </div>
+    </main>
+    <!-- =========================================
+     MODAL DO PRODUTO
+========================================= -->
+
+    <!-- MODAL — modal-produto-auto -->
+    <div id="modal-produto-auto" class="modal-produto" style="display: none">
+      <div class="modal-conteudo">
+        <button
+          type="button"
+          class="btn-fechar-modal-auto"
+          onclick="fecharModalProdutoAuto()"
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+
+        <img id="modal-img-auto" class="modal-img" alt="" />
+
+        <h2 id="modal-nome-auto"></h2>
+
+        <p id="modal-desc-auto"></p>
+
+        <!-- TIPO -->
+
+        <!-- MODAL — modal-opcoes-tipo-auto -->
+        <div id="modal-opcoes-tipo-auto"></div>
+
+        <!-- ADICIONAIS -->
+
+        <div id="box-adicionais-auto">
+          <button
+            type="button"
+            id="btn-toggle-adicionais-auto"
+            onclick="toggleAdicionaisAutoatendimento()"
+          >
+            Adicionais +
+          </button>
+
+          <div id="lista-adicionais-auto" style="display: none"></div>
+        </div>
+
+        <!-- QUANTIDADE -->
+
+        <div class="qtd-produto-modal">
+          <label> Quantidade </label>
+
+          <div>
+            <button type="button" onclick="alterarQtdProdutoAuto(-1)">-</button>
+
+            <span id="qtd-produto-auto"> 1 </span>
+
+            <button type="button" onclick="alterarQtdProdutoAuto(1)">+</button>
+          </div>
+        </div>
+
+        <!-- OBSERVAÇÃO -->
+
+        <textarea id="obs-produto-auto" placeholder="Ex: tirar cebola, bem passado..."></textarea>
+
+        <button type="button" onclick="adicionarProdutoCarrinhoAuto()">
+          🛒 Adicionar ao carrinho
+        </button>
+      </div>
+    </div>
+
+    <!-- =========================================
+     MODAL DO COMBO
+========================================= -->
+
+    <!-- MODAL — modal-combo-auto -->
+    <div id="modal-combo-auto" class="modal-produto" style="display: none">
+      <div class="modal-conteudo">
+        <button type="button" class="btn-fechar-modal-auto" onclick="fecharComboAuto()">×</button>
+
+        <img id="combo-img-auto" class="modal-img" alt="" />
+
+        <h2 id="combo-nome-auto"></h2>
+
+        <p id="combo-desc-auto"></p>
+
+        <h3 id="combo-preco-auto" data-preco-base="0">R$ 0,00</h3>
+
+        <!-- QUANTIDADE -->
+
+        <div class="qtd-produto-modal">
+          <label> Quantidade </label>
+
+          <div>
+            <button type="button" onclick="alterarQtdComboAuto(-1)">-</button>
+
+            <span id="qtd-combo-auto"> 1 </span>
+
+            <button type="button" onclick="alterarQtdComboAuto(1)">+</button>
+          </div>
+        </div>
+
+        <!-- PERSONALIZAÇÃO -->
+
+        <div id="personalizacao-combo-auto"></div>
+
+        <hr />
+
+        <textarea id="observacao-combo-auto" placeholder="Observação geral do combo..."></textarea>
+
+        <button type="button" onclick="adicionarComboCarrinhoAuto()">
+          🛒 Adicionar combo ao pedido
+        </button>
+      </div>
+    </div>
+    <!-- =========================================
+     REVISÃO DO PEDIDO
+========================================= -->
+
+    <!-- MODAL — modal-resumo-auto -->
+    <div id="modal-resumo-auto" class="modal-produto" style="display: none">
+      <div class="modal-conteudo">
+        <button
+          type="button"
+          class="btn-fechar-modal-auto"
+          onclick="fecharResumoPedidoAuto()"
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+
+        <h2>🛒 Seu Pedido</h2>
+
+        <div id="lista-resumo-auto"></div>
+
+        <hr />
+
+        <h3>
+          Total: R$
+          <span id="total-resumo-auto"> 0,00 </span>
+        </h3>
+
+        <button
+          type="button"
+          onclick="
+                fecharResumoPedidoAuto()
+            "
+        >
+          ← Continuar pedindo
+        </button>
+
+        <button
+          type="button"
+          onclick="
+                confirmarEnvioPedidoAuto()
+            "
+        >
+          🚀 Confirmar e enviar
+        </button>
+      </div>
+    </div>
+    <!-- =========================================
+     LOGIN DO CLIENTE
+========================================= -->
+
+    <!-- MODAL — modal-login-auto -->
+    <div id="modal-login-auto" class="modal-produto" style="display: none">
+      <div class="modal-conteudo">
+        <button
+          type="button"
+          class="btn-fechar-modal-auto"
+          onclick="fecharLoginAutoatendimento()"
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+
+        <h2>👤 Minha conta</h2>
+
+        <p>Entre para vincular esta comanda ao seu perfil.</p>
+
+        <label> Nome </label>
+
+        <input type="text" id="login-auto-nome" placeholder="Seu nome" autocomplete="name" />
+
+        <br /><br />
+
+        <label> Celular </label>
+
+        <input
+          type="tel"
+          id="login-auto-telefone"
+          placeholder="65999999999"
+          inputmode="numeric"
+          maxlength="11"
+        />
+
+        <br /><br />
+
+        <label>
+          Código de ativação
+          <small>(opcional)</small>
+        </label>
+
+        <input type="text" id="login-auto-codigo" placeholder="Código, se tiver" />
+
+        <br /><br />
+
+        <label>
+          <input type="checkbox" id="login-auto-salvar" />
+          Lembrar neste aparelho
+        </label>
+
+        <br /><br />
+
+        <button type="button" onclick="entrarClienteAutoatendimento()">✅ Entrar</button>
+
+        <div id="status-login-auto" style="margin-top: 15px"></div>
+      </div>
+    </div>
+    <!-- =========================================
+     MINHA CONTA - AUTOATENDIMENTO
+========================================= -->
+
+    <!-- MODAL — modal-conta-auto -->
+    <div id="modal-conta-auto" class="modal-produto" style="display: none">
+      <div class="modal-conteudo">
+        <button
+          type="button"
+          class="btn-fechar-modal-auto"
+          onclick="fecharContaAutoatendimento()"
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+
+        <h2>👤 Minha conta</h2>
+
+        <div id="conteudo-conta-auto"></div>
+      </div>
+    </div>
+
+    <!-- FIREBASE -->
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <!-- AUTOATENDIMENTO -->
+
+    <script src="js/autoatendimento.js?v=20261020-18"></script>
+
+    <script src="js/operacao.js?v=20261020-18"></script>
+    <script src="js/app-ui.js?v=20261020-16"></script>
+    <script src="js/raspadinhas-recuperacao.js?v=20261020-3"></script>
+    <script src="js/raspadinhas.js?v=20261020-5"></script>
+    <script src="js/fluxos-interface.js?v=20261018-6"></script>
+  </body>
+</html>

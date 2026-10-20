@@ -1,0 +1,544 @@
+/* Ajustes comuns para celular, áreas de toque e larguras menores. Regras de componentes específicos ficam em componentes/.
+ * Consulte GUIA-ESTILOS.md antes de alterar a ordem de carregamento.
+ */
+/* Correções comuns e componentes pensados primeiro para celular. */
+/* main / section — conteúdo e componentes */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+/* Tags base e variáveis */
+body {
+  min-width: 0;
+}
+/* main / section — conteúdo e componentes */
+img {
+  max-width: 100%;
+}
+/* form — campos e botões */
+input,
+select,
+textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+button {
+  min-height: 44px;
+}
+/* main / section — conteúdo e componentes */
+.opcoes-tipo-pedido {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+.opcoes-tipo-pedido label {
+  position: relative;
+  display: block !important;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0;
+  cursor: pointer;
+}
+.opcoes-tipo-pedido input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+.opcoes-tipo-pedido span {
+  min-height: 94px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #555;
+  border-radius: 12px;
+  padding: 12px 6px;
+  background: #202020;
+  font-size: 15px;
+  text-align: center;
+  line-height: 1.3;
+}
+.opcoes-tipo-pedido b {
+  font-size: 24px;
+  font-weight: normal;
+}
+.opcoes-tipo-pedido input:checked + span {
+  background: #c91c27;
+  border-color: #ff6268;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #ff6268;
+}
+.opcoes-tipo-pedido input:focus-visible + span {
+  outline: 3px solid #ffd700;
+  outline-offset: 3px;
+}
+/* dialog / div — modais e carrinho */
+#modal-produto .modal-conteudo {
+  position: relative;
+  padding: 0 20px 16px;
+  max-height: 92vh;
+  max-height: 92dvh;
+  overscroll-behavior: contain;
+}
+.modal-produto-cabecalho {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 0 4px;
+  background: #111;
+  z-index: 2;
+}
+/* main / section — conteúdo e componentes */
+.btn-fechar-produto {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #555;
+  border-radius: 50%;
+  background: #242424;
+  color: white;
+  font-size: 22px;
+}
+/* dialog / div — modais e carrinho */
+#modal-produto #lista-adicionais.aberta {
+  max-height: none;
+  overflow: visible;
+}
+#modal-produto .item-adicional {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  align-items: center;
+}
+#modal-produto .item-adicional > div:first-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+}
+#modal-produto .controle-adicional {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  align-items: center;
+}
+#modal-produto .controle-adicional button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+}
+#modal-produto .qtd-produto-modal > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#modal-produto .qtd-produto-modal button {
+  width: 44px;
+  padding: 0;
+  margin: 8px 0;
+}
+#modal-produto #modal-nome {
+  margin: 14px 0 10px;
+  padding-right: 0;
+  font-size: 24px;
+}
+#modal-produto #modal-desc {
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+#modal-produto #modal-opcoes-tipo label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+}
+#modal-produto #modal-opcoes-tipo br {
+  display: none;
+}
+#modal-produto #modal-opcoes-tipo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-bottom: 14px;
+}
+#modal-produto input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #e32932;
+}
+/* main / section — conteúdo e componentes */
+.produto-acoes {
+  position: sticky;
+  bottom: -16px;
+  background: #111;
+  padding: 12px 0 16px;
+  margin-top: 12px;
+}
+.produto-acoes button {
+  width: 100%;
+  margin: 0;
+  min-height: 50px;
+}
+.btn-ver-mais-cardapio {
+  display: block;
+  width: 100%;
+  margin: 8px 0 28px;
+  padding: 12px;
+  border: 1px solid #75373b;
+  border-radius: 10px;
+  background: #25191a;
+  color: #fff;
+}
+#tela-inicio h2 {
+  scroll-margin-top: 80px;
+}
+.rodape-loja {
+  padding: 28px 0 100px;
+  margin-top: 28px;
+  border-top: 1px solid #454545;
+  text-align: center;
+}
+.rodape-identidade strong {
+  font-size: 20px;
+}
+.rodape-identidade p {
+  color: #c9c9c9;
+  font-size: 14px;
+}
+.rodape-redes a {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  color: #fff;
+  font-size: 15px;
+}
+.rodape-parceiros {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 430px;
+  margin: 12px auto;
+}
+.rodape-parceiro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 64px;
+  background: #202020;
+  border: 1px solid #444;
+  border-radius: 12px;
+}
+/* section — perfil e acesso */
+.login-atendente {
+  width: min(440px, 100%);
+  padding: 24px 16px;
+  margin: 24px auto;
+}
+.login-atendente h1 {
+  font-size: 28px;
+}
+.login-atendente input,
+.login-atendente button {
+  width: 100%;
+}
+/* Responsividade / @media */
+@media (max-width: 650px) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .container {
+    padding: 12px;
+    width: 100%;
+  }
+  .header-loja-topo {
+    padding: 12px;
+    gap: 12px;
+    align-items: center;
+  }
+  .header-loja h1 {
+    font-size: clamp(20px, 5vw, 28px);
+  }
+  .header-loja .logo-loja {
+    width: 72px;
+    height: 72px;
+    flex: none;
+    margin-top: -28px;
+  }
+  .header-loja-nome {
+    min-width: 0;
+  }
+  .header-loja .subtitulo {
+    font-size: 12px;
+  }
+  .info-rapida-loja {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px 12px;
+    overflow: visible;
+  }
+  .info-rapida-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    padding: 9px 8px;
+    gap: 4px;
+    min-height: 96px;
+  }
+  .info-rapida-item > div {
+    min-width: 0;
+  }
+  .info-rapida-item strong {
+    font-size: 11px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.3;
+  }
+  .info-rapida-item small {
+    font-size: 11px;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.3;
+  }
+  .info-rapida-item span {
+    font-size: 16px;
+  }
+  .abas-navegacao {
+    max-width: 100%;
+    justify-content: flex-start;
+    padding: 10px 12px;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .abas-navegacao a {
+    flex: none;
+    margin: 0;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .busca-produto-box {
+    margin: 12px;
+    padding: 12px;
+    gap: 6px;
+    flex-direction: column;
+    align-items: stretch;
+    width: auto;
+  }
+  .busca-produto-box label {
+    font-size: 12px;
+    color: #c9c9c9;
+  }
+  .busca-produto-box input {
+    width: 100%;
+    font-size: 16px;
+  }
+  #tela-inicio .grid {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0;
+    gap: 10px;
+  }
+  #tela-inicio h2 {
+    margin: 28px 0 16px;
+    font-size: 22px;
+  }
+  #tela-inicio .card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    height: auto;
+    min-height: 112px;
+    padding: 12px;
+    text-align: left;
+  }
+  #tela-inicio .card-info {
+    min-width: 0;
+    flex: 1;
+    height: auto;
+    align-items: flex-start;
+  }
+  #tela-inicio .card-info h3 {
+    min-height: 0;
+    justify-content: flex-start;
+    margin: 0 0 6px;
+    font-size: 15px;
+  }
+  #tela-inicio .card-info p {
+    display: block;
+    margin: 0 0 6px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  #tela-inicio .card-img {
+    order: 2;
+    width: 76px;
+    height: 76px;
+    flex: none;
+  }
+  #tela-inicio .card-img img {
+    width: 76px;
+    height: 76px;
+    object-fit: contain;
+  }
+  #tela-inicio .card-info .preco {
+    font-size: 15px;
+  }
+  #modal-produto {
+    padding: 8px;
+  }
+  #modal-produto .modal-conteudo {
+    width: 100%;
+    padding: 0 14px 14px;
+    border-radius: 14px;
+  }
+  #modal-produto .modal-img {
+    height: 155px;
+  }
+  #modal-produto #modal-nome {
+    font-size: 22px;
+    border-left: 3px solid #e32932;
+    padding-left: 10px;
+  }
+  #modal-produto .item-adicional strong {
+    font-size: 14px;
+  }
+  #modal-produto .item-adicional span {
+    font-size: 14px;
+  }
+  .secao-finalizacao {
+    padding: 14px;
+  }
+  .tipo-pedido-grupo {
+    margin: 12px 0 24px;
+  }
+  .opcoes-tipo-pedido {
+    gap: 6px;
+  }
+  .opcoes-tipo-pedido span {
+    font-size: 13px;
+    padding: 10px 4px;
+  }
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  .admin-body main {
+    padding: 12px;
+  }
+  .admin-header {
+    height: auto;
+    min-height: 0;
+    padding: 24px 12px;
+    background: #171717;
+  }
+  .admin-header h1 {
+    font-size: 26px;
+  }
+  .admin-body .financeiro-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-body section {
+    padding: 14px;
+  }
+  .admin-body h2 {
+    font-size: 20px;
+    overflow-wrap: anywhere;
+  }
+  .menu-atendente {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0 12px;
+    gap: 10px;
+  }
+  .painel-atendente-body > h1 {
+    font-size: 26px;
+    margin: 20px 12px 12px;
+  }
+  .painel-atendente-body > p {
+    margin: 12px;
+  }
+  .menu-atendente button {
+    font-size: 14px;
+    padding: 12px 8px;
+  }
+  .central-operacao {
+    width: auto;
+    margin: 12px;
+  }
+  .operacao-acoes {
+    gap: 8px;
+  }
+  .registro-operacao,
+  .producao-item {
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+  dialog {
+    width: calc(100% - 24px);
+    max-width: 600px;
+    padding: 16px;
+  }
+  #area-comanda-atendente,
+  #area-entrega-atendente,
+  #area-retirada-atendente,
+  #area-mesa-atendente,
+  #area-produtos-comanda {
+    max-width: 100%;
+    padding: 12px;
+  }
+  .auto-grid-produtos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .auto-cabecalho-topo {
+    gap: 10px;
+  }
+  .auto-cabecalho-topo h2 {
+    font-size: 21px;
+    overflow-wrap: anywhere;
+  }
+  #modal-produto-auto .modal-conteudo,
+  #modal-combo-auto .modal-conteudo,
+  #modal-resumo-auto .modal-conteudo,
+  #modal-conta-auto .modal-conteudo {
+    width: calc(100% - 16px);
+    max-height: 92dvh;
+    padding: 14px;
+  }
+  .cozinha-pedido {
+    padding: 14px;
+  }
+  .cozinha-body header h1 {
+    font-size: 26px;
+  }
+  .financeiro-resumo {
+    gap: 18px;
+  }
+  .financeiro-resumo > div {
+    flex: 1 1 140px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,496 @@
+/* Navegação por etapas, controles Voltar/X, acessibilidade e módulos administrativos.
+ * Consulte GUIA-ESTILOS.md antes de alterar a ordem de carregamento.
+ */
+/* Uma tela por etapa, com espaço para os controles fixos. */
+/* main / section — conteúdo e componentes */
+[hidden] {
+  display: none !important;
+}
+/* form — campos e botões */
+button.ui-x[hidden] {
+  display: none !important;
+}
+/* Tags base e variáveis */
+body:has(.nav-inferior),
+body:has(.menu-inferior),
+body:has(.auto-footer) {
+  padding-bottom: 0;
+}
+/* main / section — conteúdo e componentes */
+#area-autoatendimento {
+  padding-bottom: calc(var(--barra-inferior) + env(safe-area-inset-bottom));
+}
+/* Tags base e variáveis */
+body[data-tela="perfil"] #botao-flutuante,
+body[data-tela="finalizar"] #botao-flutuante {
+  display: none !important;
+}
+/* main / section — conteúdo e componentes */
+.tela-app {
+  padding-bottom: calc(var(--barra-inferior) + env(safe-area-inset-bottom));
+}
+.rodape-loja {
+  padding-bottom: 16px;
+}
+/* form — campos e botões */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid #ed2633 !important;
+  outline-offset: 2px;
+}
+/* dialog / div — modais e carrinho */
+.modal,
+.modal-produto,
+.modal-carrinho {
+  z-index: 10000 !important;
+  padding: 12px !important;
+  overflow-y: auto;
+}
+.modal-conteudo,
+.modal-content,
+.conteudo-carrinho {
+  position: relative !important;
+  margin: auto;
+  max-height: calc(100dvh - 24px) !important;
+  overflow-y: auto;
+  padding-top: 58px !important;
+  overscroll-behavior: contain;
+}
+.modal-conteudo input[type="text"],
+.modal-conteudo input[type="tel"],
+.modal-conteudo input[type="password"],
+.modal-conteudo textarea {
+  display: block;
+  width: 100%;
+  background: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 8px;
+  min-height: 44px;
+  padding: 10px 12px;
+  margin: 8px 0 16px;
+}
+.ui-x,
+.btn-fechar-produto,
+.btn-fechar-modal-auto {
+  background: #e60016 !important;
+  color: #fff !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 24px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+/* main / section — conteúdo e componentes */
+.ui-x {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 5;
+}
+.ui-caixa {
+  position: relative;
+  padding-top: 60px !important;
+}
+/* dialog / div — modais e carrinho */
+dialog.ui-caixa {
+  position: fixed;
+  inset: 12px;
+  margin: auto;
+  width: min(600px, calc(100vw - 24px));
+  height: fit-content;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* main / section — conteúdo e componentes */
+.ui-navegacao {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #111;
+  padding: 8px;
+  margin: -12px -12px 16px;
+  gap: 12px;
+}
+.ui-navegacao .ui-x {
+  position: static;
+}
+.ui-voltar {
+  background: transparent !important;
+  border: 1px solid #555 !important;
+  padding: 10px 12px !important;
+  margin: 0 !important;
+}
+/* dialog / div — modais e carrinho */
+#modal-molhos label,
+.opcoes-tipo-molho label,
+.opcoes-molhos label {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  margin: 4px 10px 4px 0 !important;
+  max-width: 100%;
+  font-size: 15px;
+}
+#modal-molhos input[type="checkbox"],
+#modal-molhos input[type="radio"] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #ed2633;
+}
+#modal-molhos .opcoes-tipo-molho {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+/* main / section — conteúdo e componentes */
+.bloco-molho-item {
+  padding: 14px !important;
+  margin: 12px 0 !important;
+}
+.linha-salvar-endereco {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+/* section — perfil e acesso */
+#aviso-login-endereco:empty {
+  display: none;
+}
+#aviso-login-endereco:not(:empty) {
+  display: block;
+  background: #49191d;
+  border: 1px solid #b5303b;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
+}
+/* main / section — conteúdo e componentes */
+#detalhe-valores > p,
+#detalhe-valores > div,
+#detalhe-valores > h3,
+.revisao-item {
+  background: #171717;
+  border: 1px solid #363636;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 10px 0 !important;
+  line-height: 1.5;
+}
+#detalhe-valores > p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#detalhe-valores > h3 {
+  border-color: #8c3138;
+}
+/* section — perfil e acesso */
+#perfil-nome,
+#perfil-telefone {
+  display: block;
+  width: 100%;
+  margin: 14px 0 !important;
+  min-height: 48px;
+}
+.perfil-card {
+  position: relative;
+  padding: 22px !important;
+  margin: 16px 0 !important;
+}
+/* main / section — conteúdo e componentes */
+.linha-codigo {
+  display: flex;
+  gap: 10px;
+  margin: 16px 0;
+  align-items: center;
+}
+.linha-codigo input {
+  min-width: 0;
+  flex: 1;
+}
+.linha-codigo button {
+  flex: none;
+}
+/* Tags base e variáveis */
+body[data-tela="perfil"] .info-rapida-loja,
+body[data-tela="perfil"] .abas-navegacao,
+body[data-tela="perfil"] .horario-box,
+body[data-tela="perfil"] .busca-produto-box,
+body[data-tela="finalizar"] .busca-produto-box {
+  display: none !important;
+}
+/* main / section — conteúdo e componentes */
+.busca-produto-box {
+  position: relative;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  padding: 10px 14px !important;
+}
+.busca-produto-box label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.busca-produto-box input {
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  padding: 6px !important;
+  flex: 1;
+  min-width: 0;
+}
+/* form — campos e botões */
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+/* main / section — conteúdo e componentes */
+.busca-limpar {
+  background: transparent !important;
+  color: #ff3544 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 36px;
+  width: 36px;
+  font-size: 24px;
+  border: 0;
+}
+/* nav — menus e categorias */
+.abas-navegacao,
+.auto-categorias,
+.ui-categorias {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  max-width: 100%;
+  gap: 8px;
+  justify-content: flex-start !important;
+  touch-action: pan-x;
+  scrollbar-width: thin;
+  padding-bottom: 12px !important;
+}
+.abas-navegacao > a,
+.auto-categorias > button,
+.ui-categorias > button {
+  flex: 0 0 auto !important;
+  white-space: nowrap;
+  min-width: max-content;
+}
+.abas-navegacao {
+  position: relative !important;
+}
+/* section — administração e atendimento */
+.operacao-acoes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.operacao-acoes button,
+.operacao-acoes a {
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
+}
+.operacao-acoes h2 {
+  grid-column: 1/-1;
+}
+/* section — financeiro */
+.financeiro-resumo {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px !important;
+}
+.financeiro-resumo > div {
+  background: #202020;
+  border: 1px solid #3d3d3d;
+  border-radius: 12px;
+  padding: 14px;
+  min-width: 0;
+  font-size: 14px;
+}
+.financeiro-resumo strong {
+  display: block;
+  font-size: 22px;
+  margin-top: 8px;
+}
+/* section — administração e atendimento */
+.admin-body label {
+  display: block;
+  margin: 14px 0 8px;
+  line-height: 1.4;
+}
+/* section — perfil e acesso */
+.admin-body input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+.admin-body select,
+.admin-body textarea,
+#tela-perfil input:not([type="checkbox"]) {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  background: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 9px;
+  padding: 10px 12px;
+  margin: 8px 0 14px;
+}
+/* section — administração e atendimento */
+.admin-body input[type="checkbox"],
+.admin-body input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #ed2633;
+}
+.admin-body a {
+  color: #f4b5ba;
+}
+/* main / section — conteúdo e componentes */
+.ui-acoes-pedido {
+  margin: 14px 0 22px;
+}
+/* section — administração e atendimento */
+#area-fechamento-comanda .ui-x {
+  display: none !important;
+}
+/* main / section — conteúdo e componentes */
+.ui-modulo {
+  border: 1px solid #414141;
+  border-radius: 12px;
+  margin: 12px 0;
+  background: #171717;
+}
+.ui-modulo > summary {
+  cursor: pointer;
+  padding: 16px;
+  list-style: none;
+  font-size: 17px;
+  font-weight: bold;
+}
+.ui-modulo > summary small {
+  display: block;
+  font-size: 13px;
+  font-weight: normal;
+  color: #ccc;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+.ui-modulo > section {
+  margin: 0 !important;
+  border: 0 !important;
+}
+.ui-modulo > summary {
+  position: relative;
+  padding-right: 66px;
+}
+.ui-modulo:not([open]) .ui-fechar-modulo {
+  display: none !important;
+}
+.ui-modulo[open] {
+  position: fixed;
+  inset: 12px;
+  height: fit-content;
+  min-height: 0;
+  z-index: 6000;
+  overflow-y: auto;
+  margin: auto;
+  max-width: 760px;
+  max-height: calc(100dvh - 24px);
+  margin-inline: auto;
+  background: #111;
+}
+.ui-modulo[open] > summary {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: #171717;
+  border-bottom: 1px solid #444;
+}
+.ui-modulo[open] > section {
+  padding-top: 16px !important;
+}
+.raspa-cartao {
+  width: 100%;
+  position: relative;
+  height: 200px;
+  background: #202020;
+  border: 1px solid #803038;
+  border-radius: 14px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 20px;
+}
+.raspa-cartao canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.raspa-termos {
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.auto-busca {
+  margin: 16px 0;
+}
+.auto-busca input {
+  width: 100%;
+  min-height: 48px;
+}
+.auto-ver-mais {
+  width: 100%;
+}
+.auto-busca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.auto-busca input {
+  min-width: 0;
+  flex: 1;
+}
+/* Responsividade / @media */
+@media (max-width: 400px) {
+  .financeiro-resumo strong {
+    font-size: 20px;
+  }
+}
+
+#ui-fundo-modulo {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 5999;
+  background: rgb(0 0 0 / 65%);
+}
+body:has(.ui-modulo[open]) #ui-fundo-modulo {
+  display: block;
+}
+body:has(.ui-modulo[open]) {
+  overflow: hidden;
+}

@@ -1,0 +1,427 @@
+/* Grades, categorias e componentes próprios do autoatendimento da mesa.
+ * Consulte GUIA-ESTILOS.md antes de alterar a ordem de carregamento.
+ */
+/* =========================================
+   GRID DO CARDÁPIO - AUTOATENDIMENTO
+========================================= */
+
+/* main / section — conteúdo e componentes */
+
+.auto-grid-produtos {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(240px, 280px));
+
+  justify-content: center;
+
+  gap: 18px;
+
+  width: 100%;
+}
+
+/* =========================================
+   CELULAR
+========================================= */
+
+/* Responsividade / @media */
+
+@media (max-width: 500px) {
+  .auto-grid-produtos {
+    grid-template-columns: 1fr;
+    gap: 10px;
+
+  }
+
+  /* Lanches, batatas e bebidas usam o mesmo modal; combos seguem o mesmo espaço. */
+  #modal-nome-auto,
+  #combo-nome-auto {
+    margin-top: 10px;
+  }
+
+  #btn-toggle-adicionais-auto {
+    margin-top: 0;
+  }
+
+ 
+}
+/* =========================================
+   CABEÇALHO
+========================================= */
+
+/* main / section — conteúdo e componentes */
+
+.auto-cabecalho {
+  padding: 15px;
+}
+
+.auto-cabecalho-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.auto-cabecalho-topo h2 {
+  margin: 0;
+}
+
+/* =========================================
+   LOGIN NO TOPO
+========================================= */
+
+/* section — perfil e acesso */
+
+.btn-login-auto {
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+}
+
+/* =========================================
+   CATEGORIAS
+========================================= */
+
+/* nav — menus e categorias */
+
+.auto-categorias {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+
+  display: flex;
+  gap: 8px;
+
+  overflow-x: auto;
+
+  width: 100%;
+
+  padding: 10px 12px;
+
+  box-sizing: border-box;
+
+  background: #111;
+
+  border-bottom: 1px solid #444;
+
+  scrollbar-width: none;
+}
+
+.auto-categorias::-webkit-scrollbar {
+  display: none;
+}
+
+.auto-categorias button {
+  flex-shrink: 0;
+
+  white-space: nowrap;
+
+  padding: 10px 14px;
+}
+
+.auto-categorias::-webkit-scrollbar {
+  display: none;
+}
+
+.auto-categorias button {
+  flex-shrink: 0;
+
+  white-space: nowrap;
+
+  padding: 10px 14px;
+}
+
+/* =========================================
+   FOOTER
+========================================= */
+
+/* main / section — conteúdo e componentes */
+
+.auto-footer {
+  position: fixed;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 64px;
+
+  display: flex;
+
+  z-index: 1000;
+
+  background: #111;
+
+  border-top: 1px solid #444;
+}
+
+.auto-footer button {
+  flex: 1;
+
+  margin: 0;
+
+  border-radius: 0;
+
+  position: relative;
+}
+
+/* =========================================
+   CONTADOR DO CARRINHO
+========================================= */
+
+/* dialog / div — modais e carrinho */
+
+#contador-carrinho-auto {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 22px;
+  height: 22px;
+
+  margin-left: 5px;
+
+  padding: 0 5px;
+
+  border-radius: 50%;
+
+  background: white;
+  color: black;
+
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* =========================================
+   COMPENSAR HEADER AO SCROLL
+========================================= */
+
+/* main / section — conteúdo e componentes */
+
+#secao-auto-lanches,
+#secao-auto-combos,
+#secao-auto-batatas,
+#secao-auto-bebidas {
+  scroll-margin-top: 75px;
+}
+/* dialog / div — modais e carrinho */
+#modal-produto-auto .modal-conteudo,
+#modal-resumo-auto .modal-conteudo {
+  position: relative;
+}
+
+.btn-fechar-modal-auto {
+  position: absolute;
+
+  top: 10px;
+  right: 10px;
+
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+  margin: 0;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 25px;
+  line-height: 1;
+
+  z-index: 20;
+}
+#modal-combo-auto .modal-conteudo {
+  position: relative;
+}
+
+#modal-combo-auto .combo-modo-auto button {
+  min-width: 0;
+  white-space: normal;      /* Permite quebrar a linha */
+  overflow-wrap: anywhere;  /* Quebra palavras se faltar espaço */
+  height: auto;            /* Botão cresce conforme o texto */
+  padding: 12px 8px;
+}
+
+/* main / section — conteúdo e componentes */
+
+.combo-modo-auto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.combo-modo-auto button {
+  flex: 1;
+  min-width: 130px;
+}
+
+.lanche-combo-auto {
+  border: 1px solid #444;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+.config-combo-auto {
+  display: none;
+  position: relative;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #555;
+  border-radius: 8px;
+}
+
+.adicional-combo-auto {
+  margin-bottom: 12px;
+}
+
+.adicional-combo-auto strong {
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.resumo-combo-auto {
+  margin: 8px 0 12px;
+}
+/* =========================================
+   PÓS-PEDIDO
+========================================= */
+
+.auto-pos-pedido {
+  max-width: 480px;
+
+  margin: 40px auto;
+
+  padding: 20px;
+
+  text-align: center;
+}
+
+.auto-pedido-enviado {
+  margin: 30px 0;
+
+  padding: 20px;
+
+  border: 1px solid #444;
+
+  border-radius: 10px;
+}
+
+.auto-acoes-pos-pedido {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.auto-acoes-pos-pedido button {
+  width: 100%;
+
+  min-height: 55px;
+
+  font-size: 17px;
+}
+/* section — perfil e acesso */
+.btn-login-auto {
+  overflow: hidden;
+}
+
+.avatar-login-auto {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  border-radius: 50%;
+}
+/* dialog / div — modais e carrinho */
+#modal-conta-auto .modal-conteudo {
+  position: relative;
+}
+
+/* section — perfil e acesso */
+
+.perfil-conta-auto {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* main / section — conteúdo e componentes */
+
+.avatar-conta-auto {
+  width: 90px;
+  height: 90px;
+
+  object-fit: cover;
+
+  border-radius: 50%;
+
+  border: 2px solid #444;
+}
+
+/* section — perfil e acesso */
+
+.perfil-conta-auto h3 {
+  margin-top: 10px;
+}
+
+/* main / section — conteúdo e componentes */
+
+.bloco-conta-auto {
+  margin: 15px 0;
+
+  padding: 14px;
+
+  border: 1px solid #444;
+
+  border-radius: 10px;
+}
+
+.bloco-conta-auto h3 {
+  margin-top: 0;
+}
+
+.valor-bonus-auto {
+  font-size: 24px;
+}
+.cupom-conta-auto {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  padding: 12px;
+
+  margin-top: 10px;
+
+  border: 1px dashed #555;
+
+  border-radius: 8px;
+}
+
+.cupom-conta-auto strong {
+  font-size: 17px;
+}
+
+.cupom-conta-auto span {
+  font-weight: bold;
+}
+
+.cupom-conta-auto small {
+  opacity: 0.8;
+}

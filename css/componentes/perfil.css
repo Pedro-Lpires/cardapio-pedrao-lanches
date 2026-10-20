@@ -1,0 +1,162 @@
+/* section#tela-perfil: campo de ativação e ajuda.
+ * Edite este arquivo para ajustar este componente.
+ * IDs refletem a estrutura do HTML; ordem: contêiner, filhos e estados.
+ */
+
+/* Mascote de boas-vindas: imagem inteira, sem o recorte circular de avatar. */
+#perfil-home .mascote-perfil {
+  display: block;
+  width: 144px;
+  max-width: 55%;
+  height: auto;
+  max-height: 180px;
+  object-fit: contain;
+  margin: 20px auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+#tela-perfil .linha-codigo {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+#tela-perfil .linha-codigo input {
+  margin: 0 !important;
+  min-width: 0;
+}
+#tela-perfil .linha-codigo button {
+  height: 44px !important;
+  min-height: 44px !important;
+  width: 44px !important;
+  min-width: 44px;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 8px;
+}
+/* Edição de endereço em uma única janela, sem prompts do navegador. */
+dialog.editor-endereco-cliente {
+  width: calc(100% - 24px);
+  max-width: 420px;
+  max-height: calc(100dvh - 24px);
+  box-sizing: border-box;
+  margin: auto;
+  padding: 18px;
+  overflow-y: auto;
+  border: 1px solid #444;
+  border-radius: 16px;
+  background: #202020;
+  color: #fff;
+}
+dialog.editor-endereco-cliente::backdrop {
+  background: rgb(0 0 0 / 78%);
+}
+.editor-endereco-cliente header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.editor-endereco-cliente header h2 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 20px;
+  text-transform: none;
+}
+.editor-endereco-cliente .editor-endereco-fechar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 26px;
+}
+.editor-endereco-cliente label {
+  display: block;
+  margin-bottom: 12px;
+  text-align: left;
+  font-size: 14px;
+}
+.editor-endereco-cliente input,
+.editor-endereco-cliente textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 6px 0 0;
+  padding: 10px;
+  border: 1px solid #555;
+  border-radius: 8px;
+  background: #151515;
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+}
+.editor-endereco-cliente .editor-endereco-acoes {
+  display: flex;
+  gap: 10px;
+}
+.editor-endereco-cliente .editor-endereco-acoes button {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px;
+  font-size: 14px;
+}
+.editor-endereco-cliente .editor-endereco-cancelar {
+  background: #383838;
+}
+.editor-endereco-cliente .editor-endereco-status {
+  color: #ffd08a;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.editor-endereco-cliente button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+/* Código CDA: campo e ajuda na primeira linha; ativação abaixo. */
+#ativar-cda-box.linha-codigo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 10px 8px;
+}
+#ativar-cda-box #codigo-ativacao-logado {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+#tela-perfil #ativar-cda-box button[onclick="explicarCodigo()"] {
+  width: 32px !important;
+  min-width: 32px;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  font-size: 16px;
+}
+#tela-perfil #ativar-cda-box .ativar-cda {
+  grid-column: 1 / -1;
+  justify-self: start;
+  width: auto !important;
+  min-height: 44px;
+  padding: 10px 24px !important;
+  margin: 0;
+}
+.raspadinha-status-usada {
+  display: inline-block;
+  margin: 8px 0;
+  padding: 6px 12px;
+  border: 1px solid #555;
+  border-radius: 8px;
+  background: #303030;
+  color: #bbb;
+  font-size: 14px;
+}

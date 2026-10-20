@@ -1,0 +1,61 @@
+/* div#modal-carrinho: lista com rolagem e ações fixas.
+ * Edite este arquivo para ajustar este componente.
+ * IDs refletem a estrutura do HTML; ordem: contêiner, filhos e estados.
+ */
+
+/* Contêiner: ancora a janela acima da navegação inferior. */
+#modal-carrinho {
+  align-items: flex-end !important;
+  padding: 12px 12px calc(76px + env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+}
+#modal-carrinho .conteudo-carrinho {
+  min-height: 0;
+  position: relative !important;
+  bottom: auto !important;
+  width: min(600px, 100%);
+  padding: 60px 16px 16px !important;
+  gap: 12px;
+  max-height: calc(100dvh - 100px) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column;
+  margin: 0 auto !important;
+}
+#modal-carrinho #lista-carrinho {
+  overscroll-behavior: contain;
+  padding-bottom: 8px !important;
+  position: static !important;
+  bottom: auto;
+  left: auto;
+  width: 100%;
+  /* Fallback antes do limite em dvh para navegadores antigos. */
+  max-height: none !important;
+  overflow: visible;
+  z-index: auto;
+  padding: 0;
+  margin: 0;
+  gap: 10px;
+  overflow-y: auto !important;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100dvh - 260px) !important;
+}
+#modal-carrinho .acoes-carrinho {
+  /* Limpar/Finalizar ficam fora da região rolável dos itens. */
+  position: static !important;
+  flex: 0 0 auto;
+  order: 2;
+  margin: 12px 0 0 !important;
+  background: #111;
+  padding-top: 8px;
+}
+#modal-carrinho .topo-carrinho {
+  margin: 0 !important;
+  padding: 12px !important;
+  min-height: 0 !important;
+}
+#modal-carrinho .topo-carrinho h3 {
+  margin: 0 !important;
+  font-size: 18px;
+}

@@ -1,38 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atendente</title>
 
-<title>Atendente</title>
+    <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
+    <link rel="stylesheet" href="css/paginas/atendente.css?v=20261019-2" />
+  </head>
+  <body>
+    <div class="login-atendente">
+      <h1>👨‍💼 Painel do Atendente</h1>
 
-<link rel="stylesheet" href="css/style.css">
+      <input type="text" id="codigo-atendente" placeholder="Código do atendente" />
 
-</head>
-<body>
+      <button onclick="loginAtendente()">Entrar</button>
+    </div>
 
-<div class="login-atendente">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <h1>👨‍💼 Painel do Atendente</h1>
+    <script src="js/ui-comum.js?v=20261018-1"></script>
+    <script src="js/script.js?v=20261020-18"></script>
+    <script src="js/atendente.js?v=20261020-14"></script>
+    <script src="js/operacao.js?v=20261020-18"></script>
 
-    <input
-        type="text"
-        id="codigo-atendente"
-        placeholder="Código do atendente"
-    >
-
-    <button onclick="loginAtendente()">
-        Entrar
-    </button>
-
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-<script src="js/script.js"></script>
-<script src="js/atendente.js"></script>
-
-</body>
+    <script src="js/app-ui.js?v=20261020-16"></script>
+    <script src="js/raspadinhas-recuperacao.js?v=20261020-3"></script>
+    <script src="js/raspadinhas.js?v=20261020-5"></script>
+    <script src="js/fluxos-interface.js?v=20261018-6"></script>
+  </body>
 </html>

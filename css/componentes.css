@@ -1,0 +1,10 @@
+/* Estilos finais por componente. A sequência mantém as prioridades atuais. */
+@import url("componentes/avisos.css?v=20261019-3");
+@import url("componentes/navegacao-e-busca.css?v=20261019-2");
+@import url("componentes/delivery-produto.css?v=20261019-2");
+@import url("componentes/delivery-carrinho.css?v=20261019-2");
+@import url("componentes/delivery-checkout.css?v=20261019-2");
+@import url("componentes/perfil.css?v=20261019-2");
+@import url("componentes/autoatendimento.css?v=20261019-2");
+@import url("componentes/atendente.css?v=20261019-2");
+@import url("componentes/raspadinhas.css?v=20261020-18");

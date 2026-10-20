@@ -1,0 +1,293 @@
+/* Componentes operacionais compartilhados: central, impressão, cozinha, atendimento e financeiro.
+ * Consulte GUIA-ESTILOS.md antes de alterar a ordem de carregamento.
+ */
+/* Tags base e variáveis */
+:root {
+  --operacao-vermelho: #e32932;
+  --operacao-fundo: #121212;
+  --operacao-card: #202020;
+  --operacao-borda: #454545;
+  --operacao-texto: #f7f7f7;
+  --operacao-verde: #3bc880;
+}
+/* form — campos e botões */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid #ffd700;
+  outline-offset: 3px;
+}
+/* main / section — conteúdo e componentes */
+[hidden] {
+  display: none !important;
+}
+/* header — cabeçalho e identidade */
+.header-loja {
+  height: auto;
+  min-height: 0;
+  display: block;
+  background: none;
+  border: 0;
+}
+.header-loja h1 {
+  font-size: clamp(24px, 5vw, 36px);
+  text-shadow: none;
+}
+.header-loja-topo {
+  justify-content: flex-start;
+  text-align: left;
+}
+/* main / section — conteúdo e componentes */
+.busca-produto-box {
+  margin: 16px auto;
+  max-width: 1100px;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  gap: 12px;
+}
+.busca-produto-box input {
+  flex: 1;
+  min-width: 0;
+}
+/* section — administração e atendimento */
+.admin-body main {
+  max-width: 1180px;
+  margin: auto;
+  padding: 20px;
+}
+.admin-body section {
+  margin: 22px 0;
+  padding: 20px;
+  border: 1px solid var(--operacao-borda);
+  border-radius: 14px;
+}
+.admin-body h2 {
+  margin: 0 0 18px;
+}
+.admin-body button,
+.menu-atendente button,
+.central-operacao button {
+  margin: 6px 4px 6px 0;
+  min-height: 44px;
+  padding: 12px 16px;
+  border-radius: 9px;
+}
+.admin-body input,
+.admin-body select,
+.admin-body textarea {
+  margin: 8px 0;
+  max-width: 100%;
+}
+.admin-body input[type="checkbox"],
+.admin-body input[type="radio"] {
+  width: auto;
+}
+#lista-adicionais-admin,
+#lista-atendentes-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px;
+}
+#lista-adicionais-admin > div,
+#lista-atendentes-admin > div {
+  padding: 16px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  background: #202020;
+}
+/* nav — menus e categorias */
+.menu-atendente {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+.menu-atendente button {
+  margin: 0;
+}
+/* section — administração e atendimento */
+.central-operacao {
+  padding: 20px;
+  max-width: 1100px;
+  margin: 20px auto;
+  border: 1px solid var(--operacao-borda);
+  border-radius: 14px;
+  background: var(--operacao-fundo);
+}
+.operacao-acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.operacao-acoes h2 {
+  margin-right: auto;
+}
+.operacao-acoes a {
+  color: #fff;
+  border: 1px solid #777;
+  border-radius: 8px;
+  padding: 12px;
+}
+.registro-operacao {
+  padding: 20px;
+  margin: 20px 0;
+  background: var(--operacao-card);
+  border-left: 4px solid var(--operacao-vermelho);
+  border-radius: 8px;
+}
+/* section — cozinha e produção */
+.producao-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--operacao-borda);
+}
+.producao-item strong {
+  font-size: 1.15em;
+}
+.producao-item p {
+  margin: 6px 0;
+}
+.producao-obs {
+  color: #ffe19a;
+  font-weight: bold;
+}
+.producao-combo {
+  margin: 10px 0 0 16px;
+  border-left: 2px solid #888;
+  padding-left: 12px;
+}
+/* dialog / div — modais e carrinho */
+dialog {
+  width: min(600px, 90vw);
+  max-height: 90vh;
+  overflow: auto;
+  background: #202020;
+  color: white;
+  border: 1px solid #777;
+  border-radius: 14px;
+  padding: 24px;
+}
+dialog::backdrop {
+  background: #000b;
+}
+dialog textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 16px 0;
+}
+/* Tags base e variáveis */
+body.cozinha-body {
+  margin: 0;
+  padding: 20px;
+  color: var(--operacao-texto);
+  background: var(--operacao-fundo);
+  font-family: Arial, sans-serif;
+}
+/* section — cozinha e produção */
+.cozinha-body > header {
+  height: auto;
+  background: none;
+  text-align: left;
+  border-bottom: 2px solid var(--operacao-vermelho);
+  padding: 8px 0 20px;
+}
+.cozinha-body header h1 {
+  font-size: 30px;
+}
+.cozinha-pedido {
+  margin: 22px 0;
+  background: var(--operacao-card);
+  border: 2px solid var(--operacao-borda);
+  padding: 22px;
+  border-radius: 12px;
+}
+.cozinha-pedido:first-child {
+  border-color: var(--operacao-vermelho);
+}
+.cozinha-pedido header {
+  height: auto;
+  display: block;
+  background: none;
+  border: 0;
+  text-align: left;
+}
+.cozinha-pedido h2 {
+  margin: 0 0 8px;
+}
+.cozinha-pedido button {
+  width: 100%;
+  background: #196c42;
+  padding: 18px;
+  margin: 18px 0 0;
+}
+.cozinha-vazia {
+  padding: 40px 0;
+  font-size: 24px;
+}
+.cozinha-monitor .cozinha-controle,
+.cozinha-monitor details {
+  display: none;
+}
+.cozinha-monitor #fila-cozinha {
+  max-width: 1500px;
+  margin: auto;
+}
+.cozinha-monitor .cozinha-pedido {
+  font-size: 24px;
+}
+.cozinha-monitor .cozinha-pedido h2 {
+  font-size: 36px;
+}
+/* section — financeiro */
+.financeiro-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.financeiro-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.financeiro-resumo {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 24px 0;
+}
+.financeiro-resumo strong {
+  font-size: 28px;
+  display: block;
+}
+/* Responsividade / @media */
+@media (max-width: 600px) {
+  .admin-body main,
+  .central-operacao {
+    padding: 12px;
+  }
+  .admin-body section,
+  .registro-operacao {
+    padding: 14px;
+  }
+  .operacao-acoes {
+    align-items: stretch;
+  }
+  .operacao-acoes button,
+  .operacao-acoes a {
+    flex: 1 1 140px;
+    text-align: center;
+  }
+  .cozinha-body {
+    padding: 12px !important;
+  }
+}

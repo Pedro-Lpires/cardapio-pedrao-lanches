@@ -1,0 +1,27 @@
+/* div#modal-produto: imagem, adicionais, quantidade e observações.
+ * Edite este arquivo para ajustar este componente.
+ * IDs refletem a estrutura do HTML; ordem: contêiner, filhos e estados.
+ */
+
+#modal-produto .modal-conteudo {
+  padding: 60px 16px 20px !important;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+#modal-produto #modal-img {
+  display: block;
+  margin: 0 auto 18px;
+  max-height: 180px;
+}
+#modal-produto .qtd-produto-modal {
+  margin: 14px 0;
+}
+#modal-produto #obs-produto {
+  margin: 12px 0 18px !important;
+  min-height: 74px;
+}
+#modal-produto .modal-produto-cabecalho {
+  display: contents;
+  position: static;
+  background: transparent;
+}

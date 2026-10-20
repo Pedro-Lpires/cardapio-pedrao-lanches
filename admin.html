@@ -1,476 +1,370 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel Administrativo - Pedrão Lanches</title>
-    <link rel="icon" href="images/logo-trailer.png">
-    <link rel="stylesheet" href="css/style.css"> <link rel="stylesheet" href="css/admin.css"> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body class="admin-body">
+    <link rel="icon" href="images/logo-trailer.png" />
+    <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
+    <link rel="stylesheet" href="css/paginas/admin.css?v=20261019-2" />
 
+    <script src="js/ui-comum.js?v=20261018-1"></script>
+  </head>
+  <body class="admin-body">
+    <!-- HEADER — cabeçalho da página -->
     <header class="admin-header">
-        <h1>📊 Painel de Vendas</h1>
-        <p class="subtitulo">Gestão Estratégica Pedrão Lanches</p>
+      <h1>Administração Pedrão Lanches</h1>
+      <p class="subtitulo">Pedidos, atendimento e cardápio</p>
     </header>
 
+    <!-- MAIN — conteúdo principal -->
     <main class="container">
-        
+      <section class="admin-pedidos">
+        <h2 onclick="togglePedidosRecentes()" style="cursor: pointer">📦 Pedidos recentes</h2>
 
-</div>
-<section class="admin-pedidos">
-    <h2 onclick="togglePedidosRecentes()" style="cursor:pointer;">
-        📦 Pedidos recentes
-    </h2>
+        <div id="lista-pedidos-admin" style="display: none"></div>
+      </section>
+      <section class="admin-online">
+        <h2 onclick="toggleUsuariosOnlineAdmin()" style="cursor: pointer">🟢 Usuários online</h2>
 
-    <div id="lista-pedidos-admin" style="display:none;"></div>
-</section>
-<section class="admin-online">
-    <h2 onclick="toggleUsuariosOnlineAdmin()" style="cursor:pointer;">
-        🟢 Usuários online
-    </h2>
+        <div id="lista-usuarios-online" style="display: none"></div>
+      </section>
 
-    <div id="lista-usuarios-online" style="display:none;"></div>
-</section>
+      <button onclick="toggleLoja()">Abrir / Fechar Loja</button>
+      <button type="button" onclick="liberarAreaAvancadaAdmin()">🔒 Administração Avançada</button>
 
-<button onclick="toggleLoja()">Abrir / Fechar Loja</button>
-<button
-    type="button"
-    onclick="liberarAreaAvancadaAdmin()"
->
-    🔒 Administração Avançada
-</button>
-     
-<div
-    id="area-admin-avancada"
-    style="display:none;"
->
-<button
-    type="button"
-    onclick="abrirFinanceiroAdmin()"
->
-    💰 Financeiro
-</button>
+      <div id="area-admin-avancada" style="display: none">
+        <button type="button" onclick="window.open('financeiro.html', '_blank')">
+          💰 Financeiro
+        </button>
 
-<div
-    id="area-financeiro-admin"
-    style="display:none;"
->
-  
-        <section class="box-grafico">
-            <canvas id="meuGrafico"></canvas>
+        <section class="admin-fidelidade">
+          <h2>🎁 Fidelidade Cliente</h2>
+
+          <input
+            type="text"
+            id="admin-busca-cliente"
+            placeholder="Telefone, nome ou código do cliente"
+          />
+          <button type="button" onclick="buscarClienteAdmin()">Buscar cliente</button>
+
+          <div id="resultado-cliente-admin"></div>
+        </section>
+        <section class="admin-cupons">
+          <h2>🏷️ Cupons de Desconto</h2>
+
+          <select id="cupom-tipo" onchange="atualizarCamposCupomAdmin()">
+            <option value="">Escolha o tipo de cupom</option>
+            <option value="pedido">Cupom do pedido</option>
+            <option value="taxa">Cupom da taxa de entrega</option>
+            <option value="item">Cupom de item</option>
+          </select>
+          <div id="campo-item-geral-check" style="display: none">
+            <label>
+              <input type="checkbox" id="cupom-item-geral" onchange="atualizarCamposCupomAdmin()" />
+              Aplicar em todos os lanches?
+            </label>
+          </div>
+
+          <input type="text" id="cupom-nome" placeholder="Nome do cupom. Ex: Dia dos Pais" />
+          <input type="text" id="cupom-codigo" placeholder="Código. Ex: PAI10" />
+
+          <div id="box-modo-cupom" style="display: none">
+            <select id="cupom-modo" onchange="atualizarCamposCupomAdmin()">
+              <option value="">Escolha o desconto</option>
+              <option value="valor">Desconto em R$</option>
+              <option value="porcentagem">Desconto em %</option>
+              <option value="gratis">Taxa grátis</option>
+            </select>
+          </div>
+
+          <input
+            type="number"
+            id="cupom-valor"
+            placeholder="Valor do desconto"
+            style="display: none"
+          />
+
+          <div id="campo-km-gratis" style="display: none">
+            <input
+              type="number"
+              id="cupom-km-gratis"
+              placeholder="Taxa grátis até quantos km? Ex: 5"
+            />
+          </div>
+
+          <div id="campo-item-cupom" style="display: none">
+            <div id="campo-item-geral-tipo" style="display: none">
+              <select id="cupom-item-geral-tipo">
+                <option value="geral">Todos os lanches</option>
+
+                <option value="artesanal">Todos artesanais</option>
+                <option value="industrial">Todos industriais</option>
+
+                <option value="bebidas">Todas bebidas</option>
+                <option value="batatas">Todas batatas</option>
+                <option value="combos">Todos combos</option>
+
+                <option value="frango">Todos frango</option>
+                <option value="file">Todos filé mignon</option>
+                <option value="hotdog">Todos hot dogs</option>
+              </select>
+
+              <select id="cupom-item-geral-modo">
+                <option value="valor">Desconto em R$</option>
+                <option value="porcentagem">Desconto em %</option>
+              </select>
+
+              <input type="number" id="cupom-item-geral-valor" placeholder="Valor do desconto" />
+            </div>
+            <input type="text" id="cupom-item-nome" placeholder="Nome do item. Ex: Baguncinha" />
+            <input
+              type="number"
+              id="cupom-item-preco-promocional"
+              placeholder="Preço promocional. Ex: 20"
+            />
+          </div>
+
+          <label class="check-admin-cupom">
+            <input type="checkbox" id="cupom-tem-minimo" onchange="atualizarCamposCupomAdmin()" />
+            Exigir pedido mínimo?
+          </label>
+
+          <div id="campo-pedido-minimo" style="display: none">
+            <input
+              type="number"
+              id="cupom-pedido-minimo"
+              placeholder="Valor mínimo do pedido. Ex: 100"
+            />
+          </div>
+
+          <button type="button" onclick="criarCupomDesconto()">Criar cupom</button>
+          <button type="button" onclick="listarCuponsDesconto()">Buscar/listar cupons</button>
+
+          <div id="lista-cupons-admin"></div>
         </section>
 
-        <nav class="filtros-admin">
-            <button class="btn-filtro" onclick="processar('hoje')">HOJE</button>
-            <button class="btn-filtro" onclick="processar('semana')">ESTA SEMANA</button>
-            <button class="btn-filtro" onclick="processar('mes')">ESTE MÊS</button>
-        </nav>
+        <section class="admin-mensagens">
+          <h2>📩 Suporte dos Clientes</h2>
+          <!-- colocar opcao de enviar cupons direto para cliente e opcao de criar cupom para 1 pedido, se pedir o pedido nao vale mais = taxa freee em 1 pedido -->
+          <div class="filtros-suporte-admin">
+            <button type="button" onclick="listarChamadosAdmin('aberto')">Abertos</button>
+            <button type="button" onclick="listarChamadosAdmin('finalizado')">Finalizados</button>
+            <button type="button" onclick="listarChamadosAdmin('todos')">Todos</button>
+            <button type="button" onclick="listarChamadosAdmin('aberto', 'reclamacao')">
+              Reclamações
+            </button>
+            <button type="button" onclick="listarChamadosAdmin('aberto', 'feedback')">
+              Feedbacks
+            </button>
+            <button type="button" onclick="listarChamadosAdmin('aberto', 'outros')">Outros</button>
+          </div>
 
-       <section class="grid-resumo">
-    <div class="card-total">
-        <p>Faturamento Total</p>
-        <strong id="resumo-geral">R$ 0,00</strong>
-    </div>
+          <div id="lista-chamados-admin"></div>
+          <div id="chat-chamado-admin"></div>
+          <div id="perfil-cliente-suporte-admin"></div>
+          <div id="lista-usuarios-online"></div>
+        </section>
 
-    <div class="card-stats">
-        <div class="stat-group">
-            <div class="stat-item"><span>🍔 Lanches:</span> <strong id="resumo-lanches">R$ 0,00</strong></div>
-            <div class="stat-item"><span>🥤 Bebidas:</span> <strong id="resumo-bebidas">R$ 0,00</strong></div>
-            <div class="stat-item"><span>🎁 Combos:</span> <strong id="resumo-combos">R$ 0,00</strong></div>
-            <div class="stat-item"><span>🍟 Batatas:</span> <strong id="resumo-batatas">R$ 0,00</strong></div>
-          <div class="stat-item">
-    <span>🍶 Molhos:</span>
-    <strong id="resumo-molhos">R$ 0,00</strong>
-</div>
+        <section class="admin-atendentes">
+          <h2>👨‍💼 Atendentes</h2>
+
+          <input type="text" id="atendente-nome" placeholder="Nome do atendente" />
+
+          <input type="text" id="atendente-codigo" placeholder="Código de acesso" />
+
+          <button type="button" onclick="salvarAtendenteAdmin()">Salvar atendente</button>
+
+          <button type="button" onclick="listarAtendentesAdmin()">Ver atendentes</button>
+
+          <div id="lista-atendentes-admin"></div>
+        </section>
+      </div>
+      <section class="admin-adicionais">
+        <h2>➕ Adicionais</h2>
+
+        <div class="financeiro-form">
+          <label>Nome do adicional<input id="adicional-nome" placeholder="Ex.: Alface" /></label>
+          <label
+            >Preço (R$)<input
+              id="adicional-preco"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0,00"
+          /></label>
+          <label
+            >Ordem no cardápio<input id="adicional-ordem" type="number" min="0" placeholder="1"
+          /></label>
         </div>
 
-        <hr class="divisor-admin">
+        <label>
+          <input type="checkbox" id="adicional-ativo" checked />
+          Ativo
+        </label>
 
-        <div class="stat-item destaque-motoboy">
-            <span>🚴‍♀️ Taxa Motoboy:</span> <strong id="resumo-taxas-motoboy">R$ 0,00</strong>
-        </div>
-<div class="stat-item">
-    <span>🎁 Fidelidade:</span>
-    <strong id="resumo-fidelidade">R$ 0,00</strong>
-</div>
+        <label>
+          <input type="checkbox" id="adicional-esgotado" />
+          Esgotado
+        </label>
 
-<div class="stat-item">
-    <span>🏷️ Cupons:</span>
-    <strong id="resumo-cupons">R$ 0,00</strong>
-</div>
-
-<div class="stat-item">
-    <span>💸 Descontos Gerais:</span>
-    <strong id="resumo-descontos">R$ 0,00</strong>
-</div>
-        <hr class="divisor-admin">
-
-        <div class="stat-group">
-            <div class="stat-item entrega">
-                <span>🛵 Total Entrega:</span> <strong id="resumo-faturamento-entrega">R$ 0,00</strong>
-            </div>
-            <div class="stat-item retirada">
-                <span>🏪 Total Retirada:</span> <strong id="resumo-faturamento-retirada">R$ 0,00</strong>
-            </div>
-            <div class="stat-item local">
-    <span>🍔 Consumir no Local:</span> <strong id="resumo-faturamento-local">R$ 0,00</strong>
-</div>
-        </div>
-    </div>
-</section>
-
-</div>
-<section class="admin-fidelidade">
-    <h2>🎁 Fidelidade Cliente</h2>
-
-    <input type="text" id="admin-busca-cliente" placeholder="Telefone, nome ou código do cliente">
-    <button type="button" onclick="buscarClienteAdmin()">Buscar cliente</button>
-
-    <div id="resultado-cliente-admin"></div>
-</section>
-<section class="admin-cupons">
-    <h2>🏷️ Cupons de Desconto</h2>
-
-    <select id="cupom-tipo" onchange="atualizarCamposCupomAdmin()">
-        <option value="">Escolha o tipo de cupom</option>
-        <option value="pedido">Cupom do pedido</option>
-        <option value="taxa">Cupom da taxa de entrega</option>
-        <option value="item">Cupom de item</option>
-    </select>
-        <div id="campo-item-geral-check" style="display:none;">
-    <label>
-        <input
-            type="checkbox"
-            id="cupom-item-geral"
-            onchange="atualizarCamposCupomAdmin()"
-        >
-        Aplicar em todos os lanches?
-    </label>
-</div>
-
-    <input type="text" id="cupom-nome" placeholder="Nome do cupom. Ex: Dia dos Pais">
-    <input type="text" id="cupom-codigo" placeholder="Código. Ex: PAI10">
-
-    <div id="box-modo-cupom" style="display:none;">
-        <select id="cupom-modo" onchange="atualizarCamposCupomAdmin()">
-            <option value="">Escolha o desconto</option>
-            <option value="valor">Desconto em R$</option>
-            <option value="porcentagem">Desconto em %</option>
-            <option value="gratis">Taxa grátis</option>
-        </select>
-    </div>
-
-    <input type="number" id="cupom-valor" placeholder="Valor do desconto" style="display:none;">
-
-    <div id="campo-km-gratis" style="display:none;">
-        <input type="number" id="cupom-km-gratis" placeholder="Taxa grátis até quantos km? Ex: 5">
-    </div>
-
-    <div id="campo-item-cupom" style="display:none;">
-      
-   
-
-<div id="campo-item-geral-tipo" style="display:none;">
-
-    <select id="cupom-item-geral-tipo">
-    <option value="geral">Todos os lanches</option>
-
-    <option value="artesanal">Todos artesanais</option>
-    <option value="industrial">Todos industriais</option>
-
-    <option value="bebidas">Todas bebidas</option>
-    <option value="batatas">Todas batatas</option>
-    <option value="combos">Todos combos</option>
-
-    <option value="frango">Todos frango</option>
-    <option value="file">Todos filé mignon</option>
-    <option value="hotdog">Todos hot dogs</option>
-</select>
-
-    <select id="cupom-item-geral-modo">
-        <option value="valor">Desconto em R$</option>
-        <option value="porcentagem">Desconto em %</option>
-    </select>
-
-    <input type="number"
-           id="cupom-item-geral-valor"
-           placeholder="Valor do desconto">
-</div>
-        <input type="text" id="cupom-item-nome" placeholder="Nome do item. Ex: Baguncinha">
-        <input type="number" id="cupom-item-preco-promocional" placeholder="Preço promocional. Ex: 20">
-    </div>
-
-    <label class="check-admin-cupom">
-        <input type="checkbox" id="cupom-tem-minimo" onchange="atualizarCamposCupomAdmin()">
-        Exigir pedido mínimo?
-    </label>
-
-    <div id="campo-pedido-minimo" style="display:none;">
-        <input type="number" id="cupom-pedido-minimo" placeholder="Valor mínimo do pedido. Ex: 100">
-    </div>
-
-    <button type="button" onclick="criarCupomDesconto()">Criar cupom</button>
-    <button type="button" onclick="listarCuponsDesconto()">Buscar/listar cupons</button>
-
-    <div id="lista-cupons-admin"></div>
-</section>  
-
-<section class="admin-mensagens">
-    <h2>📩 Suporte dos Clientes</h2>
- <!-- colocar opcao de enviar cupons direto para cliente e opcao de criar cupom para 1 pedido, se pedir o pedido nao vale mais = taxa freee em 1 pedido -->
-    <div class="filtros-suporte-admin">
-        <button type="button" onclick="listarChamadosAdmin('aberto')">Abertos</button>
-        <button type="button" onclick="listarChamadosAdmin('finalizado')">Finalizados</button>
-        <button type="button" onclick="listarChamadosAdmin('todos')">Todos</button>
-        <button type="button" onclick="listarChamadosAdmin('aberto', 'reclamacao')">Reclamações</button>
-<button type="button" onclick="listarChamadosAdmin('aberto', 'feedback')">Feedbacks</button>
-<button type="button" onclick="listarChamadosAdmin('aberto', 'outros')">Outros</button>
-
-    </div>
-
-    <div id="lista-chamados-admin"></div>
-    <div id="chat-chamado-admin"></div>
-    <div id="perfil-cliente-suporte-admin"></div>
-    <div id="lista-usuarios-online"></div>
-</section>  
-
-<section class="admin-atendentes">
-
-    <h2>👨‍💼 Atendentes</h2>
-
-    <input
-        type="text"
-        id="atendente-nome"
-        placeholder="Nome do atendente"
-    >
-
-    <input
-        type="text"
-        id="atendente-codigo"
-        placeholder="Código de acesso"
-    >
-
-
-    <button
-        type="button"
-        onclick="salvarAtendenteAdmin()"
-    >
-        Salvar atendente
-    </button>
-
-    <button
-        type="button"
-        onclick="listarAtendentesAdmin()"
-    >
-        Ver atendentes
-    </button>
-
-    <div id="lista-atendentes-admin"></div>
-
-</section>
-</div>
-<section class="admin-adicionais">
-    <h2>➕ Adicionais</h2>
-
-    <input id="adicional-nome" placeholder="Nome do adicional">
-    <input id="adicional-preco" type="number" placeholder="Preço">
-    <input id="adicional-ordem" type="number" placeholder="Ordem">
-
-    <label>
-        <input type="checkbox" id="adicional-ativo" checked>
-        Ativo
-    </label>
-
-    <label>
-        <input type="checkbox" id="adicional-esgotado">
-        Esgotado
-    </label>
-
-    <button type="button" onclick="salvarAdicionalAdmin()">
-        Salvar adicional
-    </button>
-<!-- <button type="button" onclick="importarAdicionaisFixosParaFirebase()">
+        <button type="button" onclick="salvarAdicionalAdmin()">Salvar adicional</button>
+        <!-- <button type="button" onclick="importarAdicionaisFixosParaFirebase()">
     Importar adicionais atuais
 </button> -->
 
-    <button type="button" onclick="toggleListaAdicionaisAdmin()">
-    Ver / ocultar adicionais
-</button>
-    <div id="lista-adicionais-admin"></div>
-</section>
+        <button type="button" onclick="toggleListaAdicionaisAdmin()">
+          Ver / ocultar adicionais
+        </button>
+        <div id="lista-adicionais-admin"></div>
+      </section>
 
+      <section class="admin-produtos">
+        <h2>🍔 Produtos</h2>
+        <div class="tabs-produto-admin">
+          <button type="button" class="tab-admin active" onclick="abrirAbaProdutoAdmin('criar')">
+            ➕ Criar produto
+          </button>
 
-<section class="admin-produtos">
-   
-    <h2>🍔 Produtos</h2>
-    <div class="tabs-produto-admin">
-
-    <button
-        type="button"
-        class="tab-admin active"
-        onclick="abrirAbaProdutoAdmin('criar')"
-    >
-        ➕ Criar produto
-    </button>
-
-    <button
-        type="button"
-        class="tab-admin"
-        onclick="abrirAbaProdutoAdmin('editar')"
-    >
-        ✏️ Editar produto
-    </button>
-
-</div>
- <div id="aba-criar-produto" style="display:none;">
-
-    <!-- <button type="button" onclick="importarProdutosFixosParaFirebase()">
+          <button type="button" class="tab-admin" onclick="abrirAbaProdutoAdmin('editar')">
+            ✏️ Editar produto
+          </button>
+        </div>
+        <div id="aba-criar-produto" style="display: none">
+          <!-- <button type="button" onclick="importarProdutosFixosParaFirebase()">
     Importar produtos atuais
 </button> -->
 
-  <div class="form-produto-admin">
+          <div class="form-produto-admin">
+            <div class="grupo-form-admin">
+              <h3>Dados básicos</h3>
 
-    <div class="grupo-form-admin">
-        <h3>Dados básicos</h3>
+              <input id="produto-nome" placeholder="Nome do produto" />
 
-        <input id="produto-nome" placeholder="Nome do produto">
+              <textarea id="produto-descricao" placeholder="Descrição"></textarea>
 
-        <textarea id="produto-descricao" placeholder="Descrição"></textarea>
+              <div class="linha-form-admin">
+                <select id="produto-categoria">
+                  <option value="lanches">Lanches</option>
+                  <option value="combos">Combos</option>
+                  <option value="bebidas">Bebidas</option>
+                  <option value="batatas">Batatas</option>
+                </select>
 
-        <div class="linha-form-admin">
-            <select id="produto-categoria">
-                <option value="lanches">Lanches</option>
-                <option value="combos">Combos</option>
-                <option value="bebidas">Bebidas</option>
-                <option value="batatas">Batatas</option>
-            </select>
+                <select id="produto-tipo-base">
+                  <option value="hamburguer">Hambúrguer</option>
+                  <option value="frango">Frango</option>
+                  <option value="file">Filé</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+            </div>
 
-            <select id="produto-tipo-base">
-                <option value="hamburguer">Hambúrguer</option>
-                <option value="frango">Frango</option>
-                <option value="file">Filé</option>
-                <option value="outro">Outro</option>
-            </select>
+            <div class="grupo-form-admin">
+              <h3>Preços</h3>
+
+              <div class="linha-form-admin">
+                <input id="produto-preco" type="number" placeholder="Preço principal" />
+                <input id="produto-preco-industrial" type="number" placeholder="Preço industrial" />
+                <input id="produto-preco-frango" type="number" placeholder="Preço frango" />
+                <input id="produto-preco-file" type="number" placeholder="Preço filé" />
+              </div>
+            </div>
+
+            <div class="grupo-form-admin">
+              <h3>Configurações</h3>
+
+              <div class="linha-form-admin">
+                <input id="produto-imagem" placeholder="Imagem. Ex: baguncinha.png" />
+                <input id="produto-ordem" type="number" placeholder="Posição" />
+                <div id="box-qtd-lanches-combo" style="display: none">
+                  <label>Quantidade de lanches no combo</label>
+                  <input id="produto-qtd-lanches-combo" type="number" min="0" value="1" />
+                </div>
+              </div>
+            </div>
+
+            <div class="grupo-form-admin">
+              <h3>Opções disponíveis</h3>
+
+              <label><input type="checkbox" id="produto-op-artesanal" /> Artesanal</label>
+              <label><input type="checkbox" id="produto-op-industrial" /> Industrial</label>
+              <label><input type="checkbox" id="produto-op-frango" /> Frango</label>
+              <label><input type="checkbox" id="produto-op-file" /> Filé</label>
+            </div>
+
+            <div class="grupo-form-admin">
+              <h3>Adicionais</h3>
+
+              <label
+                ><input type="checkbox" id="produto-adicionais" checked /> Permite adicionais</label
+              >
+
+              <label>
+                <input type="radio" name="modo-adicional" value="todos" checked />
+                Todos
+              </label>
+
+              <label>
+                <input type="radio" name="modo-adicional" value="selecionar" />
+                Selecionar específicos
+              </label>
+
+              <div id="lista-adicionais-produto"></div>
+            </div>
+
+            <div class="grupo-form-admin">
+              <h3>Status</h3>
+
+              <label><input type="checkbox" id="produto-ativo" checked /> Produto ativo</label>
+              <label><input type="checkbox" id="produto-esgotado" /> Produto esgotado</label>
+            </div>
+
+            <button type="button" onclick="salvarProdutoAdmin()">Salvar produto</button>
+          </div>
         </div>
-    </div>
+        <div id="aba-editar-produto" style="display: none">
+          <input
+            type="text"
+            id="buscar-produto-admin"
+            placeholder="Buscar produto..."
+            oninput="listarProdutosAdmin()"
+          />
 
-    <div class="grupo-form-admin">
-        <h3>Preços</h3>
+          <select id="filtro-categoria-admin" onchange="listarProdutosAdmin()">
+            <option value="">Todas categorias</option>
+            <option value="lanches">Lanches</option>
+            <option value="combos">Combos</option>
+            <option value="bebidas">Bebidas</option>
+            <option value="batatas">Batatas</option>
+          </select>
 
-        <div class="linha-form-admin">
-            <input id="produto-preco" type="number" placeholder="Preço principal">
-            <input id="produto-preco-industrial" type="number" placeholder="Preço industrial">
-            <input id="produto-preco-frango" type="number" placeholder="Preço frango">
-            <input id="produto-preco-file" type="number" placeholder="Preço filé">
+          <button type="button" onclick="toggleListaProdutosAdmin()">Ver produtos</button>
+
+          <div id="lista-produtos-admin"></div>
+          <div id="form-editar-produto-admin"></div>
         </div>
-    </div>
+      </section>
 
-    <div class="grupo-form-admin">
-        <h3>Configurações</h3>
-
-        <div class="linha-form-admin">
-            <input id="produto-imagem" placeholder="Imagem. Ex: baguncinha.png">
-            <input id="produto-ordem" type="number" placeholder="Posição">
-          <div id="box-qtd-lanches-combo" style="display:none;">
-    <label>Quantidade de lanches no combo</label>
-    <input
-        id="produto-qtd-lanches-combo"
-        type="number"
-        min="0"
-        value="1"
-    >
-</div>
-        </div>
-    </div>
-
-    <div class="grupo-form-admin">
-        <h3>Opções disponíveis</h3>
-
-        <label><input type="checkbox" id="produto-op-artesanal"> Artesanal</label>
-        <label><input type="checkbox" id="produto-op-industrial"> Industrial</label>
-        <label><input type="checkbox" id="produto-op-frango"> Frango</label>
-        <label><input type="checkbox" id="produto-op-file"> Filé</label>
-    </div>
-
-    <div class="grupo-form-admin">
-        <h3>Adicionais</h3>
-
-        <label><input type="checkbox" id="produto-adicionais" checked> Permite adicionais</label>
-
-        <label>
-            <input type="radio" name="modo-adicional" value="todos" checked>
-            Todos
-        </label>
-
-        <label>
-            <input type="radio" name="modo-adicional" value="selecionar">
-            Selecionar específicos
-        </label>
-
-        <div id="lista-adicionais-produto"></div>
-    </div>
-
-    <div class="grupo-form-admin">
-        <h3>Status</h3>
-
-        <label><input type="checkbox" id="produto-ativo" checked> Produto ativo</label>
-        <label><input type="checkbox" id="produto-esgotado"> Produto esgotado</label>
-    </div>
-
-    <button type="button" onclick="salvarProdutoAdmin()">
-        Salvar produto
-    </button>
-
-</div>
-</div>
-<div
-    id="aba-editar-produto"
-    style="display:none;"
->
-
-    <input
-        type="text"
-        id="buscar-produto-admin"
-        placeholder="Buscar produto..."
-        oninput="listarProdutosAdmin()"
-    >
-
-    <select
-        id="filtro-categoria-admin"
-        onchange="listarProdutosAdmin()"
-    >
-        <option value="">Todas categorias</option>
-        <option value="lanches">Lanches</option>
-        <option value="combos">Combos</option>
-        <option value="bebidas">Bebidas</option>
-        <option value="batatas">Batatas</option>
-    </select>
-
-    <button
-        type="button"
-        onclick="toggleListaProdutosAdmin()"
-    >
-        Ver produtos
-    </button>
-
-    <div id="lista-produtos-admin"></div>
-<div id="form-editar-produto-admin"></div>
-</div>
-
-</section>
-
-
-        <div class="voltar-loja">
-    <a href="index.html">← Voltar para a Loja</a>
-</div>
+      <div class="voltar-loja">
+        <a href="index.html">← Voltar para a Loja</a>
+      </div>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<script src="js/produtos.js"></script>
-    <script src="js/admin.js"></script> </body>
+    <script src="js/produtos.js"></script>
+    <script src="js/admin.js?v=20261020-18"></script>
+    <script src="js/operacao.js?v=20261020-18"></script>
+    <script src="js/cupons-admin-ui.js?v=20261020-14"></script>
+    <script src="js/campanhas.js?v=20261020-14"></script>
+    <script src="js/app-ui.js?v=20261020-16"></script>
+    <script src="js/raspadinhas-recuperacao.js?v=20261020-3"></script>
+    <script src="js/raspadinhas.js?v=20261020-5"></script>
+    <script src="js/catalogo-admin-ui.js?v=20261020-18"></script>
+    <script src="js/fluxos-interface.js?v=20261018-6"></script>
+  </body>
 </html>
 <!-- Cupom simples
 desconto em R$
@@ -488,8 +382,5 @@ taxa grátis até X km
 Taxa personalizada
 adicional geral na taxa
 ou tabela manual por km -->
-
-
-
 
 <!-- criar cupom pedido 1 vez. ou seja se o cliente usar ele nao pode usar novamente. só se eu ativar para ele novamente. no caso, decido oque darei para o cliente, desconto geral item taxa... mas ele só consegue usar 1vez. vamos fazer isso, para q, quando erramos em pedidos ou aldo do tipo, darei esse cupom para ele, se ele usar , ok aplica o que dei, mas se ele querer usar de novo nao vai pois ja foi usado. mas para eu nao ficar apagando toda hora 1 cupom e gerar outro por cada erro nosso e para ficar cuidadendo quando ele usar e tals, quero essa opção de vez unica, pois se errarmos com 5 pessoas por dia, e entrego esse cupom para cada uma delas, elas poderao usar apenas 1 vez e ele nao funciona mais para elas, e para elas nao usarem em outros dispositivos, eu quero uma modo para ativar para cada usuario mesmo o nao logado ou seja uma opcao para eu editar o numero de pessoas q ele pode ser utilizado, ex = 5 erros por dia = 7 dias na semana sao 35 erros. coloco q esse cupom pode ser usado 35x,   ou grudo esse cupom no numero de celular do cliente. mas no numero que ele colocar na revisao pois pode ser q ele nao tenha login. ou acha melhor eu pedir para ele se logar ou eu mesmo logo para ele e prego no numero de telefone do login dele? enfim quero mesmo é esse cupom q pode ser usado 1vez. e se errarmos novamente com o mesmo cliente damos dou novamente o cupom e ativo para esse usario q ele pode usar 1vez novamente, fazendo assim q eu nao crio 1 cupom para cada erro.  -->

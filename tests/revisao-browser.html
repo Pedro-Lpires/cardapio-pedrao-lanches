@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Revisão isolada — Pedrão</title>
+    <style>
+      body {
+        background: #292929;
+        color: white;
+        font: 16px Arial;
+        margin: 16px;
+      }
+      iframe {
+        width: 375px;
+        height: 667px;
+        background: #111;
+        display: block;
+        margin-top: 16px;
+        border: 1px solid #888;
+      }
+      button,
+      select {
+        padding: 10px;
+        margin: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Revisão isolada</h1>
+    <p>
+      Dados fictícios em memória. Sem conexão com o Firebase e sem mensagens para clientes reais.
+    </p>
+    <label
+      >Página<select id="pagina">
+        <option value="index.html">Cardápio</option>
+        <option value="admin.html">Admin</option>
+        <option value="painel-atendente.html">Atendente</option>
+        <option value="autoatendimento.html">Autoatendimento</option>
+        <option value="financeiro.html">Financeiro</option>
+      </select></label
+    ><button onclick="largura(320)">320 px</button><button onclick="largura(375)">375 px</button
+    ><button onclick="largura(430)">430 px</button>
+    <p>Senha fictícia dos painéis: teste1234</p>
+    <iframe id="mobile" title="Prévia isolada"></iframe>
+    <script>
+      const frame = document.getElementById("mobile");
+      function largura(n) {
+        frame.style.width = n + "px";
+      }
+      async function abrir() {
+        const pagina = document.getElementById("pagina").value;
+        let html = await (await fetch("../" + pagina)).text();
+        html = html.replace(
+          /<script\s+src="https:\/\/www.gstatic.com\/firebasejs[^\"]*"\s*>\s*<\/script>/g,
+          "",
+        );
+        html = html.replace(
+          "<head>",
+          '<head><base href="' +
+            new URL("../", location.href) +
+            '"><script src="tests/firebase-ui-mock.js"><\/script>',
+        );
+        frame.srcdoc = html;
+      }
+      document.getElementById("pagina").onchange = abrir;
+      abrir();
+    </script>
+  </body>
+</html>

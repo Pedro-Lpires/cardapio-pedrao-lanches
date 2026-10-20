@@ -1,0 +1,232 @@
+/* div#revisao-pedido / section#checkout-entrega-ui: etapas da finalização.
+ * Edite este arquivo para ajustar este componente.
+ * IDs refletem a estrutura do HTML; ordem: contêiner, filhos e estados.
+ */
+
+/* Molhos pagos seguem o mesmo cartão compacto dos outros adicionais. */
+#modal-molhos .btn-molhos-pagos {
+  width: auto;
+  min-height: 40px;
+  margin: 10px 0;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+#modal-molhos #area-molhos-pagos {
+  padding: 0;
+  background: transparent;
+}
+#modal-molhos .molho-pago-linha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px 20px 34px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 10px;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  background: #202020;
+}
+#modal-molhos .molho-pago-linha button {
+  width: 34px;
+  min-width: 34px;
+  height: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+}
+#modal-molhos .molho-pago-linha > span {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Endereço separado de condomínio/CNH, com acesso secundário aos salvos. */
+#checkout-entrega-ui #box-endereco-salvo {
+  margin-top: 28px !important;
+}
+#checkout-entrega-ui .cabecalho-endereco-ui {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+#checkout-entrega-ui .cabecalho-endereco-ui > label {
+  margin: 0;
+  font-size: 15px;
+}
+#checkout-entrega-ui .btn-enderecos-salvos-ui {
+  flex: none;
+  width: auto;
+  min-height: 36px;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid #e00012;
+  border-radius: 8px;
+  background: #e00012;
+  font-size: 12px;
+  line-height: 1.2;
+}
+#checkout-entrega-ui #endereco-escrito {
+  display: block;
+  width: 100%;
+  margin-top: 0;
+}
+#checkout-entrega-ui #select-endereco-salvo {
+  margin: 0 0 10px;
+}
+#checkout-entrega-ui > h3 {
+  width: fit-content;
+  margin: 26px auto 18px;
+  padding-bottom: 8px;
+  border-bottom: 3px solid #20c773;
+  text-align: center;
+}
+
+/* Finalizar usa o mesmo cabeçalho simples do perfil e um card para o formulário. */
+body[data-tela="finalizar"] .info-rapida-loja,
+body[data-tela="finalizar"] .abas-navegacao,
+body[data-tela="finalizar"] .horario-box {
+  display: none !important;
+}
+body[data-tela="finalizar"] main.container {
+  padding-top: 20px;
+}
+#tela-finalizar #finalizar-pedido {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto 20px;
+  padding: 20px 16px;
+  gap: 18px;
+  background: #202020;
+  border: 1px solid #3a3a3a;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px #0005;
+}
+#tela-finalizar .tipo-pedido-grupo {
+  margin: 0;
+}
+#tela-finalizar .tipo-pedido-grupo > h3 {
+  margin: 0 0 12px;
+}
+#tela-finalizar .box-cliente {
+  margin: 0;
+}
+
+#revisao-pedido.revisao-local #detalhe-valores > [hidden] {
+  display: none !important;
+}
+#modal-molhos {
+  z-index: 12000 !important;
+}
+body:has(#revisao-pedido:not([hidden])[style*="display: block"])::after,
+body:has(#checkout-entrega-ui:not([hidden]))::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  z-index: 10999;
+  pointer-events: auto;
+}
+#revisao-pedido,
+#checkout-entrega-ui {
+  position: fixed !important;
+  inset: 50% auto auto 50% !important;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  width: calc(100% - 24px) !important;
+  max-width: 600px;
+  margin: 0 !important;
+  z-index: 11000 !important;
+  background: #202020;
+  border: 1px solid #555 !important;
+  border-radius: 14px;
+  padding: 12px 12px calc(24px + env(safe-area-inset-bottom)) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  /* Cresce só até o conteúdo; etapas longas continuam rolando dentro da tela. */
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 24px);
+  overscroll-behavior: contain;
+  scroll-padding-block: 76px 24px;
+}
+#revisao-pedido > *,
+#checkout-entrega-ui > * {
+  flex-shrink: 0;
+  min-width: 0;
+}
+#revisao-pedido > .ui-navegacao,
+#checkout-entrega-ui > .ui-navegacao {
+  top: -12px;
+  margin: -12px -12px 12px;
+  padding: 8px 12px;
+}
+#revisao-pedido > button:last-child,
+#checkout-entrega-ui > button:last-child {
+  display: block;
+  width: 100%;
+  margin: 16px 0 0 !important;
+}
+body:has(#revisao-pedido:not([hidden])[style*="display: block"]) .menu-inferior,
+body:has(#revisao-pedido:not([hidden])[style*="display: flex"]) .menu-inferior,
+body:has(#checkout-entrega-ui:not([hidden])) .menu-inferior {
+  visibility: hidden;
+  pointer-events: none;
+}
+#revisao-pedido h2,
+#checkout-entrega-ui h2 {
+  margin: 12px 0;
+  font-size: 20px;
+}
+#revisao-pedido #detalhe-valores {
+  display: block !important;
+  width: 100%;
+}
+#revisao-pedido #detalhe-valores > p {
+  display: flex !important;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 10px !important;
+  margin: 4px 0 !important;
+  line-height: 1.4;
+  min-height: 0;
+  border-radius: 6px;
+}
+#revisao-pedido #detalhe-valores > div {
+  width: 100%;
+  padding: 10px !important;
+  margin: 8px 0 !important;
+}
+#revisao-pedido #detalhe-valores > h3 {
+  padding: 12px !important;
+  margin: 12px 0 !important;
+}
+#revisao-pedido #detalhe-valores > p[hidden] {
+  display: none !important;
+}
+#checkout-entrega-ui .campo-espacado {
+  margin: 12px 0 !important;
+  text-align: left;
+}
+#checkout-entrega-ui label {
+  display: block;
+  margin: 8px 0;
+}
+#checkout-entrega-ui textarea,
+#checkout-entrega-ui select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #555;
+  background: #222;
+  color: white;
+  border-radius: 9px;
+}
+#checkout-entrega-ui .grupo-pagamento label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+#checkout-entrega-ui .linha-salvar-endereco[hidden] {
+  display: none !important;
+}

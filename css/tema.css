@@ -1,0 +1,2519 @@
+/* Identidade visual compartilhada e estilos das telas. A posição após a base preserva a aparência atual.
+ * Consulte GUIA-ESTILOS.md antes de alterar a ordem de carregamento.
+ */
+/* Tags base e variáveis */
+* {
+  box-sizing: border-box;
+}
+:root {
+  --card-bg-alt: #181818;
+  --gutter: 16px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-white);
+  padding-bottom: 80px;
+}
+
+/* header — cabeçalho e identidade */
+
+.header-loja {
+  position: relative;
+}
+
+.banner-loja {
+  height: 150px;
+  background:
+    url("../images/banner-pedrao.jpeg") center/cover no-repeat,
+    linear-gradient(135deg, #3a0a0a, #1a1a1a);
+  border-bottom: 3px solid var(--primary-color);
+}
+
+.header-loja-topo {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 10px var(--gutter) 16px var(--gutter);
+}
+
+.logo-loja {
+  width: 84px;
+  height: 84px;
+  margin-top: -48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #000;
+  border: 3px solid var(--bg-color);
+  box-shadow: var(--shadow-card);
+  flex-shrink: 0;
+}
+
+.header-loja-nome {
+  padding-bottom: 4px;
+}
+
+.header-loja-nome h1 {
+  font-size: clamp(20px, 6vw, 28px);
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* main / section — conteúdo e componentes */
+
+.subtitulo {
+  color: var(--text-gold);
+  font-weight: bold;
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+}
+
+.info-rapida-loja {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 0 var(--gutter) var(--gutter) var(--gutter);
+}
+
+.info-rapida-loja::-webkit-scrollbar {
+  display: none;
+}
+
+.info-rapida-item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 12px);
+  padding: 8px 8px;
+  text-decoration: none;
+  color: #fff;
+  overflow: hidden;
+}
+
+.info-rapida-item strong,
+.info-rapida-item small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.info-rapida-item span {
+  font-size: 20px;
+}
+
+.info-rapida-item strong {
+  display: block;
+  font-size: 0.75rem;
+  color: #999;
+  font-weight: normal;
+}
+
+.info-rapida-item small {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+/* nav — menus e categorias */
+
+.abas-navegacao {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: var(--bg-color);
+  padding: 15px 10px;
+  gap: 15px;
+  border-bottom: 2px solid var(--primary-color);
+  justify-content: center;
+}
+.abas-navegacao a {
+  color: var(--text-white);
+  text-decoration: none;
+  padding: 8px 15px;
+  background: var(--card-bg);
+  border-radius: 20px;
+  font-weight: bold;
+  border: 1px solid var(--border-color);
+  transition: 0.3s;
+}
+.abas-navegacao a:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.abas-navegacao a.ativa {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* main / section — conteúdo e componentes */
+
+.container {
+  padding: 30px;
+  max-width: 1200px;
+  margin: auto;
+}
+h2 {
+  scroll-margin-top: 100px;
+  border-left: 5px solid var(--primary-color);
+  padding-left: 15px;
+  margin: 40px 0 20px 0;
+  text-transform: uppercase;
+}
+.box-cliente {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.input-padrao {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  background: #1e1e1e;
+  color: var(--text-white);
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.input-padrao::placeholder {
+  color: #aaa;
+}
+
+.input-padrao:focus {
+  border: 1px solid #00ff88;
+  box-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+}
+
+/* .grid {
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px; 
+    padding: 20px; 
+    justify-content: center;
+} */
+/* .card {
+    background: var(--card-bg); 
+    padding: 20px; 
+    border-radius: 15px; 
+    border: 1px solid var(--border-color);
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    text-align: center;
+    min-height: 400px; 
+    justify-content: space-between; 
+    transition: 0.3s;
+}
+.card:hover { transform: translateY(-5px); border-color: var(--primary-color); }
+.card img { width: 100%; height: 150px; object-fit: contain; }
+.card h3 { font-size: 1.2rem; height: 2.4rem; display: flex; align-items: center; }
+.ingredientes { font-size: 0.85rem; color: #bbb; flex-grow: 1; }
+.preco { font-size: 1.4rem; font-weight: bold; color: #2ecc71; margin: 15px 0; } */
+/*  */
+
+.grid {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+}
+/* PC grande */
+/* Responsividade / @media */
+@media (min-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Notebook / PC médio */
+@media (min-width: 700px) and (max-width: 999px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablet / celular grande */
+@media (min-width: 500px) and (max-width: 699px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* main / section — conteúdo e componentes */
+
+.card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  height: 405px;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: var(--shadow-card);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary-color);
+}
+
+.card-img {
+  height: 155px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-img img {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+}
+
+.card-info {
+  height: 210px;
+  width: 100%;
+  display: grid;
+  grid-template-rows: 55px 105px 40px;
+  align-items: center;
+}
+
+.card-info h3 {
+  font-size: 1.2rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-info p {
+  font-size: 0.85rem;
+  color: #bbb;
+  margin: 0;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-info .preco {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #2ecc71;
+  margin: 0;
+}
+
+/* CELULAR: estilo app */
+/* Responsividade / @media */
+@media (max-width: 500px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .card {
+    height: auto;
+    min-height: 120px;
+    padding: 12px;
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-info {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    flex: 1;
+  }
+
+  .card-info h3 {
+    min-height: auto;
+    font-size: 15px;
+    justify-content: flex-start;
+    margin: 0 0 5px;
+  }
+
+  .card-info p {
+    font-size: 12px;
+    margin: 0 0 6px;
+    display: block;
+  }
+
+  .card-info .preco {
+    font-size: 15px;
+  }
+
+  .card-img {
+    height: auto;
+    order: 2;
+  }
+
+  .card-img img {
+    width: 85px;
+    height: 85px;
+  }
+}
+/* main / section — conteúdo e componentes */
+.btn-escolher {
+  width: 100%;
+  margin-top: 10px;
+}
+.quantidade-controle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  background: var(--primary-color);
+  padding: 8px 15px;
+  border-radius: 50px;
+  width: 100%;
+  max-width: 150px;
+}
+.btn-qtd {
+  background: none;
+  border: none;
+  color: var(--text-white);
+  font-size: 1.8rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+.qtd-input {
+  width: 35px;
+  background: var(--text-white);
+  border: none;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.secao-finalizacao {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  text-align: center;
+}
+.tipo-pedido-grupo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+  width: 100%;
+}
+.tipo-pedido-grupo h3 {
+  margin-bottom: 10px;
+  width: 100%;
+  text-align: center;
+}
+.opcoes-alinhadas {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+.opcoes-alinhadas label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.1em;
+}
+.opcoes-alinhadas input {
+  margin-right: 8px;
+}
+
+/* form — campos e botões */
+
+textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-white);
+  border: 1px solid var(--border-color);
+  resize: none;
+}
+
+button {
+  margin-top: 20px;
+  padding: 15px 25px;
+  background: var(--primary-color);
+  color: var(--text-white);
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.3s;
+  outline: none;
+}
+button:hover {
+  transform: scale(1.05);
+}
+
+/* main / section — conteúdo e componentes */
+
+.grupo-botoes-acao {
+  display: flex;
+  gap: 10px;
+}
+.grupo-botoes-acao button {
+  flex: 1;
+  padding: 15px;
+  font-weight: bold;
+}
+#btn-apagar {
+  background-color: #ff4444;
+}
+#btn-finalizar {
+  background-color: var(--secondary-color);
+}
+
+#lista-conferencia {
+  width: 100%;
+  text-align: left;
+}
+
+#lista-conferencia div {
+  display: flex;
+  justify-content: space-between;
+}
+
+#revisao-pedido {
+  background: var(--modal-bg);
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 10px;
+  border: 2px solid var(--secondary-color);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+#revisao-pedido h2 {
+  color: var(--secondary-color);
+  align-self: center;
+  border: none;
+  padding: 0;
+}
+#detalhe-valores {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+.divisor-revisao {
+  width: 100%;
+  border: 0.5px solid var(--border-color);
+  margin: 10px 0;
+}
+
+.grupo-pagamento {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+.opcao-pagamento {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 10px;
+}
+#valor-troco {
+  margin-top: 5px;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  width: calc(100% - 20px);
+  background: #333;
+  color: var(--text-white);
+}
+
+/* dialog / div — modais e carrinho */
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+/* .modal-conteudo {
+    background: var(--modal-bg);
+    width: calc(100% - 20px);            
+    max-width: 380px;      
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border: 1px solid var(--border-color);
+} */
+
+.modal-produto {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-conteudo {
+  background: #111;
+  padding: 20px;
+  border-radius: 15px;
+  width: 95%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-img {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+}
+
+/* main / section — conteúdo e componentes */
+
+#lista-adicionais {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+#lista-adicionais.aberta {
+  max-height: 600px;
+}
+
+#lista-adicionais div {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+#btn-toggle-adicionais {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-bg-alt, #181818);
+  border: 1px solid var(--border-color);
+  color: #fff;
+  font-weight: bold;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius-md, 12px);
+}
+
+/* form — campos e botões */
+
+textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+}
+/* main / section — conteúdo e componentes */
+.item-adicional {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1f1f1f;
+  border: 1px solid #333;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.item-adicional span {
+  display: block;
+  color: #00ff88;
+  font-size: 14px;
+  margin-top: 3px;
+}
+
+.controle-adicional {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controle-adicional button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  margin: 0;
+  font-size: 20px;
+}
+
+.opcao-carne {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 10px;
+  background: #2a2a2a;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.opcao-carne label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--text-white);
+}
+
+.carne-controles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.carne-controles span {
+  color: var(--secondary-color);
+  font-weight: bold;
+  font-size: 0.95rem;
+  min-width: 65px;
+  text-align: right;
+}
+
+.carne-controles input {
+  width: 40px;
+  height: 30px;
+  text-align: center;
+  border-radius: 4px;
+  border: none;
+  font-weight: bold;
+}
+
+.seletor-qtd {
+  display: flex;
+  align-items: center;
+  background: #333;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--primary-color);
+  height: 32px;
+}
+
+.seletor-qtd button {
+  background-color: var(--primary-color);
+  color: var(--text-white);
+  border: none;
+  width: 32px;
+  height: 100%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  padding: 0;
+  margin: 0;
+}
+
+.seletor-qtd button:active {
+  opacity: 0.8;
+}
+
+.seletor-qtd input {
+  width: 35px;
+  height: 100%;
+  background: transparent;
+  color: var(--text-white);
+  border: none;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 0;
+  margin: 0;
+  appearance: textfield;
+}
+
+.seletor-qtd input::-webkit-outer-spin-button,
+.seletor-qtd input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* dialog / div — modais e carrinho */
+#lista-carrinho {
+  position: fixed;
+  bottom: 70px;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #111;
+  z-index: 9999;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.item-carrinho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1f1f1f;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* main / section — conteúdo e componentes */
+
+.nome-item {
+  color: var(--text-white);
+  font-size: 14px;
+  max-width: 70%;
+}
+
+.acoes-item {
+  display: flex;
+  gap: 6px;
+}
+
+.acoes-item button {
+  border: none;
+  background: #333;
+  color: var(--text-white);
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.acoes-item button:hover {
+  background: #555;
+}
+
+#botao-flutuante {
+  position: fixed;
+  bottom: 78px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  min-width: 190px;
+  height: 48px;
+  padding: 0 22px;
+  background: var(--secondary-color);
+  color: var(--text-white);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1rem;
+  z-index: 9997;
+  border-radius: 999px;
+  border: 2px solid #27ae60;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+#botao-flutuante span {
+  display: inline-block;
+}
+
+/* dialog / div — modais e carrinho */
+
+.modal-carrinho {
+  display: none;
+  position: fixed;
+  z-index: 99999;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.conteudo-carrinho {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  max-height: 70%;
+  background: #111;
+  border-radius: 20px 20px 0 0;
+  padding: 15px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.acoes-carrinho {
+  display: flex;
+  gap: 8px;
+}
+
+.acoes-carrinho button {
+  flex: 1;
+  padding: 8px;
+  font-size: 13px;
+}
+
+/* main / section — conteúdo e componentes */
+
+.campo-espacado {
+  margin-bottom: 20px;
+}
+
+#box-condominio label,
+#campo-cnh label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+#box-condominio select,
+#campo-cnh select {
+  width: 100%;
+  max-width: 300px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  font-size: 16px;
+}
+
+/* MOBILE */
+/* Responsividade / @media */
+@media (max-width: 600px) {
+  #box-condominio select,
+  #campo-cnh select {
+    max-width: 100%;
+  }
+}
+
+/* main / section — conteúdo e componentes */
+
+.busca-produto-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: var(--gutter) var(--gutter) 0 var(--gutter);
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 12px);
+}
+
+.busca-produto-box .icone-busca {
+  font-size: 18px;
+  opacity: 0.6;
+}
+
+.busca-produto-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 15px;
+}
+
+.busca-produto-box input::placeholder {
+  color: #888;
+}
+
+.card-extra {
+  display: none;
+}
+
+.card-extra.mostrar-item {
+  display: flex;
+}
+
+.btn-ver-mais {
+  display: block;
+  width: 100%;
+  margin: 0 0 24px 0;
+  padding: 12px;
+  background: transparent;
+  border: 1px dashed var(--border-color);
+  color: #ccc;
+  font-weight: bold;
+  font-size: 14px;
+  border-radius: var(--radius-md, 12px);
+}
+
+.horario-box {
+  margin: var(--gutter) auto;
+  padding: 10px 18px;
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-radius: 999px;
+  background: rgba(229, 9, 20, 0.15);
+  border: 1px solid var(--primary-color);
+  max-width: calc(100% - 32px);
+}
+
+.tela-app {
+  display: none;
+}
+
+.tela-app.ativa {
+  display: block;
+}
+
+/* nav — menus e categorias */
+
+.menu-inferior {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 64px;
+  background: #151515;
+  border-top: 2px solid var(--primary-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 9998;
+  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.menu-inferior button {
+  border: none;
+  background: transparent;
+  color: #888;
+  font-weight: bold;
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin: 0;
+  padding: 6px 12px;
+  transition: color 0.2s;
+}
+
+.menu-inferior button span {
+  font-size: 12px;
+}
+
+.menu-inferior button.ativa {
+  color: var(--primary-color);
+}
+
+/* Tags base e variáveis */
+
+body {
+  padding-bottom: 75px;
+}
+
+/* section — perfil e acesso */
+
+.botoes-perfil {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.botoes-perfil button {
+  flex: 1;
+  min-width: 100px;
+}
+
+.box-perfil-logado {
+  background: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 15px;
+}
+
+/* =========================================
+   TELA DE PERFIL / LOGIN
+   (não existia nenhum estilo pra isso antes —
+   por isso aparecia "cru", sem cartão nem
+   espaçamento e com a imagem do mascote quebrada)
+========================================= */
+
+.perfil-app {
+  padding: var(--gutter);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.perfil-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 28px 22px;
+  text-align: left;
+  box-shadow: var(--shadow-card);
+}
+
+.perfil-card h2 {
+  border: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  text-transform: none;
+  font-size: 1.4rem;
+  line-height: 1.3;
+  text-align: center;
+}
+
+#perfil-home {
+  text-align: center;
+}
+
+.perfil-acoes-iniciais {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.perfil-acoes-iniciais button {
+  flex: 1;
+  margin: 0;
+}
+
+.perfil-acoes-iniciais button:last-child {
+  background: transparent;
+  border: 2px solid var(--primary-color);
+}
+
+.mascote-perfil {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #2a2a2a, #151515);
+  border: 2px solid var(--border-color);
+}
+
+.btn-voltar-perfil {
+  display: block;
+  width: 100%;
+  background: transparent !important;
+  color: #aaa !important;
+  padding: 0 !important;
+  margin: 0 0 18px 0 !important;
+  font-size: 14px !important;
+  font-weight: normal !important;
+  text-align: left;
+}
+/* main / section — conteúdo e componentes */
+.form-endereco {
+  background: #1f1f1f;
+  border: 1px solid #333;
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+.form-endereco input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #151515;
+  color: #fff;
+}
+
+.form-endereco button {
+  width: 100%;
+}
+.endereco-box {
+  background: #1f1f1f;
+  border: 1px solid #333;
+  border-left: 4px solid #e50914;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 12px 0;
+  line-height: 1.4;
+}
+.pedido-fidelidade {
+  border-left: 5px solid #2ecc71 !important;
+  box-shadow: 0 0 0 1px rgba(46, 204, 113, 0.35);
+}
+
+/* Histórico de pedidos ("Seus pedidos anteriores") —
+   não tinha nenhum CSS, por isso ficava tudo centralizado
+   e sem separação entre um pedido e outro */
+
+.pedido-antigo {
+  background: var(--card-bg-alt);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--primary-color);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.pedido-antigo strong {
+  font-size: 1rem;
+}
+
+.pedido-antigo small {
+  display: block;
+  color: #999;
+  margin: 2px 0 10px 0;
+}
+
+.pedido-antigo p {
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+  color: #ddd;
+}
+
+.pedido-antigo button {
+  width: 100%;
+  margin: 0;
+  padding: 10px;
+  font-size: 15px;
+}
+
+/* section — perfil e acesso */
+
+.tag-login,
+.tag-sem-login,
+.tag-fidelidade,
+.tag-cancelado {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  margin: 5px 5px 5px 0;
+}
+
+.tag-login {
+  background: #1f6feb;
+}
+
+.tag-sem-login {
+  background: #555;
+}
+
+/* main / section — conteúdo e componentes */
+
+.tag-fidelidade {
+  background: #2ecc71;
+  color: #111;
+}
+
+.tag-cancelado {
+  background: #777;
+}
+.label-cupom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+#codigo-cupom-desconto {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #111;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.btn-cupom {
+  width: 100%;
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+/* dialog / div — modais e carrinho */
+.topo-carrinho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: #111;
+  border: 1px solid #2ecc71;
+}
+
+.info-item-carrinho {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.valor-item-carrinho {
+  font-weight: bold;
+  color: #2ecc71;
+}
+
+/* main / section — conteúdo e componentes */
+
+.extras-item,
+.obs-item {
+  color: #ccc;
+  font-size: 13px;
+}
+
+/* dialog / div — modais e carrinho */
+
+.item-carrinho {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: #1f1f1f;
+}
+/* main / section — conteúdo e componentes */
+.box-avatar-cliente {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.avatar-preview {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #2ecc71;
+}
+
+.lista-avatares {
+  display: flex;
+  gap: 10px;
+  overflow: auto;
+  margin-bottom: 15px;
+}
+
+.lista-avatares img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.lista-avatares img:hover {
+  border-color: #2ecc71;
+}
+
+/* section — perfil e acesso */
+
+.check-salvar-login {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 15px 0;
+}
+/* main / section — conteúdo e componentes */
+.topo-logado-acoes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* section — perfil e acesso */
+
+.btn-editar-perfil,
+.btn-sair-pequeno {
+  width: auto !important;
+  padding: 8px 14px !important;
+  font-size: 14px !important;
+}
+
+/* main / section — conteúdo e componentes */
+
+.btn-sair-pequeno {
+  background: #333 !important;
+}
+
+/* section — perfil e acesso */
+
+.btn-mensagens-perfil {
+  width: auto !important;
+  padding: 8px 18px !important;
+  font-size: 14px !important;
+  margin-top: 8px;
+}
+/* main / section — conteúdo e componentes */
+.linha-avatar-mensagem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* section — perfil e acesso */
+
+.btn-mensagens-perfil {
+  width: auto !important;
+  padding: 8px 14px !important;
+  font-size: 13px !important;
+}
+/* main / section — conteúdo e componentes */
+.topo-mensagens {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/* nav — menus e categorias */
+
+.abas-mensagens {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.abas-mensagens button {
+  flex: 1;
+}
+
+/* main / section — conteúdo e componentes */
+
+.card-mensagem {
+  background: #1f1f1f;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.card-mensagem small {
+  opacity: 0.7;
+}
+
+#mensagem-suporte {
+  width: 100%;
+  min-height: 100px;
+  margin-top: 15px;
+}
+.linha-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+/* section — administração e atendimento */
+
+.linha-admin {
+  flex-direction: row-reverse;
+}
+
+/* main / section — conteúdo e componentes */
+
+.avatar-msg {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #2ecc71;
+}
+
+.msg-chat {
+  max-width: 75%;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.msg-cliente {
+  background: #262626;
+  border-left: 4px solid #2ecc71;
+}
+
+/* section — administração e atendimento */
+
+.msg-admin {
+  background: #3a1111;
+  border-right: 4px solid #ff0000;
+}
+
+/* main / section — conteúdo e componentes */
+
+.card-chamado-cliente {
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+}
+
+.card-chamado-cliente button {
+  margin-top: 10px;
+}
+
+#box-enviar-suporte {
+  padding-bottom: 80px;
+}
+/* dialog / div — modais e carrinho */
+#modal-mensagens .conteudo-carrinho {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+/* section — administração e atendimento */
+.box-online-admin {
+  margin-top: 20px;
+}
+
+.card-online-admin {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  background: #1b1b1b;
+
+  padding: 12px;
+
+  border-radius: 12px;
+
+  margin-bottom: 10px;
+
+  border-left: 4px solid #2ecc71;
+}
+
+.avatar-online-admin {
+  width: 55px;
+  height: 55px;
+
+  border-radius: 50%;
+  object-fit: cover;
+}
+/* main / section — conteúdo e componentes */
+.badge-msg {
+  background: #fff;
+  color: red;
+  border-radius: 50%;
+  padding: 2px 7px;
+  margin-left: 5px;
+  font-weight: bold;
+}
+.acoes-chat-cliente {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.aviso-nova-msg {
+  color: #2ecc71;
+  font-weight: bold;
+}
+.mini-aviso-msg {
+  display: block;
+  font-size: 10px;
+  margin-top: 2px;
+  color: #fff;
+}
+.btn-msg-aba {
+  position: relative;
+}
+
+.badge-aba-msg {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+
+  background: #fff;
+  color: red;
+
+  min-width: 20px;
+  height: 20px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  font-weight: bold;
+
+  padding: 2px;
+}
+
+.badge-aba-msg:empty {
+  display: none;
+}
+.produto-esgotado {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+.produto-esgotado img {
+  filter: grayscale(1);
+}
+
+.tag-esgotado {
+  display: inline-block;
+  margin-top: 8px;
+  background: #e50914;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+.bloco-molho-item {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+/* =========================================
+   PAINEL DO ATENDENTE
+   (a página inteira não tinha CSS próprio —
+   só herdava o "button {}" genérico, por
+   isso tudo ficava grudado e sem organização)
+========================================= */
+
+/* section — administração e atendimento */
+
+.pagina-atendente {
+  padding: var(--gutter);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.pagina-atendente h1 {
+  font-size: 1.3rem;
+  margin: 0 0 4px 0;
+  border: none;
+  padding: 0;
+  text-transform: none;
+}
+
+.pagina-atendente #nome-atendente {
+  color: #999;
+  margin: 0 0 18px 0;
+  font-size: 0.9rem;
+}
+
+.pagina-atendente hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 0 0 20px 0;
+}
+
+/* nav — menus e categorias */
+
+.menu-atendente {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.menu-atendente button {
+  flex: 1 1 calc(50% - 10px);
+  margin: 0;
+  padding: 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  text-align: center;
+}
+
+.menu-atendente button[onclick="abrirConsumoLocal()"] {
+  flex-basis: 100%;
+}
+
+.menu-atendente button[onclick="logoutAtendente()"] {
+  background: #333;
+}
+
+/* main / section — conteúdo e componentes */
+
+#btn-chamados-mesa {
+  position: relative;
+}
+
+#contador-chamados-mesa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--primary-color);
+  font-size: 12px;
+}
+
+/* áreas de conteúdo dinâmico (mesas, comandas,
+   produtos, entrega, retirada, chamados) */
+
+/* section — administração e atendimento */
+
+#area-consumo-local,
+#area-mesa-atendente,
+#area-produtos-comanda,
+#area-entrega-atendente,
+#area-retirada-atendente,
+#area-chamados-mesa-atendente,
+#area-comanda-atendente {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* main / section — conteúdo e componentes */
+
+#area-consumo-local {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* section — administração e atendimento */
+
+.mesa-atendente {
+  margin: 0 !important;
+  flex: 1 1 calc(33.333% - 10px);
+  min-width: 90px;
+  padding: 16px 8px !important;
+  border-radius: var(--radius-md) !important;
+  font-weight: bold;
+  color: #fff !important;
+  border: none;
+}
+
+/* main / section — conteúdo e componentes */
+
+.bloco-molho-item h4 {
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.opcoes-molho-unidade {
+  background: #202020;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 8px;
+}
+.opcoes-tipo-molho {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.radio-molho {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+/* =========================================
+   RODAPÉ DA LOJA (redes sociais + parceiros)
+========================================= */
+
+.rodape-loja {
+  margin-top: 30px;
+  padding: 20px var(--gutter);
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.rodape-redes {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.rodape-redes a {
+  font-size: 26px;
+  text-decoration: none;
+}
+
+.rodape-parceiros-titulo {
+  color: #888;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 10px 0;
+}
+
+.rodape-parceiros {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.rodape-parceiros a {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 8px 16px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.rodape-copy {
+  color: #666;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+/* =========================================
+   MODAL DE MOLHOS (finalizar pedido)
+   — .modal-content não tinha NENHUM CSS,
+   por isso o conteúdo vazava e ficava
+   sobreposto ao restante da página
+========================================= */
+
+/* dialog / div — modais e carrinho */
+
+.modal-content {
+  background: #111;
+  padding: 20px;
+  border-radius: 15px;
+  width: 95%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+}
+
+.modal-content h2 {
+  border: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+}
+
+.modal-content h3 {
+  font-size: 1rem;
+  margin: 16px 0 10px 0;
+}
+
+.modal-content hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 18px 0;
+}
+
+.modal-content > button {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* main / section — conteúdo e componentes */
+
+#area-molhos-pagos {
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--card-bg-alt, #181818);
+  border-radius: var(--radius-md, 12px);
+}
+
+#area-molhos-pagos > p {
+  margin: 0 0 12px 0;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.molho-pago-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.molho-pago-linha span {
+  flex: 1;
+}
+
+.molho-pago-linha button {
+  margin: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.molho-pago-linha strong {
+  min-width: 22px;
+  text-align: center;
+}
+
+/* section — administração e atendimento */
+
+.admin-body {
+  background-color: var(--bg-color);
+}
+
+.admin-header {
+  height: 150px;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+    url("../images/banner-pedrao.jpeg") center/px cover;
+}
+
+/* main / section — conteúdo e componentes */
+
+.box-grafico {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* section — administração e atendimento */
+
+.filtros-admin {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+/* main / section — conteúdo e componentes */
+
+.btn-filtro {
+  background: var(--card-bg);
+  border: 1px solid var(--primary-color);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-filtro:hover {
+  background: var(--primary-color);
+}
+
+.grid-resumo {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.card-total {
+  background: var(--card-bg);
+  border: 1px solid var(--secondary-color);
+  padding: 30px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-total p {
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.card-total strong {
+  color: var(--secondary-color);
+  font-size: 2.5rem;
+}
+
+.card-stats {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+}
+
+.stat-item span:first-child {
+  color: #bbb;
+}
+.stat-item span:last-child {
+  font-weight: bold;
+  color: var(--text-white);
+}
+
+/* section — administração e atendimento */
+
+.divisor-admin {
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  margin: 5px 0;
+}
+
+/* main / section — conteúdo e componentes */
+
+.card-stats {
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 1.1rem;
+  color: #ddd;
+}
+
+.stat-item strong {
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+/* section — administração e atendimento */
+
+.divisor-admin {
+  border: 0;
+  border-top: 1px solid #333;
+  margin: 15px 0;
+}
+
+/* main / section — conteúdo e componentes */
+
+.destaque-motoboy span,
+.destaque-motoboy strong {
+  color: #ffc107 !important;
+  font-weight: bold;
+}
+
+.stat-item.entrega strong {
+  color: #4caf50 !important;
+}
+
+.stat-item.retirada strong {
+  color: #2196f3 !important;
+}
+
+.stat-group {
+  display: flex;
+  flex-direction: column;
+}
+.voltar-loja {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.voltar-loja a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.voltar-loja a:hover {
+  opacity: 0.8;
+}
+/* Responsividade / @media */
+@media (max-width: 600px) {
+  .grid-resumo {
+    grid-template-columns: 1fr;
+  }
+  .card-total strong {
+    font-size: 1.8rem;
+  }
+}
+
+/* section — administração e atendimento */
+
+.admin-fidelidade {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 25px;
+}
+
+.admin-fidelidade input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #0f0f0f;
+  color: #fff;
+}
+
+.card-admin-cliente {
+  background: #202020;
+  border-left: 4px solid #e50914;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 15px;
+}
+.admin-pedidos {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 25px;
+}
+
+.pedido-admin {
+  background: #202020;
+  border-left: 4px solid #e50914;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 12px 0;
+}
+
+.pedido-admin button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* main / section — conteúdo e componentes */
+
+.pedido-cancelado {
+  opacity: 0.55;
+  border-left-color: #777;
+}
+
+.tag-cancelado {
+  display: inline-block;
+  background: #555;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: bold;
+}
+/* section — administração e atendimento */
+.topo-cliente-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.dados-cliente-admin {
+  background: #181818;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+#form-edicao-cliente-admin {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+#form-edicao-cliente-admin label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.pedido-cliente-admin {
+  background: #151515;
+  border-left: 4px solid #e50914;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 10px 0;
+}
+/* main / section — conteúdo e componentes */
+.pedido-fidelidade {
+  border-left: 5px solid #2ecc71 !important;
+  box-shadow: 0 0 0 1px rgba(46, 204, 113, 0.35);
+}
+
+/* section — perfil e acesso */
+
+.tag-login,
+.tag-sem-login,
+.tag-fidelidade,
+.tag-cancelado {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  margin: 5px 5px 5px 0;
+}
+
+.tag-login {
+  background: #1f6feb;
+}
+
+.tag-sem-login {
+  background: #555;
+}
+
+/* main / section — conteúdo e componentes */
+
+.tag-fidelidade {
+  background: #2ecc71;
+  color: #111;
+}
+
+.tag-cancelado {
+  background: #777;
+}
+
+/* section — administração e atendimento */
+
+.admin-cupons {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 25px;
+}
+
+.admin-cupons input,
+.admin-cupons select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #0f0f0f;
+  color: #fff;
+}
+
+.card-cupom-admin {
+  background: #202020;
+  border-left: 4px solid #e50914;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 12px 0;
+}
+.admin-mensagens {
+  background: #151515;
+  padding: 18px;
+  border-radius: 14px;
+  margin-top: 25px;
+}
+
+.card-mensagem-admin {
+  background: #202020;
+  border-left: 4px solid #2ecc71;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 12px 0;
+}
+/* section — perfil e acesso */
+.card-perfil-suporte-admin {
+  background: #151515;
+  border-left: 4px solid #2ecc71;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+/* section — administração e atendimento */
+
+.pedido-suporte-admin {
+  background: #202020;
+  padding: 14px;
+  border-radius: 12px;
+  margin: 12px 0;
+}
+
+.pedido-suporte-admin small {
+  display: block;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+.avatar-admin-cliente {
+  width: 75px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #2ecc71;
+  margin: 10px 0;
+}
+
+/* section — perfil e acesso */
+
+.card-perfil-suporte-admin {
+  background: #151515;
+  border-left: 4px solid #2ecc71;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+/* section — administração e atendimento */
+
+.pedido-suporte-admin {
+  background: #202020;
+  padding: 14px;
+  border-radius: 12px;
+  margin: 12px 0;
+}
+/* main / section — conteúdo e componentes */
+.info-online-status {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin-top: 6px;
+}
+
+.info-online-status small {
+  color: #fff;
+  font-size: 13px;
+}
+
+.status-online {
+  font-weight: bold;
+}
+/* section — administração e atendimento */
+.form-produto-admin {
+  display: grid;
+  gap: 14px;
+}
+
+.grupo-form-admin {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.grupo-form-admin h3 {
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.linha-form-admin {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.linha-form-admin input,
+.linha-form-admin select,
+.grupo-form-admin textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+}
+/* main / section — conteúdo e componentes */
+#lista-adicionais-produto {
+  display: none;
+}
+/* section — administração e atendimento */
+.pedido-topo-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 8px;
+}
+
+.pedido-total-admin {
+  font-size: 18px;
+  font-weight: bold;
+
+  color: #28a745;
+}
+
+.pedido-info-admin {
+  font-size: 13px;
+  opacity: 0.8;
+
+  margin-top: 4px;
+}
+/* =========================================
+   SEÇÕES SEM ESTILO: Adicionais, Suporte,
+   Atendentes, Usuários online
+   (usavam classes que nunca tinham CSS —
+   por isso ficava tudo jogado, sem card
+   nem espaçamento)
+========================================= */
+
+.admin-adicionais,
+.admin-atendentes {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-adicionais input,
+.admin-atendentes input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #0f0f0f;
+  color: #fff;
+  margin: 0;
+}
+
+.admin-adicionais label,
+.admin-atendentes label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 12px 0 0;
+}
+
+.admin-adicionais > button,
+.admin-atendentes > button {
+  margin: 4px 8px 4px 0;
+}
+
+.card-produto-admin,
+.card-chamado-admin {
+  background: #202020;
+  border-left: 4px solid var(--primary-color);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-produto-admin p,
+.card-chamado-admin p {
+  margin: 0;
+}
+
+.card-produto-admin button,
+.card-chamado-admin button {
+  margin: 4px 8px 0 0;
+  width: auto;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.filtros-suporte-admin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filtros-suporte-admin button {
+  margin: 0;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.check-admin-cupom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+/* main / section — conteúdo e componentes */
+
+#lista-usuarios-online {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+#lista-usuarios-online:empty {
+  display: none;
+}
+
+/* section — administração e atendimento */
+
+.ajuda-cupom-admin {
+  background: #1b1b1b;
+  border: 1px dashed #444;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.ajuda-cupom-admin summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.ajuda-cupom-admin ul {
+  margin: 10px 0 0 0;
+  padding-left: 18px;
+  line-height: 1.6;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.admin-cupons > button,
+.admin-mensagens > button {
+  margin: 4px 8px 4px 0;
+}

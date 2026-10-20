@@ -1,81 +1,78 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Atendente</title>
 
-<title>Painel Atendente</title>
+    <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
+    <link rel="stylesheet" href="css/paginas/painel-atendente.css?v=20261019-2" />
+  </head>
+  <body class="painel-atendente-body">
+    <h1>👨‍💼 Painel do Atendente</h1>
 
-<link rel="stylesheet" href="css/style.css">
+    <p id="nome-atendente"></p>
 
-</head>
-<body>
+    <hr />
 
-<h1>
-👨‍💼 Painel do Atendente
-</h1>
+    <!-- ========================= -->
+    <!-- MENU PRINCIPAL -->
+    <!-- ========================= -->
 
-<p id="nome-atendente"></p>
+    <div class="menu-atendente">
+      <button onclick="abrirConsumoLocal()">🍔 Consumo no Local</button>
 
-<hr>
+      <button onclick="abrirEntregaAtendente()">🛵 Entrega</button>
 
-<button onclick="abrirConsumoLocal()">
-🍔 Consumo no Local
-</button>
-<div
-    id="area-consumo-local"
-    style="display:none;"
->
-</div>
-<div
-    id="area-mesa-atendente"
-    style="display:none;"
-></div>
-<div
-    id="area-comanda-atendente"
-    style="
-        display:none;
-        margin-top:20px;
-        padding:15px;
-        border:1px solid #444;
-        border-radius:10px;
-    "
-></div>
+      <button onclick="abrirRetiradaAtendente()">📦 Retirada</button>
 
-<div
-    id="area-produtos-comanda"
-    style="display:none;"
-></div>
+      <button onclick="abrirComandasAbertas()">📋 Comandas Abertas</button>
 
-<button>
-🛵 Entrega
-</button>
+      <button type="button" id="btn-chamados-mesa" onclick="abrirChamadosMesaAtendente()">
+        🔔 Chamados
+        <span id="contador-chamados-mesa" style="display: none"> 0 </span>
+      </button>
 
-<button>
-📦 Retirada
-</button>
+      <button onclick="logoutAtendente()">Sair</button>
+    </div>
 
-<button>
-📋 Comandas Abertas
-</button>
+    <!-- ========================= -->
+    <!-- CONTEÚDO DAS TELAS -->
+    <!-- ========================= -->
 
-<button>
-🔔 Chamados
-</button>
+    <div id="area-consumo-local" style="display: none"></div>
 
-<button
-    onclick="logoutAtendente()"
->
-    Sair
-</button>
+    <div id="area-mesa-atendente" style="display: none"></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <div
+      id="area-comanda-atendente"
+      style="
+        display: none;
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #444;
+        border-radius: 10px;
+      "
+    ></div>
 
-<script src="js/script.js"></script>
-<script src="js/produto-comanda.js"></script>
-<script src="js/atendente.js"></script>
+    <div id="area-produtos-comanda" style="display: none"></div>
+    <div id="area-entrega-atendente" style="display: none"></div>
+    <div id="area-retirada-atendente" style="display: none"></div>
+    <div id="area-chamados-mesa-atendente" style="display: none"></div>
 
-</body>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script src="js/ui-comum.js?v=20261018-1"></script>
+    <script src="js/script.js?v=20261020-18"></script>
+    <script src="js/produto-comanda.js?v=20261020-18"></script>
+    <script src="js/atendente.js?v=20261020-14"></script>
+
+    <script src="js/operacao.js?v=20261020-18"></script>
+    <script src="js/app-ui.js?v=20261020-16"></script>
+    <script src="js/raspadinhas-recuperacao.js?v=20261020-3"></script>
+    <script src="js/raspadinhas.js?v=20261020-5"></script>
+    <script src="js/fluxos-interface.js?v=20261018-6"></script>
+  </body>
 </html>

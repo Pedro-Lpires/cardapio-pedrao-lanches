@@ -1,0 +1,106 @@
+/* Card compartilhado de mensagens: dialog fica acima dos outros modais. */
+dialog.aviso-ui.aviso-ui-boas-vindas {
+  border-color: #444;
+  padding-top: 58px;
+}
+dialog.aviso-ui-boas-vindas #aviso-ui-texto {
+  font-size: 21px;
+  font-weight: bold;
+}
+dialog.aviso-ui .aviso-ui-icone[hidden] {
+  display: none;
+}
+dialog.aviso-ui.aviso-ui-localizacao {
+  border-color: #555;
+}
+dialog.aviso-ui-localizacao .aviso-ui-icone {
+  background: transparent;
+  width: 40px;
+  height: 40px;
+  font-size: 32px;
+}
+dialog.aviso-ui {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  width: calc(100% - 32px);
+  max-width: 320px;
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 20px 18px 16px;
+  overflow-y: auto;
+  border: 1px solid #e32932;
+  border-radius: 18px;
+  background: #191919;
+  color: #fff;
+  box-shadow: 0 16px 60px #0009;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+dialog.aviso-ui::backdrop {
+  background: rgb(0 0 0 / 75%);
+}
+dialog.aviso-ui .aviso-ui-fechar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #333;
+  color: white;
+  font-size: 26px;
+  cursor: pointer;
+}
+dialog.aviso-ui .aviso-ui-icone {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin: 4px auto 10px;
+  border-radius: 12px;
+  background: #e32932;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+dialog.aviso-ui h2 {
+  display: block;
+  height: auto;
+  margin: 0 24px 10px;
+  padding: 0;
+  border: 0;
+  font-size: 17px;
+  line-height: 1.3;
+}
+dialog.aviso-ui p {
+  margin: 0 0 14px;
+  color: #eee;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+dialog.aviso-ui .aviso-ui-entendi {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #e00012;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+dialog.aviso-ui button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}

@@ -1,0 +1,347 @@
+/* div#modal-produto-auto / login: tipos, quantidade, combos e conta.
+ * Edite este arquivo para ajustar este componente.
+ * IDs refletem a estrutura do HTML; ordem: contêiner, filhos e estados.
+ */
+
+.auto-estado-qr {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-height: calc(100dvh - 84px);
+  padding: 24px 18px;
+}
+.auto-aviso-qr {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 380px;
+  padding: 26px 20px;
+  border: 1px solid #3a3a3a;
+  border-radius: 18px;
+  background: #202020;
+  text-align: center;
+  box-shadow: 0 8px 24px #0004;
+}
+.auto-aviso-qr-icone {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 40px;
+}
+.auto-aviso-qr > h2 {
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  font-size: 23px;
+  line-height: 1.3;
+  text-transform: none;
+}
+.auto-aviso-qr p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.auto-aviso-qr .auto-aviso-qr-ajuda {
+  margin-top: 16px;
+  color: #bbb;
+  font-size: 14px;
+}
+
+/* Título do cardápio: Galgin quando disponível, com faixa sob a palavra. */
+#area-autoatendimento .auto-cabecalho > h2 {
+  position: relative;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 8px 10px;
+  border-left: 0;
+  text-align: center;
+  font-family: "Galgin", Georgia, serif;
+  font-size: 28px;
+  line-height: 1.2;
+}
+#area-autoatendimento .auto-cabecalho > h2::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 5px;
+  border-radius: 2px;
+  background: #e00012;
+  transform: skewX(-15deg);
+}
+
+/* Início no celular: aproxima identificação, busca e categorias. */
+@media (max-width: 600px) {
+  #area-autoatendimento .auto-cabecalho {
+    padding: 12px 14px 6px;
+  }
+  #area-autoatendimento .auto-cabecalho-topo .btn-login-auto {
+    margin: 0;
+  }
+  #area-autoatendimento .auto-cabecalho > p {
+    margin: 5px 0;
+    line-height: 1.35;
+  }
+  #area-autoatendimento .auto-cabecalho > hr {
+    margin: 10px 0 8px;
+  }
+  #area-autoatendimento .auto-cabecalho > h2 {
+    margin: 14px auto 6px;
+  }
+  #area-autoatendimento .auto-busca {
+    margin: 10px 14px 16px;
+  }
+  #area-autoatendimento .auto-categorias {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  #area-autoatendimento .auto-categorias > button {
+    margin: 0;
+  }
+  #area-autoatendimento section[id^="secao-auto-"] > h2 {
+    margin-top: 8px;
+    margin-bottom: 14px;
+  }
+}
+
+/* Combos: nome e preço à esquerda, controles compactos à direita. */
+/* Cartão do lanche: título, resumo e opções ocupam linhas próprias. */
+#modal-combo-auto .acoes-todos-combo-auto {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+#modal-combo-auto .acoes-todos-combo-auto > button {
+  flex: 0 1 150px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 6px;
+  min-height: 44px;
+  font-size: 14px;
+  white-space: normal;
+}
+#modal-combo-auto .lanche-combo-auto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px 8px;
+  min-width: 0;
+  text-align: left;
+}
+#modal-combo-auto .lanche-combo-auto > strong,
+#modal-combo-auto .lanche-combo-auto > .resumo-combo-auto,
+#modal-combo-auto .lanche-combo-auto > .config-combo-auto {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: 0;
+}
+#modal-combo-auto .lanche-combo-auto > button {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  height: auto;
+  margin: 0;
+  padding: 12px 6px;
+  font-size: 14px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+#modal-combo-auto .resumo-combo-auto:empty {
+  display: none;
+}
+#modal-combo-auto .adicional-combo-auto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  margin: 0 0 8px;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  background: #202020;
+  text-align: left;
+  line-height: 1.5;
+}
+#modal-combo-auto .info-adicional-combo-auto {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+}
+#modal-combo-auto .adicional-combo-auto strong {
+  display: block;
+  margin: 0;
+  line-height: 1.3;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+#modal-combo-auto .info-adicional-combo-auto > span {
+  display: block;
+  margin-top: 4px;
+  color: #00e676;
+  white-space: nowrap;
+}
+#modal-combo-auto .controle-adicional-combo-auto {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+#modal-combo-auto .controle-adicional-combo-auto button {
+  flex: none;
+  width: 32px;
+  min-width: 32px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: 0;
+  font-size: 20px;
+}
+#modal-combo-auto .controle-adicional-combo-auto span {
+  min-width: 14px;
+  text-align: center;
+  font-weight: bold;
+}
+
+#modal-opcoes-tipo-auto {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 20px;
+}
+#modal-opcoes-tipo-auto br {
+  display: none;
+}
+#modal-opcoes-tipo-auto label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 4px;
+  margin: 0;
+  line-height: 1.4;
+  cursor: pointer;
+}
+#modal-opcoes-tipo-auto input[type="radio"] {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: #e32932;
+}
+#modal-produto-auto #box-adicionais-auto {
+  margin-bottom: 24px;
+}
+/* Separa o botão Adicionais da lista expandida. */
+#modal-produto-auto #lista-adicionais-auto {
+  margin-top: 10px;
+}
+#modal-produto-auto .qtd-produto-modal {
+  margin: 24px 0 18px;
+}
+#modal-produto-auto .qtd-produto-modal > label {
+  display: block;
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+#modal-produto-auto .qtd-produto-modal > div {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+#modal-produto-auto .qtd-produto-modal button {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+}
+#modal-produto-auto #qtd-produto-auto {
+  min-width: 24px;
+  text-align: center;
+}
+.config-combo-auto {
+  position: relative;
+  padding: 8px 12px 12px !important;
+  margin-top: 14px;
+}
+.config-combo-auto > h3 {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0 0 12px;
+  padding-right: 48px;
+  text-align: left;
+  font-size: 18px;
+}
+.config-combo-auto > .btn-fechar-modal-auto {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+#modal-login-auto .modal-conteudo {
+  padding: 54px 16px 16px !important;
+  max-width: 390px;
+}
+#modal-login-auto h2 {
+  font-size: 22px;
+  margin: 0 0 12px !important;
+}
+#modal-login-auto h3 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+#modal-login-auto label {
+  display: block;
+  margin: 8px 0 4px;
+  line-height: 1.2;
+}
+#modal-login-auto input:not([type="checkbox"]) {
+  margin: 4px 0 8px !important;
+  height: 42px;
+  min-height: 42px;
+  padding: 8px 10px !important;
+}
+#modal-login-auto #auto-voltar-escolha {
+  position: absolute;
+  left: 12px;
+  top: 8px;
+  min-height: 36px;
+  padding: 6px 8px !important;
+}
+#modal-login-auto .auto-ou {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  color: #ccc;
+  margin: 10px 0;
+}
+#modal-login-auto .auto-ou::before,
+#modal-login-auto .auto-ou::after {
+  content: "";
+  height: 1px;
+  background: #555;
+  flex: 1;
+}
+#modal-login-auto .auto-lembrar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+#modal-login-auto #auto-confirmar-conta {
+  width: 100%;
+  margin: 0;
+  min-height: 44px;
+}
+#auto-escolha-conta {
+  display: grid;
+  gap: 12px;
+}
+#auto-escolha-conta[hidden],
+#auto-form-conta[hidden],
+#auto-grupo-codigo[hidden],
+#auto-voltar-escolha[hidden] {
+  display: none !important;
+}

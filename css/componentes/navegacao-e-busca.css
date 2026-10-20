@@ -1,0 +1,65 @@
+/* nav / busca: categorias por toque e botão de limpar.
+ * Edite este arquivo para ajustar este componente.
+ * IDs refletem a estrutura do HTML; ordem: contêiner, filhos e estados.
+ */
+
+/* Delivery: uma única borda discreta, sem contornos duplicados ao digitar. */
+.busca-produto-box #busca-produto {
+  outline: none !important;
+  box-shadow: none;
+}
+.busca-produto-box:focus-within {
+  border-color: #3a3a3a;
+  box-shadow: none;
+}
+.busca-produto-box .icone-busca {
+  flex: none;
+  opacity: 1;
+}
+#tela-inicio > #lanches {
+  margin-top: 16px;
+}
+
+.abas-navegacao,
+.auto-categorias,
+.ui-categorias {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none;
+  touch-action: auto !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+.abas-navegacao::-webkit-scrollbar,
+.auto-categorias::-webkit-scrollbar,
+.ui-categorias::-webkit-scrollbar {
+  display: none !important;
+}
+.busca-limpar[hidden] {
+  display: none !important;
+}
+.auto-busca:has(input:placeholder-shown) .busca-limpar {
+  display: none !important;
+}
+.auto-busca {
+  position: relative;
+  margin: 12px 14px 20px;
+  padding: 0;
+  max-width: 520px;
+}
+.auto-busca input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 42px 10px 12px;
+  border: 1px solid #555;
+  border-radius: 10px;
+  background: #222;
+  color: #fff;
+  font-size: 15px;
+}
+.auto-busca .busca-limpar {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  height: 36px;
+  min-height: 36px;
+}

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Revisão mobile — Pedrão</title>
+    <style>
+      body {
+        font: 16px Arial;
+        background: #292929;
+        color: white;
+        margin: 16px;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 16px 0;
+      }
+      button {
+        padding: 12px;
+        font: inherit;
+      }
+      iframe {
+        display: block;
+        border: 2px solid #888;
+        background: #111;
+        max-width: none;
+        height: 500px;
+      }
+      #medidas {
+        margin: 16px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Revisão mobile</h1>
+    <label
+      >Página<select id="pagina" onchange="mudarPagina()">
+        <option value="index.html">Cardápio</option>
+        <option value="admin.html">Admin</option>
+        <option value="painel-atendente.html">Atendente</option>
+        <option value="atendente.html">Login atendente</option>
+        <option value="autoatendimento.html">Autoatendimento</option>
+        <option value="cozinha.html">Cozinha</option>
+        <option value="financeiro.html">Financeiro</option>
+      </select></label
+    >
+    <nav>
+      <button onclick="mudarLargura(320)">320 px</button
+      ><button onclick="mudarLargura(360)">360 px</button
+      ><button onclick="mudarLargura(390)">390 px</button
+      ><button onclick="mudarLargura(430)">430 px</button
+      ><button onclick="mudarAltura(500)">Altura 500 px</button
+      ><button onclick="mudarAltura(836)">Altura 836 px</button>
+    </nav>
+    <p id="medidas"></p>
+    <iframe id="mobile" title="Prévia mobile" src="../index.html" style="width: 390px"></iframe>
+    <script>
+      const frame = document.getElementById("mobile");
+      function medir() {
+        const d = frame.contentDocument;
+        document.getElementById("medidas").textContent =
+          "Viewport: " +
+          frame.contentWindow.innerWidth +
+          "px · conteúdo: " +
+          d.documentElement.scrollWidth +
+          "px";
+      }
+      function mudarLargura(w) {
+        frame.style.width = w + "px";
+        medir();
+      }
+      function mudarAltura(h) {
+        frame.style.height = h + "px";
+        medir();
+      }
+      function mudarPagina() {
+        frame.src = "../" + document.getElementById("pagina").value;
+      }
+      frame.addEventListener("load", medir);
+    </script>
+  </body>
+</html>

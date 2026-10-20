@@ -1,0 +1,13 @@
+/* Variáveis gerais. Edite aqui as cores usadas por var(...) e a reserva da barra inferior. Valores fixos de um componente ficam no CSS desse componente. */
+:root {
+  --primary-color: #e50914;
+  --primary-hover: #b30710;
+  --secondary-color: #2ecc71;
+  --bg-color: #121212;
+  --card-bg: #1f1f1f;
+  --modal-bg: #222;
+  --text-white: #ffffff;
+  --text-gold: #ffd700;
+  --border-color: #333;
+  --barra-inferior: 84px;
+}

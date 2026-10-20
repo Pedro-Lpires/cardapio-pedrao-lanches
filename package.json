@@ -1,0 +1,17 @@
+{
+  "name": "cardapio-pedrao-lanches",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cardápio, atendimento e operação do Pedrão Lanches.",
+  "scripts": {
+    "format": "prettier --write \"*.{html,json,md}\" \"css/**/*.css\" \"js/**/*.js\" \"tests/**/*.{js,cjs,html}\" \"scripts/**/*.mjs\"",
+    "format:check": "prettier --check \"*.{html,json,md}\" \"css/**/*.css\" \"js/**/*.js\" \"tests/**/*.{js,cjs,html}\" \"scripts/**/*.mjs\"",
+    "check": "node scripts/verificar-fontes.mjs",
+    "test": "node scripts/rodar-testes.mjs",
+    "preview": "node tests/servidor-local.cjs"
+  },
+  "devDependencies": {
+    "postcss": "8.5.6",
+    "prettier": "3.6.2"
+  }
+}
