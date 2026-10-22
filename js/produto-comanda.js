@@ -28,6 +28,22 @@ let itemComandaEmEdicao = null;
 let quantidadeLanchesComboAtual = 0;
 let modoPersonalizacaoCombo = "";
 let contextoPainelProduto = "comanda";
+let adicionaisPainelCacheUI = null;
+let adicionaisPainelBuscaUI = null;
+async function buscarAdicionaisPainelUI() {
+  if (adicionaisPainelCacheUI && Date.now() - adicionaisPainelCacheUI.em < 30000)
+    return adicionaisPainelCacheUI.snap;
+  if (!adicionaisPainelBuscaUI)
+    adicionaisPainelBuscaUI = lerComPrazoUI(db.collection("adicionais").get())
+      .then((snap) => {
+        adicionaisPainelCacheUI = { snap, em: Date.now() };
+        return snap;
+      })
+      .finally(() => {
+        adicionaisPainelBuscaUI = null;
+      });
+  return adicionaisPainelBuscaUI;
+}
 
 async function abrirPainelProduto(comandaId, produtoId) {
   const doc = await db.collection("produtos").doc(produtoId).get();
@@ -35,6 +51,10 @@ async function abrirPainelProduto(comandaId, produtoId) {
   if (!doc.exists) return;
 
   const produto = doc.data();
+  if (produto.ativo === false || produto.esgotado) {
+    mostrarAvisoUI("Produto indisponível no momento.");
+    return;
+  }
   modoPersonalizacaoCombo = "";
   configuracoesLanchesCombo = {};
   configuracaoTodosCombo = null;
@@ -100,7 +120,7 @@ async function abrirPainelProduto(comandaId, produtoId) {
         tipos
           .map(
             (tipo, index) =>
-              '<label><input type="radio" name="tipo-produto" value="' +
+              '<label class="tipo-produto-opcao"><input type="radio" name="tipo-produto" value="' +
               tipo.valor +
               '" data-preco="' +
               tipo.preco +
@@ -112,7 +132,7 @@ async function abrirPainelProduto(comandaId, produtoId) {
               moedaOperacao(tipo.preco) +
               "</label>",
           )
-          .join("<br>") +
+          .join("") +
         "<hr>"
       : "";
 
@@ -300,6 +320,8 @@ function atualizarPrecoProduto() {
   const precoFinal = precoBase + totalAdicionais;
 
   precoTela.textContent = `R$ ${precoFinal.toFixed(2)}`;
+  if (typeof atualizarResumoAdicionaisProdutoUI === "function")
+    atualizarResumoAdicionaisProdutoUI("area-acrescimos-produto");
 }
 
 async function carregarCategoriaProdutos(comandaId, categoria) {
@@ -316,7 +338,7 @@ async function carregarCategoriaProdutos(comandaId, categoria) {
   snap.forEach((doc) => {
     const p = doc.data();
 
-    if (!p.ativo) return;
+    if (!p.ativo || p.esgotado) return;
 
     if (p.categoria != categoria) return;
 
@@ -345,11 +367,11 @@ ${p.nome}
   lista.innerHTML = html;
 }
 async function montarAdicionaisProduto(produto) {
-  if (!produto.permiteAdicionais) {
+  if (String(produto.categoria).toLowerCase() === "bebidas" || !produto.permiteAdicionais) {
     return "";
   }
 
-  const snap = await db.collection("adicionais").get();
+  const snap = await buscarAdicionaisPainelUI();
 
   let adicionais = [];
 
@@ -437,7 +459,7 @@ async function montarAdicionaisProduto(produto) {
     htmlLista += `
 
             <div
-                class="adicional-produto-config"
+                class="adicional-produto-config adicional-combo-auto"
                 data-id="${adicional.id}"
                 data-nome="${adicional.nome}"
                 data-preco="${Number(adicional.preco || 0)}"
@@ -445,23 +467,18 @@ async function montarAdicionaisProduto(produto) {
                     margin-bottom:15px;
                 "
             >
-
-                <div>
+<div class="info-adicional-combo-auto">
 
                     <strong>
                         ${adicional.nome}
                     </strong>
 
-                    + R$ ${Number(adicional.preco || 0).toFixed(2)}
+                    <span>R$ ${Number(adicional.preco || 0).toFixed(2)}</span>
 
                 </div>
 
 
-                <div
-                    style="
-                        margin-top:5px;
-                    "
-                >
+                <div class="controle-adicional-combo-auto">
 
                     <button
                         type="button"
@@ -512,31 +529,7 @@ async function montarAdicionaisProduto(produto) {
 
         <hr>
 
-        <div>
-
-            <h3>
-                Terá acréscimos?
-            </h3>
-
-            <button
-                type="button"
-                onclick="
-                    mostrarAcrescimosProduto(false)
-                "
-            >
-                Não
-            </button>
-
-            <button
-                type="button"
-                onclick="
-                    mostrarAcrescimosProduto(true)
-                "
-            >
-                Sim
-            </button>
-
-        </div>
+        <div class="acrescimos-opcoes-atendente"><button type="button" onclick="mostrarAcrescimosProduto(true)">Acréscimos</button></div>
 
 
         <div
@@ -553,33 +546,44 @@ async function montarAdicionaisProduto(produto) {
                 Adicionais
             </h3>
 
-            ${htmlLista}
+            <div class="adicionais-grade-atendente">${htmlLista}</div>
 
         </div>
 
     `;
+}
+function configuracaoComboTemAlteracoes(configuracao) {
+  return (
+    !!configuracao &&
+    ((configuracao.adicionais || []).some((a) => Number(a.qtd ?? a.quantidade ?? 0) > 0) ||
+      !!(configuracao.observacao || "").trim())
+  );
+}
+function configuracoesAtivasCombo() {
+  return modoPersonalizacaoCombo === "todos"
+    ? [configuracaoTodosCombo]
+    : modoPersonalizacaoCombo === "individual"
+      ? Object.values(configuracoesLanchesCombo)
+      : [];
 }
 function alterarQuantidadeProduto(valor) {
   const elemento = document.getElementById("quantidade-produto-config");
 
   if (!elemento) return;
 
-  // =========================
-  // COMBO PERSONALIZADO
-  // SEMPRE É 1 UNIDADE
-  // =========================
-
-  if (modoPersonalizacaoCombo === "todos" || modoPersonalizacaoCombo === "individual") {
+  const configuracoes = configuracoesAtivasCombo();
+  const temAcrescimos =
+    produtoTemAcrescimos() ||
+    configuracoes.some((c) =>
+      (c?.adicionais || []).some((a) => Number(a.qtd ?? a.quantidade ?? 0) > 0),
+    );
+  if (valor > 0 && (temAcrescimos || configuracoes.some(configuracaoComboTemAlteracoes))) {
     elemento.textContent = "1";
-
-    return;
-  }
-
-  // Se tem acréscimo,
-  // esse item é individual
-  if (produtoTemAcrescimos()) {
-    elemento.textContent = "1";
-
+    alert(
+      temAcrescimos
+        ? "Retire os acréscimos para aumentar a quantidade."
+        : "Remova as observações dos lanches para aumentar a quantidade.",
+    );
     return;
   }
 
@@ -679,6 +683,10 @@ async function adicionarProdutoConfiguradoComanda(comandaId, produtoId) {
   }
 
   const produto = docProduto.data();
+  if (produto.ativo === false || produto.esgotado) {
+    mostrarAvisoUI("Produto indisponível no momento.");
+    return;
+  }
 
   // =========================
   // QUANTIDADE
@@ -890,7 +898,6 @@ async function adicionarProdutoConfiguradoComanda(comandaId, produtoId) {
     valorTotal: novoTotal,
   });
 
-  await confirmarProducaoOperacao("comandas", comandaId, true);
   abrirBuscaProdutos(comandaId);
 }
 function mostrarAcrescimosProduto(mostrar) {
@@ -959,7 +966,7 @@ function montarPersonalizacaoCombo(produto) {
                 )
             "
         >
-            Personalizar
+            Escolher
         </button>
 
         <button
@@ -995,7 +1002,7 @@ function montarPersonalizacaoCombo(produto) {
         <hr>
 
         <h3>
-            Personalização do Combo
+            Acréscimos
         </h3>
 
         <p>
@@ -1012,7 +1019,7 @@ function montarPersonalizacaoCombo(produto) {
                 )
             "
         >
-            Aplicar para todos
+            Todos
         </button>
 
 
@@ -1024,7 +1031,7 @@ function montarPersonalizacaoCombo(produto) {
                 )
             "
         >
-            Personalizado
+            Individual
         </button>
 
 
@@ -1060,7 +1067,7 @@ function montarPersonalizacaoCombo(produto) {
         abrirConfiguracaoTodosCombo()
     "
 >
-    Personalizar
+    Escolher
 </button>
 
 <button
@@ -1112,7 +1119,7 @@ function montarPersonalizacaoCombo(produto) {
 
     `;
 }
-function selecionarModoCombo(modo) {
+async function selecionarModoCombo(modo) {
   const areaTodos = document.getElementById("config-todos-combo");
 
   const areaIndividual = document.getElementById("config-individual-combo");
@@ -1140,8 +1147,8 @@ function selecionarModoCombo(modo) {
     ((configuracaoTodosCombo.adicionais || []).length > 0 ||
       (configuracaoTodosCombo.observacao || "").trim() !== "")
   ) {
-    const confirmar = confirm(
-      "Ao mudar para Personalizado, a configuração aplicada a todos será apagada. Continuar?",
+    const confirmar = await confirmarOperacao(
+      "Ao mudar para Individual, a configuração aplicada a todos será apagada. Continuar?",
     );
 
     if (!confirmar) {
@@ -1158,7 +1165,7 @@ function selecionarModoCombo(modo) {
   // =========================
 
   if (modo === "todos" && Object.keys(configuracoesLanchesCombo).length > 0) {
-    const confirmar = confirm(
+    const confirmar = await confirmarOperacao(
       "Ao mudar para Aplicar para todos, as personalizações individuais serão apagadas. Continuar?",
     );
 
@@ -1176,16 +1183,6 @@ function selecionarModoCombo(modo) {
   // =========================
 
   modoPersonalizacaoCombo = modo;
-
-  // =========================
-  // COMBO PERSONALIZADO
-  // SEMPRE QUANTIDADE 1
-  // =========================
-  const quantidadeProduto = document.getElementById("quantidade-produto-config");
-
-  if (quantidadeProduto) {
-    quantidadeProduto.textContent = "1";
-  }
 
   // =========================
   // MOSTRAR ÁREA
@@ -1222,7 +1219,7 @@ async function abrirConfiguracaoLancheCombo(numeroLanche) {
 
   modal.innerHTML = "<p>Carregando...</p>";
 
-  const snap = await db.collection("adicionais").get();
+  const snap = await buscarAdicionaisPainelUI();
 
   let adicionais = [];
 
@@ -1255,60 +1252,10 @@ async function abrirConfiguracaoLancheCombo(numeroLanche) {
 
     htmlAdicionais += `
 
-            <div
-                class="adicional-lanche-combo"
-                data-id="${adicional.id}"
-                data-nome="${adicional.nome}"
-                data-preco="${Number(adicional.preco || 0)}"
-                style="
-                    margin-bottom:15px;
-                "
-            >
-
-                <strong>
-                    ${adicional.nome}
-                </strong>
-
-                + R$ ${Number(adicional.preco || 0).toFixed(2)}
-
-                <br><br>
-
-                <button
-                    type="button"
-                    onclick="
-                        alterarAdicionalLancheCombo(
-                            '${adicional.id}',
-                            -1
-                        )
-                    "
-                >
-                    −
-                </button>
-
-
-                <strong
-                    id="qtd-combo-adicional-${adicional.id}"
-                    style="
-                        margin:0 12px;
-                    "
-                >
-                    ${quantidade}
-                </strong>
-
-
-                <button
-                    type="button"
-                    onclick="
-                        alterarAdicionalLancheCombo(
-                            '${adicional.id}',
-                            1
-                        )
-                    "
-                >
-                    +
-                </button>
-
-            </div>
+            <div class="adicional-lanche-combo adicional-combo-auto" data-id="${adicional.id}" data-nome="${adicional.nome}" data-preco="${Number(adicional.preco || 0)}">
+<div class="info-adicional-combo-auto"><strong>${adicional.nome}</strong><span>R$ ${Number(adicional.preco || 0).toFixed(2)}</span></div>
+<div class="controle-adicional-combo-auto"><button type="button" onclick="alterarAdicionalLancheCombo('${adicional.id}', -1)">−</button><span id="qtd-combo-adicional-${adicional.id}">${quantidade}</span><button type="button" onclick="alterarAdicionalLancheCombo('${adicional.id}', 1)">+</button></div>
+</div>
 
         `;
   });
@@ -1378,7 +1325,7 @@ async function abrirConfiguracaoTodosCombo() {
 
   modal.innerHTML = "<p>Carregando...</p>";
 
-  const snap = await db.collection("adicionais").get();
+  const snap = await buscarAdicionaisPainelUI();
 
   let adicionais = [];
 
@@ -1406,58 +1353,10 @@ async function abrirConfiguracaoTodosCombo() {
 
     htmlAdicionais += `
 
-            <div
-                class="adicional-todos-combo"
-                data-id="${adicional.id}"
-                data-nome="${adicional.nome}"
-                data-preco="${Number(adicional.preco || 0)}"
-                style="
-                    margin-bottom:15px;
-                "
-            >
-
-                <strong>
-                    ${adicional.nome}
-                </strong>
-
-                + R$ ${Number(adicional.preco || 0).toFixed(2)}
-
-                <br><br>
-
-                <button
-                    type="button"
-                    onclick="
-                        alterarAdicionalTodosCombo(
-                            '${adicional.id}',
-                            -1
-                        )
-                    "
-                >
-                    −
-                </button>
-
-                <strong
-                    id="qtd-todos-adicional-${adicional.id}"
-                    style="
-                        margin:0 12px;
-                    "
-                >
-                    ${quantidade}
-                </strong>
-
-                <button
-                    type="button"
-                    onclick="
-                        alterarAdicionalTodosCombo(
-                            '${adicional.id}',
-                            1
-                        )
-                    "
-                >
-                    +
-                </button>
-
-            </div>
+            <div class="adicional-todos-combo adicional-combo-auto" data-id="${adicional.id}" data-nome="${adicional.nome}" data-preco="${Number(adicional.preco || 0)}">
+<div class="info-adicional-combo-auto"><strong>${adicional.nome}</strong><span>R$ ${Number(adicional.preco || 0).toFixed(2)}</span></div>
+<div class="controle-adicional-combo-auto"><button type="button" onclick="alterarAdicionalTodosCombo('${adicional.id}', -1)">−</button><span id="qtd-todos-adicional-${adicional.id}">${quantidade}</span><button type="button" onclick="alterarAdicionalTodosCombo('${adicional.id}', 1)">+</button></div>
+</div>
 
         `;
   });
@@ -1692,10 +1591,7 @@ function salvarConfiguracaoTodosCombo() {
   });
   const observacao = document.getElementById("observacao-todos-combo")?.value.trim() || "";
 
-  configuracaoTodosCombo = {
-    adicionais,
-    observacao,
-  };
+  configuracaoTodosCombo = adicionais.length || observacao ? { adicionais, observacao } : null;
 
   atualizarResumoTodosCombo();
 
@@ -1746,6 +1642,11 @@ function atualizarResumoTodosCombo() {
   resumo.innerHTML = partes.join("<br>");
 }
 function atualizarPrecoComboPersonalizado() {
+  if (typeof atualizarObservacaoComboUI === "function") atualizarObservacaoComboUI();
+  if (configuracoesAtivasCombo().some(configuracaoComboTemAlteracoes)) {
+    const quantidade = document.getElementById("quantidade-produto-config");
+    if (quantidade) quantidade.textContent = "1";
+  }
   const precoTela = document.getElementById("preco-produto-config");
 
   if (!precoTela) return;
@@ -1830,13 +1731,11 @@ async function adicionarComboConfiguradoComanda(
   // =========================
 
   const temConfiguracaoTodos =
-    modoPersonalizacaoCombo === "todos" &&
-    configuracaoTodosCombo &&
-    ((configuracaoTodosCombo.adicionais || []).length > 0 ||
-      (configuracaoTodosCombo.observacao || "").trim() !== "");
+    modoPersonalizacaoCombo === "todos" && configuracaoComboTemAlteracoes(configuracaoTodosCombo);
 
   const temConfiguracaoIndividual =
-    modoPersonalizacaoCombo === "individual" && Object.keys(configuracoesLanchesCombo).length > 0;
+    modoPersonalizacaoCombo === "individual" &&
+    Object.values(configuracoesLanchesCombo).some(configuracaoComboTemAlteracoes);
 
   const comboPersonalizado = temConfiguracaoTodos || temConfiguracaoIndividual;
 
@@ -1978,6 +1877,7 @@ async function adicionarComboConfiguradoComanda(
     descricao: produto.desc || produto.descricao || "",
     bebida: produto.bebida || produto.bebidaCombo || "",
     bebidas: produto.bebidas || [],
+    comboComponentes: produto.comboComponentes || [],
     comboQtdLanches: qtdLanches,
 
     comboPersonalizado,
@@ -2098,7 +1998,6 @@ async function adicionarComboConfiguradoComanda(
     valorTotal: novoTotal,
   });
 
-  await confirmarProducaoOperacao("comandas", comandaId, true);
   abrirBuscaProdutos(comandaId);
 }
 function cancelarEdicaoItemComanda(comandaId) {

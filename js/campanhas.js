@@ -223,11 +223,7 @@ async function publicarCampanhaAdmin() {
       previa.criadoEm = Date.now();
     }
     await ref.set({ ...previa, status: "publicando" });
-    const texto =
-      previa.texto +
-      (previa.cupomCodigo
-        ? "\nCupom: " + previa.cupomCodigo + ". Confira as condições de uso do cupom."
-        : "");
+    const texto = previa.texto;
     for (let i = previa.enviados || 0; i < previa.clientes.length; i += 400) {
       const lote = previa.clientes.slice(i, i + 400),
         batch = db.batch();
@@ -377,11 +373,9 @@ async function retomarCampanhaAdmin(id) {
 async function historicoCompletoClienteAdmin(telefone) {
   const box = document.getElementById("pedidos-cliente-admin");
   if (!box) return;
-  if (box.style.display !== "none" && box.dataset.historicoCliente === telefone) {
-    box.style.display = "none";
-    return;
-  }
-  box.style.display = "block";
+  const aberta = box.parentElement?.matches("dialog.interface-janela") ? box.parentElement : null;
+  if (aberta) return aberta.close();
+  abrirJanelaElementoUI(box, "Pedidos e pagamentos");
   box.dataset.historicoCliente = telefone;
   box.textContent = "Carregando histórico…";
   try {
@@ -418,7 +412,7 @@ async function historicoCompletoClienteAdmin(telefone) {
         lista
           .map(
             (p) =>
-              `<article class="registro-operacao"><h3>${p.tipoHistorico === "local" ? `Consumo no local · Mesa ${escaparOperacao(p.mesa || "")}` : `Pedido ${escaparOperacao(p.numero || "")}`}</h3><small>${new Date(tempoRegistroOperacao(p)).toLocaleString("pt-BR")}</small>${itensHtmlOperacao(p.itens || [], true)}<p>Total pago: <strong>${moedaOperacao(p.valorPago ?? p.valorTotal)}</strong></p><p>Benefícios: ${moedaOperacao(Number(p.descontoCupom || 0) + Number(p.descontoFidelidade || 0))}</p>${p.cupomCodigo ? `<p>Cupom: ${escaparOperacao(p.cupomCodigo)}</p>` : ""}</article>`,
+              `<article class="registro-operacao"><h3>${p.tipoHistorico === "local" ? `Consumo no local${p.mesa ? " · Mesa " + escaparOperacao(p.mesa) : ""}` : `${/entrega/i.test(p.tipo || "") ? "Delivery" : /retirada/i.test(p.tipo || "") ? "Retirada" : "Pedido"} #${escaparOperacao(p.numero || "")}`}</h3><small>${new Date(tempoRegistroOperacao(p)).toLocaleString("pt-BR")}</small>${itensHtmlOperacao(p.itens || [], true)}<p>Total pago: <strong>${moedaOperacao(p.valorPago ?? p.valorTotal)}</strong></p><p>Benefícios: ${moedaOperacao(Number(p.descontoCupom || 0) + Number(p.descontoFidelidade || 0))}</p>${p.cupomCodigo ? `<p>Cupom: ${escaparOperacao(p.cupomCodigo)}</p>` : ""}</article>`,
           )
           .join("") || "<p>Nenhum histórico disponível.</p>";
   } catch (e) {

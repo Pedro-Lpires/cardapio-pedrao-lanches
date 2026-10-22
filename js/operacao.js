@@ -25,11 +25,29 @@ function serializarOperacao(valor) {
     );
   return JSON.stringify(valor);
 }
+// Resumo local de alteração: evita repetir a conferência ao apenas visualizar a comanda.
+function assinaturaItensProducaoOperacao(itens) {
+  const texto = serializarOperacao(itens || []);
+  let a = 2166136261,
+    b = 3335557771;
+  for (let i = 0; i < texto.length; i++) {
+    const c = texto.charCodeAt(i);
+    a = Math.imul(a ^ c, 16777619);
+    b = Math.imul(b ^ c, 2246822519);
+  }
+  return (
+    texto.length +
+    ":" +
+    (a >>> 0).toString(16).padStart(8, "0") +
+    (b >>> 0).toString(16).padStart(8, "0")
+  );
+}
 function dialogoOperacao(titulo, entrada = null, confirmacao = false, opcoes = {}) {
   return new Promise((resolve) => {
     const dialog = document.createElement("dialog");
     dialog.className = entrada ? "ui-caixa ui-form-entrada" : "ui-caixa";
-    dialog.innerHTML = `<form method="dialog"><h3>${escaparOperacao(titulo)}</h3>${entrada ? `<label>${escaparOperacao(opcoes.label || "Informe abaixo")}<input id="entrada-dialogo-operacao" type="${entrada}" autocomplete="off" required></label>` : ""}<div class="operacao-acoes"><button value="ok" type="submit">${escaparOperacao(opcoes.botao || (confirmacao ? "Confirmar" : "Continuar"))}</button><button value="cancelar" type="button">Cancelar</button></div></form>`;
+    dialog.innerHTML = `<form method="dialog"><h3>${escaparOperacao(titulo)}</h3>${entrada ? `<label>${escaparOperacao(opcoes.label || "Informe abaixo")}<input id="entrada-dialogo-operacao" type="${entrada}" autocomplete="off" ${opcoes.obrigatorio === false ? "" : "required"}></label>` : ""}<div class="operacao-acoes"><button value="ok" type="submit">${escaparOperacao(opcoes.botao || (confirmacao ? "Confirmar" : "Continuar"))}</button><button value="cancelar" type="button">Cancelar</button></div></form>`;
+    if (entrada) dialog.querySelector("input").value = opcoes.valor ?? "";
     const cancelar = dialog.querySelector('[value="cancelar"]');
     cancelar.textContent = "×";
     cancelar.className = "ui-x";
@@ -59,6 +77,9 @@ function confirmarOperacao(texto) {
 }
 function solicitarEntradaOperacao(texto, tipo = "text") {
   return dialogoOperacao(texto, tipo);
+}
+function solicitarTextoUI(texto, valor = "") {
+  return dialogoOperacao(texto, "text", false, { valor, obrigatorio: false });
 }
 function avisoOperacao(texto) {
   const dialog = document.createElement("dialog");
@@ -335,12 +356,13 @@ function identidadeItemOperacao(item) {
   return {
     nome: item.nome || "Item",
     categoria: item.categoria || "",
-    carne: item.tipoCarne || item.carne || "",
+    carne: item.tipoCarne || item.carne || item.tipo || "",
     adicionais: item.adicionais || [],
     obs: item.observacao || item.obs || "",
     lanchesCombo: item.lanchesCombo || item.lanchesPersonalizados || [],
     bebida: item.bebida || item.bebidaCombo || "",
     bebidas: item.bebidas || [],
+    comboComponentes: item.comboComponentes || [],
     combo: item.combo || null,
   };
 }
@@ -349,40 +371,165 @@ function agruparItensOperacao(itens) {
   for (const item of itens || []) {
     const detalhe = identidadeItemOperacao(item);
     const chave = serializarOperacao(detalhe);
-    if (!grupos.has(chave)) grupos.set(chave, { ...item, ...detalhe, quantidade: 0 });
-    grupos.get(chave).quantidade += Number(item.quantidade ?? item.qtd ?? 1);
+    if (!grupos.has(chave))
+      grupos.set(chave, {
+        ...item,
+        ...detalhe,
+        quantidade: 0,
+        ...(item.leituraChapeiro ? { repeticoesPersonalizacaoChapeiro: 0 } : {}),
+      });
+    const grupo = grupos.get(chave);
+    grupo.quantidade += Number(item.quantidade ?? item.qtd ?? 1);
+    if (item.leituraChapeiro)
+      grupo.repeticoesPersonalizacaoChapeiro += Number(item.repeticoesPersonalizacaoChapeiro || 1);
   }
   return [...grupos.values()];
 }
+function componentesComboOperacao(item) {
+  if (!/combo/i.test(item.categoria || item.nome || "")) return [];
+  if (item.comboComponentes?.length)
+    return item.comboComponentes.map((c) => ({
+      ...c,
+      quantidade: Number(c.quantidade || c.qtd || 1),
+    }));
+  const descricao = String(item.descricao || item.desc || "").trim();
+  const partes =
+    descricao && /^\d+\s/.test(descricao)
+      ? descricao.split("+")
+      : [String(item.nome || "").replace(/^combo\s*/i, "")];
+  return partes
+    .map((parte, n) => {
+      const match = parte.trim().match(/^(\d+)\s+(.+)/);
+      const nome = match ? match[2].trim() : parte.trim();
+      const categoria = /refrigerante|refri|coca|guaran[aá]|bebida|suco|[aá]gua|cerveja/i.test(nome)
+        ? "bebidas"
+        : /batata/i.test(nome)
+          ? "batatas"
+          : "lanches";
+      return {
+        nome,
+        categoria,
+        quantidade: match
+          ? Number(match[1])
+          : categoria === "lanches" && n === 0
+            ? Number(item.comboQtdLanches || item.lanchesCombo?.length || 1)
+            : 1,
+        tipoCarne: categoria === "lanches" ? item.tipoCarne || item.carne || item.tipo || "" : "",
+      };
+    })
+    .filter((c) => c.nome && c.quantidade > 0);
+}
+function detalhesComponentesComboOperacao(item) {
+  const componentes = componentesComboOperacao(item);
+  if (!componentes.length) return "";
+  const quantidade = Number(item.quantidade ?? item.qtd ?? 1);
+  return (
+    '<ul class="combo-componentes-ui" aria-label="Itens do combo">' +
+    componentes
+      .map(
+        (c) =>
+          "<li>" +
+          escaparOperacao(quantidade * c.quantidade) +
+          " " +
+          escaparOperacao(c.nome) +
+          (c.tipoCarne ? " · " + escaparOperacao(c.tipoCarne) : "") +
+          "</li>",
+      )
+      .join("") +
+    "</ul>"
+  );
+}
+function detalhesLanchesComboOperacao(item) {
+  const lanches = item.lanchesCombo || item.lanchesPersonalizados || [];
+  if (!lanches.length) return "";
+  const assinatura = (l) =>
+    serializarOperacao({
+      adicionais: (l.adicionais || [])
+        .filter((a) => Number(a.qtd ?? a.quantidade ?? 1) > 0)
+        .map((a) => ({ nome: a.nome, qtd: Number(a.qtd ?? a.quantidade ?? 1) }))
+        .sort((a, b) => a.nome.localeCompare(b.nome)),
+      obs: l.observacao || l.obs || "",
+    });
+  const todos =
+    item.modoPersonalizacaoCombo === "todos" ||
+    (!item.modoPersonalizacaoCombo &&
+      lanches.length > 1 &&
+      lanches.every((l) => assinatura(l) === assinatura(lanches[0])));
+  const detalhe = (l) =>
+    detalhesItemOperacao({ ...l, lanchesCombo: [], lanchesPersonalizados: [] });
+  if (todos) {
+    const html = detalhe(lanches[0]);
+    return html ? '<div class="producao-combo"><strong>Todos com:</strong>' + html + "</div>" : "";
+  }
+  const repeticoes = item.leituraChapeiro ? Number(item.repeticoesPersonalizacaoChapeiro || 1) : 1;
+  return Array.from({ length: repeticoes }, () => lanches)
+    .flat()
+    .map((l, n) => {
+      const html = detalhe(l);
+      return html
+        ? '<div class="producao-combo"><strong>' +
+            (item.leituraChapeiro ? "1 lanche com:" : "Lanche " + (l.numero || n + 1)) +
+            "</strong>" +
+            html +
+            "</div>"
+        : "";
+    })
+    .join("");
+}
+function itensChapeiroOperacao(itens) {
+  const bebida = (nome) =>
+    /refrigerante|refri|coca|guaran[aá]|bebida|suco|[aá]gua|cerveja/i.test(nome || "");
+  return (itens || []).flatMap((item) => {
+    if (
+      /bebida/i.test(item.categoria || "") ||
+      (!/combo/i.test(item.categoria || item.nome || "") && bebida(item.nome))
+    )
+      return [];
+    if (!/combo/i.test(item.categoria || item.nome || "")) return [item];
+    const quantidade = Number(item.quantidade ?? item.qtd ?? 1);
+    return componentesComboOperacao(item)
+      .filter((c) => c.categoria !== "bebidas")
+      .map((c, n) => {
+        const nome = c.nome;
+        const lanche = c.categoria === "lanches";
+        return {
+          ...item,
+          nome,
+          quantidade: quantidade * c.quantidade,
+          categoria: c.categoria,
+          tipo: lanche ? item.tipo || "" : "",
+          carne: lanche ? item.carne || "" : "",
+          tipoCarne: lanche ? item.tipoCarne || item.carne || item.tipo || c.tipoCarne || "" : "",
+          comboComponentes: [],
+          leituraChapeiro: true,
+          repeticoesPersonalizacaoChapeiro: quantidade,
+          descricao: "",
+          desc: "",
+          bebida: "",
+          bebidas: [],
+          lanchesCombo: n === 0 ? item.lanchesCombo || item.lanchesPersonalizados || [] : [],
+          adicionais: n === 0 ? item.adicionais || [] : [],
+          observacao: n === 0 ? item.observacao || "" : "",
+        };
+      });
+  });
+}
 function detalhesItemOperacao(item) {
-  let html = "";
-  if (
-    /combo/i.test(item.categoria || item.nome || "") &&
-    !(item.lanchesCombo || item.lanchesPersonalizados || []).length &&
-    (item.descricao || item.desc)
-  )
-    html += `<p>${escaparOperacao(item.descricao || item.desc)}</p>`;
-  if (item.carne || item.tipoCarne)
-    html += `<p>Carne: ${escaparOperacao(item.carne || item.tipoCarne)}</p>`;
+  let html = detalhesComponentesComboOperacao(item);
+  if (item.carne || item.tipoCarne || item.tipo)
+    html += `<p>Tipo: ${escaparOperacao(item.carne || item.tipoCarne || item.tipo)}</p>`;
   for (const ad of item.adicionais || [])
     html += `<p>+ ${escaparOperacao(ad.qtd || ad.quantidade || 1)} ${escaparOperacao(ad.nome)}</p>`;
   const obs = item.observacao || item.obs;
   if (obs) html += `<p class="producao-obs">Obs.: ${escaparOperacao(obs)}</p>`;
-  (item.lanchesCombo || item.lanchesPersonalizados || []).forEach((lanche, i) => {
-    if (
-      !(lanche.adicionais || []).some((a) => Number(a.qtd ?? a.quantidade ?? 1) > 0) &&
-      !String(lanche.observacao || lanche.obs || "").trim()
-    )
-      return;
-    html += `<div class="producao-combo"><strong>Lanche ${i + 1}: ${escaparOperacao(lanche.nome || lanche.tipoCarne || "")}</strong>${detalhesItemOperacao(lanche)}</div>`;
-  });
+  html += detalhesLanchesComboOperacao(item);
   return html;
 }
 function itensHtmlOperacao(itens, valores = false) {
   return (valores ? itens : agruparItensOperacao(itens))
     .map(
       (item) =>
-        `<article class="producao-item"><strong>${escaparOperacao(item.quantidade ?? item.qtd ?? 1)} × ${escaparOperacao(item.nome)}</strong>${valores ? `<span>${moedaOperacao(item.subtotal ?? Number(item.precoUnitario ?? item.preco ?? 0) * Number(item.quantidade ?? item.qtd ?? 1))}</span>` : ""}${detalhesItemOperacao(item)}</article>`,
+        `<article class="producao-item"><strong>${escaparOperacao(item.quantidade ?? item.qtd ?? 1)} ${escaparOperacao(item.nome)}</strong>${valores ? `<span>${moedaOperacao(item.subtotal ?? Number(item.precoUnitario ?? item.preco ?? 0) * Number(item.quantidade ?? item.qtd ?? 1))}</span>` : ""}${detalhesItemOperacao(item)}</article>`,
     )
     .join("");
 }
@@ -391,34 +538,19 @@ function bebidasOperacao(itens) {
   for (const item of itens || []) {
     const qtd = Number(item.quantidade ?? item.qtd ?? 1);
     if (/bebida/i.test(item.categoria || "")) bebidas.push(item);
-    const lista = item.bebidas || item.combo?.bebidas || [];
+    const explicitas = item.bebidas || item.combo?.bebidas || [];
+    const singular = item.bebida || item.bebidaCombo;
+    const lista = explicitas.length
+      ? explicitas
+      : singular
+        ? [singular]
+        : componentesComboOperacao(item).filter((c) => c.categoria === "bebidas");
     for (const bebida of Array.isArray(lista) ? lista : [])
       bebidas.push(
         typeof bebida === "string"
           ? { nome: bebida, quantidade: qtd }
           : { ...bebida, quantidade: Number(bebida.quantidade || bebida.qtd || 1) * qtd },
       );
-    const bebida = item.bebida || item.bebidaCombo;
-    if (bebida)
-      bebidas.push(
-        typeof bebida === "string"
-          ? { nome: bebida, quantidade: qtd }
-          : { ...bebida, quantidade: Number(bebida.quantidade || bebida.qtd || 1) * qtd },
-      );
-    if (!bebida && !lista.length && /combo/i.test(item.categoria || item.nome || "")) {
-      const descricao = item.descricao || item.desc || "";
-      const trecho = descricao
-        .split("+")
-        .find((s) => /refrigerante|refri|coca|guaran[aá]|bebida|suco/i.test(s));
-      if (trecho) {
-        const texto = trecho.trim();
-        const match = texto.match(/^(\d+)\s+(.+)/);
-        bebidas.push({
-          nome: match ? match[2] : texto,
-          quantidade: qtd * (match ? Number(match[1]) : 1),
-        });
-      }
-    }
   }
   return agruparItensOperacao(bebidas);
 }
@@ -437,8 +569,7 @@ async function completarItensOperacao(itens) {
         /combo/i.test(i.categoria || i.nome || "") &&
         !i.descricao &&
         !i.desc &&
-        !i.bebida &&
-        !i.bebidas?.length,
+        !i.comboComponentes?.length,
     )
   )
     return itens || [];
@@ -456,6 +587,10 @@ async function completarItensOperacao(itens) {
       descricao: item.descricao || item.desc || produto.descricao || produto.desc || "",
       bebida: item.bebida || item.bebidaCombo || produto.bebida || produto.bebidaCombo || "",
       bebidas: item.bebidas?.length ? item.bebidas : produto.bebidas || [],
+      comboComponentes: item.comboComponentes?.length
+        ? item.comboComponentes
+        : produto.comboComponentes || [],
+      comboQtdLanches: item.comboQtdLanches || produto.comboQtdLanches || 1,
     };
   });
 }
@@ -493,7 +628,7 @@ function gerarImpressaoOperacao(tipo, dados) {
       html += `<p>CNH: ${escaparOperacao(dados.cnh || "Não informado")}</p>`;
     html += `<p>Total: <strong>${moedaOperacao(dados.valorTotal)}</strong></p><p>Pagamento: ${escaparOperacao(textoPagamentoOperacao(dados))}</p><h3>Bebidas, incluindo combos</h3>${itensHtmlOperacao(bebidasOperacao(dados.itens)) || "<p>Nenhuma bebida.</p>"}`;
   } else {
-    html += `<h3>${tipo === "cozinha" ? "Chapeiro" : "Conferência geral"}</h3>${itensHtmlOperacao(dados.itens || [], tipo === "geral")}`;
+    html += `<h3>${tipo === "cozinha" ? "Chapeiro" : "Conferência geral"}</h3>${itensHtmlOperacao(tipo === "cozinha" ? itensChapeiroOperacao(dados.itens || []) : dados.itens || [], tipo === "geral")}`;
     if (dados.observacao) html += `<p>Observação: ${escaparOperacao(dados.observacao)}</p>`;
     if (tipo === "geral")
       html += `<hr>${/entrega/i.test(dados.tipo || "") && Number(dados.taxaEntrega) > 0 ? `<p>Taxa de entrega: ${moedaOperacao(dados.taxaEntrega)}</p>` : ""}<p>Descontos: ${moedaOperacao(Number(dados.descontoCupom || 0) + Number(dados.descontoFidelidade || 0))}</p><h2>Total: ${moedaOperacao(totalConferencia)}</h2><p>Recebido: ${moedaOperacao(recebido)}</p><p>Falta receber: ${moedaOperacao(falta)}</p><p>Pagamento: ${escaparOperacao(textoPagamentoOperacao(dados))}</p><p>Recibo de conferência — não é documento fiscal.</p>`;
@@ -653,8 +788,10 @@ async function abrirCentralOperacao(tipo = null, registroId = null) {
     else document.body.append(box);
   }
   box.hidden = false;
-  box.classList.toggle("central-etapa-modal", !!tipo || !!registroId);
-  box.innerHTML = `<div class="operacao-acoes"><h2>${tipo ? "Pedidos de " + escaparOperacao(tipo) : "Pedidos e produção"}</h2><button type="button" onclick="document.getElementById('central-operacao').hidden=true">Fechar</button><a href="cozinha.html" target="_blank" rel="noopener">Abrir tela do chapeiro</a><button type="button" onclick="carregarCentralOperacao()">Atualizar pedidos</button></div><p>Confira o pedido e confirme para enviá-lo à cozinha. As impressões ficam disponíveis aqui.</p><label>Imprimir comandas abertas da mesa <input id="mesa-imprimir-operacao" type="number" min="1" inputmode="numeric"></label><button type="button" onclick="imprimirMesaOperacao(Number(document.getElementById('mesa-imprimir-operacao').value))">Imprimir mesa para chapeiro</button><div id="registros-operacao">Carregando…</div>`;
+  box.style.display = "block";
+  observarCorteProducaoOperacao();
+  box.classList.add("central-etapa-modal");
+  box.innerHTML = `<div class="ui-navegacao"><button class="ui-voltar" onclick="${tipo || registroId ? "abrirCentralOperacao()" : "fecharCentralProducaoUI()"}">← Voltar</button><button class="ui-x" aria-label="Fechar produção" onclick="fecharCentralProducaoUI()">×</button></div><h2>${tipo ? "Pedidos de " + escaparOperacao(tipo) : "Pedidos e produção"}</h2><p>${tipo ? "Confira os pedidos desta categoria. Abra um pedido para ver os detalhes e as opções de impressão." : "Escolha o tipo de pedido. As ferramentas da cozinha ficam em Chapeiro."}</p><div class="operacao-acoes">${tipo || registroId ? '<button type="button" onclick="carregarCentralOperacao()">Atualizar pedidos</button>' : '<button type="button" onclick="abrirControlesChapeiroOperacao()">Chapeiro</button>'}</div><label>Imprimir comandas abertas da mesa <input id="mesa-imprimir-operacao" type="number" min="1" inputmode="numeric"></label><button type="button" onclick="imprimirMesaOperacao(Number(document.getElementById('mesa-imprimir-operacao').value))">Imprimir mesa para chapeiro</button><div id="registros-operacao">Carregando…</div>`;
   const categorias = document.createElement("div");
   categorias.className = "operacao-acoes";
   categorias.setAttribute("aria-label", "Tipo de pedido");
@@ -675,7 +812,6 @@ async function abrirCentralOperacao(tipo = null, registroId = null) {
     box.querySelector('a[href="cozinha.html"]')?.remove();
   if (document.querySelector(".menu-atendente") || tipo || registroId)
     box.querySelector('[onclick*="hidden=true"]')?.remove();
-  if (!document.querySelector(".menu-atendente") && (tipo || registroId)) cabecalhoEtapaUI(box);
   if (tipo !== "Mesas" || registroId) {
     box.querySelector("label")?.remove();
     box.querySelector('[onclick^="imprimirMesaOperacao"]')?.remove();
@@ -687,10 +823,23 @@ async function abrirCentralOperacao(tipo = null, registroId = null) {
   }
   await carregarCentralOperacao();
 }
+function fecharCentralProducaoUI() {
+  const box = document.getElementById("central-operacao");
+  box.hidden = true;
+  box.style.display = "none";
+  if (document.querySelector(".menu-atendente")) fecharFluxoAtendenteUI();
+}
+function abrirControlesChapeiroOperacao() {
+  const box = janelaProducaoOperacao("controles-chapeiro", "Chapeiro");
+  box.innerHTML =
+    '<p>Gerencie os pedidos que aparecem na chapa. A limpeza preserva os pedidos e pagamentos no histórico.</p><div class="operacao-acoes"><a class="botao-padrao" href="cozinha.html" target="_blank" rel="noopener">Abrir tela</a><button onclick="abrirFilaChapeiroOperacao()">Fila do chapeiro</button><button onclick="abrirFilaChapeiroOperacao()">Atualizar fila</button><button onclick="limparTelasProducaoOperacao()">Limpar telas</button></div>';
+}
 let viradaCentralOperacao;
 async function carregarCentralOperacao() {
   clearTimeout(viradaCentralOperacao);
   if (!tipoCentralOperacao && !idCentralOperacao) return;
+  const registrosTela = document.getElementById("registros-operacao");
+  if (registrosTela) registrosTela.textContent = "Carregando pedidos do dia...";
   const tipoSolicitado = tipoCentralOperacao,
     idSolicitado = idCentralOperacao;
   viradaCentralOperacao = setTimeout(
@@ -708,7 +857,7 @@ async function carregarCentralOperacao() {
           return { docs: doc.exists ? [doc] : [] };
         }
         return colecao === "pedidos"
-          ? db.collection(colecao).where("dataMs", ">=", janelaOperacionalOperacao().inicio).get()
+          ? db.collection(colecao).where("dataMs", ">=", inicioProducaoOperacao()).get()
           : db.collection(colecao).where("status", "==", "Aberta").get();
       }),
     );
@@ -735,10 +884,11 @@ async function carregarCentralOperacao() {
         !r.cancelado &&
         !/cancelad/i.test(r.status || "") &&
         (r.colecao === "comandas"
-          ? r.status === "Aberta"
+          ? r.status === "Aberta" &&
+            (idCentralOperacao || tempoRegistroOperacao(r) >= inicioProducaoOperacao())
           : !vinculados.has(r.id) &&
             (idCentralOperacao ||
-              (tempoRegistroOperacao(r) >= janela.inicio &&
+              (tempoRegistroOperacao(r) >= inicioProducaoOperacao() &&
                 tempoRegistroOperacao(r) < janela.fim))),
     );
     const grupo = (r) =>
@@ -761,7 +911,7 @@ async function carregarCentralOperacao() {
               : "Retirada";
           const args = `'${r.colecao}','${escaparOperacao(r.id)}'`;
           const recebido = r.pagamentoConfirmado === true || /^pago$/i.test(r.status || "");
-          return `<article class="registro-operacao"><h3>${escaparOperacao(titulo)} — ${escaparOperacao(r.nome || r.cliente || "")}</h3><p>${escaparOperacao(r.tipo || "Consumo no local")} · ${moedaOperacao(r.valorTotal)}</p><p class="recebimento-status ${recebido ? "recebido" : ""}">${recebido ? "Recebido confirmado" : "Recebimento ainda não confirmado"}${r.pagamento ? " · " + escaparOperacao(r.pagamento) : ""}</p>${!idCentralOperacao ? `<button onclick="abrirCentralOperacao('${escaparOperacao(r.tipo || "")}','${escaparOperacao(r.id)}')">Abrir pedido</button>` : `${itensHtmlOperacao(r.itens || [])}${acoesRegistroUI(r.colecao, r.id, /entrega/i.test(r.tipo || ""))}<button onclick="solicitarDocumentoClienteOperacao(${args})">Dados para nota fiscal</button>${r.colecao === "pedidos" && !/local/i.test(r.tipo || "") && !recebido ? `<button onclick="confirmarRecebimentoOperacao('${escaparOperacao(r.id)}')">Confirmar recebimento</button>` : ""}`}</article>`;
+          return `<article class="registro-operacao"><h3>${escaparOperacao(titulo)} — ${escaparOperacao(r.nome || r.cliente || "")}</h3><p>${escaparOperacao(r.tipo || "Consumo no local")} · ${moedaOperacao(r.valorTotal)}</p><p class="recebimento-status ${recebido ? "recebido" : ""}">${recebido ? "Recebido confirmado" : "Recebimento ainda não confirmado"}${r.pagamento ? " · " + escaparOperacao(r.pagamento) : ""}</p>${!idCentralOperacao ? `<button onclick="abrirCentralOperacao('${escaparOperacao(r.tipo || "")}','${escaparOperacao(r.id)}')">Abrir pedido</button>` : `${itensHtmlOperacao(r.itens || [])}${acoesRegistroUI(r.colecao, r.id, /entrega/i.test(r.tipo || ""))}<div class="registro-acoes-secundarias-ui"><button onclick="solicitarDocumentoClienteOperacao(${args})">Dados para nota fiscal</button>${r.colecao === "pedidos" && !/local/i.test(r.tipo || "") && !recebido ? `<button onclick="confirmarRecebimentoOperacao('${escaparOperacao(r.id)}')">Confirmar recebimento</button>` : ""}</div>`}</article>`;
         })
         .join("") || "<p>Nenhum pedido pendente neste período.</p>";
     if (idCentralOperacao && lista.length) {
@@ -801,7 +951,7 @@ function molhosAtendenteOperacao(itens) {
         .filter((m) => Number(m.qtd || m.quantidade || 0) > 0)
         .map(
           (m) =>
-            `<li>${escaparOperacao(m.qtd || m.quantidade)} × ${escaparOperacao(m.nome)}${m.preco != null ? " · " + moedaOperacao(Number(m.preco) * Number(m.qtd || m.quantidade)) : ""}</li>`,
+            `<li>${escaparOperacao(m.qtd || m.quantidade)} ${escaparOperacao(m.nome)}${m.preco != null ? " · " + moedaOperacao(Number(m.preco) * Number(m.qtd || m.quantidade)) : ""}</li>`,
         )
         .join("");
       return `<section class="molhos-atendente"><h4>Molhos · ${escaparOperacao(item.nome)}</h4>${linhasGratis ? `<p>Grátis</p><ul>${linhasGratis}</ul>` : ""}${linhasPagos ? `<p>Pagos</p><ul>${linhasPagos}</ul>` : ""}</section>`;
@@ -839,6 +989,161 @@ function janelaOperacionalOperacao(agora = Date.now()) {
   const inicio = Date.parse(`${get("year")}-${get("month")}-${get("day")}T02:00:00-04:00`);
   return { inicio, fim: inicio + 86400000 };
 }
+let corteManualProducaoOperacao = 0,
+  pararConfigProducaoOperacao = null;
+let viradaFilaCozinhaOperacao = null,
+  inicioAssinaturaCozinhaOperacao = null;
+let registrosDiaCozinhaOperacao = [],
+  modoRemoverCozinhaOperacao = false;
+function inicioProducaoOperacao(agora = Date.now()) {
+  return Math.max(
+    janelaOperacionalOperacao(agora).inicio,
+    corteManualProducaoOperacao ? corteManualProducaoOperacao + 1 : 0,
+  );
+}
+function aplicarCorteProducaoOperacao(valor) {
+  const novo = Number(valor || 0);
+  if (novo === corteManualProducaoOperacao) return;
+  corteManualProducaoOperacao = novo;
+  if (pararFilaCozinhaOperacao) assinarFilaDiaCozinhaOperacao();
+  const central = document.getElementById("central-operacao");
+  if (central && !central.hidden) carregarCentralOperacao();
+}
+function observarCorteProducaoOperacao() {
+  if (pararConfigProducaoOperacao) return;
+  pararConfigProducaoOperacao = db
+    .collection("config")
+    .doc("producaoTela")
+    .onSnapshot(
+      (doc) => aplicarCorteProducaoOperacao(doc.exists ? doc.data().limpaAntes : 0),
+      (erro) => console.error("Não foi possível sincronizar a limpeza da produção.", erro),
+    );
+}
+async function limparTelasProducaoOperacao() {
+  if (
+    !(await confirmarOperacao(
+      "Limpar as telas do chapeiro e de Pedidos e produção? Os pedidos e pagamentos continuam no histórico.",
+    ))
+  )
+    return;
+  try {
+    const ref = db.collection("config").doc("producaoTela");
+    const corte = await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      const tempo = Math.max(Date.now(), Number(doc.data()?.limpaAntes || 0) + 1);
+      t.set(
+        ref,
+        { limpaAntes: tempo, limpoPor: localStorage.getItem("atendenteNome") || "Admin" },
+        { merge: true },
+      );
+      return tempo;
+    });
+    aplicarCorteProducaoOperacao(corte);
+  } catch (e) {
+    avisoOperacao("Não foi possível limpar as telas: " + e.message);
+  }
+}
+function janelaProducaoOperacao(id, titulo, aoFechar) {
+  const antiga = document.getElementById(id);
+  if (antiga) return antiga;
+  const dialog = document.createElement("dialog");
+  dialog.className = "ui-caixa suporte-admin-tela producao-janela";
+  dialog.innerHTML =
+    '<header class="suporte-admin-cabecalho"><button class="suporte-voltar" type="button">← Voltar</button><h3>' +
+    escaparOperacao(titulo) +
+    '</h3><button class="ui-x" type="button" aria-label="Fechar">×</button></header><div class="suporte-admin-conteudo" id="' +
+    id +
+    '"></div>';
+  dialog.querySelectorAll("header button").forEach((b) => (b.onclick = () => dialog.close()));
+  dialog.addEventListener(
+    "close",
+    () => {
+      aoFechar?.();
+      dialog.remove();
+    },
+    { once: true },
+  );
+  document.body.append(dialog);
+  dialog.showModal();
+  return dialog.querySelector(".suporte-admin-conteudo");
+}
+async function abrirFilaChapeiroOperacao() {
+  janelaProducaoOperacao("gestao-fila-cozinha", "Fila do chapeiro", pararCozinhaOperacao);
+  observarCorteProducaoOperacao();
+  if (!pararFilaCozinhaOperacao) assinarFilaDiaCozinhaOperacao();
+}
+async function abrirConcluidosCozinhaOperacao() {
+  janelaProducaoOperacao("concluidos-cozinha", "Pedidos concluídos");
+  atualizarConcluidosCozinhaOperacao();
+}
+function alternarRemocaoCozinhaOperacao() {
+  modoRemoverCozinhaOperacao = !modoRemoverCozinhaOperacao;
+  renderizarFilaCozinhaOperacao();
+}
+async function retirarDaFilaCozinhaOperacao(id) {
+  if (
+    !(await confirmarOperacao(
+      "Retirar este pedido da tela do chapeiro? O pedido e o pagamento permanecem registrados.",
+    ))
+  )
+    return;
+  try {
+    const ref = db.collection("filaCozinha").doc(id);
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      if (!doc.exists || doc.data().status !== "aguardando")
+        throw Error("Este pedido já saiu da fila.");
+      t.update(ref, { status: "retirado", retiradoEm: Date.now() });
+    });
+    modoRemoverCozinhaOperacao = false;
+    renderizarFilaCozinhaOperacao();
+  } catch (e) {
+    avisoOperacao(e.message);
+  }
+}
+function assinarFilaDiaCozinhaOperacao() {
+  pararFilaCozinhaOperacao?.();
+  pararFilaCozinhaOperacao = null;
+  clearTimeout(viradaFilaCozinhaOperacao);
+  for (const origem of origensCozinhaOperacao.values()) origem.parar();
+  origensCozinhaOperacao.clear();
+  filaOperacao = [];
+  registrosDiaCozinhaOperacao = [];
+  modoRemoverCozinhaOperacao = false;
+  const inicio = inicioProducaoOperacao();
+  inicioAssinaturaCozinhaOperacao = inicio;
+  renderizarFilaCozinhaOperacao();
+  atualizarConcluidosCozinhaOperacao();
+  // Um único índice de data: lê apenas o dia atual, sem índice composto ou varredura histórica.
+  pararFilaCozinhaOperacao = db
+    .collection("filaCozinha")
+    .where("criadoEmMs", ">=", inicio)
+    .onSnapshot(
+      (snap) => {
+        if (inicio !== inicioAssinaturaCozinhaOperacao) return;
+        registrosDiaCozinhaOperacao = snap.docs
+          .map((d) => ({ ...d.data(), id: d.id }))
+          .filter(
+            (r) =>
+              Number(r.criadoEmMs) >= inicio &&
+              Number(r.criadoEmMs) < janelaOperacionalOperacao().fim,
+          );
+        filaOperacao = registrosDiaCozinhaOperacao.filter((r) => r.status === "aguardando");
+        sincronizarOrigensCozinhaOperacao();
+        renderizarFilaCozinhaOperacao();
+        atualizarConcluidosCozinhaOperacao();
+      },
+      (erro) => {
+        const lista =
+          document.getElementById("fila-cozinha") || document.getElementById("gestao-fila-cozinha");
+        if (lista) lista.textContent = "Não foi possível conectar a fila: " + erro.message;
+      },
+    );
+  viradaFilaCozinhaOperacao = setTimeout(
+    assinarFilaDiaCozinhaOperacao,
+    Math.max(1000, janelaOperacionalOperacao().fim - Date.now() + 50),
+  );
+}
 async function confirmarProducaoOperacao(colecao, id, automatico = false) {
   if (automatico && colecao !== "comandas") return;
   if (
@@ -847,6 +1152,11 @@ async function confirmarProducaoOperacao(colecao, id, automatico = false) {
   )
     return;
   try {
+    const configProducao = await db.collection("config").doc("producaoTela").get();
+    const corteEnvio = Math.max(
+      janelaOperacionalOperacao().inicio,
+      Number(configProducao.data()?.limpaAntes || 0) + 1,
+    );
     const origem = db.collection(colecao).doc(id);
     const fila = db.collection("filaCozinha").doc(`${colecao}_${id}_ativo`);
     const dadosOrigem = (await origem.get()).data();
@@ -875,7 +1185,11 @@ async function confirmarProducaoOperacao(colecao, id, automatico = false) {
         throw Error("A comanda não está aberta.");
       const itens = agruparItensOperacao(itensCompletos);
       const enviados = agruparItensOperacao(
-        filas.filter((f) => f.status === "pronto").flatMap((f) => f.itens || []),
+        filas
+          .filter(
+            (f) => ["pronto", "retirado"].includes(f.status) || Number(f.criadoEmMs) < corteEnvio,
+          )
+          .flatMap((f) => f.itens || []),
       );
       const novos = itens
         .map((item) => {
@@ -893,7 +1207,11 @@ async function confirmarProducaoOperacao(colecao, id, automatico = false) {
       if (!novos.length) {
         if (filaDoc.exists && filaDoc.data().status === "aguardando")
           t.update(fila, { status: "substituido", atualizadoEm: Date.now() });
-        t.update(origem, { itensEnviadosCozinha: itens, cozinhaConfirmadaEm: Date.now() });
+        t.update(origem, {
+          itensEnviadosCozinha: itens,
+          cozinhaItensVersao: assinaturaItensProducaoOperacao(r.itens),
+          cozinhaConfirmadaEm: Date.now(),
+        });
         return;
       }
       if (filaDoc.exists && filaDoc.data().status === "pronto")
@@ -914,15 +1232,20 @@ async function confirmarProducaoOperacao(colecao, id, automatico = false) {
         observacao: r.observacao || "",
         status: "aguardando",
         criadoEmMs:
-          filaDoc.exists && filaDoc.data().status === "aguardando"
+          filaDoc.exists &&
+          filaDoc.data().status === "aguardando" &&
+          Number(filaDoc.data().criadoEmMs) >= corteEnvio
             ? filaDoc.data().criadoEmMs
             : Date.now(),
         atualizadoEm: Date.now(),
         confirmadoPor: localStorage.getItem("atendenteNome") || "Admin",
       });
-      t.update(origem, { itensEnviadosCozinha: itens, cozinhaConfirmadaEm: Date.now() });
+      t.update(origem, {
+        itensEnviadosCozinha: itens,
+        cozinhaItensVersao: assinaturaItensProducaoOperacao(r.itens),
+        cozinhaConfirmadaEm: Date.now(),
+      });
     });
-    if (!automatico) avisoOperacao("Itens enviados à cozinha.");
   } catch (e) {
     avisoOperacao(e.message);
   }
@@ -948,7 +1271,7 @@ async function compartilharMotoboyOperacao(colecao, id) {
   r.itens = await completarItensOperacao(r.itens);
   const texto = `Pedrão Lanches\nEntrega ${r.numeroEntregaDia || ""}\nCliente: ${r.nome || r.cliente || ""}\nTelefone: ${r.telefone || ""}\nEndereço: ${r.endereco || "Não informado"}\nCondomínio: ${r.condominio || "Não informado"}\nCNH: ${r.cnh || "Não informado"}\nTotal: ${moedaOperacao(r.valorTotal)}\nPagamento: ${textoPagamentoOperacao(r)}\nBebidas:\n${
     bebidasOperacao(r.itens)
-      .map((i) => `${i.quantidade}x ${i.nome}`)
+      .map((i) => `${i.quantidade} ${i.nome}`)
       .join("\n") || "Nenhuma"
   }\nLocalização: ${r.localizacao || r.mapa || "Não informada"}`;
   let box = document.getElementById("compartilhar-motoboy");
@@ -992,27 +1315,37 @@ let pararFilaCozinhaOperacao = null;
 let pararConcluidosCozinhaOperacao = null;
 const origensCozinhaOperacao = new Map();
 function renderizarFilaCozinhaOperacao() {
-  const lista = document.getElementById("fila-cozinha");
+  const gestao = document.getElementById("gestao-fila-cozinha");
+  const lista = document.getElementById("fila-cozinha") || gestao;
   if (!lista) return;
   const ativos = filaOperacao
     .filter((r) => {
       const origem = origensCozinhaOperacao.get(r.origemColecao + "/" + r.origemId);
       return (
-        origem?.dados && !origem.dados.cancelado && !/cancelad/i.test(origem.dados.status || "")
+        Number(r.criadoEmMs) >= inicioProducaoOperacao() &&
+        origem?.dados &&
+        !origem.dados.cancelado &&
+        !/cancelad/i.test(origem.dados.status || "")
       );
     })
     .map((r) => {
       const origem = origensCozinhaOperacao.get(r.origemColecao + "/" + r.origemId).dados;
       return { ...r, tipo: r.tipo || origem.tipo || "", mesa: r.mesa || origem.mesa || "" };
     })
+    .filter((r) => itensChapeiroOperacao(r.itens).length > 0)
     .sort((a, b) => a.criadoEmMs - b.criadoEmMs);
-  document.getElementById("quantidade-cozinha").textContent =
-    ativos.length + " pedido(s) aguardando";
+  const contador = document.getElementById("quantidade-cozinha");
+  if (contador) contador.textContent = ativos.length + " pedido(s) aguardando";
+  const remover = document.getElementById("cozinha-remover");
+  if (remover) {
+    remover.textContent = modoRemoverCozinhaOperacao ? "Concluir exclusão" : "Excluir";
+    remover.setAttribute("aria-pressed", String(modoRemoverCozinhaOperacao));
+  }
   lista.innerHTML =
     ativos
       .map(
         (r, i) =>
-          `<article class="cozinha-pedido"><header><h2>${escaparOperacao(rotuloDestinoCozinhaOperacao(r))}</h2><p>${escaparOperacao(r.cliente)} · ${new Date(r.criadoEmMs).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p>${i === 0 ? "<strong>Próximo pedido</strong>" : ""}</header>${itensHtmlOperacao(r.itens)}${r.observacao ? `<p class="producao-obs">${escaparOperacao(r.observacao)}</p>` : ""}<button class="cozinha-controle" onclick="concluirCozinhaOperacao('${r.id}')">OK — pedido pronto</button></article>`,
+          `${i === 0 ? '<p class="cozinha-proximo">Próximo pedido</p>' : ""}<article class="cozinha-pedido">${modoRemoverCozinhaOperacao && !gestao ? `<button class="cozinha-controle cozinha-remover-x" aria-label="Retirar pedido" onclick="retirarDaFilaCozinhaOperacao('${r.id}')">×</button>` : ""}<header><h2>${escaparOperacao(rotuloDestinoCozinhaOperacao(r))}</h2><p>${escaparOperacao(r.cliente)} · ${new Date(r.criadoEmMs).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</p></header>${itensHtmlOperacao(itensChapeiroOperacao(r.itens))}${r.observacao ? `<p class="producao-obs">${escaparOperacao(r.observacao)}</p>` : ""}${gestao ? `<button onclick="retirarDaFilaCozinhaOperacao('${r.id}')">Retirar da tela</button>` : `${modoRemoverCozinhaOperacao ? "" : `<button class="cozinha-controle" onclick="concluirCozinhaOperacao('${r.id}')">OK</button>`}`}</article>`,
       )
       .join("") ||
     '<p class="cozinha-vazia">Tudo em dia. Aguardando novos pedidos confirmados.</p>';
@@ -1040,8 +1373,10 @@ function sincronizarOrigensCozinhaOperacao() {
           renderizarFilaCozinhaOperacao();
         },
         (erro) => {
-          document.getElementById("quantidade-cozinha").textContent =
-            "Não foi possível conferir o pedido: " + erro.message;
+          const contador = document.getElementById("quantidade-cozinha");
+          if (contador)
+            contador.textContent = "Não foi possível conferir o pedido: " + erro.message;
+          else console.error("Não foi possível conferir o pedido da fila.", erro);
         },
       );
   }
@@ -1049,37 +1384,34 @@ function sincronizarOrigensCozinhaOperacao() {
 function atualizarConcluidosCozinhaOperacao() {
   const caixa = document.getElementById("concluidos-cozinha");
   if (!caixa) return;
-  const aberto = caixa.closest("details")?.open;
-  if (pararConcluidosCozinhaOperacao) {
-    pararConcluidosCozinhaOperacao();
-    pararConcluidosCozinhaOperacao = null;
-  }
-  if (!aberto || !pararFilaCozinhaOperacao) return;
-  caixa.textContent = "Carregando concluídos recentes…";
-  // Índice simples já disponível: não exige novo índice composto no Firebase.
-  pararConcluidosCozinhaOperacao = db
-    .collection("filaCozinha")
-    .orderBy("concluidoEm", "desc")
-    .limit(10)
-    .onSnapshot(
-      (snap) => {
-        const recentes = snap.docs
-          .map((doc) => ({ ...doc.data(), id: doc.id }))
-          .filter((r) => r.status === "pronto");
-        caixa.innerHTML =
-          recentes
-            .map(
-              (r) =>
-                `<p>${escaparOperacao(rotuloDestinoCozinhaOperacao(r))} — ${escaparOperacao(r.cliente)} <button onclick="voltarCozinhaOperacao('${r.id}')">Voltar para fila</button></p>`,
-            )
-            .join("") || "<p>Nenhum pedido concluído.</p>";
-      },
-      (erro) => {
-        caixa.textContent = "Não foi possível carregar os concluídos: " + erro.message;
-      },
-    );
+  const recentes = registrosDiaCozinhaOperacao
+    .filter((r) => r.status === "pronto" && Number(r.criadoEmMs) >= inicioProducaoOperacao())
+    .sort((a, b) => Number(b.concluidoEm) - Number(a.concluidoEm));
+  caixa.innerHTML =
+    recentes
+      .map(
+        (r) =>
+          '<article class="producao-concluido"><strong>' +
+          escaparOperacao(rotuloDestinoCozinhaOperacao(r)) +
+          " · " +
+          escaparOperacao(r.cliente) +
+          "</strong><small>" +
+          new Date(r.concluidoEm).toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }) +
+          "</small>" +
+          itensHtmlOperacao(itensChapeiroOperacao(r.itens || [])) +
+          "<button onclick=\"voltarCozinhaOperacao('" +
+          escaparOperacao(r.id) +
+          "')\">Voltar para fila</button></article>",
+      )
+      .join("") || "<p>Nenhum pedido concluído neste dia.</p>";
 }
 function pararCozinhaOperacao() {
+  clearTimeout(viradaFilaCozinhaOperacao);
+  inicioAssinaturaCozinhaOperacao = null;
+  registrosDiaCozinhaOperacao = [];
   pararFilaCozinhaOperacao?.();
   pararFilaCozinhaOperacao = null;
   pararConcluidosCozinhaOperacao?.();
@@ -1091,32 +1423,31 @@ function pararCozinhaOperacao() {
 function iniciarCozinhaOperacao() {
   const lista = document.getElementById("fila-cozinha");
   if (!lista || pararFilaCozinhaOperacao) return;
+  const modo = new URLSearchParams(location.search).get("modo");
+  document.body.classList.toggle("cozinha-monitor", modo === "monitor");
   if (!sessionStorage.getItem("cozinhaAcessoPedrao")) {
     document.getElementById("cozinha-acesso").hidden = false;
     document.getElementById("quantidade-cozinha").textContent =
       "Entre com o código do funcionário para conectar.";
     return;
   }
-  const modo = new URLSearchParams(location.search).get("modo");
-  document.body.classList.toggle("cozinha-monitor", modo === "monitor");
-  pararFilaCozinhaOperacao = db
-    .collection("filaCozinha")
-    .where("status", "==", "aguardando")
-    .onSnapshot(
-      (snap) => {
-        filaOperacao = snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-        sincronizarOrigensCozinhaOperacao();
-        renderizarFilaCozinhaOperacao();
-      },
-      (erro) => {
-        lista.textContent = "Não foi possível conectar a cozinha: " + erro.message;
-      },
-    );
-  const detalhes = document.getElementById("concluidos-cozinha")?.closest("details");
-  if (detalhes) detalhes.ontoggle = atualizarConcluidosCozinhaOperacao;
-  atualizarConcluidosCozinhaOperacao();
+  observarCorteProducaoOperacao();
+  assinarFilaDiaCozinhaOperacao();
 }
-window.addEventListener("pagehide", pararCozinhaOperacao);
+window.addEventListener("pagehide", () => {
+  pararCozinhaOperacao();
+  pararConfigProducaoOperacao?.();
+  pararConfigProducaoOperacao = null;
+  clearTimeout(viradaCentralOperacao);
+});
+document.addEventListener("visibilitychange", () => {
+  if (
+    !document.hidden &&
+    pararFilaCozinhaOperacao &&
+    inicioAssinaturaCozinhaOperacao !== inicioProducaoOperacao()
+  )
+    assinarFilaDiaCozinhaOperacao();
+});
 window.addEventListener("pageshow", (evento) => {
   if (evento.persisted) iniciarCozinhaOperacao();
 });
@@ -1143,19 +1474,36 @@ async function entrarCozinhaOperacao() {
 }
 async function concluirCozinhaOperacao(id) {
   try {
-    await db
-      .collection("filaCozinha")
-      .doc(id)
-      .update({ status: "pronto", concluidoEm: Date.now() });
+    const ref = db.collection("filaCozinha").doc(id);
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      if (
+        !doc.exists ||
+        doc.data().status !== "aguardando" ||
+        Number(doc.data().criadoEmMs) < inicioProducaoOperacao()
+      )
+        throw Error("Este pedido já saiu da fila do dia.");
+      t.update(ref, { status: "pronto", concluidoEm: Date.now() });
+    });
   } catch (e) {
-    avisoOperacao("Não foi possível concluir: " + e.message);
+    avisoOperacao(e.message);
   }
 }
 async function voltarCozinhaOperacao(id) {
   try {
-    await db.collection("filaCozinha").doc(id).update({ status: "aguardando", concluidoEm: null });
+    const ref = db.collection("filaCozinha").doc(id);
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      if (
+        !doc.exists ||
+        doc.data().status !== "pronto" ||
+        Number(doc.data().criadoEmMs) < inicioProducaoOperacao()
+      )
+        throw Error("Este pedido não pertence aos concluídos do dia atual.");
+      t.update(ref, { status: "aguardando", concluidoEm: null });
+    });
   } catch (e) {
-    avisoOperacao("Não foi possível voltar: " + e.message);
+    avisoOperacao(e.message);
   }
 }
 function filtrarCardapioPedrao(texto) {

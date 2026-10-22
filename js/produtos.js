@@ -199,78 +199,272 @@ window.listaCombos = [
   {
     nome: "Combo 3 Caseiro",
     preco: 80,
-    desc: "3 Baguncinha Caseiro + Refrigerante 1,5L",
+    desc: "3 Baguncinha artesanal + 1 Refrigerante 1,5L",
     img: "3baguncinha.webp",
+    comboQtdLanches: 3,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "Baguncinha",
+        quantidade: 3,
+        tipoCarne: "Artesanal",
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 1,5L",
+        quantidade: 1,
+      },
+    ],
   },
   {
     nome: "Combo 3 X-Bacon",
     preco: 80,
-    desc: "3 X-Bacon + Refrigerante 1,5L",
+    desc: "3 X-Bacon artesanal + 1 Refrigerante 1,5L",
     img: "3xbacon.webp",
+    comboQtdLanches: 3,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "X-Bacon",
+        quantidade: 3,
+        tipoCarne: "Artesanal",
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 1,5L",
+        quantidade: 1,
+      },
+    ],
   },
   {
     nome: "Combo 3 X-Bagunça",
     preco: 95,
-    desc: "3 X-Bagunça + Refrigerante 1,5L ",
+    desc: "3 X-Bagunça artesanal + 1 Refrigerante 1,5L",
     img: "3xbagunca.webp",
+    comboQtdLanches: 3,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "X-Bagunça",
+        quantidade: 3,
+        tipoCarne: "Artesanal",
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 1,5L",
+        quantidade: 1,
+      },
+    ],
   },
   {
     nome: "Combo 3 Big Big",
     preco: 95,
-    desc: "3 Big BIG + Refrigerante 1,5L ",
+    desc: "3 Big Big artesanal + 1 Refrigerante 1,5L",
     img: "3big.webp",
+    comboQtdLanches: 3,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "Big Big",
+        quantidade: 3,
+        tipoCarne: "Artesanal",
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 1,5L",
+        quantidade: 1,
+      },
+    ],
   },
   {
     nome: "Combo 5 Artesanal",
     preco: 130,
-    desc: "5 Baguncinha Caseiro + Refrigerante 2L ",
+    desc: "5 Baguncinha artesanal + 1 Refrigerante 2L",
     img: "5baguncinha.webp",
+    comboQtdLanches: 5,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "Baguncinha",
+        quantidade: 5,
+        tipoCarne: "Artesanal",
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 2L",
+        quantidade: 1,
+      },
+    ],
   },
-
   {
     nome: "Combo 4 Industrial",
     preco: 75,
-    desc: "4 Baguncinha industrial + Refrigerante 1,5L",
+    desc: "4 Baguncinha industrial + 1 Refrigerante 1,5L",
     img: "4baguncinha.webp",
+    comboQtdLanches: 4,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "Baguncinha",
+        quantidade: 4,
+        tipoCarne: "Industrial",
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 1,5L",
+        quantidade: 1,
+      },
+    ],
   },
-
   {
     nome: "Combo 2 X-Tudo",
     preco: 110,
-    desc: "2 X-Tudo + Batata Frita média + Refrigerante 1,5L ",
+    desc: "2 X-Tudo artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     img: "2tudo.webp",
+    comboQtdLanches: 2,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "X-Tudo",
+        quantidade: 2,
+        tipoCarne: "Artesanal",
+      },
+      {
+        categoria: "batatas",
+        nome: "Batata Frita Média",
+        quantidade: 1,
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 1,5L",
+        quantidade: 1,
+      },
+    ],
   },
-
   {
     nome: "Combo 2 Filé Bagunça",
     preco: 85,
-    desc: "2 Filé Mignon Bagunça + Batata Frita média + Refrigerante 1,5L ",
+    desc: "2 X-Filé Bagunça + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     img: "2filebagunca.webp",
+    comboQtdLanches: 2,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "X-Filé Bagunça",
+        quantidade: 2,
+        tipoCarne: "Filé mignon",
+      },
+      {
+        categoria: "batatas",
+        nome: "Batata Frita Média",
+        quantidade: 1,
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 1,5L",
+        quantidade: 1,
+      },
+    ],
   },
   {
     nome: "Combo 2 X-Bagunça",
     preco: 80,
-    desc: "2 X-Bagunça + Batata Frita média + Refrigerante 1,5L ",
+    desc: "2 X-Bagunça artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     img: "2xbagunca.webp",
+    comboQtdLanches: 2,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "X-Bagunça",
+        quantidade: 2,
+        tipoCarne: "Artesanal",
+      },
+      {
+        categoria: "batatas",
+        nome: "Batata Frita Média",
+        quantidade: 1,
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 1,5L",
+        quantidade: 1,
+      },
+    ],
   },
   {
     nome: "Combo 2 Big Big",
     preco: 80,
-    desc: "2 Big BIG + Batata Frita média + Refrigerante 1,5L ",
+    desc: "2 Big Big artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     img: "2big.webp",
+    comboQtdLanches: 2,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "Big Big",
+        quantidade: 2,
+        tipoCarne: "Artesanal",
+      },
+      {
+        categoria: "batatas",
+        nome: "Batata Frita Média",
+        quantidade: 1,
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante 1,5L",
+        quantidade: 1,
+      },
+    ],
   },
   {
     nome: "Combo 2 Artesanal",
     preco: 70,
-    desc: "2 Baguncinha Caseiro + 2 Batata Frita pequena + 2 Refrigerantes latas",
+    desc: "2 Baguncinha artesanal + 1 Batata Frita Média + 2 Refrigerantes em lata",
     img: "2baguncinhaartesanal.webp",
+    comboQtdLanches: 2,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "Baguncinha",
+        quantidade: 2,
+        tipoCarne: "Artesanal",
+      },
+      {
+        categoria: "batatas",
+        nome: "Batata Frita Média",
+        quantidade: 1,
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante em lata",
+        quantidade: 2,
+      },
+    ],
   },
-
   {
     nome: "Combo 2 Industrial",
     preco: 56,
-    desc: "2 Baguncinha Industrial + 1 Batata Frita Média + 2 Refrigerantes latas",
+    desc: "2 Baguncinha industrial + 1 Batata Frita Média + 2 Refrigerantes em lata",
     img: "2baguncinhaindustrial.webp",
+    comboQtdLanches: 2,
+    comboComponentes: [
+      {
+        categoria: "lanches",
+        nome: "Baguncinha",
+        quantidade: 2,
+        tipoCarne: "Industrial",
+      },
+      {
+        categoria: "batatas",
+        nome: "Batata Frita Média",
+        quantidade: 1,
+      },
+      {
+        categoria: "bebidas",
+        nome: "Refrigerante em lata",
+        quantidade: 2,
+      },
+    ],
   },
 ];
 

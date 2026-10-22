@@ -51,6 +51,14 @@ const ctx = vm.createContext({
   alert: () => assert.fail("Edição não deve usar alertas"),
 });
 const fonte = fs.readFileSync("js/script.js", "utf8");
+const operacao = fs.readFileSync("js/operacao.js", "utf8");
+vm.runInContext(
+  operacao.slice(
+    operacao.indexOf("function serializarOperacao("),
+    operacao.indexOf("function dialogoOperacao("),
+  ),
+  ctx,
+);
 vm.runInContext(
   fonte.slice(
     fonte.indexOf("async function editarEnderecoCliente("),
@@ -72,6 +80,8 @@ vm.runInContext(
   assert.match(status.textContent, /Preencha/);
   campos.nome.value = "Casa nova";
   campos.rua.value = "Rua B";
+  // O Firestore pode devolver as mesmas chaves em outra ordem.
+  enderecos[0] = { extra: true, bairro: "Centro", numero: "10", rua: "Rua A", nome: "Casa" };
   await form.onsubmit({ preventDefault() {} });
   assert.equal(escritas, 1);
   assert.equal(enderecos[0].rua, "Rua B");
@@ -79,6 +89,12 @@ vm.runInContext(
   assert.equal(enderecos[1].nome, "Trabalho");
   assert.equal(atualizado, 1);
   assert.equal(fechado, true);
+  await ctx.editarEnderecoCliente(0);
+  enderecos[0] = { ...enderecos[0], rua: "Alteração real em outra tela" };
+  await form.onsubmit({ preventDefault() {} });
+  assert.equal(escritas, 1);
+  assert.equal(enderecos[0].rua, "Alteração real em outra tela");
+  assert.match(status.textContent, /outra tela/);
   console.log(
     "PASS: edição preenchida, cancelar sem escrita, validação e atualização preservando outros endereços.",
   );

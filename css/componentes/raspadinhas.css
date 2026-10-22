@@ -800,3 +800,1088 @@ dialog.ui-caixa.suporte-admin-tela {
   display: block;
   margin-bottom: 16px;
 }
+
+/* Produção do dia e controles móveis da chapa. */
+.cozinha-body .cozinha-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0 0;
+}
+.cozinha-body .cozinha-acoes button {
+  width: auto;
+  min-height: 40px;
+  height: auto;
+  margin: 0;
+  padding: 10px 13px;
+  font-size: 14px;
+}
+.cozinha-body .cozinha-acoes button[aria-pressed="true"] {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+.cozinha-pedido {
+  position: relative;
+}
+.cozinha-pedido .cozinha-remover-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: #e60016;
+  color: white;
+  font-size: 26px;
+  z-index: 2;
+}
+.cozinha-pedido:has(.cozinha-remover-x) header {
+  padding-right: 42px;
+}
+.producao-janela .cozinha-pedido {
+  margin: 14px 0;
+  padding: 16px;
+  font-size: 15px;
+}
+.producao-janela .suporte-voltar {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.producao-janela .cozinha-pedido header {
+  height: auto;
+  padding: 0;
+  background: none;
+  border: 0;
+  display: block;
+  text-align: left;
+}
+.producao-janela .cozinha-pedido h2 {
+  font-size: 19px;
+}
+.producao-janela .cozinha-pedido button {
+  width: auto;
+  min-height: 40px;
+  padding: 10px 14px;
+  margin-top: 12px;
+  background: #e60016;
+}
+.producao-concluido {
+  padding: 16px;
+  margin-bottom: 14px;
+  border: 1px solid #444;
+  border-radius: 12px;
+  background: #202020;
+}
+.producao-concluido small {
+  display: block;
+  margin: 8px 0 12px;
+}
+.producao-concluido button {
+  margin-top: 12px;
+}
+.cozinha-body.cozinha-monitor > header {
+  display: none;
+}
+.cozinha-body.cozinha-monitor .cozinha-controle {
+  display: none !important;
+}
+
+/* Feedback imediato e navegação compacta no celular. */
+.ui-carregando {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 90px;
+  padding: 20px 16px;
+  color: #eee;
+  font-size: 15px;
+}
+.ui-carregando > span {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border: 3px solid #555;
+  border-top-color: #f00020;
+  border-radius: 50%;
+  animation: carregando-ui 0.8s linear infinite;
+}
+.carregamento-etapa-ui {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 32px));
+  z-index: 16000;
+  padding: 12px;
+  border: 1px solid #555;
+  border-radius: 12px;
+  background: #1b1b1b;
+  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 72%);
+}
+@keyframes carregando-ui {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-carregando > span {
+    animation: none;
+  }
+}
+#lista-conferencia .botao-molhos-item {
+  width: auto;
+  min-height: 38px;
+  padding: 8px 16px;
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+#suporte-menu {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+#box-enviar-suporte #suporte-menu button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-height: 100px;
+  padding: 14px;
+  border: 1px solid #555;
+  background: #242424;
+  text-align: left;
+}
+#suporte-menu strong {
+  font-size: 15px;
+}
+#suporte-menu span {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #ccc;
+}
+.card-mensagem .mensagem-descricao {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+  margin: 0;
+}
+.card-mensagem .mensagem-cupom {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  margin: 14px 0;
+  background: #151515;
+  border: 1px dashed #666;
+  border-radius: 8px;
+}
+.mensagem-cupom span {
+  color: #bbb;
+  font-size: 12px;
+}
+.mensagem-cupom strong {
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+.card-mensagem small {
+  display: block;
+  margin-top: 14px;
+  color: #bbb;
+}
+.adicionais-grade-atendente {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 12px;
+}
+.adicional-produto-config,
+.adicional-lanche-combo,
+.adicional-todos-combo {
+  padding: 14px;
+  border: 1px solid #484848;
+  border-radius: 10px;
+  background: #181818;
+}
+.adicionais-grade-atendente .adicional-produto-config {
+  margin-bottom: 0 !important;
+}
+.adicional-produto-config > div:first-child {
+  line-height: 1.5;
+}
+.adicional-produto-config > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px !important;
+}
+.adicional-produto-config button {
+  width: 38px !important;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 6px !important;
+  margin: 0 !important;
+}
+.adicional-produto-config .qtd-adicional-produto {
+  margin: 0 !important;
+  min-width: 24px;
+  text-align: center;
+}
+.tipo-produto-opcao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #484848;
+  border-radius: 8px;
+  background: #181818;
+}
+.tipo-produto-opcao input {
+  width: auto;
+  margin: 0;
+}
+.tipo-produto-opcao:has(input:checked) {
+  border-color: #e60016;
+}
+.acrescimos-opcoes-atendente {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin: 16px 0;
+}
+.acrescimos-opcoes-atendente h3 {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+}
+.acrescimos-opcoes-atendente button {
+  margin: 0 !important;
+  justify-self: start;
+  width: auto;
+  min-height: 38px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+.acrescimos-opcoes-atendente .adicionais-selecionados-ui {
+  margin-top: 0;
+}
+
+/* Janelas de etapas e controles compactos, com o mesmo contraste em todas as páginas. */
+dialog.interface-janela {
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0 18px 18px;
+  overflow: auto;
+  color: #fff;
+  background: #1c1c1c;
+  border: 1px solid #555;
+  border-radius: 14px;
+}
+dialog.interface-janela::backdrop {
+  background: rgb(0 0 0 / 78%);
+}
+.interface-janela-topo {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 38px;
+  align-items: center;
+  gap: 10px;
+  margin: 0 -18px 18px;
+  padding: 12px;
+  background: #171717;
+  border-bottom: 1px solid #444;
+}
+.interface-janela-topo h3 {
+  font-size: 16px;
+  margin: 0;
+}
+.interface-janela-topo .ui-x {
+  position: static !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.interface-janela button,
+.admin-atalhos button,
+.central-operacao button,
+.ui-acoes-pedido button {
+  min-height: 38px;
+  padding: 9px 13px;
+  margin: 0;
+  font-size: 14px;
+  width: auto;
+}
+.interface-janela > div:not(.interface-janela-topo) {
+  padding: 0;
+}
+.interface-janela [id^="modal-config-"] {
+  position: static !important;
+  margin: 0 !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+.interface-janela h3,
+.interface-janela h4 {
+  font-size: 16px;
+}
+.interface-janela :is(.adicional-lanche-combo, .adicional-todos-combo) {
+  font-size: 14px;
+  padding: 12px;
+}
+.interface-janela :is(.adicional-lanche-combo, .adicional-todos-combo) button {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+}
+.interface-janela :is(.adicional-lanche-combo, .adicional-todos-combo) br + br {
+  display: none;
+}
+.interface-janela .registro-operacao {
+  padding: 16px;
+  margin: 0 0 14px;
+  border: 1px solid #444;
+  border-left: 3px solid #e60016;
+  border-radius: 10px;
+}
+.interface-janela .producao-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 12px 0;
+  margin: 0;
+  border-bottom: 1px solid #444;
+}
+.interface-janela .producao-item strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.interface-janela .producao-item span {
+  white-space: nowrap;
+  font-size: 14px;
+}
+.interface-janela .dados-cliente-admin p {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  margin: 0;
+  border-bottom: 1px solid #444;
+  overflow-wrap: anywhere;
+}
+.interface-janela > #form-edicao-cliente-admin {
+  display: grid !important;
+  gap: 10px;
+}
+.interface-janela #form-edicao-cliente-admin input {
+  margin: 0 0 8px;
+  width: 100%;
+}
+#suporte-menu button {
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+}
+#suporte-menu strong {
+  min-height: 2.5em;
+  display: flex;
+  align-items: flex-start;
+}
+.perfil-edicao-acoes {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.perfil-edicao-acoes button {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 10px 14px !important;
+  min-height: 40px !important;
+  font-size: 14px !important;
+}
+.perfil-edicao-acoes #btn-entrar-perfil {
+  font-weight: 700;
+}
+.admin-atalhos,
+#controles-chapeiro .operacao-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+.admin-atalhos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.admin-atalhos button {
+  width: 100%;
+  min-height: 52px;
+  padding: 8px;
+  font-size: 13px;
+}
+#central-operacao.central-etapa-modal {
+  inset: auto !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%);
+  width: min(760px, calc(100vw - 32px));
+  height: auto !important;
+  max-height: calc(100dvh - 32px);
+  margin: 0 !important;
+  border: 1px solid #555;
+  border-radius: 14px;
+  padding: 16px !important;
+}
+#central-operacao > h2 {
+  font-size: 20px;
+  margin: 18px 0 12px;
+}
+#central-operacao > p {
+  line-height: 1.5;
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+.botao-padrao {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #e60016;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+}
+.ui-voltar,
+.suporte-voltar,
+.interface-janela-topo button,
+.ui-navegacao button,
+.editor-endereco-cancelar {
+  background: #e60016 !important;
+  color: #fff !important;
+  border: 1px solid #ff3547 !important;
+  white-space: nowrap;
+}
+.ui-navegacao button,
+.suporte-voltar {
+  min-height: 38px;
+  padding: 9px 12px;
+  font-size: 14px;
+}
+.ui-acoes-pedido {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+.comanda-card button,
+.card-comanda button {
+  min-height: 38px;
+  font-size: 14px;
+  padding: 9px 12px;
+  margin: 0;
+}
+.comanda-card > button {
+  margin: 10px 0 0;
+}
+.ui-acoes-pedido button,
+#central-operacao .operacao-acoes button {
+  flex: 0 0 auto;
+}
+.cliente-acoes-ui {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.interface-janela .cliente-acoes-ui button {
+  width: 100%;
+}
+.topo-cliente-admin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.comanda-valores {
+  margin: 16px 0;
+  display: grid;
+  gap: 8px;
+}
+.comanda-valores > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.comanda-valores dd {
+  margin: 0;
+}
+button[aria-busy="true"]::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  vertical-align: -2px;
+  border: 2px solid rgb(255 255 255 / 45%);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: carregando-ui 0.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  button[aria-busy="true"]::before {
+    animation: none;
+  }
+}
+
+.interface-janela.janela-combo-auto .config-combo-auto {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.interface-janela .controle-adicional-combo-auto button {
+  width: 32px;
+  height: 44px;
+  min-height: 44px;
+}
+
+/* Controles de produto agrupados por tarefa, com fundo próprio e respiro. */
+:is(#modal-produto, #modal-produto-auto)
+  :is(
+    .qtd-produto-modal,
+    #modal-opcoes-tipo,
+    #modal-opcoes-tipo-auto,
+    #box-adicionais-produto,
+    #box-adicionais-auto
+  ),
+.produto-bloco-ui,
+.acrescimos-opcoes-atendente {
+  background: #252525;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 14px 0;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 18%);
+}
+:is(#modal-opcoes-tipo, #modal-opcoes-tipo-auto):empty {
+  display: none;
+}
+.produto-bloco-ui h3 {
+  margin: 0 0 12px;
+}
+.produto-bloco-ui:has(> textarea[hidden]) {
+  display: none;
+}
+:is(#obs-produto, #obs-produto-auto, #observacao-combo-auto) {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 14px 0;
+  background: #292929;
+  padding: 14px;
+  border-radius: 10px;
+}
+#observacao-combo-auto[hidden] {
+  display: none;
+}
+.interface-janela :is(#lista-adicionais, #lista-adicionais-auto, #area-acrescimos-produto) {
+  padding: 0;
+  margin: 0;
+}
+.interface-janela .adicionais-grade-atendente {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+.interface-janela .controle-adicional-combo-auto :is(span, strong) {
+  margin: 0 !important;
+  min-width: 18px;
+  text-align: center;
+}
+.combo-observacao-ui {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+.cozinha-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+.cozinha-acoes button {
+  flex: 1;
+  min-width: 90px;
+  margin: 0;
+  font-size: 14px;
+  min-height: 40px;
+  padding: 10px;
+}
+#cozinha-acesso {
+  max-width: 440px;
+  margin: 28px auto;
+  padding: 22px;
+  background: #252525;
+  border-radius: 14px;
+}
+#cozinha-acesso form {
+  display: grid;
+  gap: 14px;
+}
+#cozinha-acesso input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  background: #191919;
+  color: white;
+  border: 1px solid #666;
+  border-radius: 8px;
+}
+#cozinha-acesso button {
+  margin: 0;
+}
+.cozinha-body .operacao-acoes {
+  gap: 12px;
+  margin-bottom: 18px;
+}
+:is(#btn-toggle-adicionais, #btn-toggle-adicionais-auto) {
+  background: #ed0016;
+  color: #fff;
+  border: 0;
+  border-radius: 9px;
+  min-height: 40px;
+  padding: 10px 16px;
+  margin: 0;
+}
+#combo-site-opcoes-ui {
+  background: #252525;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 14px 0;
+}
+#combo-site-opcoes-ui[hidden],
+#obs-produto[hidden] {
+  display: none;
+}
+
+.combo-resumo-ui {
+  background: #2c2c2c;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Acréscimos: a janela controla a rolagem; elimina o recolhimento legado. */
+dialog.interface-janela #lista-adicionais {
+  max-height: none !important;
+  overflow: visible !important;
+  transition: none;
+}
+:is(#btn-toggle-adicionais, #btn-toggle-adicionais-auto, .combo-abrir-ui) {
+  width: auto !important;
+  min-height: 38px !important;
+  padding: 9px 14px !important;
+  font-size: 14px !important;
+  margin: 0 !important;
+}
+:is(#box-adicionais-produto, #box-adicionais-auto, #combo-site-opcoes-ui, .combo-entrada-ui) {
+  padding: 10px !important;
+  margin: 12px 0 !important;
+}
+:is(#modal-opcoes-tipo, #modal-opcoes-tipo-auto)[hidden] {
+  display: none !important;
+}
+#combo-site-opcoes-ui:empty {
+  display: none;
+}
+.combo-selecao-ui {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.combo-selecao-ui:empty {
+  display: none;
+}
+.combo-selecao-ui > div {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #292929;
+  border-radius: 8px;
+}
+#personalizacao-combo-auto > [hidden] {
+  display: none !important;
+}
+.produto-painel-compacto-ui > [hidden] {
+  display: none !important;
+}
+.produto-painel-compacto-ui > button:last-child {
+  margin: 12px 0 0 !important;
+  min-height: 42px;
+  padding: 10px 16px;
+}
+.produto-painel-compacto-ui .quantidade-painel-ui {
+  margin-bottom: 0;
+  padding: 12px;
+}
+.produto-painel-compacto-ui .quantidade-painel-ui button {
+  margin: 0;
+  width: 38px;
+  min-height: 38px;
+  padding: 7px;
+}
+.produto-painel-compacto-ui > h2 {
+  margin: 12px 0 8px;
+}
+#modal-combo-auto .modal-conteudo > hr {
+  display: none;
+}
+#modal-combo-auto #personalizacao-combo-auto {
+  margin: 10px 0;
+  padding: 0;
+}
+#modal-resumo-auto .modal-conteudo {
+  padding: 16px !important;
+}
+#modal-resumo-auto .modal-conteudo > h2 {
+  margin: 0 48px 16px 0 !important;
+  padding: 0 0 0 10px !important;
+  font-size: 20px;
+  line-height: 1.5;
+}
+#modal-resumo-auto .modal-conteudo > .ui-x {
+  top: 12px;
+  right: 12px;
+}
+#modal-resumo-auto .resumo-auto-item {
+  background: #242424;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+#modal-resumo-auto .resumo-auto-item-topo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 8px;
+}
+#modal-resumo-auto .resumo-auto-preco {
+  white-space: nowrap;
+  font-size: 14px;
+}
+#modal-resumo-auto .resumo-auto-item p {
+  margin: 6px 0;
+}
+#modal-resumo-auto .resumo-auto-item > div {
+  margin-top: 8px !important;
+}
+#modal-resumo-auto .resumo-auto-acoes {
+  display: flex;
+  gap: 8px;
+}
+#modal-resumo-auto .resumo-auto-acoes button {
+  width: auto;
+  margin: 0;
+  padding: 7px 12px;
+  min-height: 34px;
+  font-size: 13px;
+}
+.comanda-item-acao[hidden] {
+  display: none !important;
+}
+dialog.interface-janela #lista-adicionais .info-adicional-combo-auto {
+  display: block;
+  margin: 0;
+}
+dialog.interface-janela #lista-adicionais .controle-adicional-combo-auto {
+  margin: 0;
+}
+dialog.interface-janela .controle-adicional-combo-auto :is(span, strong) {
+  color: #fff;
+}
+
+#personalizacao-combo-auto > .combo-modo-auto {
+  display: none !important;
+}
+#modal-resumo-auto .modal-conteudo > h3 {
+  margin: 12px 0;
+}
+#modal-resumo-auto .modal-conteudo > button:not(.ui-x) {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  min-height: 40px;
+  font-size: 14px;
+}
+.interface-janela #area-acrescimos-produto > [data-limpar-acrescimos] {
+  margin-top: 14px !important;
+}
+.interface-janela .adicional-produto-config > .controle-adicional-combo-auto {
+  margin-top: 0 !important;
+}
+.acrescimos-com-contador-ui {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.acrescimos-contador-ui {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 20px;
+  background: #fff;
+  color: #b90010;
+  font-size: 12px;
+  font-weight: 700;
+}
+.adicionais-selecionados-ui {
+  margin-top: 10px;
+  padding: 9px 11px;
+  background: #303030;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left;
+}
+.adicionais-selecionados-ui[hidden] {
+  display: none;
+}
+.cozinha-proximo {
+  margin: 14px 0 8px;
+  padding: 0 4px;
+  color: #ffd166;
+  font-size: 14px;
+  font-weight: 700;
+}
+dialog.destino-pedido-ui {
+  padding: 16px !important;
+}
+dialog.destino-pedido-ui > h2 {
+  margin: 0 48px 16px 0 !important;
+  padding-top: 0 !important;
+  font-size: 20px;
+  line-height: 1.5;
+}
+dialog.destino-pedido-ui > .ui-x {
+  top: 12px;
+  right: 12px;
+}
+dialog.destino-pedido-ui > .operacao-acoes {
+  margin: 0;
+  gap: 10px;
+}
+
+.cozinha-proximo + .cozinha-pedido {
+  border-color: #ed0016;
+}
+/* Cabeçalho do diálogo reserva altura para o X antes das ações. */
+dialog.destino-pedido-ui > h2 {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px !important;
+}
+.pagamento-compacto-ui button {
+  min-height: 38px;
+  padding: 9px 13px;
+  font-size: 14px;
+  margin: 8px 4px 8px 0;
+}
+.pagamento-compacto-ui .pagamento-separado-modos button {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 13px;
+  width: auto;
+}
+.pagamento-quantidade-ui {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 6px 0 0;
+}
+.pagamento-quantidade-ui button {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  margin: 0;
+  padding: 0;
+  font-size: 18px;
+}
+.pagamento-quantidade-ui span {
+  margin: 0 !important;
+  min-width: 22px;
+  text-align: center;
+}
+.pagamento-item-ui {
+  line-height: 1.5;
+}
+.pagamento-busca-linha-ui {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+.pagamento-busca-linha-ui input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 8px;
+}
+.pagamento-busca-linha-ui button {
+  margin: 0;
+  width: auto;
+  min-height: 38px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+#resultado-cliente-separado:not(:empty) {
+  padding: 12px;
+  border-radius: 10px;
+  background: #2b2b2b;
+  display: grid;
+  gap: 10px;
+}
+#resultado-cliente-separado p {
+  margin: 0;
+}
+#resultado-cliente-separado button {
+  margin: 0;
+  justify-self: start;
+}
+.pagamento-misto-resumo-ui {
+  background: #2b2b2b;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pagamento-secundario-ui label {
+  display: block;
+  margin: 8px 0 4px;
+}
+.pagamento-secundario-ui input[type="number"] {
+  padding: 10px;
+  width: calc(100% - 36px);
+  box-sizing: border-box;
+}
+.pagamento-secundario-ui
+  :is(#area-pagamento-misto, #area-pagamento-misto-separado)
+  > hr:first-child {
+  display: none;
+}
+.pagamento-secundario-ui #cupons-disponiveis-pagamento-ui button {
+  margin-top: 10px;
+}
+.pagamento-item-ui > strong {
+  display: block;
+}
+.pagamento-secundario-ui :is(#area-pagamento-misto, #area-pagamento-misto-separado) > br {
+  display: none;
+}
+.pagamento-secundario-ui .pagamento-misto-conteudo-ui {
+  margin-top: 0 !important;
+}
+.pagamento-misto-campos-ui {
+  display: grid;
+  gap: 10px;
+}
+.pagamento-secundario-ui label.pagamento-misto-campo-ui {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 52%);
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 14px;
+}
+.pagamento-misto-valor-ui {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 10px;
+  color: #bbb;
+  background: #282828;
+  border: 1px solid #555;
+  border-radius: 8px;
+}
+.pagamento-secundario-ui .pagamento-misto-valor-ui input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 8px;
+  margin: 0;
+  background: transparent;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-size: 16px;
+}
+.pagamento-misto-conteudo-ui > [id^="resumo-"] {
+  margin-top: 18px;
+}
+.pagamento-informado-ui {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #ccc;
+  font-size: 13px;
+}
+.pagamento-restante-ui {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 14px;
+  border: 1px solid #a68132;
+  border-radius: 10px;
+  background: #342b19;
+  color: #ffdc89;
+  font-size: 14px;
+}
+.pagamento-restante-ui strong {
+  font-size: 22px;
+  white-space: nowrap;
+}
+.pagamento-restante-ui.quitado {
+  border-color: #32845a;
+  background: #193426;
+  color: #9aefbd;
+}
+.registro-acoes-secundarias-ui {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+.registro-acoes-secundarias-ui > button {
+  margin: 0 !important;
+  min-height: 38px;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+.combo-componentes-ui {
+  margin: 8px 0 10px;
+  padding: 10px 12px;
+  list-style: none;
+  border-radius: 8px;
+  background: #292929;
+  color: #e4e4e4;
+  font-size: 14px;
+  line-height: 1.6;
+}

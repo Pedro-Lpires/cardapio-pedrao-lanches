@@ -257,7 +257,7 @@ async function localTests() {
     valorTotal: 150,
   });
   assert(!recibo.includes("R$"));
-  assert(recibo.includes("5 × Baguncinha"));
+  assert(recibo.includes("5 Baguncinha"));
   assert(!recibo.includes("<script>"));
   assert(recibo.includes("Sem queijo"));
   const geral = context.gerarImpressaoOperacao("geral", {
@@ -312,7 +312,7 @@ async function localTests() {
   const molhos = context.molhosAtendenteOperacao([itemMolhos]);
   assert(molhos.includes("2 Maionese"));
   assert(molhos.includes("Unidade 2: Sem molho"));
-  assert(molhos.includes("2 × Barbecue"));
+  assert(molhos.includes("2 Barbecue"));
   for (const destino of ["cozinha", "motoboy"]) {
     const impressao = context.gerarImpressaoOperacao(destino, { itens: [itemMolhos] });
     assert(!impressao.includes("Maionese"));

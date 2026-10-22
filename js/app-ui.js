@@ -21,7 +21,7 @@ function atualizarPublicoCampanhaUI() {
 }
 function acoesRegistroUI(colecao, id, entrega = false) {
   const a = `'${colecao}','${escaparOperacao(id)}'`;
-  return `<div class="operacao-acoes ui-acoes-pedido"><button onclick="abrirDestinoPedidoUI('cozinha',${a})">Cozinha</button>${entrega ? `<button onclick="abrirDestinoPedidoUI('motoboy',${a})">Motoboy</button>` : ""}<button onclick="imprimirRegistroOperacao(${a},'geral')">Imprimir conferência</button></div>`;
+  return `<div class="operacao-acoes ui-acoes-pedido"><button onclick="abrirDestinoPedidoUI('cozinha',${a})">Cozinha</button>${entrega ? `<button onclick="abrirDestinoPedidoUI('motoboy',${a})">Motoboy</button>` : ""}<button title="Imprimir conferência" aria-label="Imprimir conferência" onclick="imprimirRegistroOperacao(${a},'geral')">Imprimir</button></div>`;
 }
 const telasAtendenteUI = [
   "area-consumo-local",
@@ -36,6 +36,7 @@ const telasAtendenteUI = [
 let pilhaAtendenteUI = [],
   profundidadeUI = 0,
   voltandoUI = false;
+let navegacaoAtendenteUI = 0;
 function ocultarTelasAtendenteUI() {
   telasAtendenteUI.forEach((id) => {
     const e = document.getElementById(id);
@@ -46,12 +47,33 @@ function ocultarTelasAtendenteUI() {
   });
 }
 function fecharFluxoAtendenteUI() {
+  navegacaoAtendenteUI++;
+  document.getElementById("carregamento-etapa-atendente")?.remove();
   pilhaAtendenteUI = [];
   ocultarTelasAtendenteUI();
   document.querySelector(".menu-atendente").hidden = false;
   window.scrollTo(0, 0);
 }
 async function voltarFluxoAtendenteUI() {
+  if (profundidadeUI) return fecharFluxoAtendenteUI();
+  const pagamento =
+    /^(abrirFechamento|abrirPagamento|abrirIdentificacao|abrirBeneficios|abrirFormaPagamento)/;
+  const rota = [...pilhaAtendenteUI]
+    .reverse()
+    .find((r) => r.nome === "abrirComandaVisual" || pagamento.test(r.nome));
+  if (rota?.args[0]) {
+    const doc = await lerComPrazoUI(db.collection("comandas").doc(rota.args[0]).get());
+    if (!doc.exists || doc.data().status !== "Aberta") {
+      limparHistoricoComandaUI(rota.args[0]);
+    } else if (
+      pagamento.test(pilhaAtendenteUI.at(-1)?.nome || "") &&
+      pilhaAtendenteUI.at(-1)?.nome !== "abrirFechamentoComanda" &&
+      !pilhaAtendenteUI.slice(0, -1).some((r) => pagamento.test(r.nome))
+    ) {
+      pilhaAtendenteUI = pilhaAtendenteUI.filter((r) => !pagamento.test(r.nome));
+      return abrirFechamentoComanda(rota.args[0]);
+    }
+  }
   pilhaAtendenteUI.pop();
   const anterior = pilhaAtendenteUI.at(-1);
   if (!anterior) return fecharFluxoAtendenteUI();
@@ -62,13 +84,53 @@ async function voltarFluxoAtendenteUI() {
     voltandoUI = false;
   }
 }
+function limparHistoricoComandaUI(id) {
+  pilhaAtendenteUI = pilhaAtendenteUI.filter((r) => r.args[0] !== id);
+}
+function reiniciarHistoricoPagamentoUI(id) {
+  pilhaAtendenteUI = pilhaAtendenteUI.filter(
+    (r) =>
+      r.args[0] !== id ||
+      !/^(abrirPagamento|abrirIdentificacao|abrirBeneficios|abrirFormaPagamento)/.test(r.nome),
+  );
+}
+async function fecharEtapaAtendenteUI() {
+  const rota = pilhaAtendenteUI.at(-1);
+  if (["abrirConsumoLocal", "abrirComandasAbertas"].includes(rota?.nome))
+    return fecharFluxoAtendenteUI();
+  if (rota?.nome === "abrirMesaAtendente") return abrirConsumoLocal();
+  if (
+    /^(abrirFechamento|abrirPagamento|abrirIdentificacao|abrirBeneficios|abrirFormaPagamento)/.test(
+      rota?.nome || "",
+    ) &&
+    rota.args[0]
+  ) {
+    const doc = await lerComPrazoUI(db.collection("comandas").doc(rota.args[0]).get());
+    if (!doc.exists || doc.data().status !== "Aberta") return voltarFluxoAtendenteUI();
+    const id = rota.args[0];
+    reiniciarHistoricoPagamentoUI(id);
+    return rota.nome === "abrirFechamentoComanda"
+      ? abrirComandaVisual(id)
+      : abrirFechamentoComanda(id);
+  }
+  return voltarFluxoAtendenteUI();
+}
 function cabecalhoEtapaUI(area) {
   area.querySelector(".ui-navegacao")?.remove();
   const nav = document.createElement("div");
   nav.className = "ui-navegacao";
   nav.innerHTML =
-    '<button class="ui-voltar" onclick="voltarFluxoAtendenteUI()">← Voltar</button><button class="ui-x" aria-label="Fechar e voltar ao painel" onclick="fecharFluxoAtendenteUI()">×</button>';
+    '<button class="ui-voltar" onclick="voltarFluxoAtendenteUI()">← Voltar</button><button class="ui-x" aria-label="Fechar etapa atual" onclick="fecharEtapaAtendenteUI()">×</button>';
   area.prepend(nav);
+  if (
+    area.id === "area-produtos-comanda" &&
+    typeof comandaAbertaAtual !== "undefined" &&
+    comandaAbertaAtual
+  ) {
+    const comandaId = comandaAbertaAtual;
+    nav.querySelector(".ui-x").onclick = () => abrirComandaVisual(comandaId);
+    nav.querySelector(".ui-x").setAttribute("aria-label", "Fechar itens e voltar à comanda");
+  }
   if (area.id === "central-operacao" && (tipoCentralOperacao || idCentralOperacao)) {
     const anterior = idCentralOperacao ? tipoCentralOperacao : null;
     nav.querySelector(".ui-voltar").onclick = () => abrirCentralOperacao(anterior);
@@ -76,7 +138,11 @@ function cabecalhoEtapaUI(area) {
     nav.querySelector(".ui-x").setAttribute("aria-label", "Fechar categoria");
   }
   area.querySelectorAll("button").forEach((b) => {
-    if (!b.closest(".ui-navegacao") && /voltar (para |à )?(comanda|mesa)/i.test(b.textContent)) {
+    if (
+      !b.closest(".ui-navegacao") &&
+      (/voltar (para |à |aos )?(comanda|mesa|produtos)/i.test(b.textContent) ||
+        /^[←⬅]?\s*voltar$/i.test(b.textContent.trim()))
+    ) {
       b.hidden = true;
     }
     if (b.classList.contains("ui-x") && !b.closest(".ui-navegacao")) b.hidden = true;
@@ -125,11 +191,16 @@ function instalarNavegacaoAtendenteUI() {
     if (typeof original !== "function") continue;
     window[nome] = async function (...args) {
       if (profundidadeUI) return original.apply(this, args);
+      const navegacao = ++navegacaoAtendenteUI;
+      if (nome === "abrirConsumoLocal" && !voltandoUI) pilhaAtendenteUI = [];
       if (nome === "abrirCentralOperacao" && !args[1] && !voltandoUI)
         pilhaAtendenteUI = pilhaAtendenteUI.filter(
           (r) => r.nome !== "abrirCentralOperacao" || (args[0] && !r.args[0] && !r.args[1]),
         );
-      if (!voltandoUI && ["abrirBuscaProdutos", "abrirComandaVisual"].includes(nome)) {
+      if (
+        !voltandoUI &&
+        ["abrirBuscaProdutos", "abrirComandaVisual", "abrirMesaAtendente"].includes(nome)
+      ) {
         const indice = pilhaAtendenteUI.findLastIndex(
           (r) => r.nome === nome && r.args[0] === args[0],
         );
@@ -137,17 +208,30 @@ function instalarNavegacaoAtendenteUI() {
       }
       ocultarTelasAtendenteUI();
       document.querySelector(".menu-atendente").hidden = true;
+      const carregando = document.createElement("section");
+      carregando.id = "carregamento-etapa-atendente";
+      carregando.className = "carregamento-etapa-ui";
+      carregando.innerHTML = htmlCarregandoUI("Carregando…");
+      cabecalhoEtapaUI(carregando);
+      document.body.append(carregando);
       if (nome === "abrirComandaVisual" && typeof areaDestinoComandaAtual !== "undefined")
         areaDestinoComandaAtual = null;
       profundidadeUI++;
       try {
         await original.apply(this, args);
       } catch (e) {
+        ocultarTelasAtendenteUI();
         document.querySelector(".menu-atendente").hidden = false;
         avisoOperacao("Não foi possível abrir esta etapa: " + e.message);
         return;
       } finally {
+        carregando.remove();
         profundidadeUI--;
+      }
+      if (navegacao !== navegacaoAtendenteUI) {
+        ocultarTelasAtendenteUI();
+        document.querySelector(".menu-atendente").hidden = false;
+        return;
       }
       let alvo = nome === "abrirPainelProduto" ? "area-comanda-atendente" : id;
       if (nome === "abrirPainelProduto" && typeof contextoPainelProduto !== "undefined") {
@@ -201,8 +285,7 @@ function instalarNavegacaoAtendenteUI() {
           .querySelector(".ui-navegacao")
           .insertAdjacentHTML("afterend", acoesRegistroUI("comandas", args[0]));
       if (nome === "abrirMesaAtendente") {
-        const mesaDoc = await db.collection("mesas").doc(String(args[0])).get();
-        const numero = Number(mesaDoc.data()?.numero);
+        const numero = Number(area.dataset.mesaNumero);
         if (Number.isInteger(numero)) {
           const box = document.createElement("div");
           box.className = "operacao-acoes";
@@ -443,6 +526,55 @@ function atualizarAutoCardapioUI() {
     if (b.textContent !== texto) b.textContent = texto;
   });
 }
+function instalarCarregamentoAcoesUI() {
+  const acoes = {
+    buscarCliente: "Entrando…",
+    loginAtendente: "Entrando…",
+    salvarPerfilCliente: "Salvando…",
+    criarPerfilCliente: "Criando conta…",
+    abrirPedidosCliente: "Buscando…",
+    abrirBonusCliente: "Buscando…",
+    abrirEnderecosCliente: "Buscando…",
+    editarEnderecoCliente: "Abrindo…",
+    aplicarCupomDesconto: "Conferindo…",
+    carregarCategoriaProdutos: "Buscando…",
+    criarChamadoSuporte: "Enviando…",
+    enviarMensagemChamadoCliente: "Enviando…",
+  };
+  for (const [nome, texto] of Object.entries(acoes)) {
+    const original = window[nome];
+    if (typeof original !== "function") continue;
+    let executando = false;
+    window[nome] = async function (...args) {
+      if (executando) return;
+      executando = true;
+      const botao = document.activeElement?.closest("button");
+      const conteudo = botao?.innerHTML;
+      if (botao) {
+        botao.disabled = true;
+        botao.setAttribute("aria-busy", "true");
+        botao.textContent = texto;
+      }
+      try {
+        return await original.apply(this, args);
+      } catch (erro) {
+        if (["abrirPedidosCliente", "abrirEnderecosCliente"].includes(nome))
+          document.getElementById("area-perfil").innerHTML =
+            "<p>Não foi possível buscar os dados. Confira sua conexão e tente novamente.</p>";
+        mostrarAvisoUI(
+          erro.message || "Não foi possível concluir. Confira sua conexão e tente novamente.",
+        );
+      } finally {
+        executando = false;
+        if (botao?.isConnected) {
+          botao.disabled = false;
+          botao.removeAttribute("aria-busy");
+          botao.innerHTML = conteudo;
+        }
+      }
+    };
+  }
+}
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof abrirTela === "function" && document.getElementById("tela-inicio")) {
     const anterior = abrirTela;
@@ -489,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
     x.className = "ui-x";
     x.textContent = "×";
     x.setAttribute("aria-label", "Fechar minha conta");
-    x.onclick = () => abrirTela("inicio");
+    x.onclick = () => (card.id === "perfil-form" ? voltarPerfilUI() : abrirTela("inicio"));
     card.classList.add("ui-caixa");
     card.prepend(x);
   });
@@ -501,6 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#modal-carrinho .conteudo-carrinho").prepend(fecharCarrinho);
   }
   instalarNavegacaoAtendenteUI();
+  instalarCarregamentoAcoesUI();
   atualizarPublicoCampanhaUI();
   organizarModulosAdminUI();
   prepararFotosAdminUI();
@@ -514,19 +647,45 @@ document.addEventListener("DOMContentLoaded", () => {
           : original(...args);
   }
   let pendente = false;
-  new MutationObserver(() => {
+  const detalhesNovos = new Set();
+  let atualizarFotos = false,
+    atualizarCardapio = false;
+  new MutationObserver((registros) => {
+    for (const registro of registros)
+      for (const n of registro.addedNodes) {
+        if (n.nodeType !== 1) continue;
+        if (
+          n.matches("#produto-imagem,#edit-produto-imagem") ||
+          n.querySelector("#produto-imagem,#edit-produto-imagem")
+        )
+          atualizarFotos = true;
+        if (
+          n.matches(".auto-grid-produtos") ||
+          n.querySelector(".auto-grid-produtos") ||
+          registro.target.closest?.(".auto-grid-produtos")
+        )
+          atualizarCardapio = true;
+        if (n.matches('[id^="pedido-detalhes-"]')) detalhesNovos.add(n);
+        n.querySelectorAll('[id^="pedido-detalhes-"]').forEach((d) => detalhesNovos.add(d));
+      }
+    if (!atualizarFotos && !atualizarCardapio && !detalhesNovos.size) return;
     if (pendente) return;
     pendente = true;
     requestAnimationFrame(() => {
       pendente = false;
-      prepararFotosAdminUI();
-      atualizarAutoCardapioUI();
-      document.querySelectorAll('[id^="pedido-detalhes-"]').forEach((d) => {
-        if (d.querySelector(".ui-acoes-pedido")) return;
-        const id = d.id.slice("pedido-detalhes-".length);
-        const entrega = d.dataset.entrega === "true";
-        d.insertAdjacentHTML("beforeend", acoesRegistroUI("pedidos", id, entrega));
-      });
+      if (atualizarFotos) prepararFotosAdminUI();
+      if (atualizarCardapio) atualizarAutoCardapioUI();
+      atualizarFotos = atualizarCardapio = false;
+      const lote = [...detalhesNovos];
+      detalhesNovos.clear();
+      lote
+        .filter((d) => d.isConnected)
+        .forEach((d) => {
+          if (d.querySelector(".ui-acoes-pedido")) return;
+          const id = d.id.slice("pedido-detalhes-".length);
+          const entrega = d.dataset.entrega === "true";
+          d.insertAdjacentHTML("beforeend", acoesRegistroUI("pedidos", id, entrega));
+        });
     });
   }).observe(document.body, { childList: true, subtree: true });
 });

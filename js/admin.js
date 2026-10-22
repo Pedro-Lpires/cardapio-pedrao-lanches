@@ -79,29 +79,12 @@ function processar(periodo) {
 
 window.onload = () => processar("hoje");
 
-function toggleLoja() {
-  console.log("CLIQUEI NO BOTÃO");
-
+async function toggleLoja() {
   const ref = db.collection("config").doc("loja");
-
-  ref.get().then((doc) => {
-    console.log("DOC:", doc.exists, doc.data());
-
-    const atual = doc.exists ? doc.data().aberta : true;
-
-    console.log("VALOR ATUAL:", atual);
-
-    ref
-      .set({
-        aberta: !atual,
-      })
-      .then(() => {
-        console.log("SALVOU COM SUCESSO");
-      })
-      .catch((e) => {
-        console.error("ERRO AO SALVAR:", e);
-      });
-  });
+  const doc = await lerComPrazoUI(ref.get());
+  const aberta = !(doc.exists ? doc.data().aberta : true);
+  await ref.set({ aberta }, { merge: true });
+  mostrarAvisoUI(aberta ? "Loja aberta." : "Loja fechada.");
 }
 function limparTelefoneAdmin(valor) {
   return valor.replace(/\D/g, "");
@@ -258,6 +241,7 @@ async function salvarClienteAdmin(telefoneAntigo) {
   }
 
   alert("Cliente atualizado!");
+  document.getElementById("form-edicao-cliente-admin")?.closest("dialog.interface-janela")?.close();
   document.getElementById("admin-busca-cliente").value = telefoneNovo;
   buscarClienteAdmin();
 }
@@ -501,7 +485,7 @@ function formatarItemPedidoAdmin(i) {
 }
 
 async function cancelarPedidoAdmin(idPedido) {
-  if (!confirm("Cancelar esse pedido?")) return;
+  if (!(await confirmarOperacao("Cancelar esse pedido?"))) return;
 
   const ref = db.collection("pedidos").doc(idPedido);
   const doc = await ref.get();
@@ -548,7 +532,9 @@ function ativarEdicaoClienteAdmin() {
   const form = document.getElementById("form-edicao-cliente-admin");
   if (!form) return;
 
-  form.style.display = form.style.display === "none" ? "block" : "none";
+  const janela = form.parentElement?.matches("dialog.interface-janela") ? form.parentElement : null;
+  if (janela) return janela.close();
+  abrirJanelaElementoUI(form, "Editar cliente");
 }
 
 async function listarPedidosClienteAdmin(telefone) {
@@ -633,7 +619,7 @@ async function editarPedidoAdmin(idPedido) {
     textoItens += `${index + 1}. ${item.nome} - Qtd: ${item.quantidade} - R$ ${item.preco}\n`;
   });
 
-  const opcao = prompt(
+  const opcao = await solicitarTextoUI(
     textoItens +
       "\nO que deseja fazer?\n" +
       "1 - Adicionar item\n" +
@@ -647,20 +633,25 @@ async function editarPedidoAdmin(idPedido) {
   );
 
   if (opcao === "1") {
-    const termo = prompt("Digite parte do nome do item. Ex: coca, big, bacon, combo");
+    const termo = await solicitarTextoUI(
+      "Digite parte do nome do item. Ex: coca, big, bacon, combo",
+    );
     if (!termo) return;
 
     const resultados = buscarItensAdmin(termo);
 
     if (resultados.length === 0) {
-      const addManual = confirm("Nenhum item encontrado. Deseja adicionar manualmente?");
+      const addManual = await confirmarOperacao(
+        "Nenhum item encontrado. Deseja adicionar manualmente?",
+      );
       if (!addManual) return;
 
-      const nomeItem = prompt("Nome do item:");
-      const qtd = Number(prompt("Quantidade:", "1")) || 1;
-      const preco = Number(prompt("Preço unitário:", "0")) || 0;
+      const nomeItem = await solicitarTextoUI("Nome do item:");
+      const qtd = Number(await solicitarTextoUI("Quantidade:", "1")) || 1;
+      const preco = Number(await solicitarTextoUI("Preço unitário:", "0")) || 0;
       const categoria =
-        prompt("Categoria: Lanches, Bebidas, Combos ou Batatas", "Lanches") || "Lanches";
+        (await solicitarTextoUI("Categoria: Lanches, Bebidas, Combos ou Batatas", "Lanches")) ||
+        "Lanches";
 
       itens.push({ nome: nomeItem, quantidade: qtd, preco, categoria });
     } else {
@@ -670,14 +661,14 @@ async function editarPedidoAdmin(idPedido) {
         listaTexto += `${index + 1}. ${item.nome} - R$ ${Number(item.preco).toFixed(2)} (${item.categoria})\n`;
       });
 
-      const escolha = Number(prompt(listaTexto + "\nDigite o número do item:"));
+      const escolha = Number(await solicitarTextoUI(listaTexto + "\nDigite o número do item:"));
 
       if (!escolha || escolha < 1 || escolha > resultados.length) {
         return alert("Opção inválida.");
       }
 
       const selecionado = resultados[escolha - 1];
-      const qtd = Number(prompt("Quantidade:", "1")) || 1;
+      const qtd = Number(await solicitarTextoUI("Quantidade:", "1")) || 1;
 
       itens.push({
         nome: selecionado.nome,
@@ -696,7 +687,9 @@ async function editarPedidoAdmin(idPedido) {
     alert("Item adicionado!");
     return;
   } else if (opcao === "2") {
-    const numeroItem = Number(prompt(textoItens + "\nDigite o número do item que deseja remover:"));
+    const numeroItem = Number(
+      await solicitarTextoUI(textoItens + "\nDigite o número do item que deseja remover:"),
+    );
 
     if (!numeroItem || numeroItem < 1 || numeroItem > itens.length) {
       return alert("Item inválido.");
@@ -713,7 +706,7 @@ async function editarPedidoAdmin(idPedido) {
     alert("Item removido!");
     return;
   } else if (opcao === "3") {
-    const respostaTaxa = prompt("Nova taxa de entrega:", pedido.taxaEntrega || 0);
+    const respostaTaxa = await solicitarTextoUI("Nova taxa de entrega:", pedido.taxaEntrega || 0);
 
     if (respostaTaxa === null) {
       return;
@@ -734,7 +727,7 @@ async function editarPedidoAdmin(idPedido) {
     alert("Taxa alterada!");
     return;
   } else if (opcao === "4") {
-    const escolhaTipo = prompt(
+    const escolhaTipo = await solicitarTextoUI(
       "Escolha o tipo do pedido:\n" + "1 - Entrega\n" + "2 - Retirada\n" + "3 - Consumir no local",
     );
 
@@ -754,7 +747,8 @@ async function editarPedidoAdmin(idPedido) {
     return;
   } else if (opcao === "5") {
     const novoVale =
-      Number(prompt("Valor do vale fidelidade:", pedido.descontoFidelidade || 0)) || 0;
+      Number(await solicitarTextoUI("Valor do vale fidelidade:", pedido.descontoFidelidade || 0)) ||
+      0;
 
     await ref.update({
       descontoFidelidade: novoVale,
@@ -765,12 +759,12 @@ async function editarPedidoAdmin(idPedido) {
     alert("Vale fidelidade alterado!");
     return;
   } else if (opcao === "6") {
-    const acaoCupom = prompt(
+    const acaoCupom = await solicitarTextoUI(
       "O que deseja fazer?\n" + "1 - Adicionar cupom\n" + "2 - Remover cupom",
     );
 
     if (acaoCupom === "1") {
-      const tipoCupom = prompt(
+      const tipoCupom = await solicitarTextoUI(
         "Qual tipo de cupom deseja adicionar?\n" +
           "1 - Cupom do pedido\n" +
           "2 - Cupom da taxa de entrega\n" +
@@ -789,7 +783,7 @@ async function editarPedidoAdmin(idPedido) {
 
       return;
     } else if (acaoCupom === "2") {
-      const tipoCupom = prompt(
+      const tipoCupom = await solicitarTextoUI(
         "Qual cupom deseja remover?\n" +
           "1 - Cupom do pedido\n" +
           "2 - Cupom da taxa de entrega\n" +
@@ -827,7 +821,7 @@ async function editarMolhosPagosPedidoAdmin(idPedido, pedidoAntigo) {
     textoItens += `${index + 1}. ${item.quantidade} ${item.nome}\n`;
   });
 
-  const numeroItem = Number(prompt(textoItens));
+  const numeroItem = Number(await solicitarTextoUI(textoItens));
 
   if (!numeroItem || numeroItem < 1 || numeroItem > itens.length) {
     return alert("Item inválido.");
@@ -835,10 +829,17 @@ async function editarMolhosPagosPedidoAdmin(idPedido, pedidoAntigo) {
 
   const item = itens[numeroItem - 1];
 
-  const maionese = Number(prompt("Quantidade de Maionese:", buscarQtdMolho(item, "Maionese"))) || 0;
-  const ketchup = Number(prompt("Quantidade de Ketchup:", buscarQtdMolho(item, "Ketchup"))) || 0;
-  const mostarda = Number(prompt("Quantidade de Mostarda:", buscarQtdMolho(item, "Mostarda"))) || 0;
-  const barbecue = Number(prompt("Quantidade de Barbecue:", buscarQtdMolho(item, "Barbecue"))) || 0;
+  const maionese =
+    Number(await solicitarTextoUI("Quantidade de Maionese:", buscarQtdMolho(item, "Maionese"))) ||
+    0;
+  const ketchup =
+    Number(await solicitarTextoUI("Quantidade de Ketchup:", buscarQtdMolho(item, "Ketchup"))) || 0;
+  const mostarda =
+    Number(await solicitarTextoUI("Quantidade de Mostarda:", buscarQtdMolho(item, "Mostarda"))) ||
+    0;
+  const barbecue =
+    Number(await solicitarTextoUI("Quantidade de Barbecue:", buscarQtdMolho(item, "Barbecue"))) ||
+    0;
 
   const molhosPagos = [];
 
@@ -1115,7 +1116,7 @@ function buscarItensAdmin(termo) {
   });
 }
 async function aplicarCupomPedidoAdmin(idPedido, pedidoAntigo) {
-  const codigoCupom = prompt("Digite o código do cupom do pedido:");
+  const codigoCupom = await solicitarTextoUI("Digite o código do cupom do pedido:");
   if (!codigoCupom) return;
 
   const codigo = codigoCupom.toUpperCase().trim();
@@ -1331,7 +1332,7 @@ async function listarMensagensAdmin() {
 }
 
 async function responderMensagemAdmin(clienteId) {
-  const texto = prompt("Digite a resposta para o cliente:");
+  const texto = await solicitarTextoUI("Digite a resposta para o cliente:");
 
   if (!texto) return;
 
@@ -1774,7 +1775,7 @@ async function verPedidoAnexadoSuporte(pedidoId, colecao = "pedidos") {
         (item) =>
           "<li><strong>" +
           esc(item.quantidade || item.qtd || 1) +
-          " × " +
+          " " +
           esc(item.nome || "Item") +
           "</strong>" +
           (item.observacao || item.obs ? "<p>" + esc(item.observacao || item.obs) + "</p>" : "") +
@@ -2140,7 +2141,7 @@ async function alternarProdutoEsgotado(id, novoStatus) {
 }
 
 async function excluirProdutoAdmin(id) {
-  if (!confirm("Deseja excluir este produto?")) return;
+  if (!(await confirmarOperacao("Deseja excluir este produto?"))) return;
 
   await db.collection("produtos").doc(id).delete();
 
@@ -2294,7 +2295,7 @@ async function editarAcrescimosPedidoAdmin(idPedido, pedidoAntigo) {
     textoItens += `${index + 1}. ${item.nome}\n`;
   });
 
-  const numeroItem = Number(prompt(textoItens));
+  const numeroItem = Number(await solicitarTextoUI(textoItens));
 
   if (!numeroItem || numeroItem < 1 || numeroItem > itens.length) {
     return alert("Item inválido.");
@@ -2302,7 +2303,7 @@ async function editarAcrescimosPedidoAdmin(idPedido, pedidoAntigo) {
 
   const item = itens[numeroItem - 1];
 
-  const acao = prompt(
+  const acao = await solicitarTextoUI(
     "O que deseja fazer?\n\n" +
       "1 - Adicionar acréscimo\n" +
       "2 - Remover acréscimo\n" +
@@ -2341,7 +2342,7 @@ async function editarAcrescimosPedidoAdmin(idPedido, pedidoAntigo) {
       lista += `${index + 1}. ${a.nome} (${a.qtd})\n`;
     });
 
-    const remover = Number(prompt(lista));
+    const remover = Number(await solicitarTextoUI(lista));
 
     if (!remover || remover < 1 || remover > adicionais.length) {
       return alert("Opção inválida.");
@@ -2386,7 +2387,7 @@ async function editarAcrescimosPedidoAdmin(idPedido, pedidoAntigo) {
         lista += `${index + 1}. ${a.nome} - R$ ${Number(a.preco).toFixed(2)}\n`;
       });
 
-      const escolha = Number(prompt(lista));
+      const escolha = Number(await solicitarTextoUI(lista));
 
       if (!escolha || escolha < 1 || escolha > adicionaisDisponiveis.length) {
         break;
@@ -2400,7 +2401,7 @@ async function editarAcrescimosPedidoAdmin(idPedido, pedidoAntigo) {
         qtd: 1,
       });
 
-      const continuar = confirm("Adicionar outro acréscimo?");
+      const continuar = await confirmarOperacao("Adicionar outro acréscimo?");
 
       if (!continuar) {
         break;
@@ -2474,7 +2475,9 @@ async function salvarEdicaoProdutoAdmin(id) {
 }
 
 async function importarProdutosFixosParaFirebase() {
-  if (!confirm("Importar produtos atuais para o Firebase? Faça isso só uma vez.")) {
+  if (
+    !(await confirmarOperacao("Importar produtos atuais para o Firebase? Faça isso só uma vez."))
+  ) {
     return;
   }
 
@@ -2512,6 +2515,12 @@ async function importarProdutosFixosParaFirebase() {
       descricao: p.desc || p.descricao || "",
       categoria: p.categoria,
       tipoBase: p.tipoBase,
+      ...(p.categoria === "combos"
+        ? {
+            comboQtdLanches: p.comboQtdLanches || 1,
+            comboComponentes: p.comboComponentes || [],
+          }
+        : {}),
 
       preco: Number(p.preco || 0),
       precoIndustrial: Number(p.precoIndustrial || 0),
@@ -2646,7 +2655,10 @@ async function editarAdicionalAdmin(id) {
   document.getElementById("catalogo-adicional-editor").closest("dialog").scrollTop = 0;
 }
 async function importarAdicionaisFixosParaFirebase() {
-  if (!confirm("Importar adicionais antigos para o Firebase? Faça isso só uma vez.")) return;
+  if (
+    !(await confirmarOperacao("Importar adicionais antigos para o Firebase? Faça isso só uma vez."))
+  )
+    return;
 
   const adicionaisFixos = [
     { nome: "Hambúrguer Caseiro", preco: 8 },

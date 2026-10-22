@@ -2,7 +2,7 @@
 
 ## Consultas automáticas
 
-- Cozinha: fila aguardando e documentos de origem desses registros. Concluídos são limitados e consultados quando a seção está aberta.
+- Cozinha: uma assinatura da fila da jornada atual, iniciada às 02h de Cuiabá, e os documentos de origem dos pedidos aguardando. Os concluídos usam os registros dessa mesma assinatura, sem consulta adicional.
 - ADM: pedidos desde o início do período solicitado. A assinatura anterior é encerrada ao mudar o período. O dia operacional vira às 02h de Cuiabá.
 - Central do atendente: pedidos do dia e comandas abertas. Um detalhe consulta seus documentos diretamente.
 - Histórico do cliente: pedidos filtrados por `clienteId`, sem baixar os pedidos de outros clientes.
@@ -23,7 +23,19 @@ As regras do Firestore precisam permitir aos painéis autorizados ler e atualiza
 
 Buscar o histórico de um cliente continua trazendo seus pedidos antigos.
 
+## Limpeza da produção
+
+A virada das 02h troca o período da fila e da central de produção. **Limpar telas** grava um corte compartilhado em `config/producaoTela`, observado pelos painéis abertos. Isso retira os registros anteriores das telas de produção, mantendo pedidos, pagamentos e histórico. **Retirar da tela** marca somente a entrada da fila como retirada. Pedidos retirados ou de jornadas anteriores não reaparecem ao editar um pedido; novos itens enviados depois do corte entram normalmente.
+
 ## Validação e publicação
+
+Os observadores de interface processam apenas os elementos inseridos, em vez de varrer todos os botões e produtos a cada alteração. `js/janelas-fluxos.js` mantém as etapas secundárias em janelas e mostra um indicador nos botões que executam ações assíncronas. Publique esse arquivo junto dos demais scripts e estilos.
+
+A navegação do atendente descarta etapas antigas ao retornar à mesa e valida a comanda antes de voltar às etapas financeiras. Comandas fechadas, canceladas ou inexistentes não reabrem pelo botão Voltar; pagamentos ainda pendentes retornam à escolha do pagamento.
+
+Mensagens exibem o resultado da busca antes de marcar os registros como lidos. Consultas antigas não substituem uma aba aberta depois delas. Ao retornar ao site, a conversa visível é reconectada e o rascunho é preservado; o formulário de novo suporte permanece aberto. Buscas de mensagens, histórico e cardápio têm prazo de espera e permitem nova tentativa. A navegação do atendente mostra carregamento enquanto aguarda os dados.
+
+Abrir uma comanda com itens já conferidos não repete a transação da cozinha. O campo `cozinhaItensVersao` identifica alterações; comandas legadas fazem a primeira conferência normalmente. Adicionais do atendente reutilizam a consulta por até trinta segundos, inclusive entre produtos e combos.
 
 Execute `npm test`. A suíte `leituras-paineis.test.cjs` verifica filtros, encerramento e deduplicação, sem acessar o Firebase real. `cozinha-leituras.test.cjs` verifica os fluxos da cozinha sem consultas gerais.
 

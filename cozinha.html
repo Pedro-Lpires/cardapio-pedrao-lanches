@@ -5,18 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Chapeiro — Pedrão Lanches</title>
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/cozinha.css?v=20261019-2" />
+    <link rel="stylesheet" href="css/paginas/cozinha.css?v=20261022-5" />
   </head>
   <body class="cozinha-body">
     <!-- HEADER — cabeçalho da página -->
     <header>
       <h1>Chapa Pedrão</h1>
       <p id="quantidade-cozinha" aria-live="polite">Conectando…</p>
-      <div class="operacao-acoes">
+      <div class="operacao-acoes cozinha-controle">
         <a href="cozinha.html?modo=monitor" target="_blank" rel="noopener">Abrir modo monitor</a
         ><a href="cozinha.html">Modo celular</a>
       </div>
-      <p>Abra esta mesma página no celular e no monitor. Os pedidos se atualizam juntos.</p>
+      <div class="cozinha-controle cozinha-acoes">
+        <button
+          type="button"
+          id="cozinha-remover"
+          aria-pressed="false"
+          onclick="alternarRemocaoCozinhaOperacao()"
+        >
+          Excluir</button
+        ><button type="button" onclick="limparTelasProducaoOperacao()">Limpar</button
+        ><button type="button" onclick="abrirConcluidosCozinhaOperacao()">Concluído</button>
+      </div>
     </header>
     <section id="cozinha-acesso" hidden>
       <form onsubmit="event.preventDefault();entrarCozinhaOperacao()">
@@ -32,18 +42,15 @@
     </section>
     <!-- MAIN — conteúdo principal -->
     <main id="fila-cozinha" aria-live="polite"></main>
-    <details class="cozinha-controle">
-      <summary>Pedidos concluídos / voltar</summary>
-      <div id="concluidos-cozinha"></div>
-    </details>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="js/ui-comum.js?v=20261018-1"></script>
+    <script src="js/ui-comum.js?v=20261021-11"></script>
     <script src="js/firebase-operacao.js"></script>
-    <script src="js/operacao.js?v=20261020-18"></script>
-    <script src="js/app-ui.js?v=20261020-16"></script>
+    <script src="js/operacao.js?v=20261022-5"></script>
+    <script src="js/app-ui.js?v=20261022-2"></script>
     <script src="js/raspadinhas-recuperacao.js?v=20261020-3"></script>
     <script src="js/raspadinhas.js?v=20261020-5"></script>
-    <script src="js/fluxos-interface.js?v=20261018-6"></script>
+    <script src="js/fluxos-interface.js?v=20261021-11"></script>
+    <script src="js/janelas-fluxos.js?v=20261021-11"></script>
   </body>
 </html>

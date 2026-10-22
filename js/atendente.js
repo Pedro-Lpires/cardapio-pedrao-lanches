@@ -744,7 +744,7 @@ async function abrirMudancaTipoRetirada(pedidoId) {
 >
     ⬅ Voltar
 </button>
-    
+
 
         <h3>
             🔄 Mudar tipo do pedido
@@ -1329,7 +1329,7 @@ async function prepararItensPedidoParaComanda(itensPedido, pedidoId, numeroPedid
   );
 }
 async function vincularPedidoComandaExistente(pedidoId, mesaId, comandaId) {
-  const confirmar = confirm("Adicionar este pedido à comanda escolhida?");
+  const confirmar = await confirmarOperacao("Adicionar este pedido à comanda escolhida?");
 
   if (!confirmar) {
     return;
@@ -1644,7 +1644,7 @@ async function sincronizarPedidoOrigemDaComanda(comandaId, pedidoId) {
 }
 
 async function marcarPedidoComoRetirado(pedidoId, numeroPedido) {
-  const confirmar = confirm(`Confirmar retirada do pedido #${numeroPedido}?`);
+  const confirmar = await confirmarOperacao(`Confirmar retirada do pedido #${numeroPedido}?`);
 
   if (!confirmar) {
     return;
@@ -1981,7 +1981,7 @@ function abrirMontagemPedidoRetirada() {
                     >
 
                         <strong>
-                            ${item.quantidade}x
+                            ${item.quantidade}
                             ${item.nome}
                         </strong>
 
@@ -2472,6 +2472,7 @@ async function listarProdutosPedidoRetirada(categoria) {
 
   snap.forEach((doc) => {
     const produto = doc.data();
+    if (produto.ativo === false || produto.esgotado) return;
 
     const preco = Number(produto.preco || 0);
 
@@ -2882,7 +2883,7 @@ function abrirMontagemPedidoEntrega() {
                 >
 
                     <strong>
-                        ${item.quantidade}x
+                        ${item.quantidade}
                         ${item.nome}
                     </strong>
 
@@ -3319,14 +3320,14 @@ async function salvarPedidoEntregaAtendente() {
     alert("Erro ao criar o pedido.");
   }
 }
-function excluirItemPedidoEntrega(index) {
+async function excluirItemPedidoEntrega(index) {
   if (!pedidoEntregaAtual || !pedidoEntregaAtual.itens[index]) {
     return;
   }
 
   const item = pedidoEntregaAtual.itens[index];
 
-  const confirmar = confirm(`Excluir ${item.nome} do pedido?`);
+  const confirmar = await confirmarOperacao(`Excluir ${item.nome} do pedido?`);
 
   if (!confirmar) return;
 
@@ -3336,14 +3337,14 @@ function excluirItemPedidoEntrega(index) {
 
   abrirMontagemPedidoEntrega();
 }
-function excluirItemPedidoRetirada(index) {
+async function excluirItemPedidoRetirada(index) {
   if (!pedidoRetiradaAtual || !pedidoRetiradaAtual.itens[index]) {
     return;
   }
 
   const item = pedidoRetiradaAtual.itens[index];
 
-  const confirmar = confirm(`Excluir ${item.nome} do pedido?`);
+  const confirmar = await confirmarOperacao(`Excluir ${item.nome} do pedido?`);
 
   if (!confirmar) {
     return;
@@ -3908,7 +3909,7 @@ function renderizarOpcoesMolhoPedido(index, unidade) {
                     class="molho-um-entrega-${unidade}"
                     value="Ketchup"
                     ${salvos.includes("Ketchup") ? "checked" : ""}
-                    
+
                 >
                 Ketchup
             </label>
@@ -3922,7 +3923,7 @@ function renderizarOpcoesMolhoPedido(index, unidade) {
                     class="molho-um-entrega-${unidade}"
                     value="Mostarda"
                     ${salvos.includes("Mostarda") ? "checked" : ""}
-                   
+
                 >
                 Mostarda
             </label>
@@ -3936,7 +3937,7 @@ function renderizarOpcoesMolhoPedido(index, unidade) {
                     class="molho-um-entrega-${unidade}"
                     value="Barbecue"
                     ${salvos.includes("Barbecue") ? "checked" : ""}
-                  
+
                 >
                 Barbecue
             </label>
@@ -4420,6 +4421,7 @@ async function listarProdutosPedidoEntrega(categoria) {
 
   snap.forEach((doc) => {
     const produto = doc.data();
+    if (produto.ativo === false || produto.esgotado) return;
 
     const preco = Number(produto.preco || 0);
 
@@ -4703,13 +4705,11 @@ function adicionarComboConfiguradoPedido(produtoId, produto, quantidade, observa
   // =========================
 
   const temConfiguracaoTodos =
-    modoPersonalizacaoCombo === "todos" &&
-    configuracaoTodosCombo &&
-    ((configuracaoTodosCombo.adicionais || []).length > 0 ||
-      (configuracaoTodosCombo.observacao || "").trim() !== "");
+    modoPersonalizacaoCombo === "todos" && configuracaoComboTemAlteracoes(configuracaoTodosCombo);
 
   const temConfiguracaoIndividual =
-    modoPersonalizacaoCombo === "individual" && Object.keys(configuracoesLanchesCombo).length > 0;
+    modoPersonalizacaoCombo === "individual" &&
+    Object.values(configuracoesLanchesCombo).some(configuracaoComboTemAlteracoes);
 
   const comboPersonalizado = temConfiguracaoTodos || temConfiguracaoIndividual;
 
@@ -4816,6 +4816,7 @@ function adicionarComboConfiguradoPedido(produtoId, produto, quantidade, observa
     descricao: produto.desc || produto.descricao || "",
     bebida: produto.bebida || produto.bebidaCombo || "",
     bebidas: produto.bebidas || [],
+    comboComponentes: produto.comboComponentes || [],
     comboQtdLanches: qtdLanches,
 
     comboPersonalizado,
@@ -5462,7 +5463,7 @@ async function abrirComandasAbertas() {
 
     html += `
 
-            <div
+            <div class="comanda-card"
                 style="
                     margin-bottom:15px;
                     padding:12px;
@@ -5477,32 +5478,20 @@ async function abrirComandasAbertas() {
                     ${comanda.cliente || "Cliente"}
                 </strong>
 
-                <br><br>
-
-                Total:
-                R$ ${valorTotal.toFixed(2)}
+                <dl class="comanda-valores"><div><dt>Total</dt><dd>R$ ${valorTotal.toFixed(2)}</dd></div>
 
                 ${
                   temPagamentoParcial
                     ? `
 
-                            <br>
-
-                            Pago:
-                            R$ ${valorPago.toFixed(2)}
-
-                            <br>
-
-                            <strong>
-                                Restante:
-                                R$ ${restante.toFixed(2)}
-                            </strong>
+                            <div><dt>Pago</dt><dd>R$ ${valorPago.toFixed(2)}</dd></div>
+                            <div><dt>Restante</dt><dd><strong>R$ ${restante.toFixed(2)}</strong></dd></div>
 
                         `
                     : ""
                 }
 
-                <br><br>
+                </dl>
 
               <button
     type="button"
@@ -5609,7 +5598,7 @@ async function atenderChamadoMesa(chamadoId) {
     return;
   }
 
-  const confirmar = confirm(`Atender o chamado da Mesa ${chamado.mesaNumero}?`);
+  const confirmar = await confirmarOperacao(`Atender o chamado da Mesa ${chamado.mesaNumero}?`);
 
   if (!confirmar) {
     return;
@@ -5655,6 +5644,7 @@ async function abrirMesaAtendente(mesaId) {
   const mesa = doc.data();
 
   const areaMesa = document.getElementById("area-mesa-atendente");
+  areaMesa.dataset.mesaNumero = mesa.numero;
 
   const areaComanda = document.getElementById("area-comanda-atendente");
 
@@ -6117,15 +6107,18 @@ async function abrirComandaVisual(comandaId) {
 
   const docComanda = await db.collection("comandas").doc(comandaId).get();
 
-  if (!docComanda.exists) return;
+  if (!docComanda.exists) {
+    if (typeof limparHistoricoComandaUI === "function") limparHistoricoComandaUI(comandaId);
+    if (typeof fecharFluxoAtendenteUI === "function") fecharFluxoAtendenteUI();
+    return;
+  }
 
   const comanda = docComanda.data();
-  if (
-    comanda.status === "Aberta" &&
-    comanda.itensEnviadosCozinha &&
-    typeof confirmarProducaoOperacao === "function"
-  )
-    await confirmarProducaoOperacao("comandas", comandaId, true);
+  if (comanda.status !== "Aberta") {
+    if (typeof limparHistoricoComandaUI === "function") limparHistoricoComandaUI(comandaId);
+    if (typeof fecharFluxoAtendenteUI === "function") fecharFluxoAtendenteUI();
+    return;
+  }
 
   const area = areaDestinoComandaAtual
     ? document.getElementById(areaDestinoComandaAtual)
@@ -6144,77 +6137,7 @@ async function abrirComandaVisual(comandaId) {
   } else {
     htmlItens = comanda.itens
       .map((item, index) => {
-        let htmlDetalhes = "";
-        // Combos mostram só lanches com alterações, sem linhas "Padrão".
-        if (item.categoria === "combos" && item.lanchesCombo?.length) {
-          htmlDetalhes = item.lanchesCombo
-            .map((lanche) => {
-              const adicionais = (lanche.adicionais || []).filter(
-                (adicional) => Number(adicional.qtd ?? 1) > 0,
-              );
-              const observacao = String(lanche.observacao || "").trim();
-              if (!adicionais.length && !observacao) return "";
-              return `<div style="margin:8px 0 10px 20px"><strong>Lanche ${lanche.numero}</strong>
-              ${adicionais.map((adicional) => `<div>+ ${adicional.qtd || 1} ${adicional.nome}</div>`).join("")}
-              ${observacao ? `<div>📝 ${observacao}</div>` : ""}</div>`;
-            })
-            .join("");
-          if (item.observacao)
-            htmlDetalhes += `<div style="margin-left:20px">📝 ${item.observacao}</div>`;
-        }
-
-        // PRODUTO NORMAL
-        // =========================
-        else {
-          const adicionais = item.adicionais || [];
-
-          adicionais.forEach((adicional) => {
-            htmlDetalhes += `
-
-                                <div
-                                    style="
-                                        margin-left:20px;
-                                    "
-                                >
-                                    + ${adicional.qtd || 1}
-                                    ${adicional.nome}
-                                </div>
-
-                            `;
-          });
-
-          if (item.observacao) {
-            htmlDetalhes += `
-
-                            <div
-                                style="
-                                    margin-left:20px;
-                                "
-                            >
-                                📝 ${item.observacao}
-                            </div>
-
-                        `;
-          }
-
-          if (item.tipo) {
-            htmlDetalhes += `
-
-                            <div
-                                style="
-                                    margin-left:20px;
-                                "
-                            >
-                                Tipo: ${item.tipo}
-                            </div>
-
-                        `;
-          }
-        }
-
-        // =========================
-        // ITEM COMPLETO
-        // =========================
+        const htmlDetalhes = detalhesItemOperacao(item);
 
         return `
           <div class="comanda-item-linha">
@@ -6222,9 +6145,9 @@ async function abrirComandaVisual(comandaId) {
               <strong>${item.quantidade || 1} ${escaparOperacao(item.nome)}</strong>
               <span>R$ ${Number(item.subtotal || 0).toFixed(2)}</span>
             </div>
-            ${htmlDetalhes}
-            ${modoEditarItem ? `<button type="button" class="comanda-item-acao" onclick="editarItemComanda('${comandaId}', ${index})">✏️ Editar</button>` : ""}
-            ${modoRemoverItem ? `<button type="button" class="comanda-item-acao" onclick="removerItemComanda('${comandaId}', ${index})">× Remover</button>` : ""}
+            <div class="comanda-item-detalhes">${htmlDetalhes}</div>
+            <button type="button" class="comanda-item-acao" data-acao-comanda="editar" ${modoEditarItem ? "" : "hidden"} onclick="editarItemComanda('${comandaId}', ${index})">Editar</button>
+            <button type="button" class="comanda-item-acao" data-acao-comanda="remover" ${modoRemoverItem ? "" : "hidden"} onclick="removerItemComanda('${comandaId}', ${index})">Remover</button>
           </div>`;
       })
       .join("");
@@ -6275,7 +6198,7 @@ async function abrirComandaVisual(comandaId) {
 
         <h4>Itens</h4>
 
-        ${htmlItens}
+        <div class="comanda-itens-lista">${htmlItens}</div>
 
         <hr>
 
@@ -6350,7 +6273,7 @@ async function abrirComandaVisual(comandaId) {
     `;
 }
 async function novaComandaMesa(mesaId) {
-  const nomeCliente = prompt("Nome do cliente");
+  const nomeCliente = await solicitarTextoUI("Nome do cliente");
 
   if (!nomeCliente) return;
 
@@ -6505,6 +6428,7 @@ async function pesquisarProdutoAtendente(comandaId) {
 
   snap.forEach((doc) => {
     const p = doc.data();
+    if (p.ativo === false || p.esgotado) return;
 
     const nomeProduto = normalizarBuscaUI(p.nome);
     const encontrou = nomeProduto.includes(termo);
@@ -6619,7 +6543,7 @@ async function confirmarProdutoComanda(comandaId, produtoId) {
   abrirComandaVisual(comandaId);
 }
 async function removerItemComanda(comandaId, indiceItem) {
-  const confirmar = confirm("Remover item?");
+  const confirmar = await confirmarOperacao("Remover item?");
 
   if (!confirmar) return;
 
@@ -6657,7 +6581,7 @@ function ativarRemoverItens(comandaId) {
     modoEditarItem = false;
   }
 
-  abrirComandaVisual(comandaId);
+  atualizarAcoesItensComandaUI();
 }
 async function editarItemComanda(comandaId, index) {
   const docComanda = await db.collection("comandas").doc(comandaId).get();
@@ -6789,7 +6713,7 @@ function ativarEditarItens(comandaId) {
     modoRemoverItem = false;
   }
 
-  abrirComandaVisual(comandaId);
+  atualizarAcoesItensComandaUI();
 }
 async function editarComboComanda(comandaId, index, item) {
   if (!item.produtoId) {
@@ -7439,9 +7363,7 @@ async function abrirPagamentoTudoJunto(comandaId, preservarCupom = false) {
 
   let htmlCupons = `
 
-    <h4>
-        🎟 Cupons disponíveis
-    </h4>
+
 
 `;
 
@@ -7619,7 +7541,7 @@ ${
     ? `
             <p>
                 🎟 Cupom ${cupomPagamentoAtendenteAtual?.codigo || ""}:
-                
+
                 <strong>
                     - R$ ${descontoCupom.toFixed(2)}
                 </strong>
@@ -7653,7 +7575,7 @@ ${
 <hr>
 
 
-${htmlCupons}
+<button type="button" class="cupons-pagamento-abrir-ui" aria-expanded="false" onclick="alternarCuponsPagamentoUI()">Cupons disponíveis</button><div id="cupons-disponiveis-pagamento-ui" style="display:none">${htmlCupons}</div>
 
 
 <hr>
@@ -7668,7 +7590,7 @@ ${htmlCupons}
 
             <input
                 type="radio"
-                name="forma-pagamento-unica"
+                name="forma-pagamento-unica" onchange="desativarPagamentoMistoUI('area-pagamento-misto')"
                 value="Dinheiro"
             >
 
@@ -7684,7 +7606,7 @@ ${htmlCupons}
 
             <input
                 type="radio"
-                name="forma-pagamento-unica"
+                name="forma-pagamento-unica" onchange="desativarPagamentoMistoUI('area-pagamento-misto')"
                 value="Pix"
             >
 
@@ -7700,7 +7622,7 @@ ${htmlCupons}
 
             <input
                 type="radio"
-                name="forma-pagamento-unica"
+                name="forma-pagamento-unica" onchange="desativarPagamentoMistoUI('area-pagamento-misto')"
                 value="Débito"
             >
 
@@ -7716,7 +7638,7 @@ ${htmlCupons}
 
             <input
                 type="radio"
-                name="forma-pagamento-unica"
+                name="forma-pagamento-unica" onchange="desativarPagamentoMistoUI('area-pagamento-misto')"
                 value="Crédito"
             >
 
@@ -7922,22 +7844,13 @@ function atualizarResumoPagamentoMisto(total) {
 
   if (!resumo) return;
 
-  resumo.innerHTML = `
-
-        Total informado:
-        R$ ${informado.toFixed(2)}
-
-        <br>
-
-        Restante:
-        R$ ${Math.max(restante, 0).toFixed(2)}
-
-    `;
+  resumo.innerHTML = htmlResumoPagamentoMistoUI(informado, restante);
 }
 async function confirmarPagamentoTudoJunto(comandaId, total) {
   const areaMisto = document.getElementById("area-pagamento-misto");
 
-  const usandoMisto = areaMisto && areaMisto.style.display !== "none";
+  const usandoMisto =
+    areaMisto && (areaMisto.dataset?.ativo === "sim" || areaMisto.style.display !== "none");
 
   let pagamentos = [];
 
@@ -8008,7 +7921,7 @@ async function confirmarPagamentoTudoJunto(comandaId, total) {
   // CONFIRMAÇÃO MANUAL
   // =========================
 
-  const confirmar = confirm("Pagamento realmente confirmado?");
+  const confirmar = await confirmarOperacao("Pagamento realmente confirmado?");
 
   if (!confirmar) return;
 
@@ -9246,12 +9159,10 @@ async function abrirBeneficiosPagamentoSeparado(
         <hr>
 
 
-        <h4>
-            🎟 Cupons disponíveis
-        </h4>
 
 
-        ${htmlCupons}
+
+        <button type="button" class="cupons-pagamento-abrir-ui" aria-expanded="false" onclick="alternarCuponsPagamentoUI()">Cupons disponíveis</button><div id="cupons-disponiveis-pagamento-ui" style="display:none">${htmlCupons}</div>
 
 
         <hr>
@@ -9601,7 +9512,7 @@ ${htmlCliente}
 
             <input
                 type="radio"
-                name="forma-pagamento-separado"
+                name="forma-pagamento-separado" onchange="desativarPagamentoMistoUI('area-pagamento-misto-separado')"
                 value="Dinheiro"
             >
 
@@ -9617,7 +9528,7 @@ ${htmlCliente}
 
             <input
                 type="radio"
-                name="forma-pagamento-separado"
+                name="forma-pagamento-separado" onchange="desativarPagamentoMistoUI('area-pagamento-misto-separado')"
                 value="Pix"
             >
 
@@ -9633,7 +9544,7 @@ ${htmlCliente}
 
             <input
                 type="radio"
-                name="forma-pagamento-separado"
+                name="forma-pagamento-separado" onchange="desativarPagamentoMistoUI('area-pagamento-misto-separado')"
                 value="Débito"
             >
 
@@ -9649,7 +9560,7 @@ ${htmlCliente}
 
             <input
                 type="radio"
-                name="forma-pagamento-separado"
+                name="forma-pagamento-separado" onchange="desativarPagamentoMistoUI('area-pagamento-misto-separado')"
                 value="Crédito"
             >
 
@@ -9847,17 +9758,7 @@ function atualizarResumoMistoSeparado(total) {
 
   if (!resumo) return;
 
-  resumo.innerHTML = `
-
-        Total informado:
-        R$ ${informado.toFixed(2)}
-
-        <br>
-
-        Restante:
-        R$ ${Math.max(restante, 0).toFixed(2)}
-
-    `;
+  resumo.innerHTML = htmlResumoPagamentoMistoUI(informado, restante);
 }
 async function atualizarFidelidadePagamentoSeparado(
   clienteId,
@@ -10022,7 +9923,8 @@ async function registrarHistoricoPagamentoCliente(clienteId, dados) {
 async function confirmarPagamentoSeparado(comandaId, total) {
   const areaMisto = document.getElementById("area-pagamento-misto-separado");
 
-  const usandoMisto = areaMisto && areaMisto.style.display !== "none";
+  const usandoMisto =
+    areaMisto && (areaMisto.dataset?.ativo === "sim" || areaMisto.style.display !== "none");
 
   let pagamentos = [];
 
@@ -10452,6 +10354,7 @@ async function confirmarPagamentoSeparado(comandaId, total) {
   // AINDA FALTA PAGAR
   // =========================
 
+  if (typeof reiniciarHistoricoPagamentoUI === "function") reiniciarHistoricoPagamentoUI(comandaId);
   await abrirPagamentoSeparado(comandaId);
 }
 function fecharComandaNaLista(areaDestinoId) {
@@ -10473,4 +10376,10 @@ function fecharComandaNaLista(areaDestinoId) {
 }
 if (document.getElementById("area-chamados-mesa-atendente")) {
   iniciarListenerChamadosMesaAtendente();
+}
+
+function atualizarAcoesItensComandaUI() {
+  document.querySelectorAll("[data-acao-comanda]").forEach((b) => {
+    b.hidden = b.dataset.acaoComanda === "editar" ? !modoEditarItem : !modoRemoverItem;
+  });
 }

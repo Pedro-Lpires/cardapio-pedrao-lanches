@@ -41,7 +41,7 @@ vm.runInContext(
   await ctx.verPedidoAnexadoSuporte("p");
   assert.deepEqual(consulta, ["pedidos", "p"]);
   assert.match(box.innerHTML, /Pedido #7/);
-  assert.match(box.innerHTML, /2 × &lt;Lanche>/);
+  assert.match(box.innerHTML, /2 &lt;Lanche>/);
   assert.match(box.innerHTML, /Sem cebola/);
   await ctx.verPedidoAnexadoSuporte("local", "historicoPagamentosClientes");
   assert.deepEqual(consulta, ["historicoPagamentosClientes", "local"]);

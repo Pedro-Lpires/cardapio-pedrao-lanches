@@ -36,11 +36,29 @@
         <option value="admin.html">Admin</option>
         <option value="painel-atendente.html">Atendente</option>
         <option value="autoatendimento.html">Autoatendimento</option>
+        <option value="autoatendimento.html?mesa=6">Autoatendimento · mesa 6 nova</option>
         <option value="financeiro.html">Financeiro</option>
+        <option value="cozinha.html">Chapeiro celular</option>
+        <option value="cozinha.html?modo=monitor">Chapeiro monitor</option>
       </select></label
     ><button onclick="largura(320)">320 px</button><button onclick="largura(375)">375 px</button
     ><button onclick="largura(430)">430 px</button>
     <p>Senha fictícia dos painéis: teste1234</p>
+    <label
+      >Cenário<select id="cenario">
+        <option value="normal">Normal</option>
+        <option value="lento">Busca lenta</option>
+        <option value="falha">Falha ao buscar mensagens</option>
+        <option value="combos">Combos conferidos nas imagens</option>
+        <option value="comanda-mista">Comanda com itens diferentes</option>
+      </select></label
+    >
+    <button
+      id="retomar"
+      onclick="frame.contentDocument.dispatchEvent(new Event('visibilitychange'))"
+    >
+      Simular retorno ao site
+    </button>
     <iframe id="mobile" title="Prévia isolada"></iframe>
     <script>
       const frame = document.getElementById("mobile");
@@ -50,19 +68,34 @@
       async function abrir() {
         const pagina = document.getElementById("pagina").value;
         let html = await (await fetch("../" + pagina)).text();
+        const combosConferidos = ["combos", "comanda-mista"].includes(
+          document.getElementById("cenario").value,
+        )
+          ? await (await fetch("../scripts/combos-conferidos.json")).json()
+          : null;
         html = html.replace(
           /<script\s+src="https:\/\/www.gstatic.com\/firebasejs[^\"]*"\s*>\s*<\/script>/g,
           "",
         );
         html = html.replace(
           "<head>",
-          '<head><base href="' +
+          "<head><script>window.combosConferidosFixture=" +
+            JSON.stringify(combosConferidos) +
+            ';<\/script><base href="' +
             new URL("../", location.href) +
-            '"><script src="tests/firebase-ui-mock.js"><\/script>',
+            '"><script src="tests/firebase-ui-mock.js' +
+            "?" +
+            new URLSearchParams({
+              modo: pagina.includes("modo=monitor") ? "monitor" : "",
+              mesa: pagina.includes("mesa=6") ? "6" : "2",
+              cenario: document.getElementById("cenario").value,
+            }) +
+            '"><\/script>',
         );
         frame.srcdoc = html;
       }
       document.getElementById("pagina").onchange = abrir;
+      document.getElementById("cenario").onchange = abrir;
       abrir();
     </script>
   </body>

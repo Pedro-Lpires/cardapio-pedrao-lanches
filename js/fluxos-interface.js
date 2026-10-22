@@ -6,7 +6,7 @@
 "use strict";
 function abrirDestinoPedidoUI(destino, colecao, id) {
   const d = document.createElement("dialog");
-  d.className = "ui-caixa";
+  d.className = "ui-caixa destino-pedido-ui";
   const args = `'${colecao}','${escaparOperacao(id)}'`;
   d.innerHTML = `<button class="ui-x" aria-label="Fechar opções" onclick="this.closest('dialog').close()">×</button><h2>${destino === "cozinha" ? "Cozinha" : "Motoboy"}</h2><div class="operacao-acoes"><button onclick="imprimirRegistroOperacao(${args},'${destino}')">Imprimir</button><button onclick="${destino === "cozinha" ? `confirmarProducaoOperacao(${args})` : `compartilharMotoboyOperacao(${args})`}">${destino === "cozinha" ? "Enviar à tela" : "Enviar WhatsApp"}</button></div>`;
   d.addEventListener("close", () => d.remove(), { once: true });
@@ -15,7 +15,7 @@ function abrirDestinoPedidoUI(destino, colecao, id) {
 }
 function abrirCozinhaMesaUI(numero) {
   const d = document.createElement("dialog");
-  d.className = "ui-caixa";
+  d.className = "ui-caixa destino-pedido-ui";
   d.innerHTML = `<button class="ui-x" aria-label="Fechar opções" onclick="this.closest('dialog').close()">×</button><h2>Cozinha · Mesa ${Number(numero)}</h2><div class="operacao-acoes"><button onclick="imprimirMesaOperacao(${Number(numero)},'cozinha')">Imprimir</button><button onclick="enviarMesaCozinhaUI(${Number(numero)})">Enviar à tela</button></div>`;
   d.addEventListener("close", () => d.remove(), { once: true });
   document.body.append(d);
@@ -130,7 +130,7 @@ function montarConsumoLocalUI(itens, nome, telefone, cliente, obs = "", agora = 
   const linhas = produtos
     .map(
       (i) =>
-        `${i.quantidade} × ${i.nome}${i.adicionais.map((a) => `\n  + ${a.qtd || a.quantidade || 1} ${a.nome}`).join("")}${i.observacao ? "\n  Obs.: " + i.observacao : ""}${i.lanchesCombo
+        `${i.quantidade} ${i.nome}${i.adicionais.map((a) => `\n  + ${a.qtd || a.quantidade || 1} ${a.nome}`).join("")}${i.observacao ? "\n  Obs.: " + i.observacao : ""}${i.lanchesCombo
           .map((l, n) => {
             const ad = (l.adicionais || []).map((a) => `+ ${a.qtd || 1} ${a.nome}`);
             if (l.observacao || l.obs) ad.push("Obs.: " + (l.observacao || l.obs));
@@ -313,7 +313,10 @@ function montarCheckoutUI() {
   if (enderecoBtn) {
     const formulario = document.getElementById("perfil-form"),
       area = document.getElementById("area-perfil");
-    formulario.append(enderecoBtn);
+    const acoes = document.createElement("div");
+    acoes.className = "perfil-edicao-acoes";
+    formulario.append(acoes);
+    acoes.append(document.getElementById("btn-entrar-perfil"), enderecoBtn);
     const modoOriginal = abrirPerfilModo;
     window.abrirPerfilModo = (modo) => {
       area.replaceChildren();
@@ -323,12 +326,23 @@ function montarCheckoutUI() {
     enderecoBtn.hidden = true;
     const enderecosOriginal = abrirEnderecosCliente;
     window.abrirEnderecosCliente = async (...args) => {
-      formulario.append(area);
+      abrirJanelaElementoUI(area, "Seus endereços");
       await enderecosOriginal(...args);
+      area.querySelector(":scope > h3")?.remove();
       const novo = document.createElement("button");
       novo.textContent = "Adicionar endereço";
       novo.onclick = adicionarEndereco;
       area.append(novo);
+    };
+    const adicionarOriginal = adicionarEndereco;
+    window.adicionarEndereco = () => {
+      document.getElementById("form-endereco")?.remove();
+      adicionarOriginal();
+      const form = document.getElementById("form-endereco");
+      form.querySelector("h3")?.remove();
+      form.style.display = "none";
+      const janela = abrirJanelaElementoUI(form, "Novo endereço");
+      janela.addEventListener("close", () => form.remove(), { once: true });
     };
     for (const nome of ["mostrarPedidosCliente", "abrirBonusCliente", "mostrarPainelCliente"]) {
       const original = window[nome];

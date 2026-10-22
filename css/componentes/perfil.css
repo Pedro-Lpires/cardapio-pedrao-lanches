@@ -54,6 +54,13 @@ dialog.editor-endereco-cliente::backdrop {
   background: rgb(0 0 0 / 78%);
 }
 .editor-endereco-cliente header {
+  height: auto;
+  min-height: 44px;
+  background: none;
+  border: 0;
+  padding: 0;
+  position: static;
+  flex-direction: row;
   display: flex;
   align-items: center;
   justify-content: space-between;

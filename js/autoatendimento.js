@@ -113,6 +113,7 @@ async function iniciarAutoatendimento() {
   if (!area) {
     return;
   }
+  area.innerHTML = htmlCarregandoUI("Abrindo sua mesa…");
 
   // =========================
   // PEGAR MESA DA URL
@@ -139,9 +140,21 @@ async function iniciarAutoatendimento() {
   // BUSCAR MESA
   // =========================
 
-  const snapMesa = await db.collection("mesas").where("numero", "==", numeroMesa).limit(1).get();
+  const snapMesa = await lerComPrazoUI(
+    db.collection("mesas").where("numero", "==", numeroMesa).limit(1).get(),
+  );
+  let docMesa = snapMesa.docs[0];
+  // As mesmas vinte mesas da grade do atendente, cadastradas no primeiro uso.
+  if (!docMesa && numeroMesa <= 20) {
+    const ref = db.collection("mesas").doc("mesa-" + numeroMesa);
+    await db.runTransaction(async (transacao) => {
+      const existente = await transacao.get(ref);
+      if (!existente.exists) transacao.set(ref, { numero: numeroMesa, ocupada: false });
+    });
+    docMesa = await lerComPrazoUI(ref.get());
+  }
 
-  if (snapMesa.empty) {
+  if (!docMesa) {
     area.innerHTML = `
 
             <h2>
@@ -158,8 +171,6 @@ async function iniciarAutoatendimento() {
 
     return;
   }
-
-  const docMesa = snapMesa.docs[0];
 
   mesaAutoatendimentoId = docMesa.id;
 
@@ -1068,7 +1079,7 @@ function abrirProdutoAutoatendimento(produtoId) {
   const botaoAdicionais = document.getElementById("btn-toggle-adicionais-auto");
 
   if (botaoAdicionais) {
-    botaoAdicionais.textContent = "Adicionais +";
+    botaoAdicionais.textContent = "Acréscimos";
   }
 
   // =========================
@@ -1170,7 +1181,7 @@ function montarPersonalizacaoComboAuto() {
                             ${i}
                         )
                     "
-                >Acrescentar</button>
+                >Escolher</button>
 
 
                 <button
@@ -1215,7 +1226,7 @@ function montarPersonalizacaoComboAuto() {
                     )
                 "
             >
-                Acrescentar em todos
+                Todos
             </button>
 
 
@@ -1227,7 +1238,7 @@ function montarPersonalizacaoComboAuto() {
                     )
                 "
             >
-                Acrescentar individualmente
+                Individual
             </button>
 
         </div>
@@ -1247,7 +1258,8 @@ function montarPersonalizacaoComboAuto() {
             ></div>
 
 
-            <div class="acoes-todos-combo-auto">
+            <p>Os acréscimos e a observação serão aplicados em cada lanche.</p>
+<div class="acoes-todos-combo-auto"><button type="button" onclick="abrirConfiguracaoTodosComboAuto()">Escolher</button>
 
 
 
@@ -1284,7 +1296,7 @@ function montarPersonalizacaoComboAuto() {
     `;
 }
 
-function selecionarModoComboAuto(modo) {
+function selecionarModoComboAuto(modo, abrirEditor = true) {
   // Recolher a interface não remove a seleção nem muda o modo de cálculo.
   const alvo = document.getElementById(
     modo === "todos" ? "modo-todos-combo-auto" : "modo-individual-combo-auto",
@@ -1310,7 +1322,7 @@ function selecionarModoComboAuto(modo) {
 
   atualizarPrecoComboAuto();
 
-  if (modo === "todos") abrirConfiguracaoTodosComboAuto();
+  if (modo === "todos" && abrirEditor) abrirConfiguracaoTodosComboAuto();
 }
 
 // Abrir as opções não personaliza o combo: só acréscimos com quantidade positiva.
@@ -1370,6 +1382,8 @@ function montarAdicionaisProdutoAuto(produto) {
   lista.innerHTML = "";
 
   adicionaisAutoSelecionados = {};
+  if (typeof atualizarResumoAdicionaisProdutoUI === "function")
+    atualizarResumoAdicionaisProdutoUI("lista-adicionais-auto");
 
   // =========================
   // BEBIDA
@@ -1438,10 +1452,10 @@ function montarAdicionaisProdutoAuto(produto) {
     lista.innerHTML += `
 
                 <div
-                    class="item-adicional"
+                    class="item-adicional adicional-combo-auto"
                 >
 
-                    <div>
+                    <div class="info-adicional-combo-auto">
 
                         <strong>
                             ${adicional.nome}
@@ -1456,7 +1470,7 @@ function montarAdicionaisProdutoAuto(produto) {
 
 
                     <div
-                        class="controle-adicional"
+                        class="controle-adicional controle-adicional-combo-auto"
                     >
 
                         <button
@@ -1497,6 +1511,8 @@ function montarAdicionaisProdutoAuto(produto) {
 
             `;
   });
+  if (typeof atualizarResumoAdicionaisProdutoUI === "function")
+    atualizarResumoAdicionaisProdutoUI("lista-adicionais-auto");
 }
 function toggleAdicionaisAutoatendimento() {
   const lista = document.getElementById("lista-adicionais-auto");
@@ -1510,11 +1526,11 @@ function toggleAdicionaisAutoatendimento() {
   if (lista.style.display === "none") {
     lista.style.display = "block";
 
-    botao.textContent = "Adicionais -";
+    botao.textContent = "Acréscimos";
   } else {
     lista.style.display = "none";
 
-    botao.textContent = "Adicionais +";
+    botao.textContent = "Acréscimos";
   }
 }
 function abrirConfiguracaoTodosComboAuto() {
@@ -1614,6 +1630,7 @@ function abrirConfiguracaoTodosComboAuto() {
                 `;
   });
 
+  html += `<label class="combo-observacao-ui">Observação<textarea id="obs-todos-combo-auto" oninput="sincronizarConfiguracaoTodosComboAuto()" placeholder="Ex.: sem cebola">${configuracaoTodosComboAuto?.observacao ?? ""}</textarea></label>`;
   area.innerHTML = html;
 }
 
@@ -1689,7 +1706,10 @@ function sincronizarConfiguracaoTodosComboAuto() {
   });
 
   // Preserva observações de combos antigos; novos usam o campo geral do combo.
-  const observacao = configuracaoTodosComboAuto?.observacao || "";
+  const observacao =
+    document.getElementById("obs-todos-combo-auto")?.value?.trim() ??
+    configuracaoTodosComboAuto?.observacao ??
+    "";
 
   configuracaoTodosComboAuto = {
     adicionais,
@@ -1744,8 +1764,6 @@ function limparConfiguracaoTodosComboAuto() {
   atualizarResumoTodosComboAuto();
 
   atualizarPrecoComboAuto();
-
-  abrirConfiguracaoTodosComboAuto();
 }
 function abrirConfiguracaoLancheComboAuto(numeroLanche) {
   const area = document.getElementById(`config-lanche-combo-auto-${numeroLanche}`);
@@ -1938,7 +1956,7 @@ function atualizarStatusLancheComboAuto(numeroLanche) {
   const config = configuracoesLanchesComboAuto[numeroLanche];
 
   if (!config) {
-    area.innerHTML = "";
+    area.innerHTML = "Padrão";
 
     return;
   }
@@ -1973,6 +1991,7 @@ function fecharConfiguracaoLancheComboAuto(numeroLanche) {
   }
 }
 function atualizarPrecoComboAuto() {
+  if (typeof atualizarObservacaoComboUI === "function") atualizarObservacaoComboUI(true);
   if (!comboAutoAtual) {
     return;
   }
@@ -2096,6 +2115,7 @@ function adicionarComboCarrinhoAuto() {
     descricao: comboAutoAtual.desc || comboAutoAtual.descricao || "",
     bebida: comboAutoAtual.bebida || comboAutoAtual.bebidaCombo || "",
     bebidas: comboAutoAtual.bebidas || [],
+    comboComponentes: comboAutoAtual.comboComponentes || [],
 
     comboPersonalizado,
 
@@ -2136,8 +2156,6 @@ function adicionarComboCarrinhoAuto() {
 
     return;
   }
-
-  alert("Combo adicionado ao pedido.");
 }
 function fecharComboAuto(voltarResumo = true) {
   const modal = document.getElementById("modal-combo-auto");
@@ -2289,8 +2307,6 @@ function adicionarProdutoCarrinhoAuto() {
 
     return;
   }
-
-  alert("Produto adicionado ao pedido.");
 }
 function montarDetalhesComboResumoAuto(item) {
   if (item.categoria !== "combos") {
@@ -2404,6 +2420,8 @@ function abrirResumoPedidoAuto() {
   // =========================
 
   fecharModalProdutoAuto(false);
+  const comboAberto = document.getElementById("modal-combo-auto");
+  if (comboAberto) comboAberto.style.display = "none";
 
   const lista = document.getElementById("lista-resumo-auto");
 
@@ -2421,118 +2439,11 @@ function abrirResumoPedidoAuto() {
     totalPedido += Number(item.subtotal || 0);
 
     const adicionaisTexto = (item.adicionais || [])
-      .map((adicional) => `+ ${adicional.qtd}x ${adicional.nome}`)
+      .map((adicional) => `+ ${adicional.qtd} ${adicional.nome}`)
       .join("<br>");
     const detalhesCombo = montarDetalhesComboResumoAuto(item);
 
-    html += `
-
-                    <div
-                        style="
-                            margin-bottom:15px;
-                            padding-bottom:15px;
-                            border-bottom:1px solid #444;
-                        "
-                    >
-
-                        <strong>
-
-                            ${item.quantidade}x
-
-                            ${item.nome}
-
-                        </strong>
-
-
-                        ${
-                          item.tipo
-                            ? `
-
-                                    <br>
-
-                                    ${item.tipo}
-
-                                `
-                            : ""
-                        }
-
-
-                        ${
-                          adicionaisTexto
-                            ? `
-
-                                    <br><br>
-
-                                    ${adicionaisTexto}
-
-                                `
-                            : ""
-                        }
-                        ${
-                          detalhesCombo
-                            ? `
-
-            <br>
-
-            ${detalhesCombo}
-
-        `
-                            : ""
-                        }
-
-
-                        ${
-                          item.observacao
-                            ? `
-
-                                    <br><br>
-
-                                    Obs:
-                                    ${item.observacao}
-
-                                `
-                            : ""
-                        }
-
-
-                        <br><br>
-
-
-                        <strong>
-
-                            R$
-                            ${Number(item.subtotal || 0).toFixed(2)}
-
-                        </strong>
-
-
-                        <br><br>
-
-                        <button
-    type="button"
-    onclick="
-        editarItemCarrinhoAuto(
-            ${index}
-        )
-    "
->
-    ✏️ Editar
-</button>
-
-                        <button
-                            type="button"
-                            onclick="
-                                removerItemCarrinhoAuto(
-                                    ${index}
-                                )
-                            "
-                        >
-                            🗑 Remover
-                        </button>
-
-                    </div>
-
-                `;
+    html += `<article class="resumo-auto-item"><div class="resumo-auto-item-topo"><strong>${Number(item.quantidade || 1)} ${escaparOperacao(item.nome)}</strong><strong class="resumo-auto-preco">${moedaOperacao(item.subtotal || 0)}</strong></div>${item.tipo ? '<p class="resumo-auto-tipo">' + escaparOperacao(item.tipo) + "</p>" : ""}${adicionaisTexto ? '<div class="resumo-auto-extras">' + adicionaisTexto + "</div>" : ""}${detalhesCombo}${item.observacao ? "<p>Obs.: " + escaparOperacao(item.observacao) + "</p>" : ""}<div class="resumo-auto-acoes"><button type="button" onclick="editarItemCarrinhoAuto(${index})">Editar</button><button type="button" onclick="removerItemCarrinhoAuto(${index})">Remover</button></div></article>`;
   });
 
   lista.innerHTML = html;
@@ -2542,6 +2453,8 @@ function abrirResumoPedidoAuto() {
   const modalResumo = document.getElementById("modal-resumo-auto");
 
   modalResumo.style.display = "flex";
+  modalResumo.querySelector(".modal-conteudo").scrollTop = 0;
+  modalResumo.querySelector("button")?.focus({ preventScroll: true });
 
   modalResumo.style.zIndex = "3000";
 }
@@ -2630,6 +2543,8 @@ function editarItemCarrinhoAuto(index) {
       span.textContent = quantidade;
     }
   });
+  if (typeof atualizarResumoAdicionaisProdutoUI === "function")
+    atualizarResumoAdicionaisProdutoUI("lista-adicionais-auto");
 }
 function editarComboCarrinhoAuto(index) {
   const item = carrinhoAutoatendimento[index];
@@ -2721,7 +2636,7 @@ function editarComboCarrinhoAuto(index) {
       };
     }
 
-    selecionarModoComboAuto("todos");
+    modoPersonalizacaoComboAuto = "todos";
 
     atualizarResumoTodosComboAuto();
   }
@@ -2755,7 +2670,7 @@ function editarComboCarrinhoAuto(index) {
       }
     });
 
-    selecionarModoComboAuto("individual");
+    modoPersonalizacaoComboAuto = "individual";
 
     Object.keys(configuracoesLanchesComboAuto).forEach((numero) => {
       atualizarStatusLancheComboAuto(Number(numero));
@@ -2819,7 +2734,7 @@ async function confirmarEnvioPedidoAuto() {
     return;
   }
 
-  const confirmar = confirm("Confirmar e enviar este pedido?");
+  const confirmar = await confirmarOperacao("Confirmar e enviar este pedido?");
 
   if (!confirmar) {
     return;
@@ -3760,7 +3675,7 @@ async function sairContaAutoatendimento() {
     return;
   }
 
-  const confirmar = confirm("Deseja sair da sua conta?");
+  const confirmar = await confirmarOperacao("Deseja sair da sua conta?");
 
   if (!confirmar) {
     return;
@@ -4281,7 +4196,7 @@ async function chamarAtendenteAuto() {
   alert("🔔 Atendente chamado! Aguarde um momento.");
 }
 async function pedirContaAuto() {
-  const confirmar = confirm("Deseja solicitar a conta?");
+  const confirmar = await confirmarOperacao("Deseja solicitar a conta?");
 
   if (!confirmar) {
     return;
@@ -4480,5 +4395,8 @@ async function chamarAtendenteMesaBloqueada() {
   }
 }
 document.addEventListener("DOMContentLoaded", () => {
-  iniciarAutoatendimento();
+  iniciarAutoatendimento().catch(() => {
+    document.getElementById("area-autoatendimento").innerHTML =
+      '<p>Não foi possível abrir sua mesa. Confira sua conexão.</p><button onclick="location.reload()">Tentar novamente</button>';
+  });
 });

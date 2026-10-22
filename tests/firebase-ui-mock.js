@@ -1,5 +1,9 @@
 /* Fixture exclusivamente local: nunca carregar em uma página de produção. */
 (() => {
+  const modoMonitorFixture = document.currentScript.src.includes("modo=monitor");
+  const parametrosFixture = new URL(document.currentScript.src).searchParams;
+  const mesaFixture = parametrosFixture.get("mesa") || "2";
+  const cenarioFixture = parametrosFixture.get("cenario");
   const DataReal = Date;
   const horarioTeste = new DataReal();
   horarioTeste.setHours(20, 0, 0, 0);
@@ -36,6 +40,16 @@
         bonusDisponivel: 20,
         totalGasto: 100,
         avatar: "images/avatar1.png",
+        enderecos: [
+          {
+            nome: "Casa",
+            rua: "Rua das Orquídeas",
+            numero: "6",
+            bairro: "Centro",
+            complemento: "Portão marrom",
+            enderecoCompleto: "Rua das Orquídeas, nº 6 - Centro",
+          },
+        ],
       },
       ["clientes/" + cliente + "/chamados/suporte1"]: {
         categoria: "reclamacao",
@@ -148,7 +162,10 @@
       });
   for (let i = 1; i <= 8; i++) docs.get("produtos/combo" + i).comboQtdLanches = 3;
   docs.get("produtos/lanche1").precoIndustrial = 18;
+  docs.get("produtos/lanche8").esgotado = true;
+  docs.set("adicionais/cheddar", { nome: "Cheddar", preco: 3, ativo: true, ordem: 3 });
   docs.set("adicionais/alface", { nome: "Alface", preco: 2, ativo: true, ordem: 1 });
+  docs.set("adicionais/calabresa", { nome: "Calabresa", preco: 5, ativo: true, ordem: 2 });
   Object.assign(docs.get("pedidos/retirada1").itens[0], {
     molhosGratis: [{ unidade: 1, tipo: "doisiguais", texto: "2 Maionese" }],
     molhosPagos: [{ nome: "Barbecue", qtd: 2, preco: 2 }],
@@ -181,10 +198,168 @@
     data: new Date(agora).toISOString(),
     lida: false,
   });
+  docs.set("clientes/" + cliente + "/mensagens/cupom-teste", {
+    tipo: "admin",
+    remetente: "admin",
+    texto:
+      "Um presente para você.\nUse na sua próxima compra.\nCupom: COCA200. Confira as condições de uso do cupom.",
+    cupomCodigo: "COCA200",
+    campanhaId: "teste",
+    finalidade: "cupom",
+    data: new Date(agora).toISOString(),
+    lida: false,
+  });
+  for (const [id, origemColecao, origemId, tipo, clienteNome, delta] of [
+    ["entrega-fila", "pedidos", "entrega1", "Entrega", "Cliente de entrega", -2000],
+    ["retirada-fila", "pedidos", "retirada1", "Retirada", "Cliente de retirada", -1000],
+  ])
+    docs.set("filaCozinha/" + id, {
+      origemColecao,
+      origemId,
+      tipo,
+      cliente: clienteNome,
+      status: "aguardando",
+      criadoEmMs: agora + delta,
+      itens: clone(docs.get(origemColecao + "/" + origemId).itens),
+    });
+  docs.get("filaCozinha/entrega-fila").itens = [
+    {
+      nome: "Combo 3 X-Bagunça",
+      categoria: "combos",
+      quantidade: 1,
+      descricao: "3 X-Bagunça + Refrigerante 1,5L + 1 Batata Grande",
+      tipo: "industrial",
+      modoPersonalizacaoCombo: "todos",
+      lanchesCombo: [1, 2, 3].map((numero) => ({
+        numero,
+        adicionais: [
+          { nome: "Hambúrguer Caseiro", qtd: 1 },
+          { nome: "Cheddar", qtd: 1 },
+        ],
+      })),
+    },
+    { nome: "Coca 2L", categoria: "bebidas", quantidade: 1 },
+  ];
+  if (window.combosConferidosFixture) {
+    for (const [id, produto] of docs)
+      if (id.startsWith("produtos/") && produto.categoria === "combos") docs.delete(id);
+    window.combosConferidosFixture.forEach((combo, n) =>
+      docs.set("produtos/combo-real-" + n, {
+        ...combo,
+        categoria: "combos",
+        ativo: true,
+        esgotado: false,
+        ordem: n,
+        permiteAdicionais: true,
+        modoAdicional: "todos",
+      }),
+    );
+    const combo = window.combosConferidosFixture.find((c) => c.nome === "Combo 2 Industrial");
+    const item = {
+      ...clone(combo),
+      categoria: "combos",
+      produtoId: "combo-real-11",
+      quantidade: 1,
+      precoBase: combo.preco,
+      precoUnitario: combo.preco,
+      subtotal: combo.preco,
+    };
+    Object.assign(docs.get("comandas/comanda1"), {
+      itens: [clone(item)],
+      valorTotal: combo.preco,
+      valorPago: 0,
+      pagamentos: [],
+      clienteId: null,
+    });
+    Object.assign(docs.get("pedidos/entrega1"), { itens: [clone(item)], valorTotal: combo.preco });
+    docs.get("filaCozinha/entrega-fila").itens = [clone(item)];
+    if (cenarioFixture === "comanda-mista") {
+      const criarCombo = (nome, adicionais = {}, extra = 0) => {
+        const n = window.combosConferidosFixture.findIndex((c) => c.nome === nome);
+        const combo = clone(window.combosConferidosFixture[n]);
+        return {
+          ...combo,
+          produtoId: "combo-real-" + n,
+          categoria: "combos",
+          quantidade: 1,
+          precoBase: combo.preco,
+          preco: combo.preco + extra,
+          precoUnitario: combo.preco + extra,
+          subtotal: combo.preco + extra,
+          modoPersonalizacaoCombo: "individual",
+          lanchesCombo: Array.from({ length: combo.comboQtdLanches }, (_, i) => ({
+            numero: i + 1,
+            adicionais: adicionais[i + 1] || [],
+          })),
+        };
+      };
+      const itens = [
+        criarCombo("Combo 3 X-Bagunça"),
+        {
+          nome: "Baguncinha",
+          produtoId: "lanche1",
+          categoria: "lanches",
+          quantidade: 1,
+          tipo: "artesanal",
+          preco: 33,
+          subtotal: 33,
+          adicionais: [{ nome: "Hambúrguer Caseiro", qtd: 1 }],
+        },
+        {
+          nome: "Baguncinha",
+          produtoId: "lanche1",
+          categoria: "lanches",
+          quantidade: 1,
+          tipo: "artesanal",
+          preco: 27,
+          subtotal: 27,
+          adicionais: [{ nome: "Tomate", qtd: 1 }],
+        },
+        criarCombo("Combo 2 Artesanal", { 1: [{ nome: "Bacon", qtd: 1 }] }, 5),
+        criarCombo("Combo 4 Industrial", { 2: [{ nome: "Bacon", qtd: 2 }] }, 10),
+        {
+          nome: "Batata Média",
+          produtoId: "batata1",
+          categoria: "batatas",
+          quantidade: 1,
+          preco: 23,
+          subtotal: 23,
+          adicionais: [{ nome: "Cheddar", qtd: 1 }],
+        },
+        {
+          nome: "Coca 2L",
+          produtoId: "bebida1",
+          categoria: "bebidas",
+          quantidade: 1,
+          preco: 20,
+          subtotal: 20,
+        },
+      ];
+      const total = itens.reduce((s, i) => s + i.subtotal, 0);
+      Object.assign(docs.get("comandas/comanda1"), { itens: clone(itens), valorTotal: total });
+      Object.assign(docs.get("filaCozinha/entrega-fila"), {
+        itens: clone(itens),
+        tipo: "Consumo no local",
+        mesa: 1,
+        cliente: "Rafa Teste",
+      });
+    }
+  }
+  docs.set("filaCozinha/antigo-fila", {
+    origemColecao: "pedidos",
+    origemId: "entrega-antiga",
+    tipo: "Entrega",
+    cliente: "Fila antiga não deve aparecer",
+    status: "aguardando",
+    criadoEmMs: agora - 86400000,
+    itens: [],
+  });
+  docs.get("comandas/comanda1").criadoEm = agora;
+  docs.get("comandas/comanda1").itens.forEach((item) => (item.precoUnitario = item.preco));
   const Params = window.URLSearchParams;
   window.URLSearchParams = class extends Params {
     constructor(valor) {
-      super(valor || "mesa=2");
+      super(valor || "mesa=" + mesaFixture + (modoMonitorFixture ? "&modo=monitor" : ""));
     }
   };
   let contador = 0;
@@ -253,7 +428,12 @@
       where: (k, op, v) => collection(path, [...filtros, [k, op, v]]),
       orderBy: () => collection(path, filtros),
       limit: () => collection(path, filtros),
-      get: async () => snapshot(path, filtros),
+      get: async () => {
+        if (cenarioFixture === "lento") await new Promise((r) => setTimeout(r, 1200));
+        if (cenarioFixture === "falha" && path.endsWith("/mensagens"))
+          throw Error("Falha de conexão simulada");
+        return snapshot(path, filtros);
+      },
       add: async (d) => {
         const r = doc(path + "/mock-" + ++contador);
         await r.set(d);

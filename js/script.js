@@ -128,9 +128,22 @@ function gerarItens(lista, containerId, imagemPadrao) {
 let qtdProdutoAtual = 1;
 
 function alterarQtdProduto(valor) {
-  qtdProdutoAtual += valor;
-  if (qtdProdutoAtual < 1) qtdProdutoAtual = 1;
+  const quantidade = Math.max(1, qtdProdutoAtual + valor);
+  if (limitarQuantidadeProdutoComAdicionais(quantidade)) return;
+  qtdProdutoAtual = quantidade;
   document.getElementById("qtd-produto").innerText = qtdProdutoAtual;
+}
+function limitarQuantidadeProdutoComAdicionais(quantidade = qtdProdutoAtual) {
+  const combo = categoriaProdutoAtual === "Combos";
+  const temAdicional = combo
+    ? typeof temAdicionaisComboSiteUI === "function" && temAdicionaisComboSiteUI()
+    : Object.values(adicionaisSelecionados).some((a) => Number(a.qtd) > 0);
+  if (quantidade <= 1 || !temAdicional) return false;
+  qtdProdutoAtual = 1;
+  document.getElementById("qtd-produto").innerText = "1";
+  const itens = combo ? "Combos" : categoriaProdutoAtual === "Lanches" ? "Lanches" : "Itens";
+  alert(`${itens} com adicionais devem ser adicionados ao carrinho uma unidade por vez.`);
+  return true;
 }
 let adicionais = [];
 async function carregarAdicionaisFirebase() {
@@ -196,7 +209,7 @@ function abrirProduto(item, categoria = "Lanches") {
   document.getElementById("lista-adicionais").classList.remove("aberta");
   document.getElementById("lista-adicionais").hidden = true;
   document.getElementById("btn-toggle-adicionais").setAttribute("aria-expanded", "false");
-  document.getElementById("btn-toggle-adicionais").innerText = "Adicionais +";
+  document.getElementById("btn-toggle-adicionais").innerText = "Acréscimos";
 
   const boxAdicionais = document.getElementById("box-adicionais-produto");
 
@@ -217,13 +230,13 @@ function toggleAdicionaisProduto() {
     lista.hidden = false;
     lista.classList.add("aberta");
     btn.setAttribute("aria-expanded", "true");
-    btn.innerText = "Adicionais -";
+    btn.innerText = "Acréscimos";
   } else {
     lista.style.display = "none";
     lista.hidden = true;
     lista.classList.remove("aberta");
     btn.setAttribute("aria-expanded", "false");
-    btn.innerText = "Adicionais +";
+    btn.innerText = "Acréscimos";
   }
 }
 function montarOpcoes(item) {
@@ -254,6 +267,8 @@ function montarAdicionais(categoria = "Lanches") {
   const lista = document.getElementById("lista-adicionais");
   lista.innerHTML = "";
   adicionaisSelecionados = {};
+  if (typeof atualizarResumoAdicionaisProdutoUI === "function")
+    atualizarResumoAdicionaisProdutoUI("lista-adicionais");
 
   let listaAdicionais = [...adicionais];
   if (categoria === "Batatas") {
@@ -287,13 +302,13 @@ function montarAdicionais(categoria = "Lanches") {
     };
 
     lista.innerHTML += `
-            <div class="item-adicional">
-                <div>
+            <div class="item-adicional adicional-combo-auto">
+                <div class="info-adicional-combo-auto">
                     <strong>${adicional.nome}</strong>
                     <span>R$ ${Number(adicional.preco || 0).toFixed(2)}</span>
                 </div>
 
-                <div class="controle-adicional">
+                <div class="controle-adicional controle-adicional-combo-auto">
                     <button type="button" onclick="alterarAdicional(${index}, -1)">-</button>
                     <span id="qtd-adicional-${index}">0</span>
                     <button type="button" onclick="alterarAdicional(${index}, 1)">+</button>
@@ -301,6 +316,8 @@ function montarAdicionais(categoria = "Lanches") {
             </div>
         `;
   });
+  if (typeof atualizarResumoAdicionaisProdutoUI === "function")
+    atualizarResumoAdicionaisProdutoUI("lista-adicionais");
 }
 
 function alterarAdicional(index, valor) {
@@ -354,10 +371,7 @@ function adicionarProdutoFinal() {
 
   const temAdicional = adicionais.length > 0;
 
-  if (qtdProdutoAtual > 1 && temAdicional) {
-    alert("Para adicionais personalizados, selecione apenas 1 unidade por vez.");
-    return;
-  }
+  if (temAdicional && limitarQuantidadeProdutoComAdicionais()) return;
 
   const obs = document.getElementById("obs-produto").value.trim();
 
@@ -370,6 +384,7 @@ function adicionarProdutoFinal() {
     obs: obs,
     categoria: categoriaProdutoAtual,
     comboQtdLanches: produtoAtual.comboQtdLanches || 1,
+    comboComponentes: produtoAtual.comboComponentes || [],
     molhosGratis: null,
 
     molhosPagos: [],
@@ -483,6 +498,7 @@ function renderizarCarrinho() {
                     : ""
                 }
 
+                ${typeof resumoComboHtmlSiteUI === "function" ? resumoComboHtmlSiteUI(item) : ""}
                 ${
                   obsTexto
                     ? `
@@ -525,8 +541,8 @@ function removerItem(id) {
   atualizarCarrinho();
   renderizarCarrinho();
 }
-function limparCarrinho() {
-  if (confirm("Deseja realmente apagar todo o pedido e recomeçar?")) {
+async function limparCarrinho() {
+  if (await confirmarOperacao("Deseja realmente apagar todo o pedido e recomeçar?")) {
     carrinho = [];
     const revisao = document.getElementById("revisao-pedido");
     if (revisao) revisao.style.display = "none";
@@ -792,13 +808,14 @@ function exibirRevisao(itens, subtotal, taxa, tipo, obs, mapa = "", km = 0, fora
     if (podeTerMolho) {
       texto += `
         <br>
-        <button type="button"
+        <button type="button" class="botao-molhos-item"
                 onclick="abrirMolhosItem(${carrinho.indexOf(item)})">
-            🍶 Configurar molhos deste item
+            Molho
         </button>
     `;
     }
 
+    if (typeof resumoComboHtmlSiteUI === "function") texto += resumoComboHtmlSiteUI(item);
     return texto;
   });
 
@@ -1033,6 +1050,7 @@ async function confirmarEEnviar() {
       descricao: item.desc || item.descricao || obterTextoCompletoProduto(item),
       lanchesCombo: item.lanchesCombo || [],
       comboQtdLanches: item.comboQtdLanches || 0,
+      comboComponentes: item.comboComponentes || [],
       bebida: item.bebida || item.bebidaCombo || "",
       bebidas: item.bebidas || [],
 
@@ -1132,7 +1150,9 @@ async function confirmarEEnviar() {
 
   msg += `--------------------------\n`;
   const itensWhats = carrinho.map((item) => {
-    let texto = `*${item.qtd}x ${item.nome}*`;
+    let texto = `*${item.qtd} ${item.nome}*`;
+    if (typeof resumoComboTextoSiteUI === "function" && item.lanchesCombo?.length)
+      texto += "\n" + resumoComboTextoSiteUI(item);
 
     if (item.adicionais && item.adicionais.length > 0) {
       const adicionaisTexto = item.adicionais.map((a) => `${a.qtd} ${a.nome}`).join(" + ");
@@ -1338,7 +1358,7 @@ async function salvarPedidoFirebase(pedido) {
 }
 
 async function carregarProdutosFirebase() {
-  const snap = await db.collection("produtos").where("ativo", "==", true).get();
+  const snap = await lerComPrazoUI(db.collection("produtos").where("ativo", "==", true).get());
 
   let lanches = [];
   let combos = [];
@@ -1426,6 +1446,13 @@ document.addEventListener("DOMContentLoaded", () => {
 const paginaTemCardapioCliente = document.getElementById("container-lanches");
 
 if (paginaTemCardapioCliente) {
+  for (const id of [
+    "container-lanches",
+    "container-combos",
+    "container-bebidas",
+    "container-batatas",
+  ])
+    document.getElementById(id).innerHTML = htmlCarregandoUI("Buscando cardápio…");
   Promise.all([
     carregarProdutosFirebase(),
 
@@ -1438,7 +1465,10 @@ if (paginaTemCardapioCliente) {
       )
         montarAdicionais(categoriaProdutoAtual);
     }),
-  ]);
+  ]).catch(() => {
+    paginaTemCardapioCliente.innerHTML =
+      '<p>Não foi possível carregar o cardápio. Confira sua conexão.</p><button onclick="location.reload()">Tentar novamente</button>';
+  });
 }
 
 function calcularDistancia(lat1, lon1, lat2, lon2) {
@@ -1763,7 +1793,7 @@ async function abrirPedidosCliente() {
 
   const area = document.getElementById("area-perfil");
 
-  area.innerHTML = "<p>Buscando pedidos...</p>";
+  area.innerHTML = htmlCarregandoUI("Buscando pedidos…");
 
   const telefone = String(clienteLogado.telefone || "").replace(/\D/g, "");
 
@@ -1771,7 +1801,12 @@ async function abrirPedidosCliente() {
   // PEDIDOS NORMAIS
   // =========================
 
-  const snapPedidos = await db.collection("pedidos").where("clienteId", "==", telefone).get();
+  const [snapPedidos, snapLocal] = await Promise.all([
+    lerComPrazoUI(db.collection("pedidos").where("clienteId", "==", telefone).get()),
+    lerComPrazoUI(
+      db.collection("historicoPagamentosClientes").where("clienteId", "==", telefone).get(),
+    ),
+  ]);
 
   const historicoCompleto = [];
 
@@ -1818,11 +1853,6 @@ async function abrirPedidosCliente() {
   // PAGAMENTOS DO
   // CONSUMO LOCAL
   // =========================
-
-  const snapLocal = await db
-    .collection("historicoPagamentosClientes")
-    .where("clienteId", "==", telefone)
-    .get();
 
   snapLocal.forEach((doc) => {
     const pagamento = doc.data();
@@ -2063,9 +2093,10 @@ async function abrirBonusCliente() {
 }
 async function abrirEnderecosCliente() {
   if (!clienteLogado) return alert("Faça login primeiro");
+  document.getElementById("area-perfil").innerHTML = htmlCarregandoUI("Buscando endereços…");
 
   const ref = db.collection("clientes").doc(clienteLogado.telefone);
-  const doc = await ref.get();
+  const doc = await lerComPrazoUI(ref.get());
 
   const dados = doc.data();
   const enderecos = dados.enderecos || [];
@@ -2077,7 +2108,7 @@ async function abrirEnderecosCliente() {
         <div class="endereco-box">
             <strong>${e.nome}</strong><br>
             ${e.enderecoCompleto || `${e.rua}, ${e.numero} - ${e.bairro}`}<br>
-            ${e.complemento || ""}
+            ${e.complemento && !String(e.enderecoCompleto || "").includes(e.complemento) ? escaparOperacao(e.complemento) : ""}
 
             <div class="acoes-endereco">
                 <button type="button" onclick="editarEnderecoCliente(${i})">Editar</button>
@@ -2092,7 +2123,9 @@ async function abrirEnderecosCliente() {
 function adicionarEndereco() {
   const area = document.getElementById("area-perfil");
 
-  area.innerHTML += `
+  area.insertAdjacentHTML(
+    "beforeend",
+    `
         <div class="form-endereco" id="form-endereco">
             <h3>Novo endereço</h3>
 
@@ -2104,7 +2137,8 @@ function adicionarEndereco() {
 
             <button type="button" onclick="salvarEnderecoCliente()">Salvar endereço</button>
         </div>
-    `;
+    `,
+  );
 
   setTimeout(() => {
     document
@@ -2141,6 +2175,7 @@ async function salvarEnderecoCliente() {
   });
 
   await ref.update({ enderecos: atual });
+  document.getElementById("form-endereco")?.closest("dialog")?.close();
 
   abrirEnderecosCliente();
 }
@@ -2241,7 +2276,7 @@ async function salvarEnderecoDaRevisao() {
     return alert("Digite o endereço antes de salvar.");
   }
 
-  const nome = prompt("Nome para esse endereço. Ex: Casa, Trabalho, Namorada");
+  const nome = await solicitarTextoUI("Nome para esse endereço. Ex: Casa, Trabalho, Namorada");
 
   if (!nome) return alert("Informe um nome para o endereço.");
 
@@ -2265,7 +2300,7 @@ async function salvarEnderecoDaRevisao() {
   carregarEnderecosNaRevisao("Entrega");
 }
 async function excluirEnderecoCliente(index) {
-  if (!confirm("Deseja excluir este endereço?")) return;
+  if (!(await confirmarOperacao("Deseja excluir este endereço?"))) return;
 
   const ref = db.collection("clientes").doc(clienteLogado.telefone);
   const doc = await ref.get();
@@ -2348,13 +2383,16 @@ async function editarEnderecoCliente(index) {
       return;
     }
     salvando = true;
-    form.querySelectorAll("button").forEach((botao) => (botao.disabled = true));
+    form.querySelectorAll("button").forEach((botao) => {
+      botao.disabled = true;
+      if (botao.type === "submit") botao.setAttribute("aria-busy", "true");
+    });
     status.textContent = "Salvando endereço…";
     try {
       await db.runTransaction(async (transacao) => {
         const doc = await transacao.get(ref);
         const enderecos = [...(doc.data()?.enderecos || [])];
-        if (JSON.stringify(enderecos[index]) !== JSON.stringify(atual)) {
+        if (serializarOperacao(enderecos[index]) !== serializarOperacao(atual)) {
           throw new Error("Este endereço mudou em outra tela. Feche e abra a edição novamente.");
         }
         const { rua, numero, bairro, complemento } = valores;
@@ -2377,7 +2415,10 @@ async function editarEnderecoCliente(index) {
         : "Não foi possível salvar. Confira sua conexão e tente novamente.";
     } finally {
       salvando = false;
-      form.querySelectorAll("button").forEach((botao) => (botao.disabled = false));
+      form.querySelectorAll("button").forEach((botao) => {
+        botao.disabled = false;
+        if (botao.type === "submit") botao.removeAttribute("aria-busy");
+      });
     }
   };
   document.body.append(modal);
@@ -3049,6 +3090,18 @@ function atualizarTelaClienteLogado() {
   atualizarContadorMensagens();
 }
 let abaMensagemAtual = "geral";
+let consultaMensagensUI = 0;
+
+function htmlMensagemCliente(m) {
+  // Campanhas antigas juntavam instruções genéricas e código à descrição.
+  const texto = m.cupomCodigo
+    ? String(m.texto || "").replace(
+        /\s*Cupom:\s*[^\n]+\. Confira as condições de uso do cupom\.?\s*$/i,
+        "",
+      )
+    : m.texto;
+  return `<div class="card-mensagem"><p class="mensagem-descricao">${escaparOperacao(texto)}</p>${m.cupomCodigo ? `<div class="mensagem-cupom"><span>Cupom</span><strong>${escaparOperacao(m.cupomCodigo)}</strong></div>` : ""}${m.raspadinhaId ? (m.raspadinhaStatus === "usada" ? '<span class="raspadinha-status-usada">Usado</span>' : `<button type="button" onclick="abrirRaspadinhaCliente('${escaparOperacao(m.raspadinhaId)}')">Abrir</button>`) : ""}<small>${new Date(m.data).toLocaleString("pt-BR")}${m.remetente === "cliente" ? (m.lida ? " • visualizada" : " • enviada") : ""}</small></div>`;
+}
 
 function abrirMensagensCliente() {
   document.getElementById("modal-mensagens").style.display = "flex";
@@ -3058,40 +3111,27 @@ function abrirMensagensCliente() {
 }
 
 function fecharMensagensCliente() {
+  consultaMensagensUI++;
+  if (window.listenerChamadoCliente) window.listenerChamadoCliente();
+  window.listenerChamadoCliente = null;
   document.getElementById("modal-mensagens").style.display = "none";
 }
 
 async function abrirAbaMensagens(tipo) {
+  const consulta = ++consultaMensagensUI;
   abaMensagemAtual = tipo;
 
   const lista = document.getElementById("lista-mensagens-cliente");
 
   const boxSuporte = document.getElementById("box-enviar-suporte");
-  if ((tipo === "admin" || tipo === "geral") && clienteLogado) {
-    const naoLidas = await db
-      .collection("clientes")
-      .doc(clienteLogado.telefone)
-      .collection("mensagens")
-      .where("tipo", "==", tipo)
-      .where("remetente", "==", "admin")
-      .where("lida", "==", false)
-      .get();
-
-    naoLidas.forEach((doc) => {
-      doc.ref.update({ lida: true });
-    });
-
-    atualizarContadorMensagens();
-  }
-
-  lista.innerHTML = "Carregando...";
+  if (window.listenerChamadoCliente) window.listenerChamadoCliente();
+  window.listenerChamadoCliente = null;
+  lista.innerHTML = htmlCarregandoUI("Buscando mensagens…");
 
   boxSuporte.style.display = tipo === "suporte" ? "block" : "none";
   if (tipo === "suporte") {
     lista.innerHTML = "";
     etapaSuporteCliente();
-    await listarChamadosCliente();
-    atualizarContadorMensagens();
     return;
   }
 
@@ -3101,12 +3141,22 @@ async function abrirAbaMensagens(tipo) {
   }
 
   try {
-    const snap = await db
-      .collection("clientes")
-      .doc(clienteLogado.telefone)
-      .collection("mensagens")
-      .where("tipo", "==", tipo)
-      .get();
+    const snap = await lerComPrazoUI(
+      db
+        .collection("clientes")
+        .doc(clienteLogado.telefone)
+        .collection("mensagens")
+        .where("tipo", "==", tipo)
+        .get(),
+    );
+    if (consulta !== consultaMensagensUI) return;
+    // A leitura aparece imediatamente; a marcação não bloqueia a navegação.
+    const pendentes = snap.docs.filter(
+      (doc) => doc.data().remetente === "admin" && !doc.data().lida,
+    );
+    Promise.all(pendentes.map((doc) => doc.ref.update({ lida: true })))
+      .then(() => atualizarContadorMensagens())
+      .catch(console.error);
 
     if (snap.empty) {
       lista.innerHTML = "<p>Nenhuma mensagem.</p>";
@@ -3127,34 +3177,20 @@ async function abrirAbaMensagens(tipo) {
     for (const m of mensagens) {
       if (!m.raspadinhaId || m.raspadinhaStatus) continue;
       if (!estadosAntigos.has(m.raspadinhaId)) {
-        const premio = await db.collection("raspadinhas").doc(m.raspadinhaId).get();
+        const premio = await lerComPrazoUI(db.collection("raspadinhas").doc(m.raspadinhaId).get());
+        if (consulta !== consultaMensagensUI) return;
         estadosAntigos.set(m.raspadinhaId, premio.exists ? premio.data().status : "indisponivel");
       }
       m.raspadinhaStatus = estadosAntigos.get(m.raspadinhaId);
     }
 
-    let html = "";
-
-    mensagens.forEach((m) => {
-      html += `
-                <div class="card-mensagem">
-
-                    <p>${escaparOperacao(m.texto)}</p>${m.raspadinhaId ? (m.raspadinhaStatus === "usada" ? '<span class="raspadinha-status-usada">Usado</span>' : `<button type="button" onclick="abrirRaspadinhaCliente('${escaparOperacao(m.raspadinhaId)}')">Abrir</button>`) : ""}
-
-                   <small>
-    ${new Date(m.data).toLocaleString("pt-BR")}
-    ${m.remetente === "cliente" ? (m.lida ? " • visualizada" : " • enviada") : ""}
-</small>
-
-                </div>
-            `;
-    });
-
-    lista.innerHTML = html;
+    if (consulta === consultaMensagensUI)
+      lista.innerHTML = mensagens.map(htmlMensagemCliente).join("");
   } catch (e) {
     console.error(e);
 
-    lista.innerHTML = "<p>Erro ao carregar mensagens.</p>";
+    if (consulta === consultaMensagensUI)
+      lista.innerHTML = `<p>Não foi possível buscar as mensagens. Confira sua conexão.</p><button type="button" onclick="abrirAbaMensagens(abaMensagemAtual)">Tentar novamente</button>`;
   }
 }
 
@@ -3178,7 +3214,7 @@ async function enviarMensagemSuporte() {
   abrirAbaMensagens("suporte");
 }
 async function responderMensagemAdmin(clienteId) {
-  const texto = prompt("Digite a resposta para o cliente:");
+  const texto = await solicitarTextoUI("Digite a resposta para o cliente:");
 
   if (!texto) return;
 
@@ -3195,6 +3231,7 @@ async function responderMensagemAdmin(clienteId) {
 let chamadoClienteAbertoId = null;
 
 function etapaSuporteCliente(etapa = "inicio") {
+  if (etapa !== "chat") consultaMensagensUI++;
   if (etapa !== "chat" && window.listenerChamadoCliente) {
     window.listenerChamadoCliente();
     window.listenerChamadoCliente = null;
@@ -3205,6 +3242,11 @@ function etapaSuporteCliente(etapa = "inicio") {
   document.getElementById("form-novo-chamado").style.display = etapa === "novo" ? "grid" : "none";
   document.getElementById("chat-chamado-cliente").style.display =
     etapa === "chat" ? "block" : "none";
+  if (etapa === "lista")
+    listarChamadosCliente().catch(() => {
+      document.getElementById("lista-chamados-cliente").innerHTML =
+        '<p>Não foi possível buscar seus suportes.</p><button onclick="etapaSuporteCliente(\'lista\')">Tentar novamente</button><button onclick="etapaSuporteCliente()">Voltar</button>';
+    });
 }
 function abrirFormNovoChamado() {
   etapaSuporteCliente("novo");
@@ -3214,14 +3256,16 @@ async function listarChamadosCliente() {
   if (!clienteLogado) return;
 
   const box = document.getElementById("lista-chamados-cliente");
-  box.innerHTML = "<p>Carregando suportes...</p>";
+  box.innerHTML = htmlCarregandoUI("Buscando suportes…");
 
-  const snap = await db
-    .collection("clientes")
-    .doc(clienteLogado.telefone)
-    .collection("chamados")
-    .where("status", "==", "aberto")
-    .get();
+  const snap = await lerComPrazoUI(
+    db
+      .collection("clientes")
+      .doc(clienteLogado.telefone)
+      .collection("chamados")
+      .where("status", "==", "aberto")
+      .get(),
+  );
 
   if (snap.empty) {
     box.innerHTML = `<button onclick="etapaSuporteCliente()">← Voltar</button><p>Nenhum suporte aberto.</p>`;
@@ -3259,6 +3303,21 @@ async function listarChamadosCliente() {
   }
   html += '</div><div id="suporte-blocos" class="suporte-grade" hidden>';
 
+  const naoLidas = await Promise.all(
+    chamados.map((c) =>
+      lerComPrazoUI(
+        db
+          .collection("clientes")
+          .doc(clienteLogado.telefone)
+          .collection("chamados")
+          .doc(c.id)
+          .collection("mensagens")
+          .where("remetente", "==", "admin")
+          .where("lida", "==", false)
+          .get(),
+      ),
+    ),
+  );
   for (let index = 0; index < chamados.length; index++) {
     const c = chamados[index];
 
@@ -3269,17 +3328,7 @@ async function listarChamadosCliente() {
           ? "Feedback"
           : "Outros";
 
-    const naoLidasSnap = await db
-      .collection("clientes")
-      .doc(clienteLogado.telefone)
-      .collection("chamados")
-      .doc(c.id)
-      .collection("mensagens")
-      .where("remetente", "==", "admin")
-      .where("lida", "==", false)
-      .get();
-
-    const totalNaoLidas = naoLidasSnap.size;
+    const totalNaoLidas = naoLidas[index].size;
 
     html += `
         <div class="card-chamado-cliente" data-categoria="${escaparOperacao(c.categoria)}">
@@ -3374,7 +3423,8 @@ async function criarChamadoSuporte() {
 }
 
 window.abrirChamadoCliente = async function (chamadoId) {
-  console.log("Abrindo chamado:", chamadoId);
+  const consulta = ++consultaMensagensUI;
+  const mesmoChamado = chamadoClienteAbertoId === chamadoId;
 
   chamadoClienteAbertoId = chamadoId;
 
@@ -3382,6 +3432,8 @@ window.abrirChamadoCliente = async function (chamadoId) {
   const form = document.getElementById("form-novo-chamado");
 
   etapaSuporteCliente("chat");
+  const rascunho = mesmoChamado ? chat.querySelector("textarea")?.value || "" : "";
+  chat.innerHTML = htmlCarregandoUI("Abrindo conversa…");
 
   if (window.listenerChamadoCliente) {
     window.listenerChamadoCliente();
@@ -3394,35 +3446,50 @@ window.abrirChamadoCliente = async function (chamadoId) {
     .collection("chamados")
     .doc(chamadoId);
 
-  const chamadoDoc = await chamadoRef.get();
+  let chamadoDoc;
+  try {
+    chamadoDoc = await lerComPrazoUI(chamadoRef.get());
+  } catch (erro) {
+    if (consulta === consultaMensagensUI)
+      chat.innerHTML =
+        '<button onclick="etapaSuporteCliente()">← Voltar</button><p>Não foi possível abrir a conversa. Confira sua conexão e tente novamente.</p>';
+    return;
+  }
+  if (consulta !== consultaMensagensUI) return;
   const chamado = chamadoDoc.data();
+  if (!chamado) {
+    chat.innerHTML =
+      '<p>Este suporte não está mais disponível.</p><button onclick="etapaSuporteCliente()">Voltar</button>';
+    return;
+  }
 
   window.listenerChamadoCliente = chamadoRef
     .collection("mensagens")
     .orderBy("data")
-    .onSnapshot(async (snapshot) => {
-      let mensagens = [];
+    .onSnapshot(
+      async (snapshot) => {
+        if (consulta !== consultaMensagensUI) return;
+        let mensagens = [];
 
-      for (const doc of snapshot.docs) {
-        const m = doc.data();
+        for (const doc of snapshot.docs) {
+          const m = doc.data();
 
-        if (m.remetente === "admin" && m.lida === false) {
-          await doc.ref.update({ lida: true });
-          m.lida = true;
+          if (m.remetente === "admin" && m.lida === false) {
+            doc.ref.update({ lida: true }).catch(console.error);
+            m.lida = true;
+          }
+
+          mensagens.push(m);
         }
 
-        mensagens.push(m);
-      }
+        atualizarContadorMensagens();
 
-      atualizarContadorMensagens();
-      listarChamadosCliente();
+        let html = `<h3>Conversa do suporte</h3>`;
 
-      let html = `<h3>Conversa do suporte</h3>`;
+        mensagens.forEach((m) => {
+          const ehCliente = m.remetente === "cliente";
 
-      mensagens.forEach((m) => {
-        const ehCliente = m.remetente === "cliente";
-
-        html += `
+          html += `
                     <div class="linha-msg ${ehCliente ? "linha-cliente" : "linha-admin"}">
                         <img
                             src="${ehCliente ? clienteLogado.avatar || "images/avatar1.png" : "images/avatar-admin.png"}"
@@ -3431,35 +3498,64 @@ window.abrirChamadoCliente = async function (chamadoId) {
 
                         <div class="msg-chat ${ehCliente ? "msg-cliente" : "msg-admin"}">
                             <strong>${ehCliente ? "Você" : "Pedrão Lanches"}</strong>
-                            <p>${m.texto}</p>
+                            <p>${escaparOperacao(m.texto)}</p>
                             <small>${new Date(m.data).toLocaleString("pt-BR")}</small>
                         </div>
                     </div>
                 `;
-      });
+        });
 
-      if (chamado.status !== "finalizado") {
-        html += `
+        if (chamado.status !== "finalizado") {
+          html += `
                     <div class="suporte-compositor">
                       <textarea id="resposta-chamado-cliente" aria-label="Mensagem" placeholder="Continuar conversa..."></textarea>
                       <button type="button" aria-label="Enviar mensagem" onclick="enviarMensagemChamadoCliente()">➤</button>
                     </div>
                     <div class="acoes-chat-cliente"><button type="button" onclick="finalizarChamadoCliente('${chamadoId}')">Encerrar chat</button></div>
                 `;
-      } else {
-        html += `<p><strong>Este suporte foi finalizado.</strong></p>`;
-      }
+        } else {
+          html += `<p><strong>Este suporte foi finalizado.</strong></p>`;
+        }
 
-      chat.innerHTML =
-        `<button type="button" onclick="etapaSuporteCliente()">← Voltar</button>` + html;
+        const campoAtual = chat.querySelector("textarea");
+        const textoAtual = campoAtual ? campoAtual.value : rascunho;
+        chat.innerHTML =
+          `<button type="button" onclick="etapaSuporteCliente()">← Voltar</button>` + html;
+        const campoNovo = chat.querySelector("textarea");
+        if (campoNovo) campoNovo.value = textoAtual;
 
-      const modal = document.querySelector("#modal-mensagens .conteudo-carrinho");
+        const modal = document.querySelector("#modal-mensagens .conteudo-carrinho");
 
-      if (modal) {
-        modal.scrollTop = modal.scrollHeight;
-      }
-    });
+        if (modal) {
+          modal.scrollTop = modal.scrollHeight;
+        }
+      },
+      () => {
+        if (consulta === consultaMensagensUI)
+          chat.innerHTML =
+            '<button onclick="etapaSuporteCliente()">← Voltar</button><p>Não foi possível atualizar a conversa. Confira sua conexão e abra novamente.</p>';
+      },
+    );
 };
+
+function retomarMensagensClienteUI() {
+  if (document.hidden || !clienteLogado) return;
+  const modal = document.getElementById("modal-mensagens");
+  if (!modal || modal.style.display !== "flex") return;
+  if (abaMensagemAtual !== "suporte") abrirAbaMensagens(abaMensagemAtual);
+  else if (
+    document.getElementById("chat-chamado-cliente").style.display === "block" &&
+    chamadoClienteAbertoId
+  )
+    abrirChamadoCliente(chamadoClienteAbertoId);
+  else if (document.getElementById("lista-chamados-cliente").style.display === "block")
+    etapaSuporteCliente("lista");
+}
+document.addEventListener("visibilitychange", retomarMensagensClienteUI);
+window.addEventListener("online", retomarMensagensClienteUI);
+window.addEventListener("pageshow", (evento) => {
+  if (evento.persisted) retomarMensagensClienteUI();
+});
 
 function fecharConversaChamadoCliente() {
   if (window.listenerChamadoCliente) {
@@ -3590,6 +3686,7 @@ async function togglePedidosSuporteCliente() {
   }
 }
 async function atualizarStatusOnline() {
+  if (document.hidden) return;
   const dadosOnline = {
     sessionId: onlineSessionId,
 
@@ -3614,25 +3711,48 @@ async function atualizarStatusOnline() {
   await db.collection("usuariosOnline").doc(onlineSessionId).set(dadosOnline);
 }
 setInterval(() => {
-  atualizarStatusOnline();
+  atualizarStatusOnline().catch(console.error);
 }, 30000);
 window.addEventListener("load", () => {
-  atualizarStatusOnline();
+  atualizarStatusOnline().catch(console.error);
 });
-async function atualizarContadorMensagens() {
+let buscaContadorMensagensUI = null;
+function atualizarContadorMensagens() {
+  if (!buscaContadorMensagensUI)
+    buscaContadorMensagensUI = buscarContadorMensagensUI()
+      .catch(console.error)
+      .finally(() => {
+        buscaContadorMensagensUI = null;
+      });
+  return buscaContadorMensagensUI;
+}
+async function buscarContadorMensagensUI() {
   if (!clienteLogado) return;
+  if (!document.getElementById("badge-geral")) return;
 
   let totalGeral = 0;
   let totalAdmin = 0;
   let totalSuporte = 0;
 
-  const mensagensSnap = await db
-    .collection("clientes")
-    .doc(clienteLogado.telefone)
-    .collection("mensagens")
-    .where("lida", "==", false)
-    .where("remetente", "==", "admin")
-    .get();
+  const [mensagensSnap, chamadosSnap] = await Promise.all([
+    lerComPrazoUI(
+      db
+        .collection("clientes")
+        .doc(clienteLogado.telefone)
+        .collection("mensagens")
+        .where("lida", "==", false)
+        .where("remetente", "==", "admin")
+        .get(),
+    ),
+    lerComPrazoUI(
+      db
+        .collection("clientes")
+        .doc(clienteLogado.telefone)
+        .collection("chamados")
+        .where("status", "==", "aberto")
+        .get(),
+    ),
+  ]);
 
   mensagensSnap.forEach((doc) => {
     const m = doc.data();
@@ -3646,22 +3766,18 @@ async function atualizarContadorMensagens() {
     }
   });
 
-  const chamadosSnap = await db
-    .collection("clientes")
-    .doc(clienteLogado.telefone)
-    .collection("chamados")
-    .where("status", "==", "aberto")
-    .get();
-
-  for (const chamadoDoc of chamadosSnap.docs) {
-    const respostasSnap = await chamadoDoc.ref
-      .collection("mensagens")
-      .where("lida", "==", false)
-      .where("remetente", "==", "admin")
-      .get();
-
-    totalSuporte += respostasSnap.size;
-  }
+  const respostas = await Promise.all(
+    chamadosSnap.docs.map((chamadoDoc) =>
+      lerComPrazoUI(
+        chamadoDoc.ref
+          .collection("mensagens")
+          .where("lida", "==", false)
+          .where("remetente", "==", "admin")
+          .get(),
+      ),
+    ),
+  );
+  totalSuporte = respostas.reduce((total, snap) => total + snap.size, 0);
 
   document.getElementById("badge-geral").innerText = totalGeral > 0 ? totalGeral : "";
 

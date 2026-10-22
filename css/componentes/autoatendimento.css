@@ -106,13 +106,13 @@
 
 /* Combos: nome e preço à esquerda, controles compactos à direita. */
 /* Cartão do lanche: título, resumo e opções ocupam linhas próprias. */
-#modal-combo-auto .acoes-todos-combo-auto {
+:is(#modal-combo-auto, dialog.interface-janela) .acoes-todos-combo-auto {
   display: flex;
   justify-content: center;
   gap: 8px;
   margin-bottom: 12px;
 }
-#modal-combo-auto .acoes-todos-combo-auto > button {
+:is(#modal-combo-auto, dialog.interface-janela) .acoes-todos-combo-auto > button {
   flex: 0 1 150px;
   min-width: 0;
   margin: 0;
@@ -121,7 +121,7 @@
   font-size: 14px;
   white-space: normal;
 }
-#modal-combo-auto .lanche-combo-auto {
+:is(#modal-combo-auto, dialog.interface-janela) .lanche-combo-auto {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: start;
@@ -129,14 +129,14 @@
   min-width: 0;
   text-align: left;
 }
-#modal-combo-auto .lanche-combo-auto > strong,
-#modal-combo-auto .lanche-combo-auto > .resumo-combo-auto,
-#modal-combo-auto .lanche-combo-auto > .config-combo-auto {
+:is(#modal-combo-auto, dialog.interface-janela) .lanche-combo-auto > strong,
+:is(#modal-combo-auto, dialog.interface-janela) .lanche-combo-auto > .resumo-combo-auto,
+:is(#modal-combo-auto, dialog.interface-janela) .lanche-combo-auto > .config-combo-auto {
   grid-column: 1 / -1;
   min-width: 0;
   margin: 0;
 }
-#modal-combo-auto .lanche-combo-auto > button {
+:is(#modal-combo-auto, dialog.interface-janela) .lanche-combo-auto > button {
   width: 100%;
   min-width: 0;
   min-height: 44px;
@@ -147,10 +147,10 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
-#modal-combo-auto .resumo-combo-auto:empty {
+:is(#modal-combo-auto, dialog.interface-janela) .resumo-combo-auto:empty {
   display: none;
 }
-#modal-combo-auto .adicional-combo-auto {
+:is(#modal-combo-auto, dialog.interface-janela) .adicional-combo-auto {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -163,32 +163,32 @@
   text-align: left;
   line-height: 1.5;
 }
-#modal-combo-auto .info-adicional-combo-auto {
+:is(#modal-combo-auto, dialog.interface-janela) .info-adicional-combo-auto {
   flex: 1;
   min-width: 0;
   font-size: 14px;
 }
-#modal-combo-auto .adicional-combo-auto strong {
+:is(#modal-combo-auto, dialog.interface-janela) .adicional-combo-auto strong {
   display: block;
   margin: 0;
   line-height: 1.3;
   overflow-wrap: normal;
   word-break: normal;
 }
-#modal-combo-auto .info-adicional-combo-auto > span {
+:is(#modal-combo-auto, dialog.interface-janela) .info-adicional-combo-auto > span {
   display: block;
   margin-top: 4px;
   color: #00e676;
   white-space: nowrap;
 }
-#modal-combo-auto .controle-adicional-combo-auto {
+:is(#modal-combo-auto, dialog.interface-janela) .controle-adicional-combo-auto {
   display: flex;
   flex: none;
   align-items: center;
   gap: 6px;
   margin: 0;
 }
-#modal-combo-auto .controle-adicional-combo-auto button {
+:is(#modal-combo-auto, dialog.interface-janela) .controle-adicional-combo-auto button {
   flex: none;
   width: 32px;
   min-width: 32px;
@@ -198,7 +198,7 @@
   margin: 0;
   font-size: 20px;
 }
-#modal-combo-auto .controle-adicional-combo-auto span {
+:is(#modal-combo-auto, dialog.interface-janela) .controle-adicional-combo-auto span {
   min-width: 14px;
   text-align: center;
   font-weight: bold;

@@ -161,21 +161,64 @@ body:has(#central-operacao.central-etapa-modal:not([hidden]))::before {
   overflow-wrap: anywhere;
 }
 .comanda-item-linha {
-  padding: 12px 0;
-  border-bottom: 1px solid #444;
+  padding: 14px;
+  background: #191919;
+  border: 1px solid #414141;
+  border-radius: 10px;
+  min-width: 0;
+}
+.comanda-itens-lista {
+  display: grid;
+  gap: 12px;
 }
 .comanda-item-resumo {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
 }
 .comanda-item-resumo > strong {
   min-width: 0;
+  font-size: 16px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 .comanda-item-resumo > span {
-  flex: none;
   white-space: nowrap;
+  border-radius: 6px;
+  background: #2e2e2e;
+  padding: 4px 7px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.comanda-item-detalhes {
+  margin-top: 10px;
+  color: #dedede;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.comanda-item-detalhes:empty {
+  display: none;
+}
+.comanda-item-detalhes > p {
+  margin: 5px 0;
+}
+.comanda-item-detalhes > .combo-componentes-ui {
+  margin: 0;
+  padding: 0;
+  background: none;
+}
+.comanda-item-detalhes .producao-combo {
+  margin: 10px 0 0;
+  padding: 0 0 0 10px;
+  border-left-color: #8c484b;
+}
+.comanda-item-detalhes .producao-combo > strong {
+  font-size: 14px;
+}
+.comanda-item-detalhes .producao-combo p {
+  margin: 4px 0 0;
 }
 #area-comanda-atendente .comanda-item-acao,
 .comanda-item-linha > .comanda-item-acao {
