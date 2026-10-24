@@ -191,6 +191,25 @@ async function iniciarAutoatendimento() {
 
     await mostrarSessaoAutoatendimento();
 
+    if (
+      sessaoRecuperada.clienteLogado &&
+      sessaoRecuperada.clienteId &&
+      typeof acompanharBeneficiosClientePedraoUI === "function"
+    ) {
+      const id = sessaoRecuperada.clienteId;
+      db.collection("clientes")
+        .doc(id)
+        .get()
+        .then((doc) => {
+          if (doc.exists && sessaoAutoatendimentoAtual?.clienteId === id)
+            acompanharBeneficiosClientePedraoUI(
+              { ...doc.data(), telefone: id },
+              atualizarAvataresContaAutoUI,
+            );
+        })
+        .catch((erro) => console.error("Não foi possível acompanhar o nível:", erro));
+    }
+
     return;
   }
 
@@ -712,9 +731,7 @@ async function mostrarSessaoAutoatendimento() {
     id="lista-auto-lanches"
     class="auto-grid-produtos"
 >
-                    <p>
-                        Carregando...
-                    </p>
+                    ${htmlCarregandoUI("Carregando…")}
                 </div>
 
             </section>
@@ -837,6 +854,10 @@ async function mostrarSessaoAutoatendimento() {
     `;
   atualizarIconeLoginAuto();
 
+  for (const categoria of ["lanches", "combos", "batatas", "bebidas"]) {
+    document.getElementById("lista-auto-" + categoria).innerHTML =
+      htmlCarregandoUI("Buscando cardápio…");
+  }
   await carregarAdicionaisAutoatendimento();
   await carregarCardapioAutoatendimento();
 }
@@ -920,9 +941,9 @@ async function carregarCardapioAutoatendimento() {
   } catch (erro) {
     console.error("Erro ao carregar cardápio:", erro);
 
-    const area = document.getElementById("lista-auto-lanches");
-
-    if (area) {
+    for (const categoria of ["lanches", "combos", "batatas", "bebidas"]) {
+      const area = document.getElementById("lista-auto-" + categoria);
+      if (!area) continue;
       area.innerHTML = `
 
                 <p>
@@ -1127,9 +1148,33 @@ function abrirComboAutoatendimento(produto) {
 
   precoArea.textContent = `R$ ${preco.toFixed(2)}`;
 
+  const tipos = tiposCarneProdutoOperacao(produto);
+  const areaTipos = document.getElementById("combo-opcoes-tipo-auto");
+  if (areaTipos) {
+    areaTipos.dataset.quantidade = tipos.length;
+    areaTipos.hidden = tipos.length < 2;
+    areaTipos.innerHTML =
+      tipos.length < 2
+        ? ""
+        : tipos
+            .map(
+              (tipo, indice) =>
+                `<label><input type="radio" name="tipo-combo-auto" value="${tipo.valor}" ${indice === 0 ? "checked" : ""} onchange="atualizarPrecoComboAuto()"><span>${tipo.nome}</span><small>${moedaOperacao(tipo.preco)}</small></label>`,
+            )
+            .join("");
+  }
+
   montarPersonalizacaoComboAuto();
 
   document.getElementById("modal-combo-auto").style.display = "flex";
+  const conteudo = document.querySelector("#modal-combo-auto .modal-conteudo");
+  if (conteudo) conteudo.scrollTop = 0;
+}
+function comboAutoSelecionado() {
+  return aplicarTipoComboOperacao(
+    comboAutoAtual,
+    document.querySelector('input[name="tipo-combo-auto"]:checked')?.value,
+  );
 }
 function montarPersonalizacaoComboAuto() {
   const area = document.getElementById("personalizacao-combo-auto");
@@ -1996,7 +2041,10 @@ function atualizarPrecoComboAuto() {
     return;
   }
 
-  const precoBase = Number(comboAutoAtual.preco || 0);
+  const produto = comboAutoSelecionado();
+  const precoBase = Number(produto.preco || 0);
+  const descricao = document.getElementById("combo-desc-auto");
+  if (descricao) descricao.textContent = produto.descricao || produto.desc || "";
 
   const qtdLanches = Number(comboAutoAtual.comboQtdLanches || 0);
 
@@ -2031,6 +2079,7 @@ function adicionarComboCarrinhoAuto() {
   if (!comboAutoAtual) {
     return alert("Combo não encontrado.");
   }
+  const produto = comboAutoSelecionado();
 
   const qtdLanches = Number(comboAutoAtual.comboQtdLanches || 0);
 
@@ -2090,7 +2139,7 @@ function adicionarComboCarrinhoAuto() {
     return total + subtotal;
   }, 0);
 
-  const precoBase = Number(comboAutoAtual.preco || 0);
+  const precoBase = Number(produto.preco || 0);
 
   const precoUnitario = precoBase + totalAdicionais;
 
@@ -2100,6 +2149,7 @@ function adicionarComboCarrinhoAuto() {
     nome: comboAutoAtual.nome,
 
     categoria: "combos",
+    tipo: produto.tipoCarne || "",
 
     quantidade,
 
@@ -2112,10 +2162,10 @@ function adicionarComboCarrinhoAuto() {
     observacao: document.getElementById("observacao-combo-auto")?.value.trim() || "",
 
     comboQtdLanches: qtdLanches,
-    descricao: comboAutoAtual.desc || comboAutoAtual.descricao || "",
+    descricao: produto.desc || produto.descricao || "",
     bebida: comboAutoAtual.bebida || comboAutoAtual.bebidaCombo || "",
     bebidas: comboAutoAtual.bebidas || [],
-    comboComponentes: comboAutoAtual.comboComponentes || [],
+    comboComponentes: produto.comboComponentes || [],
 
     comboPersonalizado,
 
@@ -2579,6 +2629,10 @@ function editarComboCarrinhoAuto(index) {
 
   abrirComboAutoatendimento(produto);
 
+  const tipoSalvo = String(item.tipo || item.tipoCarne || "").toLowerCase();
+  const radioTipo = document.querySelector(`input[name="tipo-combo-auto"][value="${tipoSalvo}"]`);
+  if (radioTipo) radioTipo.checked = true;
+
   // =========================
   // QUANTIDADE
   // =========================
@@ -2734,7 +2788,7 @@ async function confirmarEnvioPedidoAuto() {
     return;
   }
 
-  const confirmar = await confirmarOperacao("Confirmar e enviar este pedido?");
+  const confirmar = await confirmarOperacao("Enviar pedido ao chapeiro?");
 
   if (!confirmar) {
     return;
@@ -3182,50 +3236,18 @@ async function confirmarEnvioPedidoAuto() {
 
 function montarTiposProdutoAuto(produto) {
   const area = document.getElementById("modal-opcoes-tipo-auto");
-
-  if (!area) {
-    return;
-  }
-
-  area.innerHTML = "";
-
+  if (!area) return;
   const tipos = tiposCarneProdutoOperacao(produto);
-
-  if (tipos.length <= 1) {
-    area.innerHTML = "";
-
-    return;
-  }
-
-  tipos.forEach((tipo, index) => {
-    area.innerHTML += `
-
-                <label>
-
-                    <input
-
-                        type="radio"
-
-                        name="tipo-produto-auto"
-
-                        value="${tipo.valor}"
-
-                        data-preco="${tipo.preco}"
-
-                        ${index === 0 ? "checked" : ""}
-
-                    >
-
-                    ${tipo.nome}
-
-                    R$ ${tipo.preco.toFixed(2)}
-
-                </label>
-
-                <br>
-
-            `;
-  });
+  area.dataset.quantidade = tipos.length;
+  area.innerHTML =
+    tipos.length < 2
+      ? ""
+      : tipos
+          .map(
+            (tipo, index) =>
+              `<label><input type="radio" name="tipo-produto-auto" value="${tipo.valor}" data-preco="${tipo.preco}" ${index === 0 ? "checked" : ""}><span>${tipo.nome}</span><small>${moedaOperacao(tipo.preco)}</small></label>`,
+          )
+          .join("");
 }
 function irParaCategoriaAuto(secaoId) {
   const secao = document.getElementById(secaoId);
@@ -3324,7 +3346,7 @@ async function abrirContaAutoatendimento() {
     return;
   }
 
-  area.innerHTML = "<p>Carregando...</p>";
+  area.innerHTML = htmlCarregandoUI("Carregando…");
 
   modal.style.display = "flex";
 
@@ -3348,6 +3370,15 @@ async function abrirContaAutoatendimento() {
     }
 
     const cliente = clienteDoc.data();
+
+    if (typeof acompanharBeneficiosClientePedraoUI === "function")
+      acompanharBeneficiosClientePedraoUI(
+        {
+          ...cliente,
+          telefone: sessaoAutoatendimentoAtual.clienteId,
+        },
+        atualizarAvataresContaAutoUI,
+      );
 
     const cuponsCliente = await buscarCuponsClienteAuto(sessaoAutoatendimentoAtual.clienteId);
 
@@ -3514,7 +3545,7 @@ async function abrirContaAutoatendimento() {
                     >
 
                         <strong>
-                            ${cupom.nome || cupom.codigo}
+                            ${escaparOperacao(cupom.nome || cupom.codigo)}
                         </strong>
 
 
@@ -3533,15 +3564,17 @@ async function abrirContaAutoatendimento() {
 
                         <small>
                             Código:
-                            ${cupom.codigo}
+                            ${escaparOperacao(cupom.codigo)}
                         </small>
 
 
                         <small>
                             ${
-                              cupom.usosRestantes === 1
-                                ? "1 uso disponível"
-                                : `${cupom.usosRestantes} usos disponíveis`
+                              cupom.usosRestantes === null
+                                ? "Disponível para usar"
+                                : cupom.usosRestantes === 1
+                                  ? "1 uso disponível"
+                                  : `${cupom.usosRestantes} usos disponíveis`
                             }
                         </small>
 
@@ -3562,28 +3595,29 @@ async function abrirContaAutoatendimento() {
                 class="perfil-conta-auto"
             >
 
-                <img
-                    src="${avatar}"
-                    alt="Avatar"
-                    class="avatar-conta-auto"
-                >
+                ${typeof htmlAvatarClienteUI === "function" ? htmlAvatarClienteUI(cliente, "avatar-conta-auto", avatar) : `<img src="${avatar}" alt="Avatar" class="avatar-conta-auto">`}
 
 
                 <h3>
                     ${cliente.nome || "Cliente"}
                 </h3>
+                <p>Nível: <span class="nivel-cliente-ui" data-nivel="${nivelFidelidadeOperacao(cliente).toLowerCase()}">${nivelFidelidadeOperacao(cliente)}</span></p>
 
             </div>
 
 
+            ${typeof htmlOpcoesAvataresUI === "function" ? `<details class="avatar-escolha-auto-ui"><summary>Escolher personagem</summary><div class="avatares-grade-ui">${htmlOpcoesAvataresUI(cliente, avatar, "auto")}</div><p class="avatar-status-ui" role="status"></p></details>` : ""}
             ${htmlBonus}
-
-
-          
+            ${
+              cuponsCliente.length && typeof htmlPersonagemRecompensaPedraoUI === "function"
+                ? `<section class="cupons-conta-auto-ui" aria-label="Seus cupons"><details><summary>${htmlPersonagemRecompensaPedraoUI("cupom")}<span class="cupons-ver-auto-ui"><span class="cupons-abrir-auto-ui">Ver cupons disponíveis</span><span class="cupons-recolher-auto-ui">Ocultar cupons</span></span></summary><div class="cupons-lista-auto-ui">${htmlCupons}</div></details></section>`
+                : ""
+            }
 
 
             <button
                 type="button"
+                class="auto-sair-conta-ui"
                 onclick="
                     sairContaAutoatendimento()
                 "
@@ -3606,47 +3640,44 @@ async function abrirContaAutoatendimento() {
   }
 }
 async function buscarCuponsClienteAuto(clienteId) {
-  const cuponsDisponiveis = [];
-
+  if (!clienteId) return [];
   try {
-    const snap = await db.collection("clientes").doc(clienteId).collection("cupons").get();
-
-    if (snap.empty) {
-      return [];
+    const clienteRef = db.collection("clientes").doc(String(clienteId));
+    const [vinculos, mensagens] = await Promise.all([
+      clienteRef.collection("cupons").get(),
+      clienteRef.collection("mensagens").where("remetente", "==", "admin").get(),
+    ]);
+    // Campanhas enviam o código nas mensagens; os vínculos antigos continuam válidos.
+    // A leitura da mensagem não consome o cupom nem altera seu limite de usos.
+    const porCodigo = new Map();
+    for (const mensagem of mensagens.docs) {
+      const codigo = String(mensagem.data().cupomCodigo || "").trim();
+      if (codigo && !codigo.includes("/")) porCodigo.set(codigo, null);
     }
-
-    for (const docCupomCliente of snap.docs) {
-      const vinculo = docCupomCliente.data();
-
-      const usosRestantes = Number(vinculo.usosRestantes || 0);
-
-      if (vinculo.ativo === false || usosRestantes <= 0) {
-        continue;
-      }
-
-      const codigo = vinculo.codigo || docCupomCliente.id;
-
+    for (const docVinculo of vinculos.docs) {
+      const vinculo = docVinculo.data();
+      const codigo = String(vinculo.codigo || docVinculo.id).trim();
+      if (codigo && !codigo.includes("/")) porCodigo.set(codigo, vinculo);
+    }
+    const cuponsDisponiveis = [];
+    for (const [codigo, vinculo] of porCodigo) {
+      if (vinculo && (vinculo.ativo === false || Number(vinculo.usosRestantes || 0) <= 0)) continue;
       const cupomDoc = await db.collection("cuponsDesconto").doc(codigo).get();
-
-      if (!cupomDoc.exists) {
-        continue;
-      }
-
+      if (!cupomDoc.exists) continue;
       const cupom = cupomDoc.data();
-
-      if (cupom.ativo !== true) {
+      if (
+        cupom.ativo !== true ||
+        cupom.usadoEm ||
+        (cupom.clientesPermitidos && !cupom.clientesPermitidos.includes(String(clienteId)))
+      ) {
         continue;
       }
-
       cuponsDisponiveis.push({
-        codigo,
-
-        usosRestantes,
-
         ...cupom,
+        codigo,
+        usosRestantes: vinculo ? Number(vinculo.usosRestantes) : cupom.uso === "unico" ? 1 : null,
       });
     }
-
     return cuponsDisponiveis;
   } catch (erro) {
     console.error("Erro ao buscar cupons do cliente:", erro);
@@ -3712,6 +3743,7 @@ async function sairContaAutoatendimento() {
     sessaoAutoatendimentoAtual.nome = nomeTemporario;
 
     sessaoAutoatendimentoAtual.clienteId = null;
+    if (typeof encerrarBeneficiosPedraoUI === "function") encerrarBeneficiosPedraoUI();
 
     sessaoAutoatendimentoAtual.clienteLogado = false;
 
@@ -3841,15 +3873,12 @@ async function entrarClienteAutoatendimento() {
     // CÓDIGO DE ATIVAÇÃO OPCIONAL
     // =====================================================
 
-    if (codigo) {
-      if (codigo !== cliente.codigoAtivacao) {
-        alert("Código inválido ou não pertence a este cliente.");
-
-        return;
-      }
-
+    const codigoIncorreto = Boolean(codigo && codigo !== cliente.codigoAtivacao);
+    const ativouCda = Boolean(codigo && !codigoIncorreto && !cliente.fidelidadeAtiva);
+    if (ativouCda) {
       await clienteRef.update({
         fidelidadeAtiva: true,
+        nivelCliente: nivelFidelidadeOperacao(cliente, true),
 
         ativadoEm: new Date().toISOString(),
 
@@ -3857,6 +3886,7 @@ async function entrarClienteAutoatendimento() {
       });
 
       cliente.fidelidadeAtiva = true;
+      cliente.nivelCliente = nivelFidelidadeOperacao(cliente);
     }
 
     // =====================================================
@@ -3992,13 +4022,67 @@ async function entrarClienteAutoatendimento() {
 
     fecharLoginAutoatendimento();
 
-    mostrarBoasVindasUI(nomeConta);
+    if (codigoIncorreto)
+      alert(
+        "Entramos na sua conta, mas o CDA informado está errado. Seria interessante você não esquecer ele!",
+        "codigoLogin",
+      );
+    else if (ativouCda) mostrarAtivacaoCdaPedraoUI();
+    else mostrarBoasVindasUI(nomeConta);
+    if (typeof acompanharBeneficiosClientePedraoUI === "function")
+      acompanharBeneficiosClientePedraoUI({ ...cliente, telefone }, atualizarAvataresContaAutoUI);
   } catch (erro) {
     console.error("Erro no login do autoatendimento:", erro);
 
     alert("Não foi possível realizar o login.");
   }
 }
+function atualizarAvataresContaAutoUI(cliente) {
+  if (
+    !sessaoAutoatendimentoAtual?.clienteLogado ||
+    String(sessaoAutoatendimentoAtual.clienteId) !== String(cliente.telefone) ||
+    typeof aplicarAvatarClienteUI !== "function"
+  )
+    return;
+  sessaoAutoatendimentoAtual.clienteAvatar = dadosAvatarClienteUI(cliente).src;
+  sessaoAutoatendimentoAtual.clienteNivel = cliente.nivelCliente;
+  sessaoAutoatendimentoAtual.clienteFidelidadeAtiva = cliente.fidelidadeAtiva;
+  aplicarAvatarClienteUI(document.querySelector("#modal-conta-auto .avatar-conta-auto"), cliente);
+  const nivel = document.querySelector("#modal-conta-auto .nivel-cliente-ui");
+  if (nivel) {
+    nivel.textContent = nivelFidelidadeOperacao(cliente);
+    nivel.dataset.nivel = nivel.textContent.toLowerCase();
+  }
+  const opcoes = document.querySelector("#modal-conta-auto .avatares-grade-ui");
+  if (opcoes) opcoes.innerHTML = htmlOpcoesAvataresUI(cliente, cliente.avatar, "auto");
+  atualizarIconeLoginAuto();
+}
+
+async function selecionarAvatarAutoUI(personagem) {
+  const id = sessaoAutoatendimentoAtual?.clienteId;
+  const caixa = document.querySelector("#modal-conta-auto .avatar-escolha-auto-ui");
+  if (!id || caixa?.getAttribute("aria-busy") === "true") return;
+  caixa?.setAttribute("aria-busy", "true");
+  try {
+    const ref = db.collection("clientes").doc(String(id));
+    const doc = await ref.get();
+    if (!doc.exists || sessaoAutoatendimentoAtual?.clienteId !== id) return;
+    const cliente = { ...doc.data(), telefone: String(id) };
+    const avatar = dadosAvatarClienteUI(cliente, personagem).src;
+    await ref.update({ avatar });
+    if (sessaoAutoatendimentoAtual?.clienteId !== id) return;
+    atualizarAvataresContaAutoUI({ ...cliente, avatar });
+    const status = document.querySelector("#modal-conta-auto .avatar-status-ui");
+    if (status) status.textContent = "Personagem atualizado!";
+  } catch (erro) {
+    console.error("Não foi possível salvar o avatar:", erro);
+    const status = document.querySelector("#modal-conta-auto .avatar-status-ui");
+    if (status) status.textContent = "Não foi possível salvar. Tente novamente.";
+  } finally {
+    caixa?.removeAttribute("aria-busy");
+  }
+}
+
 function atualizarIconeLoginAuto() {
   const botao = document.getElementById("btn-login-auto");
 
@@ -4020,6 +4104,12 @@ function atualizarIconeLoginAuto() {
         `;
 
     botao.title = "Minha conta";
+    if (typeof aplicarAvatarClienteUI === "function")
+      aplicarAvatarClienteUI(botao.querySelector("img"), {
+        avatar,
+        nivelCliente: sessaoAutoatendimentoAtual.clienteNivel,
+        fidelidadeAtiva: sessaoAutoatendimentoAtual.clienteFidelidadeAtiva,
+      });
   } else {
     botao.innerHTML = "👤";
 
@@ -4068,6 +4158,7 @@ function mostrarPosPedidoAutoatendimento() {
                 class="auto-pedido-enviado"
             >
 
+                ${typeof imagemPersonagemPedraoUI === "function" ? `<img class="auto-personagem-pedido-ui" src="${imagemPersonagemPedraoUI("pedido")}" alt="" width="132" height="132" decoding="async">` : ""}
                 <h2>
                     ✅ Pedido enviado!
                 </h2>
@@ -4143,12 +4234,13 @@ async function criarChamadoAutoatendimento(tipo) {
           tipo === "conta"
             ? "A conta já foi solicitada. Aguarde o atendente."
             : "O atendente já foi chamado. Aguarde um momento.",
+          "pressa",
         );
 
         return false;
       }
 
-      alert("Você já possui uma solicitação aberta. Aguarde o atendente.");
+      alert("Você já possui uma solicitação aberta. Aguarde o atendente.", "solicitacao");
 
       return false;
     }
@@ -4364,7 +4456,7 @@ async function chamarAtendenteMesaBloqueada() {
     // =========================
 
     if (existeChamadoAtual) {
-      alert("O atendente já foi chamado.");
+      alert("O atendente já foi chamado. Aguarde um momento.", "pressa");
 
       return;
     }

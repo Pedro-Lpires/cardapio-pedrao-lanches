@@ -48,6 +48,10 @@ No autoatendimento, o bloco de `#modal-opcoes-tipo-auto` controla Artesanal/Indu
 
 Edite a regra existente no arquivo do componente. Assim você evita acrescentar correções concorrentes no fim de outro CSS.
 
+## Telas de computador
+
+Os ajustes comuns a partir de 900 px ficam em `css/componentes/desktop.css`: margens dos painéis, largura dos cartões e janelas e hover sem aumentar os botões. Esse componente é importado por último e só se aplica à tela, preservando a impressão. Ajustes exclusivos do celular continuam no componente correspondente.
+
 ## Ordem e prioridade
 
 Os imports de cada página preservam a sequência anterior: base e regras próprias da página, tema quando aplicável, operação, ajustes móveis, navegação e componentes. `css/componentes.css` é apenas o índice dos estilos finais; a edição fica nos arquivos da pasta `componentes/`.

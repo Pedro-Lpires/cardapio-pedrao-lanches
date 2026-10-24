@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Financeiro — Pedrão Lanches</title>
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/financeiro.css?v=20261022-5" />
+    <link rel="stylesheet" href="css/paginas/financeiro.css?v=20261024-9" />
   </head>
   <body class="admin-body">
     <!-- MAIN — conteúdo principal -->
@@ -42,7 +42,7 @@
               <option value="ano">Anual · ano completo</option>
             </select></label
           ><button type="button" onclick="carregarFinanceiro()">Conferir período</button>
-          <p id="financeiro-status" role="status"></p>
+          <div id="financeiro-status" role="status"></div>
           <div id="financeiro-resumo" class="financeiro-resumo"></div>
           <canvas id="grafico-financeiro" aria-label="Recebimentos por forma de pagamento"></canvas>
           <div id="financeiro-lancamentos"></div>
@@ -86,15 +86,15 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/ui-comum.js?v=20261021-11"></script>
+    <script src="js/ui-comum.js?v=20261024-3"></script>
     <script src="js/firebase-operacao.js"></script>
-    <script src="js/operacao.js?v=20261022-5"></script>
+    <script src="js/operacao.js?v=20261024-9"></script>
     <script src="js/financeiro-calculos.js"></script>
-    <script src="js/financeiro.js?v=20261018-1"></script>
-    <script src="js/app-ui.js?v=20261022-2"></script>
+    <script src="js/financeiro.js?v=20261023-4"></script>
+    <script src="js/app-ui.js?v=20261023-19"></script>
     <script src="js/raspadinhas-recuperacao.js?v=20261020-3"></script>
-    <script src="js/raspadinhas.js?v=20261020-5"></script>
-    <script src="js/fluxos-interface.js?v=20261021-11"></script>
-    <script src="js/janelas-fluxos.js?v=20261021-11"></script>
+    <script src="js/raspadinhas.js?v=20261024-9"></script>
+    <script src="js/fluxos-interface.js?v=20261024-1"></script>
+    <script src="js/janelas-fluxos.js?v=20261023-19"></script>
   </body>
 </html>

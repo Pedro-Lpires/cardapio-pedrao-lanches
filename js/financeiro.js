@@ -93,7 +93,7 @@ async function carregarFinanceiro() {
   const tipo = document.getElementById("periodo-financeiro").value;
   const periodo = limitesPeriodoFinanceiro(dia, tipo);
   const status = document.getElementById("financeiro-status");
-  status.textContent = "Carregando…";
+  status.innerHTML = htmlCarregandoUI("Carregando relatório…");
   try {
     const [pedidos, comandas, produtos, fechamento] = await Promise.all([
       db.collection("pedidos").get(),

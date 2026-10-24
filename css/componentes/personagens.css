@@ -1,0 +1,497 @@
+/* Retrato aproximado e fala em balão, como um quadrinho. */
+dialog.aviso-ui.aviso-ui-com-personagem {
+  max-width: 340px;
+  padding: 16px 18px 18px;
+  border: 1px solid #694044;
+  border-top: 3px solid #ed0014;
+  background: #1b1b1b;
+  box-shadow: 0 20px 64px #000b;
+}
+dialog.aviso-ui-com-personagem .aviso-personagem-retrato-ui {
+  position: relative;
+  width: 190px;
+  height: 158px;
+  margin: 0 auto 10px;
+  overflow: hidden;
+  animation: personagem-chegou-ui 180ms ease-out;
+}
+dialog.aviso-ui-com-personagem .aviso-personagem-ui {
+  display: block;
+  width: 158px;
+  height: 158px;
+  margin: 0 auto;
+  object-fit: contain;
+}
+dialog.aviso-ui-com-personagem [data-enquadramento="busto"] .aviso-personagem-ui {
+  width: 234px;
+  height: auto;
+  max-width: none;
+  margin: 0 0 0 -22px;
+}
+dialog.aviso-ui-com-personagem .aviso-personagem-ui[hidden] {
+  display: none;
+}
+dialog.aviso-ui-com-personagem .aviso-fala-ui {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  margin: 0 0 16px;
+  padding: 16px 14px;
+  border: 2px solid #111;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 4px 0 #0006;
+  text-align: left;
+}
+dialog.aviso-ui-com-personagem .aviso-fala-ui::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: calc(50% - 12px);
+  width: 20px;
+  height: 20px;
+  border-top: 2px solid #111;
+  border-left: 2px solid #111;
+  background: #fff;
+  transform: rotate(45deg) skew(12deg, 12deg);
+}
+dialog.aviso-ui-com-personagem h2 {
+  margin: 0 0 8px;
+  color: #bc0013;
+  font-family: "Source Sans 3", Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: none;
+  letter-spacing: normal;
+}
+dialog.aviso-ui-com-personagem #aviso-ui-texto {
+  margin: 0;
+  color: #202020;
+  font-family: "Source Sans 3", Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+dialog.aviso-ui-com-personagem:has(.aviso-personagem-ui[hidden]) .aviso-personagem-retrato-ui {
+  display: none;
+}
+dialog.aviso-ui-com-personagem:has(.aviso-personagem-ui[hidden]) .aviso-fala-ui::before {
+  display: none;
+}
+.auto-pedido-enviado .auto-personagem-pedido-ui {
+  display: block;
+  width: 132px;
+  height: 132px;
+  margin: 0 auto 12px;
+  object-fit: contain;
+}
+@keyframes personagem-chegou-ui {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+dialog.aviso-ui-com-personagem.aviso-personagem-festa-ui .aviso-personagem-retrato-ui {
+  animation: personagem-comemora-ui 750ms ease-out 2;
+}
+dialog.aviso-personagem-festa-ui .aviso-personagem-retrato-ui::before,
+dialog.aviso-personagem-festa-ui .aviso-personagem-retrato-ui::after {
+  content: "✦";
+  position: absolute;
+  z-index: 2;
+  top: 32px;
+  left: 4px;
+  color: #ffcc58;
+  font-size: 28px;
+  animation: personagem-brilho-ui 800ms ease-out 2;
+}
+dialog.aviso-personagem-festa-ui .aviso-personagem-retrato-ui::after {
+  top: 74px;
+  left: auto;
+  right: 4px;
+  animation-delay: 150ms;
+}
+.mensagem-remetente-ui {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+#modal-mensagens .abas-mensagens {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+#modal-mensagens .abas-mensagens button {
+  min-width: 0;
+  width: 100%;
+  min-height: 42px;
+  margin: 0;
+  padding: 9px 6px;
+  font-size: 15px;
+}
+.mensagem-remetente-ui img {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border: 1px solid #754148;
+  border-radius: 50%;
+  background: #151515;
+}
+.personagem-recompensa-ui {
+  margin: 12px 0 16px;
+  text-align: center;
+}
+.personagem-recompensa-ui > img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 10px;
+  object-fit: contain;
+}
+.mensagem-presente-ui > summary {
+  list-style: none;
+  cursor: pointer;
+  text-align: center;
+}
+.mensagem-presente-ui > summary::-webkit-details-marker {
+  display: none;
+}
+.mensagem-presente-ui > summary:focus-visible {
+  outline: 2px solid #ff6675;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+.mensagem-presente-ui > summary .personagem-recompensa-ui {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 6px 0 12px;
+}
+.mensagem-presente-ui > summary .personagem-recompensa-ui > img {
+  flex: 0 0 104px;
+  width: 104px;
+  height: 112px;
+  margin: 0;
+}
+.mensagem-presente-ui > summary .recompensa-fala-ui {
+  max-width: 158px;
+  padding: 11px 12px;
+  font-size: 16px;
+  line-height: 1.25;
+  text-align: left;
+}
+.mensagem-presente-ui > summary .recompensa-fala-ui::before {
+  top: calc(50% - 7px);
+  left: -8px;
+  transform: rotate(-45deg);
+}
+.mensagem-presente-ui > summary .recompensa-fala-ui::after {
+  content: "Toque para abrir";
+  display: block;
+  margin-top: 6px;
+  color: #555;
+  font-size: 13px;
+}
+.mensagem-presente-ui[open] > summary .recompensa-fala-ui::after {
+  content: "Toque para recolher";
+}
+.cupons-conta-auto-ui summary {
+  list-style: none;
+  cursor: pointer;
+  text-align: center;
+}
+.cupons-conta-auto-ui summary::-webkit-details-marker {
+  display: none;
+}
+.cupons-conta-auto-ui .personagem-recompensa-ui {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+.cupons-conta-auto-ui .personagem-recompensa-ui > img {
+  flex: 0 0 92px;
+  width: 92px;
+  height: 100px;
+  margin: 0;
+}
+.cupons-conta-auto-ui .recompensa-fala-ui {
+  max-width: 158px;
+  padding: 10px 12px;
+  font-size: 16px;
+  line-height: 1.25;
+  text-align: left;
+}
+.cupons-conta-auto-ui .recompensa-fala-ui::before {
+  top: calc(50% - 7px);
+  left: -8px;
+  transform: rotate(-45deg);
+}
+.cupons-ver-auto-ui {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: #e60016;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+.cupons-recolher-auto-ui,
+.cupons-conta-auto-ui details[open] .cupons-abrir-auto-ui {
+  display: none;
+}
+.cupons-conta-auto-ui details[open] .cupons-recolher-auto-ui {
+  display: inline;
+}
+.cupons-conta-auto-ui summary:focus-visible {
+  outline: 2px solid #ff6675;
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+.cupons-lista-auto-ui {
+  margin-top: 16px;
+}
+.mensagem-presente-conteudo-ui {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #484848;
+  overflow-wrap: anywhere;
+}
+#modal-mensagens button.mensagem-cupom {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  margin: 14px 0 6px;
+  padding: 12px;
+  border: 1px dashed #777;
+  border-radius: 10px;
+  background: #171717;
+  color: #fff;
+  text-align: left;
+}
+.cupom-copia-status-ui {
+  display: block;
+  margin: 8px 0;
+  color: #93e7b0;
+}
+#modal-mensagens .raspa-abrir-mensagem-ui {
+  margin: 4px 0 16px;
+}
+.campo-digitos-ui {
+  display: block;
+  margin: 6px 0 10px;
+  color: #c5c5c5;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.recompensa-fala-ui {
+  position: relative;
+  padding: 12px 14px;
+  border: 2px solid #111;
+  border-radius: 16px;
+  background: white;
+  color: #222;
+  font-family: "Source Sans 3", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.recompensa-fala-ui::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: -8px;
+  left: calc(50% - 7px);
+  border-top: 2px solid #111;
+  border-left: 2px solid #111;
+  background: white;
+  transform: rotate(45deg);
+}
+.recompensa-fala-ui > strong {
+  color: #bc0013;
+}
+.recompensa-fala-ui > p {
+  margin: 6px 0 0;
+}
+dialog[data-personagem="acordo"] .aviso-personagem-retrato-ui {
+  width: min(100%, 278px);
+  height: 174px;
+}
+dialog[data-personagem="acordo"] [data-enquadramento="busto"] .aviso-personagem-ui {
+  width: min(100%, 252px);
+  margin: 0 auto;
+}
+.aviso-fogo-ui {
+  position: absolute;
+  z-index: 2;
+  top: 64px;
+  left: calc(50% - 133px);
+  width: 56px;
+  height: 84px;
+  pointer-events: none;
+}
+.aviso-fogo-direita-ui {
+  left: auto;
+  right: calc(50% - 133px);
+  transform: scaleX(-1);
+  translate: -8px 6px;
+}
+.fogo-lingua-ui {
+  position: absolute;
+  inset: 0;
+  background: url("../../images/personagens-pedrao/ui/fogo-realista.png") center / contain no-repeat;
+  filter: drop-shadow(0 0 3px #ff201c88);
+  transform-origin: 50% 100%;
+  animation: chama-maos-ui 470ms ease-in-out infinite alternate;
+}
+.aviso-fogo-direita-ui .fogo-lingua-ui {
+  animation-delay: -280ms;
+}
+.fogo-faisca-ui {
+  position: absolute;
+  bottom: 34px;
+  left: 28px;
+  width: 2px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ffd27a;
+  box-shadow:
+    0 0 4px #ff7b20,
+    0 0 7px #ff2317;
+  opacity: 0;
+  --desvio-faisca: -12px;
+  animation: faisca-sobe-ui 1350ms ease-out infinite;
+}
+.fogo-faisca-1-ui {
+  left: 34px;
+  --desvio-faisca: 14px;
+  animation-delay: -250ms;
+}
+.fogo-faisca-2-ui {
+  left: 21px;
+  --desvio-faisca: -20px;
+  animation-delay: -700ms;
+  animation-duration: 1600ms;
+}
+.fogo-faisca-3-ui {
+  left: 37px;
+  --desvio-faisca: 8px;
+  animation-delay: -1050ms;
+}
+.fogo-faisca-4-ui {
+  left: 30px;
+  width: 1px;
+  --desvio-faisca: -5px;
+  animation-delay: -450ms;
+  animation-duration: 1850ms;
+}
+.fogo-faisca-5-ui {
+  left: 25px;
+  --desvio-faisca: 18px;
+  animation-delay: -1200ms;
+  animation-duration: 1700ms;
+}
+@keyframes chama-maos-ui {
+  from {
+    transform: rotate(-4deg) skewX(-3deg) scale(0.94, 0.96);
+  }
+  to {
+    transform: rotate(4deg) skewX(3deg) scale(1.04, 1.07);
+    filter: drop-shadow(0 0 5px #ff3a1788);
+  }
+}
+@keyframes faisca-sobe-ui {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  15%,
+  35% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--desvio-faisca), -69px) scale(0.25);
+  }
+}
+#perfil-dado-nivel[data-nivel]::before,
+.nivel-cliente-ui[data-nivel]::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 7px;
+  border: 1px solid #ffffff65;
+  border-radius: 50%;
+  background: #a76435;
+}
+#perfil-dado-nivel[data-nivel="prata"]::before,
+.nivel-cliente-ui[data-nivel="prata"]::before {
+  background: #bec5ce;
+}
+#perfil-dado-nivel[data-nivel="ouro"]::before,
+.nivel-cliente-ui[data-nivel="ouro"]::before {
+  background: #edbc42;
+}
+#perfil-dado-nivel[data-nivel="diamante"]::before,
+.nivel-cliente-ui[data-nivel="diamante"]::before {
+  background: #8fe7f4;
+}
+#perfil-dado-nivel[data-nivel="imortal"]::before,
+.nivel-cliente-ui[data-nivel="imortal"]::before,
+#perfil-dado-nivel[data-nivel="lenda"]::before,
+.nivel-cliente-ui[data-nivel="lenda"]::before {
+  background: #bd87f5;
+}
+@keyframes personagem-comemora-ui {
+  0%,
+  100% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(-7px) rotate(-3deg) scale(1.03);
+  }
+  65% {
+    transform: translateY(-2px) rotate(3deg);
+  }
+}
+@keyframes personagem-brilho-ui {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-15deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(15deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog.aviso-ui-com-personagem .aviso-personagem-retrato-ui,
+  dialog.aviso-ui-com-personagem.aviso-personagem-festa-ui .aviso-personagem-retrato-ui,
+  dialog.aviso-personagem-festa-ui .aviso-personagem-retrato-ui::before,
+  dialog.aviso-personagem-festa-ui .aviso-personagem-retrato-ui::after,
+  .fogo-lingua-ui,
+  .fogo-faisca-ui {
+    animation: none;
+  }
+}
+@media (max-height: 540px) {
+  dialog.aviso-ui-com-personagem:not([data-personagem="acordo"]) .aviso-personagem-retrato-ui {
+    height: 112px;
+    margin-bottom: 8px;
+  }
+  dialog.aviso-ui-com-personagem .aviso-fala-ui {
+    padding: 12px;
+  }
+}

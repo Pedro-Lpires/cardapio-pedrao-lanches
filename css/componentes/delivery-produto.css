@@ -4,24 +4,125 @@
  */
 
 #modal-produto .modal-conteudo {
-  padding: 60px 16px 20px !important;
+  padding: 56px 14px 14px !important;
+  max-height: calc(100dvh - 32px) !important;
   box-sizing: border-box;
   flex-shrink: 0;
 }
 #modal-produto #modal-img {
   display: block;
-  margin: 0 auto 18px;
-  max-height: 180px;
+  height: clamp(80px, 16dvh, 120px);
+  margin: 0 auto 10px;
+  object-fit: contain;
 }
 #modal-produto .qtd-produto-modal {
-  margin: 14px 0;
+  padding: 10px !important;
+  margin: 10px 0 !important;
+}
+#modal-produto .qtd-produto-modal > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+#modal-produto .qtd-produto-modal > label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+#modal-produto #qtd-produto {
+  display: inline-block;
+  min-width: 24px;
+  text-align: center;
+}
+#modal-produto .qtd-produto-modal button {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0;
+  font-size: 18px;
 }
 #modal-produto #obs-produto {
-  margin: 12px 0 18px !important;
-  min-height: 74px;
+  height: 56px;
+  min-height: 56px;
+  padding: 10px;
+  margin: 10px 0 !important;
+  font-size: 13px;
 }
 #modal-produto .modal-produto-cabecalho {
   display: contents;
   position: static;
   background: transparent;
+}
+#modal-produto #modal-nome {
+  margin: 10px 0 8px;
+  font-size: 22px;
+  line-height: 1.2;
+}
+#modal-produto #modal-desc {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+#modal-produto .produto-acoes > button {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  margin: 10px 0 0;
+  font-size: 15px;
+}
+#modal-produto .produto-acoes {
+  margin: 10px 0 0;
+  padding: 0;
+  bottom: 0;
+}
+#modal-produto #modal-opcoes-tipo[data-quantidade] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 0;
+  margin: 10px 0;
+  background: transparent;
+  box-shadow: none;
+}
+#modal-produto #modal-opcoes-tipo[data-quantidade="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+#modal-produto #modal-opcoes-tipo[data-quantidade] > label {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 8px;
+  min-height: 48px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  background: #252525;
+  font-size: 14px;
+  cursor: pointer;
+}
+#modal-produto #modal-opcoes-tipo[data-quantidade] > label:has(:checked) {
+  border-color: #e60016;
+}
+#modal-produto #modal-opcoes-tipo[data-quantidade] input {
+  grid-row: span 2;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #e60016;
+}
+#modal-produto #modal-opcoes-tipo[data-quantidade] small {
+  grid-column: 2;
+  font-size: 13px;
+}
+#modal-produto #modal-opcoes-tipo[data-quantidade]:not([data-quantidade="2"]) > label {
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+}
+#modal-produto #modal-opcoes-tipo[data-quantidade]:not([data-quantidade="2"]) input {
+  grid-row: auto;
+}
+#modal-produto #modal-opcoes-tipo[data-quantidade]:not([data-quantidade="2"]) small {
+  grid-column: 3;
 }

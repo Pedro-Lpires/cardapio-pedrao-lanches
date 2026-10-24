@@ -221,6 +221,9 @@ window.listaCombos = [
     preco: 80,
     desc: "3 X-Bacon artesanal + 1 Refrigerante 1,5L",
     img: "3xbacon.webp",
+    precoIndustrial: 74,
+    tipoBase: "hamburguer",
+    opcoes: { artesanal: true, industrial: true, frango: false, file: false },
     comboQtdLanches: 3,
     comboComponentes: [
       {
@@ -241,6 +244,9 @@ window.listaCombos = [
     preco: 95,
     desc: "3 X-Bagunça artesanal + 1 Refrigerante 1,5L",
     img: "3xbagunca.webp",
+    precoIndustrial: 86,
+    tipoBase: "hamburguer",
+    opcoes: { artesanal: true, industrial: true, frango: false, file: false },
     comboQtdLanches: 3,
     comboComponentes: [
       {
@@ -261,6 +267,9 @@ window.listaCombos = [
     preco: 95,
     desc: "3 Big Big artesanal + 1 Refrigerante 1,5L",
     img: "3big.webp",
+    precoIndustrial: 89,
+    tipoBase: "hamburguer",
+    opcoes: { artesanal: true, industrial: true, frango: false, file: false },
     comboQtdLanches: 3,
     comboComponentes: [
       {
@@ -321,6 +330,9 @@ window.listaCombos = [
     preco: 110,
     desc: "2 X-Tudo artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     img: "2tudo.webp",
+    precoIndustrial: 106,
+    tipoBase: "hamburguer",
+    opcoes: { artesanal: true, industrial: true, frango: false, file: false },
     comboQtdLanches: 2,
     comboComponentes: [
       {
@@ -371,6 +383,9 @@ window.listaCombos = [
     preco: 80,
     desc: "2 X-Bagunça artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     img: "2xbagunca.webp",
+    precoIndustrial: 74,
+    tipoBase: "hamburguer",
+    opcoes: { artesanal: true, industrial: true, frango: false, file: false },
     comboQtdLanches: 2,
     comboComponentes: [
       {
@@ -396,6 +411,9 @@ window.listaCombos = [
     preco: 80,
     desc: "2 Big Big artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     img: "2big.webp",
+    precoIndustrial: 76,
+    tipoBase: "hamburguer",
+    opcoes: { artesanal: true, industrial: true, frango: false, file: false },
     comboQtdLanches: 2,
     comboComponentes: [
       {

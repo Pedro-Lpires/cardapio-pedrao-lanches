@@ -13,6 +13,7 @@ const campos = Object.fromEntries(
 let documentos = [],
   consultas = 0,
   entradas = 0;
+const avisos = [];
 const db = {
   collection(nome) {
     assert.equal(nome, "clientes");
@@ -38,6 +39,7 @@ const db = {
 };
 const ctx = vm.createContext({
   console,
+  mostrarAvisoUI: (mensagem) => avisos.push(mensagem),
   document: { addEventListener() {}, getElementById: (id) => campos[id] },
   db,
   async entrarClienteAutoatendimento() {
@@ -56,17 +58,30 @@ vm.runInContext(fs.readFileSync("js/fluxos-interface.js", "utf8"), ctx);
   assert.equal(entradas, 1);
   assert.equal(campos["auto-confirmar-conta"].disabled, false);
   documentos = [];
+  campos["login-auto-nome"].value = "";
+  campos["login-auto-telefone"].value = "";
   await ctx.entrarContaAutoUI();
   assert.equal(entradas, 1);
   assert.match(campos["status-login-auto"].textContent, /não encontrado/);
+  assert.match(avisos.at(-1), /Código de ativação não encontrado/);
   documentos = [{ data: () => ({}) }, { data: () => ({}) }];
   await ctx.entrarContaAutoUI();
   assert.equal(entradas, 1);
   assert.match(campos["status-login-auto"].textContent, /mais de uma conta/);
   campos["login-auto-codigo"].value = "";
+  campos["login-auto-nome"].value = "Cliente fictício";
+  campos["login-auto-telefone"].value = "65999999999";
   await ctx.entrarContaAutoUI();
   assert.equal(entradas, 2);
   assert.equal(consultas, 3);
+  campos["login-auto-codigo"].value = "CDA-ERRADO";
+  await ctx.entrarContaAutoUI();
+  assert.equal(entradas, 3);
+  assert.equal(
+    consultas,
+    3,
+    "Nome e telefone completos seguem para validação, sem depender do CDA",
+  );
   console.log(
     "PASS: código sozinho recupera a conta; inválido/duplicado não entra; nome e celular continuam funcionando sem código.",
   );

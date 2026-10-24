@@ -15,7 +15,12 @@ function elegibilidadeRaspadinha(regra, cliente, compra, agora = Date.now()) {
   if (Number(compra.pagoEm || 0) < Number(regra.criadoEm || 0)) return false;
   if (
     regra.publico === "nivel" &&
-    String(cliente.nivelCliente || "Sem nível").toLowerCase() !== String(regra.nivel).toLowerCase()
+    String(cliente.nivelCliente || "Sem nível")
+      .toLowerCase()
+      .replace(/^lenda$/, "imortal") !==
+      String(regra.nivel)
+        .toLowerCase()
+        .replace(/^lenda$/, "imortal")
   )
     return false;
   if (regra.publico === "cliente" && compra.clienteId !== regra.clienteId) return false;
@@ -186,7 +191,7 @@ async function concederRaspadinha(
       t.set(clienteRef.collection("mensagens").doc("raspa-" + codigo), {
         tipo: "admin",
         remetente: "admin",
-        texto: "Parabéns! Você ganhou uma raspadinha. Abra para descobrir seu prêmio.",
+        texto: `Chegou coisa boa pra você, ${cliente.nome || "cliente"}!`,
         raspadinhaId: codigo,
         raspadinhaStatus: "disponivel",
         data: new Date(agora).toISOString(),
@@ -263,10 +268,23 @@ async function abrirRaspadinhaCliente(codigo) {
   } catch {}
   d.insertAdjacentHTML(
     "beforeend",
-    `<div class="raspa-cartao"><div><strong>Você ganhou ${escaparOperacao(r.premio)}!</strong>${r.imagemPremio && /^(https:\/\/|images\/)/i.test(r.imagemPremio) ? `<img class="raspa-premio-imagem" src="${escaparOperacao(r.imagemPremio)}" alt="${escaparOperacao(r.premio)}">` : ""}</div><canvas width="600" height="360" aria-label="Raspe para revelar seu prêmio"></canvas></div><p id="raspa-codigo" hidden>Código do prêmio: <strong>${escaparOperacao(r.codigo)}</strong></p><p id="raspa-revelacao-status" role="status"></p><button type="button" id="revelar-raspa">Revelar prêmio</button><p>${r.status === "usada" ? "Prêmio já utilizado." : r.status === "cancelada" ? "Prêmio cancelado." : Date.now() >= r.expiraEm ? "Prêmio vencido." : "Disponível até " + new Date(r.expiraEm).toLocaleDateString("pt-BR")}</p><p>Próxima compra mínima: ${moedaOperacao(r.minimoResgate)}.</p><p class="raspa-termos">${escaparOperacao(r.termos)}</p>`,
+    `<div class="raspa-personagem-ui" hidden></div><div class="raspa-cartao"><div><strong>Você ganhou ${escaparOperacao(r.premio)}!</strong>${r.imagemPremio && /^(https:\/\/|images\/)/i.test(r.imagemPremio) ? `<img class="raspa-premio-imagem" src="${escaparOperacao(r.imagemPremio)}" alt="${escaparOperacao(r.premio)}">` : ""}</div><canvas width="600" height="360" aria-label="Raspe para revelar seu prêmio"></canvas></div><p id="raspa-codigo" hidden>Código do prêmio: <strong>${escaparOperacao(r.codigo)}</strong></p><p id="raspa-revelacao-status" role="status"></p><button type="button" id="revelar-raspa">Revelar prêmio</button><p>${r.status === "usada" ? "Prêmio já utilizado." : r.status === "cancelada" ? "Prêmio cancelado." : Date.now() >= r.expiraEm ? "Prêmio vencido." : "Disponível até " + new Date(r.expiraEm).toLocaleDateString("pt-BR")}</p><p>Próxima compra mínima: ${moedaOperacao(r.minimoResgate)}.</p><details class="raspa-condicoes-ui"><summary>Condições deste prêmio</summary><p class="raspa-termos">${escaparOperacao(r.termos)}</p></details>`,
   );
-  async function revelar() {
+  let revelando = false;
+  async function revelar(animar = true) {
+    if (revelando) return;
+    revelando = true;
+    const personagem = d.querySelector(".raspa-personagem-ui");
+    if (personagem && typeof htmlPersonagemRecompensaPedraoUI === "function") {
+      personagem.innerHTML = htmlPersonagemRecompensaPedraoUI("premio");
+      personagem.hidden = false;
+      if (animar) {
+        d.classList.add("raspa-recompensa-animada-ui");
+        personagem.scrollIntoView({ block: "nearest" });
+      }
+    }
     d.querySelector("canvas")?.remove();
+    d.querySelector(".raspa-cartao > div")?.removeAttribute("aria-hidden");
     d.querySelector(".raspa-cartao").classList.add("raspa-revelada");
     d.querySelector("#revelar-raspa").hidden = true;
     d.querySelector("#raspa-codigo").hidden = false;
@@ -284,11 +302,12 @@ async function abrirRaspadinhaCliente(codigo) {
     }
   }
   if (revelada) {
-    await revelar();
+    await revelar(false);
     return;
   }
   const canvas = d.querySelector("canvas"),
     ctx = canvas.getContext("2d");
+  d.querySelector(".raspa-cartao > div")?.setAttribute("aria-hidden", "true");
   ctx.fillStyle = "#e60016";
   ctx.fillRect(0, 0, 600, 360);
   ctx.fillStyle = "#fff";
@@ -416,8 +435,8 @@ async function comprasParaResgateRaspadinha(r) {
   }
   return opcoes;
 }
-async function abrirResgateRaspadinha() {
-  const d = dialogoRaspadinhaUI("Consultar e entregar prêmio");
+async function abrirResgateRaspadinha(somenteConsultar = false) {
+  const d = dialogoRaspadinhaUI(somenteConsultar ? "Validar prêmio" : "Entregar prêmio");
   d.classList.add("raspa-consulta-atendente");
   d.insertAdjacentHTML(
     "beforeend",
@@ -440,6 +459,10 @@ async function abrirResgateRaspadinha() {
       if (normalizar(r.clienteNome) !== normalizar(d.querySelector("[name=nome]").value))
         throw Error("O nome não corresponde ao dono deste prêmio.");
       validarUsoRaspadinha(r);
+      if (somenteConsultar) {
+        resultado.innerHTML = `<div class="raspa-destinatario-ui"><strong>${escaparOperacao(r.premio)}</strong><p>${escaparOperacao(r.clienteNome)} · ${escaparOperacao(r.codigo)}</p><p>Prêmio disponível até ${new Date(r.expiraEm).toLocaleDateString("pt-BR")}.</p><p>Compra mínima para usar: ${moedaOperacao(r.minimoResgate)}.</p><p>${escaparOperacao(r.termos)}</p><p>Esta consulta não registra a entrega. Use “Entregar prêmio” quando entregar ao cliente.</p></div>`;
+        return;
+      }
       const compras = await comprasParaResgateRaspadinha(r);
       resultado.innerHTML = `<h3>${escaparOperacao(r.premio)}</h3><p>${escaparOperacao(r.clienteNome)} · ${escaparOperacao(r.codigo)}</p><p>Mínimo da nova compra: ${moedaOperacao(r.minimoResgate)} · Válida até ${new Date(r.expiraEm).toLocaleDateString("pt-BR")}</p><p class="raspa-termos">${escaparOperacao(r.termos)}</p><label>Nova compra confirmada<select id="raspa-referencia"><option value="">Selecione a compra</option>${compras.map((c) => `<option value="${escaparOperacao(c.valor)}">${escaparOperacao(c.texto)}</option>`).join("")}</select></label><label><input id="raspa-conferido" type="checkbox"> Conferi a compra mínima e os termos</label><button id="raspa-usar" disabled>Usou · confirmar entrega do prêmio</button>`;
       resultado.querySelector("#raspa-conferido").onchange = (e) =>
@@ -463,6 +486,29 @@ async function abrirResgateRaspadinha() {
     }
   };
 }
+function ajudaRaspadinhaUI(titulo, texto) {
+  const botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = "raspa-ajuda-botao-ui";
+  botao.textContent = "?";
+  botao.setAttribute("aria-label", "Ajuda: " + titulo);
+  botao.onclick = (e) => {
+    e.preventDefault();
+    const d = dialogoRaspadinhaUI(titulo);
+    d.classList.add("raspa-ajuda-janela-ui");
+    const p = document.createElement("p");
+    p.textContent = texto;
+    d.append(p);
+  };
+  return botao;
+}
+function abrirPainelRaspadinhaUI(id, titulo) {
+  const painel = document.getElementById(id);
+  if (!painel) return;
+  const d = abrirJanelaElementoUI(painel, titulo);
+  d.classList.add("raspa-janela-admin-ui");
+  if (id === "raspa-regras-painel") listarRegrasRaspadinha().catch(avisoOperacao);
+}
 function montarRaspadinhasAdmin() {
   const area = document.getElementById("area-admin-avancada");
   if (!area) return;
@@ -478,7 +524,7 @@ function montarRaspadinhasAdmin() {
       <label>Como emitir<select id="raspa-modo"><option value="manual">Manual</option><option value="automatico">Automática</option></select></label>
       <p class="raspa-ajuda">Automática: ao confirmar um pagamento, o sistema confere o público e o valor da compra. Manual: você escolhe o cliente e confirma a emissão.</p>
       <label>Quem pode receber<select id="raspa-publico"><option value="todos">Todos os clientes com conta</option><option value="nivel">Por nível</option><option value="cliente">Um cliente</option></select></label>
-      <label id="raspa-label-nivel" hidden>Nível<select id="raspa-nivel"><option>Bronze</option><option>Prata</option><option>Ouro</option><option>Diamante</option><option>Lenda</option><option>Sem nível</option></select></label>
+      <label id="raspa-label-nivel" hidden>Nível<select id="raspa-nivel"><option>Bronze</option><option>Prata</option><option>Ouro</option><option>Diamante</option><option>Imortal</option><option>Sem nível</option></select></label>
       <label id="raspa-label-cliente" hidden>Telefone ou código CDA<input id="raspa-cliente-regra"></label>
       <label>Compra mínima para ganhar (R$)<input id="raspa-minimo" type="number" min="0" step="0.01" value="100" required></label>
       <p class="raspa-ajuda">Valor pago em uma compra, após descontos e sem taxa de entrega. Não soma pedidos diferentes.</p>
@@ -509,6 +555,114 @@ function montarRaspadinhasAdmin() {
     <section class="raspa-painel-bloco"><h3>Conferir emissões automáticas</h3><p class="raspa-ajuda">Recupera compras pagas que ficaram pendentes, inclusive de dias anteriores. Processa pequenos lotes e salva o progresso. Se houver falha, continua do ponto seguro, sem duplicar prêmios.</p><button type="button" id="raspa-conferir" onclick="conferirEmissoesRaspadinha()">Conferir</button><p id="raspa-recuperacao-status" role="status" aria-live="polite">A recuperação também funciona com o painel do atendente aberto.</p></section>
     <p id="raspa-status" role="status" aria-live="polite"></p>
   `;
+  // As mesmas ações e campos ficam em janelas, sem duplicar formulários ou IDs.
+  s.querySelector(":scope > p:not([id])")?.remove();
+  const paineis = [...s.querySelectorAll(".raspa-painel-bloco")];
+  const nomes = [
+    "Criar raspadinha",
+    "Raspadinhas cadastradas",
+    "Emissão manual",
+    "Prêmios do cliente",
+    "Entregar prêmio",
+    "Conferir emissões automáticas",
+  ];
+  const ids = [
+    "form-regra-raspa",
+    "raspa-regras-painel",
+    "raspa-manual-painel",
+    "raspa-cliente-painel",
+    "raspa-entrega-painel",
+    "raspa-automatica-painel",
+  ];
+  const guardados = document.createElement("div");
+  guardados.hidden = true;
+  const menu = document.createElement("nav");
+  menu.className = "raspa-menu-ui";
+  menu.setAttribute("aria-label", "Ações de raspadinhas");
+  paineis.forEach((painel, i) => {
+    painel.id = ids[i];
+    painel.classList.add("raspa-painel-ui");
+    guardados.append(painel);
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = nomes[i];
+    b.onclick = () =>
+      i === 4 ? abrirResgateRaspadinha() : abrirPainelRaspadinhaUI(ids[i], nomes[i]);
+    if (i === 4) {
+      const validar = document.createElement("button");
+      validar.type = "button";
+      validar.textContent = "Validar prêmio";
+      validar.onclick = () => abrirResgateRaspadinha(true);
+      menu.append(validar);
+    }
+    menu.append(b);
+  });
+  s.querySelectorAll(".raspa-ajuda").forEach((p) => {
+    const anterior = p.previousElementSibling;
+    const titulo = anterior?.firstChild?.textContent?.trim() || "Como funciona";
+    const ajuda = ajudaRaspadinhaUI(titulo, p.textContent.trim());
+    if (anterior?.matches("label,h3")) {
+      anterior.append(ajuda);
+      p.remove();
+    } else p.replaceWith(ajuda);
+  });
+  // Os painéis já saíram de s, por isso recebem a mesma transformação.
+  guardados.querySelectorAll(".raspa-ajuda").forEach((p) => {
+    const anterior = p.previousElementSibling;
+    const ajuda = ajudaRaspadinhaUI(
+      anterior?.firstChild?.textContent?.trim() || "Como funciona",
+      p.textContent.trim(),
+    );
+    if (anterior?.matches("label,h3")) {
+      anterior.append(ajuda);
+      p.remove();
+    } else p.replaceWith(ajuda);
+  });
+  for (const [id, titulo, texto] of [
+    [
+      "imagem",
+      "Imagem do prêmio",
+      "Use o endereço direto HTTPS de uma imagem pública, ou um arquivo já publicado no site, por exemplo images/bebidas/coca-lata.png. Links de páginas e caminhos C:\\ do computador não são imagens públicas.",
+    ],
+    [
+      "termos",
+      "Condições exibidas ao cliente",
+      "Este texto aparece para o cliente na raspadinha. Escreva as condições reais: prêmio, compra mínima, validade e outras regras. Textos de teste também aparecem para ele.",
+    ],
+    [
+      "dias",
+      "Validade do prêmio",
+      "Quantidade de dias que o cliente terá para usar o prêmio, contada a partir da emissão da raspadinha.",
+    ],
+    [
+      "inicio",
+      "Início da campanha",
+      "A emissão automática só considera compras pagas a partir do início da campanha e depois do seu cadastro.",
+    ],
+    [
+      "fim",
+      "Fim da campanha",
+      "Após esta data, a campanha deixa de emitir automaticamente. Prêmios já emitidos mantêm a própria validade.",
+    ],
+    [
+      "publico",
+      "Quem pode receber",
+      "Na automática, este filtro é conferido no pagamento: todos, um nível ou uma conta específica. Na manual, você escolhe e confirma a conta que receberá.",
+    ],
+    [
+      "ativa",
+      "Campanha ativa",
+      "Uma campanha pausada não emite novos prêmios. Prêmios que já foram enviados continuam com seus estados e validades.",
+    ],
+  ]) {
+    const campo = guardados.querySelector("#raspa-" + id);
+    campo?.closest("label")?.append(ajudaRaspadinhaUI(titulo, texto));
+  }
+  guardados.querySelector("#raspa-termos").closest("label").firstChild.textContent =
+    "Condições exibidas ao cliente";
+  guardados.querySelector("#raspa-recuperacao-status").textContent =
+    "Pronto para conferir pagamentos.";
+  s.append(menu, guardados);
   area.prepend(s);
   document.getElementById("form-regra-raspa").onsubmit = (e) => {
     e.preventDefault();
@@ -518,13 +672,23 @@ function montarRaspadinhasAdmin() {
     const v = document.getElementById("raspa-publico").value;
     document.getElementById("raspa-label-nivel").hidden = v !== "nivel";
     document.getElementById("raspa-label-cliente").hidden = v !== "cliente";
+    document.getElementById("raspa-cliente-regra").disabled = v !== "cliente";
   };
+  document.getElementById("raspa-manual-status").classList.add("raspa-destinatario-ui");
+  document.getElementById("raspa-tickets").classList.add("raspa-tickets-ui");
+  document.getElementById("raspa-imagem").type = "text";
+  const statusForm = document.createElement("p");
+  statusForm.id = "raspa-form-status";
+  statusForm.setAttribute("role", "status");
+  document.getElementById("form-regra-raspa").append(statusForm);
 }
 function acessoAdminRaspa() {
   if (typeof adminAvancadoLiberado === "undefined" || !adminAvancadoLiberado)
     throw Error("Abra a administração avançada primeiro.");
 }
 async function buscarClienteRaspa(chave) {
+  if (!/^(?:\d{4}|\d{11})$/.test(chave.trim()))
+    throw Error("Informe um CDA de 4 números ou um celular de 11 números com DDD.");
   const telefone = chave.replace(/\D/g, "");
   if (telefone.length === 11) {
     const d = await db.collection("clientes").doc(telefone).get();
@@ -574,6 +738,11 @@ async function salvarRegraRaspadinha() {
       atualizadoEm: Date.now(),
     };
     if (
+      regra.imagemPremio &&
+      !/^(https:\/\/[^\s<>"']+|images\/[^\s<>"'\\]+)$/i.test(regra.imagemPremio)
+    )
+      throw Error("Use uma imagem pública HTTPS ou um caminho do site começando por images/.");
+    if (
       !regra.nome ||
       !regra.premio ||
       !regra.termos ||
@@ -596,8 +765,11 @@ async function salvarRegraRaspadinha() {
     limparRegraRaspadinha();
     await listarRegrasRaspadinha();
     document.getElementById("raspa-status").textContent = "Campanha salva.";
+    document.getElementById("raspa-form-status").textContent =
+      "Campanha salva. Ela já aparece em Raspadinhas cadastradas.";
   } catch (e) {
     document.getElementById("raspa-status").textContent = e.message;
+    document.getElementById("raspa-form-status").textContent = e.message;
   }
 }
 let regrasRaspadinhaUI = [];
@@ -626,7 +798,7 @@ function editarRegraRaspadinha(id) {
     nome: r.nome,
     modo: r.modo,
     publico: r.publico,
-    nivel: r.nivel,
+    nivel: r.nivel === "Lenda" ? "Imortal" : r.nivel,
     "cliente-regra": r.clienteId || "",
     minimo: r.minimoCompra,
     premio: r.premio,
@@ -640,7 +812,7 @@ function editarRegraRaspadinha(id) {
   for (const [k, v] of Object.entries(campos)) document.getElementById("raspa-" + k).value = v;
   document.getElementById("raspa-ativa").checked = r.ativa;
   document.getElementById("raspa-publico").onchange();
-  document.getElementById("form-regra-raspa").scrollIntoView({ block: "start" });
+  abrirPainelRaspadinhaUI("form-regra-raspa", "Editar raspadinha");
 }
 function diaCuiabaRaspa(ms) {
   return new Date(ms - 14400000).toISOString().slice(0, 10);
@@ -689,7 +861,7 @@ async function consultarDestinatarioRaspaManual() {
     const cliente = await buscarClienteRaspa(chave);
     if (campo.value.trim() !== chave) return;
     destinatarioRaspaManual = { ...cliente, chave };
-    status.textContent = "Cliente encontrado: " + cliente.nome + " · " + cliente.id;
+    status.textContent = "Cliente encontrado: " + cliente.nome + "\nCelular: " + cliente.id;
     document.getElementById("raspa-manual-emitir").disabled = false;
   } catch (erro) {
     status.textContent = erro.message;
@@ -714,7 +886,13 @@ async function emitirRaspadinhaManual() {
       return;
     const ticketId = await concederRaspadinha(id, c.id);
     const ticket = await db.collection("raspadinhas").doc(ticketId).get();
-    status.textContent = "Prêmio enviado para " + c.nome + ". Código: " + ticket.data().codigo;
+    status.textContent =
+      "Prêmio enviado para " +
+      c.nome +
+      "\nCelular: " +
+      c.id +
+      "\nCódigo da raspadinha: " +
+      ticket.data().codigo;
   } catch (erro) {
     status.textContent = erro.message;
   } finally {
@@ -727,15 +905,23 @@ async function consultarRaspadinhasAdmin() {
     const c = await buscarClienteRaspa(document.getElementById("raspa-busca-cliente").value.trim());
     const s = await db.collection("raspadinhas").where("clienteId", "==", c.id).get();
     document.getElementById("raspa-tickets").innerHTML =
-      "<h3>" +
-      escaparOperacao(c.nome) +
-      "</h3>" +
-      s.docs
-        .map((d) => {
-          const r = d.data();
-          return `<article class="registro-operacao"><strong>${escaparOperacao(r.premio)}</strong><p>${escaparOperacao(r.codigo)} · ${escaparOperacao(r.status)} · ${new Date(r.expiraEm).toLocaleDateString("pt-BR")}</p><button onclick="alterarTicketRaspadinha('${d.id}','cancelar')">Cancelar prêmio</button><button onclick="alterarTicketRaspadinha('${d.id}','validade')">Alterar validade</button><button onclick="alterarTicketRaspadinha('${d.id}','reabrir')">Corrigir uso / reabrir</button></article>`;
-        })
-        .join("");
+      `<header class="raspa-cliente-resumo-ui"><h3>${escaparOperacao(c.nome)}</h3><p>Celular: ${escaparOperacao(c.id)}</p><p>${s.size} raspadinha(s) encontrada(s)</p></header>` +
+      (s.empty
+        ? "<p>Esta conta ainda não recebeu raspadinhas.</p>"
+        : s.docs
+            .map((d) => {
+              const r = d.data();
+              const estado =
+                r.status === "usada"
+                  ? "Usada"
+                  : r.status === "cancelada"
+                    ? "Cancelada"
+                    : Number(r.expiraEm) <= Date.now()
+                      ? "Vencida"
+                      : "Disponível";
+              return `<article class="registro-operacao"><strong>${escaparOperacao(r.premio)}</strong><p>Código: <b>${escaparOperacao(r.codigo)}</b></p><p>Status: ${estado}</p><p>Válida até ${new Date(r.expiraEm).toLocaleDateString("pt-BR")}</p><button onclick="alterarTicketRaspadinha('${d.id}','cancelar')">Cancelar prêmio</button><button onclick="alterarTicketRaspadinha('${d.id}','validade')">Alterar validade</button><button onclick="alterarTicketRaspadinha('${d.id}','reabrir')">Corrigir uso / reabrir</button></article>`;
+            })
+            .join(""));
   } catch (e) {
     document.getElementById("raspa-tickets").textContent = e.message;
   }

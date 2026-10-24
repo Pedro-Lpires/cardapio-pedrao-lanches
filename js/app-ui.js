@@ -163,12 +163,10 @@ function instalarNavegacaoAtendenteUI() {
     criarNovoPedidoEntrega: "area-entrega-atendente",
     continuarNovoPedidoEntrega: "area-entrega-atendente",
     abrirMontagemPedidoEntrega: "area-entrega-atendente",
-    abrirProdutosPedidoEntrega: "area-entrega-atendente",
     abrirRetiradaAtendente: "area-retirada-atendente",
     criarNovoPedidoRetirada: "area-retirada-atendente",
     continuarNovoPedidoRetirada: "area-retirada-atendente",
     abrirMontagemPedidoRetirada: "area-retirada-atendente",
-    abrirProdutosPedidoRetirada: "area-retirada-atendente",
     abrirComandasAbertas: "area-consumo-local",
     abrirChamadosMesaAtendente: "area-chamados-mesa-atendente",
     abrirCentralOperacao: "central-operacao",
@@ -190,6 +188,8 @@ function instalarNavegacaoAtendenteUI() {
     const original = window[nome];
     if (typeof original !== "function") continue;
     window[nome] = async function (...args) {
+      if (nome === "abrirPainelProduto" && ["entrega", "retirada"].includes(contextoPainelProduto))
+        return original.apply(this, args);
       if (profundidadeUI) return original.apply(this, args);
       const navegacao = ++navegacaoAtendenteUI;
       if (nome === "abrirConsumoLocal" && !voltandoUI) pilhaAtendenteUI = [];
@@ -289,7 +289,7 @@ function instalarNavegacaoAtendenteUI() {
         if (Number.isInteger(numero)) {
           const box = document.createElement("div");
           box.className = "operacao-acoes";
-          box.innerHTML = `<button onclick="abrirCozinhaMesaUI(${numero})">Cozinha</button><button onclick="imprimirMesaOperacao(${numero},'geral')">Mesa · imprimir geral</button>`;
+          box.innerHTML = `<button onclick="abrirCozinhaMesaUI(${numero})">Cozinha</button><button onclick="imprimirMesaOperacao(${numero},'geral')">Imprimir geral</button>`;
           area.append(box);
         }
       }
@@ -347,8 +347,10 @@ async function enviarMesaCozinhaUI(mesa) {
     .where("mesa", "==", mesa)
     .where("status", "==", "Aberta")
     .get();
-  for (const d of snap.docs) await confirmarProducaoOperacao("comandas", d.id, true);
-  avisoOperacao("Itens novos enviados à tela da cozinha.");
+  for (const d of snap.docs) {
+    if ((await confirmarProducaoOperacao("comandas", d.id, true)) === false) return false;
+  }
+  return true;
 }
 async function abrirPedidosTipoUI(tipo) {
   await abrirCentralOperacao(tipo);

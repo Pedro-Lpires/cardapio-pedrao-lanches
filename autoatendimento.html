@@ -9,9 +9,10 @@
     <title>Autoatendimento - Pedrão Lanches</title>
 
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/autoatendimento.css?v=20261022-5" />
+    <link rel="stylesheet" href="css/paginas/autoatendimento.css?v=20261024-9" />
 
-    <script src="js/ui-comum.js?v=20261021-11"></script>
+    <script src="js/ui-comum.js?v=20261024-3"></script>
+    <script src="js/personagens-ui.js?v=20261024-9"></script>
   </head>
 
   <body>
@@ -103,6 +104,12 @@
 
         <h3 id="combo-preco-auto" data-preco-base="0">R$ 0,00</h3>
 
+        <div id="combo-opcoes-tipo-auto" hidden></div>
+
+        <!-- PERSONALIZAÇÃO -->
+
+        <div id="personalizacao-combo-auto"></div>
+
         <!-- QUANTIDADE -->
 
         <div class="qtd-produto-modal">
@@ -116,12 +123,6 @@
             <button type="button" onclick="alterarQtdComboAuto(1)">+</button>
           </div>
         </div>
-
-        <!-- PERSONALIZAÇÃO -->
-
-        <div id="personalizacao-combo-auto"></div>
-
-        <hr />
 
         <textarea id="observacao-combo-auto" placeholder="Observação geral do combo..."></textarea>
 
@@ -265,13 +266,13 @@
 
     <!-- AUTOATENDIMENTO -->
 
-    <script src="js/autoatendimento.js?v=20261022-3"></script>
+    <script src="js/autoatendimento.js?v=20261024-9"></script>
 
-    <script src="js/operacao.js?v=20261022-5"></script>
-    <script src="js/app-ui.js?v=20261022-2"></script>
+    <script src="js/operacao.js?v=20261024-9"></script>
+    <script src="js/app-ui.js?v=20261023-19"></script>
     <script src="js/raspadinhas-recuperacao.js?v=20261020-3"></script>
-    <script src="js/raspadinhas.js?v=20261020-5"></script>
-    <script src="js/fluxos-interface.js?v=20261021-11"></script>
-    <script src="js/janelas-fluxos.js?v=20261021-11"></script>
+    <script src="js/raspadinhas.js?v=20261024-9"></script>
+    <script src="js/fluxos-interface.js?v=20261024-1"></script>
+    <script src="js/janelas-fluxos.js?v=20261023-19"></script>
   </body>
 </html>

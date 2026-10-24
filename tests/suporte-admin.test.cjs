@@ -8,6 +8,7 @@ let encontrado = true,
 const box = { innerHTML: "" };
 const ctx = vm.createContext({
   telaSuporteAdmin: () => box,
+  htmlCarregandoUI: (texto) => texto,
   escaparOperacao: (x) => String(x).replaceAll("<", "&lt;"),
   moedaOperacao: (x) => String(x),
   db: {

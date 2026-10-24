@@ -5,7 +5,9 @@ let pronto,
   aviso = "";
 const carrinho = [];
 const ctx = vm.createContext({
+  produtoAtual: { preco: 40 },
   document: {
+    querySelector: () => null,
     getElementById: () => ({ innerText: "1" }),
     addEventListener: (nome, fn) => {
       pronto = fn;
@@ -23,6 +25,14 @@ const ctx = vm.createContext({
   alert: (txt) => (aviso = txt),
 });
 ctx.window = ctx;
+const operacao = fs.readFileSync("js/operacao.js", "utf8");
+vm.runInContext(
+  operacao.slice(
+    operacao.indexOf("function tiposCarneProdutoOperacao("),
+    operacao.indexOf("function cupomUsoUnicoOperacao("),
+  ),
+  ctx,
+);
 const produto = fs.readFileSync("js/script.js", "utf8");
 vm.runInContext(
   produto.slice(

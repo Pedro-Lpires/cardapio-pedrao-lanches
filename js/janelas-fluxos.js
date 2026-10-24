@@ -1,5 +1,54 @@
 /* Janelas secundárias e feedback das ações assíncronas. Carregar após os fluxos da página. */
 "use strict";
+function abrirFotoProdutoUI(origem) {
+  const imagem = origem.querySelector("img");
+  const src = origem.dataset.imagem || imagem?.currentSrc || imagem?.src;
+  if (!src) return;
+  const nome =
+    origem.dataset.nome ||
+    origem.closest(".modal-conteudo")?.querySelector("h2")?.textContent.trim() ||
+    "Foto do produto";
+  const janela = document.createElement("dialog");
+  janela.className = "foto-produto-ampliada-ui";
+  janela.setAttribute("aria-label", nome);
+  const cabecalho = document.createElement("header");
+  const titulo = document.createElement("h2");
+  titulo.textContent = nome;
+  const fechar = document.createElement("button");
+  fechar.type = "button";
+  fechar.className = "ui-x";
+  fechar.textContent = "×";
+  fechar.setAttribute("aria-label", "Fechar foto");
+  fechar.onclick = () => janela.close();
+  cabecalho.append(titulo, fechar);
+  const foto = document.createElement("img");
+  foto.src = src;
+  foto.alt = nome;
+  janela.append(cabecalho, foto);
+  janela.addEventListener("close", () => janela.remove(), { once: true });
+  document.body.append(janela);
+  janela.showModal();
+  return janela;
+}
+function prepararFotosProdutosUI() {
+  for (const id of ["modal-img", "modal-img-auto", "combo-img-auto"]) {
+    const imagem = document.getElementById(id);
+    if (!imagem || imagem.closest(".imagem-produto-ampliar-ui")) continue;
+    const botao = document.createElement("button");
+    botao.type = "button";
+    botao.className = "imagem-produto-ampliar-ui";
+    botao.setAttribute("aria-label", "Ampliar foto do produto");
+    botao.onclick = () => abrirFotoProdutoUI(botao);
+    imagem.before(botao);
+    botao.append(imagem);
+  }
+}
+function configurarVoltaTipoComboUI(janela, contexto) {
+  janela.querySelector(".ui-voltar").onclick = () => {
+    janela.addEventListener("close", () => abrirEscolhaAcrescimosComboUI(contexto), { once: true });
+    janela.close("aplicar");
+  };
+}
 function atualizarResumoAdicionaisProdutoUI(id) {
   const botao = document.querySelector(
     id === "lista-adicionais"
@@ -47,16 +96,7 @@ function atualizarResumoAdicionaisProdutoUI(id) {
 function abrirAcrescimosJanelaUI(id) {
   const conteudo = document.getElementById(id);
   if (!conteudo) return;
-  const quantidadePrincipal = document.getElementById("quantidade-produto-config");
-  const quantidadeAnterior = quantidadePrincipal?.textContent;
   conteudo.style.display = "none";
-  const campos = [...conteudo.querySelectorAll('[id^="qtd-"]')].map((el) => [el, el.textContent]);
-  const selecionados =
-    id === "lista-adicionais"
-      ? structuredClone(adicionaisSelecionados)
-      : id === "lista-adicionais-auto"
-        ? structuredClone(adicionaisAutoSelecionados)
-        : null;
   const janela = abrirJanelaElementoUI(conteudo, "Acréscimos");
   if (!conteudo.querySelector("[data-limpar-acrescimos]")) {
     const limpar = document.createElement("button");
@@ -72,20 +112,10 @@ function abrirAcrescimosJanelaUI(id) {
     };
     conteudo.append(limpar);
   }
-  configurarRascunhoAcrescimosUI(
-    janela,
-    () => {
-      if (id === "lista-adicionais") limitarQuantidadeProdutoComAdicionais();
-    },
-    () => {
-      campos.forEach(([el, valor]) => (el.textContent = valor));
-      if (id === "lista-adicionais") adicionaisSelecionados = selecionados;
-      if (id === "lista-adicionais-auto") adicionaisAutoSelecionados = selecionados;
-      if (id === "area-acrescimos-produto") atualizarPrecoProduto();
-      if (quantidadePrincipal && quantidadeAnterior != null)
-        quantidadePrincipal.textContent = quantidadeAnterior;
-    },
-  );
+  configurarAcrescimosImediatosUI(janela, () => {
+    if (id === "lista-adicionais") limitarQuantidadeProdutoComAdicionais();
+    if (id === "area-acrescimos-produto") atualizarPrecoProduto();
+  });
   janela.addEventListener("close", () => atualizarResumoAdicionaisProdutoUI(id), { once: true });
 }
 function resumoAcrescimosHtmlUI(configs) {
@@ -164,7 +194,7 @@ function organizarProdutoPainelUI() {
   if (titulo?.matches("h3")) caixa.append(titulo);
   caixa.append(campo);
   const painel = campo.closest(
-    "#area-comanda-atendente, #area-entrega-atendente, #area-retirada-atendente",
+    "#area-comanda-atendente, #area-entrega-atendente, #area-retirada-atendente, #pedido-produto-painel-ui",
   );
   if (painel) {
     painel.classList.add("produto-painel-compacto-ui");
@@ -196,9 +226,17 @@ function organizarProdutoPainelUI() {
       atual = proximo;
       if (grupo.querySelectorAll("button").length === 2) break;
     }
+    const adicionar = grupo.nextElementSibling;
+    if (adicionar?.matches("button[onclick*='adicionarProdutoConfigurado']")) {
+      const finalizar = document.createElement("div");
+      finalizar.className = "produto-bloco-ui produto-finalizar-ui";
+      grupo.before(finalizar);
+      finalizar.append(grupo, adicionar);
+    }
   }
 }
 document.addEventListener("DOMContentLoaded", () => {
+  prepararFotosProdutosUI();
   if (typeof montarPersonalizacaoComboAuto === "function") {
     const montar = montarPersonalizacaoComboAuto;
     window.montarPersonalizacaoComboAuto = () => {
@@ -211,6 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.abrirPainelProduto = async (...args) => {
       await abrir(...args);
       organizarProdutoPainelUI();
+      if (["entrega", "retirada"].includes(contextoPainelProduto)) abrirJanelaProdutoPedidoUI();
     };
   }
   for (const [nome, id] of [
@@ -267,10 +306,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const conteudo = document.getElementById(id);
       if (conteudo) {
         conteudo.style.display = "none";
-        abrirJanelaElementoUI(
+        const janela = abrirJanelaElementoUI(
           conteudo,
           modo === "todos" ? "Todos os lanches" : "Lanches individuais",
         );
+        configurarVoltaTipoComboUI(janela, "atendente");
       }
     };
     for (const [nome, id, titulo] of [
@@ -290,13 +330,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const conteudo = document.getElementById(id(...args));
         if (!conteudo) return;
         const janela = abrirJanelaElementoUI(conteudo, titulo(...args));
-        janela.addEventListener(
-          "close",
-          () => {
-            conteudo.innerHTML = "";
-          },
-          { once: true },
-        );
         await abrir(...args);
         conteudo.querySelector('[onclick*="fecharConfiguracao"]')?.remove();
         const salvar =
@@ -311,7 +344,14 @@ document.addEventListener("DOMContentLoaded", () => {
           conteudo.querySelectorAll("textarea").forEach((el) => (el.value = ""));
         };
         conteudo.append(limpar);
-        configurarRascunhoAcrescimosUI(janela, salvar);
+        configurarAcrescimosImediatosUI(janela, salvar);
+        janela.addEventListener(
+          "close",
+          () => {
+            conteudo.innerHTML = "";
+          },
+          { once: true },
+        );
       };
     }
     for (const [nome, id] of [
@@ -352,10 +392,11 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       if (conteudo?.style.display === "block") {
         conteudo.style.display = "none";
-        abrirJanelaElementoUI(
+        const janela = abrirJanelaElementoUI(
           conteudo,
           modo === "todos" ? "Todos os lanches" : "Lanches individuais",
         );
+        configurarVoltaTipoComboUI(janela, "auto");
       }
     };
   }
@@ -380,9 +421,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window[abrirNome] = (...args) => {
       const conteudo = document.getElementById(id(...args));
       if (!conteudo) return;
-      const anteriorTodos = structuredClone(configuracaoTodosComboAuto);
-      const anteriorIndividual = structuredClone(configuracoesLanchesComboAuto);
-      const quantidadeAnterior = quantidadeComboAuto;
       if (conteudo.parentElement.matches("dialog.interface-janela")) {
         // Atualiza o conteúdo sem acionar o antigo comportamento de recolher.
         conteudo.style.display = "none";
@@ -406,17 +444,6 @@ document.addEventListener("DOMContentLoaded", () => {
         else sincronizarConfiguracaoTodosComboAuto();
       };
       conteudo.append(limpar);
-      configurarRascunhoAcrescimosUI(janela, null, () => {
-        configuracaoTodosComboAuto = anteriorTodos;
-        configuracoesLanchesComboAuto = anteriorIndividual;
-        quantidadeComboAuto = quantidadeAnterior;
-        const quantidade = document.getElementById("qtd-combo-auto");
-        if (quantidade) quantidade.textContent = quantidadeAnterior;
-        atualizarResumoTodosComboAuto();
-        for (let n = 1; n <= Number(comboAutoAtual?.comboQtdLanches || 0); n++)
-          atualizarStatusLancheComboAuto(n);
-        atualizarPrecoComboAuto();
-      });
       janela.addEventListener(
         "close",
         () => {

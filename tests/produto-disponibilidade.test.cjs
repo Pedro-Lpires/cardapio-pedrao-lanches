@@ -12,6 +12,7 @@ let aviso = "";
 const snap = { forEach: (fn) => produtos.forEach((p) => fn({ id: p.id, data: () => p })) };
 const ctx = vm.createContext({
   contextoPainelProduto: "",
+  htmlCarregandoUI: (texto) => texto,
   document: { getElementById: () => area },
   mostrarAvisoUI: (txt) => {
     aviso = txt;

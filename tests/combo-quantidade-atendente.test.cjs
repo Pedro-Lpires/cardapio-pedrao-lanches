@@ -17,6 +17,7 @@ const ctx = vm.createContext({
   configuracoesLanchesCombo: {},
   quantidadeLanchesComboAtual: 3,
   document: {
+    querySelector: () => null,
     getElementById: (id) => elementos[id] || null,
     querySelectorAll: (seletor) => (seletor === ".adicional-produto-config" ? [] : [adicional]),
   },

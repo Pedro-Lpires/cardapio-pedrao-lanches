@@ -16,29 +16,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-let lojaAberta = true;
-
-db.collection("config")
-  .doc("loja")
-  .onSnapshot((doc) => {
-    if (doc.exists) {
-      lojaAberta = doc.data().aberta;
-
-      console.log("LOJA ABERTA?", lojaAberta);
-
-      const botoesPedido = document.querySelectorAll(".bloquear-fechado");
-
-      botoesPedido.forEach((btn) => {
-        btn.disabled = !lojaAberta;
-      });
-
-      if (!lojaAberta) {
-        document.body.style.opacity = "0.5";
-      } else {
-        document.body.style.opacity = "1";
-      }
-    }
-  });
+let lojaAberta = null;
 
 const LAT_ESTABELECIMENTO = -15.553076945525193;
 const LON_ESTABELECIMENTO = -56.05602240360688;
@@ -189,6 +167,7 @@ let descontosCupons = {
 };
 
 function abrirProduto(item, categoria = "Lanches") {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   focoAntesProduto = document.activeElement;
   produtoAtual = item;
   categoriaProdutoAtual = categoria;
@@ -242,6 +221,7 @@ function toggleAdicionaisProduto() {
 function montarOpcoes(item) {
   const div = document.getElementById("modal-opcoes-tipo");
   const tipos = tiposCarneProdutoOperacao(item);
+  div.dataset.quantidade = String(tipos.length);
   if (tipos.length <= 1) {
     div.innerHTML = "";
     return;
@@ -255,11 +235,11 @@ function montarOpcoes(item) {
         tipo.preco +
         '" ' +
         (index === 0 ? "checked" : "") +
-        ">" +
+        "><span>" +
         tipo.nome +
-        " " +
+        "</span><small>" +
         moedaOperacao(tipo.preco) +
-        "</label>",
+        "</small></label>",
     )
     .join("");
 }
@@ -330,6 +310,7 @@ function alterarAdicional(index, valor) {
   document.getElementById(`qtd-adicional-${index}`).innerText = adicionaisSelecionados[index].qtd;
 }
 function adicionarOuSomar(nome, qtd, preco, categoria = "Lanches") {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   const existente = carrinho.find((item) => item.nome === nome);
 
   if (existente) {
@@ -339,6 +320,7 @@ function adicionarOuSomar(nome, qtd, preco, categoria = "Lanches") {
   }
 }
 function adicionarProdutoFinal() {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   let tipoSelecionado = document.querySelector('input[name="tipo-produto"]:checked');
   let nomeFinal = produtoAtual.nome;
   let precoBase = produtoAtual.preco;
@@ -376,6 +358,9 @@ function adicionarProdutoFinal() {
   const obs = document.getElementById("obs-produto").value.trim();
 
   const itemCarrinho = {
+    produtoId: produtoAtual.id || null,
+    tipoCarne: tipoSelecionado?.value.toLowerCase() || "",
+    descricao: produtoAtual.descricao || produtoAtual.desc || "",
     nome: nomeFinal,
     qtd: qtdProdutoAtual,
     preco: precoBase + totalExtras,
@@ -384,7 +369,10 @@ function adicionarProdutoFinal() {
     obs: obs,
     categoria: categoriaProdutoAtual,
     comboQtdLanches: produtoAtual.comboQtdLanches || 1,
-    comboComponentes: produtoAtual.comboComponentes || [],
+    comboComponentes:
+      String(categoriaProdutoAtual).toLowerCase() === "combos"
+        ? aplicarTipoComboOperacao(produtoAtual, tipoSelecionado?.value).comboComponentes || []
+        : produtoAtual.comboComponentes || [],
     molhosGratis: null,
 
     molhosPagos: [],
@@ -401,6 +389,7 @@ function adicionarProdutoFinal() {
 }
 
 function adicionarDiretoCarrinho(nome, preco, categoria = "Lanches") {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   const itemExistente = carrinho.find((item) => item.nome === nome);
 
   if (itemExistente) {
@@ -585,6 +574,7 @@ async function limparCarrinho() {
   }
 }
 function abrirCarrinho() {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   document.getElementById("modal-carrinho").style.display = "flex";
   renderizarCarrinho();
 }
@@ -603,6 +593,7 @@ function fecharCarrinho() {
 }
 
 function irParaFinalizar() {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   fecharCarrinho();
   abrirTela("finalizar");
 
@@ -612,6 +603,7 @@ function irParaFinalizar() {
 }
 
 function finalizarPedido() {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   const nomeContato = document.getElementById("nome-cliente");
   const telefoneContato = document.getElementById("telefone-cliente");
   if (
@@ -620,10 +612,6 @@ function finalizarPedido() {
   ) {
     avisoOperacao("Informe nome e celular completo com DDD antes de continuar.");
     (!nomeContato.value.trim() ? nomeContato : telefoneContato)?.focus();
-    return;
-  }
-  if (!lojaAberta) {
-    alert("🚫 Estamos fechados no momento!");
     return;
   }
   cupomDescontoAplicado = null;
@@ -756,6 +744,7 @@ function toggleTroco() {
 }
 
 function exibirRevisao(itens, subtotal, taxa, tipo, obs, mapa = "", km = 0, foraDaArea = false) {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   dadosPedidoTemporario = { itens, subtotal, taxa, tipo, obs, mapa, km, foraDaArea };
   revisaoCarrinhoVersao = carrinhoVersao;
 
@@ -1014,6 +1003,7 @@ function entregaAtiva() {
 }
 
 async function confirmarEEnviar() {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   const nomeCliente = document.getElementById("nome-cliente").value;
   const telefoneCliente = document.getElementById("telefone-cliente").value;
   if (!nomeCliente) {
@@ -1046,6 +1036,7 @@ async function confirmarEEnviar() {
   const itensProcessados = carrinho.map((item) => {
     return {
       nome: item.nome || "Produto",
+      tipoCarne: item.tipoCarne || "",
       produtoId: item.produtoId || item.id || null,
       descricao: item.desc || item.descricao || obterTextoCompletoProduto(item),
       lanchesCombo: item.lanchesCombo || [],
@@ -1309,6 +1300,7 @@ async function confirmarEEnviar() {
 }
 
 async function salvarPedidoFirebase(pedido) {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return null;
   try {
     if (!pedido) {
       console.error("Pedido vazio. Não salvou no Firebase.");
@@ -1318,6 +1310,7 @@ async function salvarPedidoFirebase(pedido) {
     const contadorRef = await prepararContadorPedidoOperacao(db);
 
     const numero = await db.runTransaction(async (t) => {
+      if (typeof conferirLojaNaTransacaoUI === "function") await conferirLojaNaTransacaoUI(t);
       const doc = await t.get(contadorRef);
 
       let novoNumero = 1;
@@ -1338,7 +1331,11 @@ async function salvarPedidoFirebase(pedido) {
       pedido.numeroEntregaDia = await reservarNumeroEntregaOperacao(db);
 
     let docRef;
-    if (pedido.cupomDescontoCodigo) {
+    if (typeof salvarPedidoLojaAbertaUI === "function") {
+      docRef = db.collection("pedidos").doc();
+      pedido.id = docRef.id;
+      await salvarPedidoLojaAbertaUI(docRef, pedido);
+    } else if (pedido.cupomDescontoCodigo) {
       docRef = db.collection("pedidos").doc();
       pedido.id = docRef.id;
       await salvarPedidoComCupomOperacao(docRef, pedido);
@@ -1346,11 +1343,16 @@ async function salvarPedidoFirebase(pedido) {
 
     pedido.id = docRef.id;
 
-    if (!pedido.cupomDescontoCodigo)
+    if (!pedido.cupomDescontoCodigo && typeof salvarPedidoLojaAbertaUI !== "function")
       await db.collection("pedidos").doc(docRef.id).update({ id: docRef.id });
 
     return numero;
   } catch (erro) {
+    if (erro.code === "LOJA_FECHADA" && typeof atualizarEstadoLojaPublicaUI === "function") {
+      atualizarEstadoLojaPublicaUI("fechada");
+      permitirPedidoLojaUI();
+      return null;
+    }
     console.error("Erro ao salvar:", erro);
     avisoOperacao(erro.message || "Não foi possível salvar o pedido.");
     return null;
@@ -1576,6 +1578,14 @@ if (telInput) {
 function atualizarHorarioFuncionamento() {
   const el = document.getElementById("horario-funcionamento");
   if (!el) return;
+  if (typeof estadoLojaPublicaUI !== "undefined" && estadoLojaPublicaUI !== "aberta") {
+    el.textContent =
+      estadoLojaPublicaUI === "fechada"
+        ? "🔴 FECHADO - Novos pedidos indisponíveis no momento"
+        : "Conferindo disponibilidade da loja…";
+    el.style.borderColor = "red";
+    return;
+  }
 
   const agora = new Date();
   const hora = agora.getHours();
@@ -1620,6 +1630,8 @@ if (modalProdutoSite) {
 }
 
 function abrirTela(nome) {
+  if (nome === "finalizar" && typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI())
+    return;
   document.querySelectorAll(".tela-app").forEach((tela) => {
     tela.classList.remove("ativa");
   });
@@ -1647,16 +1659,24 @@ async function ativarCodigoClienteLogado() {
       if (!cliente?.codigoAtivacao || codigo !== String(cliente.codigoAtivacao).trim()) {
         return null;
       }
-      if (cliente.fidelidadeAtiva) return cliente;
-      const ativacao = { fidelidadeAtiva: true, ativadoEm: new Date().toISOString() };
+      const nivelCliente = nivelFidelidadeOperacao(cliente, true);
+      if (cliente.fidelidadeAtiva) {
+        if (cliente.nivelCliente !== nivelCliente) transacao.update(ref, { nivelCliente });
+        return { cliente: { ...cliente, nivelCliente }, ativou: false };
+      }
+      const ativacao = { fidelidadeAtiva: true, nivelCliente, ativadoEm: new Date().toISOString() };
       transacao.update(ref, ativacao);
-      return { ...cliente, ...ativacao };
+      return { cliente: { ...cliente, ...ativacao }, ativou: true };
     });
-    if (!dados) return alert("Código inválido. Confira o código de ativação e tente novamente.");
-    clienteLogado = dados;
+    if (!dados)
+      return alert(
+        "Esse código não existe ou você digitou errado. Confira e tente novamente.",
+        "codigo",
+      );
+    clienteLogado = dados.cliente;
     campo.value = "";
     atualizarTelaClienteLogado();
-    alert("Código ativado! Sua fidelidade já está disponível.");
+    if (dados.ativou) mostrarAtivacaoCdaPedraoUI();
   } catch (erro) {
     if (String(erro.code || "").includes("resource-exhausted")) {
       alert(
@@ -1672,8 +1692,8 @@ async function ativarCodigoClienteLogado() {
 
 function explicarCodigo() {
   const msg =
-    "O código de ativação libera seu cupom fidelidade.\n\n" +
-    "Para receber, fale conosco no WhatsApp. Vamos te explicar como ativar o benefício.";
+    "O código de ativação libera seus benefícios conosco! Mas é só para clientes.\n\n" +
+    "Você é cliente? Então envie uma mensagem no nosso WhatsApp que te envio seu código.";
 
   const texto = encodeURIComponent("Olá, quero receber meu cupom fidelidade do Pedrão Lanches.");
   mostrarAjudaComLinkUI(msg, `https://wa.me/5565992386045?text=${texto}`);
@@ -1720,21 +1740,26 @@ async function buscarCliente() {
     selecionarAvatar(avatarClienteAtual);
 
     if (codigo) {
-      if (codigo === clienteLogado.codigoAtivacao) {
+      if (codigo === clienteLogado.codigoAtivacao && !clienteLogado.fidelidadeAtiva) {
         await ref.update({
           fidelidadeAtiva: true,
+          nivelCliente: nivelFidelidadeOperacao(clienteLogado, true),
           ativadoEm: new Date().toISOString(),
           totalFidelidade: clienteLogado.totalFidelidade || 0,
           avatar: avatarClienteAtual,
         });
 
         clienteLogado.fidelidadeAtiva = true;
+        clienteLogado.nivelCliente = nivelFidelidadeOperacao(clienteLogado);
         clienteLogado.ativadoEm = new Date().toISOString();
 
-        alert("Código ativado! Seu vale fidelidade foi liberado.");
-      } else {
-        alert("Código inválido ou não pertence a este cliente.");
-      }
+        mostrarAtivacaoCdaPedraoUI();
+      } else if (codigo !== clienteLogado.codigoAtivacao) {
+        alert(
+          "Entramos na sua conta, mas o CDA informado está errado. Seria interessante você não esquecer ele!",
+          "codigoLogin",
+        );
+      } else mostrarBoasVindasUI(clienteLogado.nome || nome);
     } else {
       mostrarBoasVindasUI(clienteLogado.nome || nome);
     }
@@ -2189,7 +2214,10 @@ function mostrarBonusCliente() {
   }
 
   if (!clienteLogado.fidelidadeAtiva) {
-    return alert("Ative seu CDA para desbloquear o bônus fidelidade.");
+    return alert(
+      "Ative seu CDA para desbloquear o bônus fidelidade. Vamos liberar esses benefícios!",
+      "ativar",
+    );
   }
 
   abrirBonusCliente();
@@ -2438,6 +2466,7 @@ function buscarProdutoAtual(nomePedido) {
 }
 
 function pedirNovamente(itensAntigos) {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   carrinho = [];
 
   itensAntigos.forEach((itemAntigo) => {
@@ -2512,6 +2541,7 @@ function pedidoContaFidelidade(pedido) {
   return pedido.clienteId && pedido.fidelidadeAtivaNoPedido === true;
 }
 async function aplicarCupomDesconto() {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   const codigo = document.getElementById("codigo-cupom-desconto").value.trim().toUpperCase();
   const retorno = document.getElementById("retorno-cupom-desconto");
 
@@ -2848,15 +2878,21 @@ function obterTextoCompletoProduto(itemCarrinho) {
 function toggleAvatares() {
   const box = document.getElementById("lista-avatares");
   if (!box) return;
-
-  box.style.display = box.style.display === "none" ? "flex" : "none";
+  if (typeof htmlOpcoesAvataresUI === "function")
+    box.innerHTML = htmlOpcoesAvataresUI(clienteLogado || {}, avatarClienteAtual);
+  box.style.display = box.style.display === "none" ? "grid" : "none";
 }
 
 function selecionarAvatar(caminho) {
-  avatarClienteAtual = caminho;
+  avatarClienteAtual =
+    typeof dadosAvatarClienteUI === "function"
+      ? dadosAvatarClienteUI(clienteLogado || {}, caminho).src
+      : caminho;
 
   const preview = document.getElementById("avatar-cliente-preview");
-  if (preview) preview.src = caminho;
+  if (typeof aplicarAvatarClienteUI === "function")
+    aplicarAvatarClienteUI(preview, clienteLogado || {}, avatarClienteAtual);
+  else if (preview) preview.src = caminho;
 
   const box = document.getElementById("lista-avatares");
   if (box) box.style.display = "none";
@@ -2918,10 +2954,12 @@ async function salvarPerfilCliente() {
 }
 
 function logoutCliente() {
+  if (typeof encerrarContadorClienteUI === "function") encerrarContadorClienteUI();
   if (onlineSessionId) {
     db.collection("usuariosOnline").doc(onlineSessionId).delete();
   }
 
+  if (typeof encerrarBeneficiosPedraoUI === "function") encerrarBeneficiosPedraoUI();
   clienteLogado = null;
   localStorage.removeItem("clientePedrao");
 
@@ -3037,6 +3075,15 @@ function abrirPerfilModo(modo) {
 
 function atualizarTelaClienteLogado() {
   if (!clienteLogado) return;
+  if (typeof acompanharBeneficiosClientePedraoUI === "function")
+    acompanharBeneficiosClientePedraoUI(clienteLogado, (atual) => {
+      if (!clienteLogado || clienteLogado.telefone !== atual.telefone) return;
+      const mudou =
+        clienteLogado.nivelCliente !== atual.nivelCliente ||
+        clienteLogado.fidelidadeAtiva !== atual.fidelidadeAtiva;
+      clienteLogado = { ...clienteLogado, ...atual };
+      if (mudou) atualizarTelaClienteLogado();
+    });
 
   abrirPerfilModo("logado");
 
@@ -3052,6 +3099,8 @@ function atualizarTelaClienteLogado() {
 
   document.getElementById("perfil-logado-avatar").src =
     clienteLogado.avatar || "images/avatar1.png";
+  if (typeof aplicarAvatarClienteUI === "function")
+    aplicarAvatarClienteUI(document.getElementById("perfil-logado-avatar"), clienteLogado);
 
   const ativo = clienteLogado.fidelidadeAtiva;
 
@@ -3070,7 +3119,8 @@ function atualizarTelaClienteLogado() {
   const boxCda = document.getElementById("ativar-cda-box");
 
   if (ativo) {
-    nivelEl.innerText = clienteLogado.nivelCliente || "Bronze";
+    nivelEl.innerText = nivelFidelidadeOperacao(clienteLogado);
+    nivelEl.dataset.nivel = nivelEl.innerText.toLowerCase();
 
     linhaNivel.style.display = "block";
 
@@ -3100,7 +3150,33 @@ function htmlMensagemCliente(m) {
         "",
       )
     : m.texto;
-  return `<div class="card-mensagem"><p class="mensagem-descricao">${escaparOperacao(texto)}</p>${m.cupomCodigo ? `<div class="mensagem-cupom"><span>Cupom</span><strong>${escaparOperacao(m.cupomCodigo)}</strong></div>` : ""}${m.raspadinhaId ? (m.raspadinhaStatus === "usada" ? '<span class="raspadinha-status-usada">Usado</span>' : `<button type="button" onclick="abrirRaspadinhaCliente('${escaparOperacao(m.raspadinhaId)}')">Abrir</button>`) : ""}<small>${new Date(m.data).toLocaleString("pt-BR")}${m.remetente === "cliente" ? (m.lida ? " • visualizada" : " • enviada") : ""}</small></div>`;
+  const daLoja = m.remetente === "admin";
+  const remetente =
+    daLoja && !m.cupomCodigo
+      ? '<div class="mensagem-remetente-ui"><img src="images/personagens-pedrao/ui/mago-tranquilo.png" alt="" width="40" height="40"><strong>Pedrão Lanches</strong></div>'
+      : "";
+  const recompensa =
+    daLoja && typeof htmlPersonagemRecompensaPedraoUI === "function"
+      ? htmlPersonagemRecompensaPedraoUI(
+          m.cupomCodigo ? "cupom" : m.raspadinhaId ? "raspadinha" : "",
+        )
+      : "";
+  let corpo = `<p class="mensagem-descricao">${escaparOperacao(texto)}</p>`;
+  if (m.cupomCodigo) {
+    corpo = `<details class="mensagem-presente-ui"><summary aria-label="Abrir ou recolher cupom ${escaparOperacao(m.cupomCodigo)}">${recompensa || "Tem cupom pra você!"}</summary><div class="mensagem-presente-conteudo-ui">${corpo}<button type="button" class="mensagem-cupom" data-codigo="${escaparOperacao(m.cupomCodigo)}" onclick="copiarCupomClienteUI(this)"><span>Cupom · toque para copiar</span><strong>${escaparOperacao(m.cupomCodigo)}</strong></button><span class="cupom-copia-status-ui" role="status"></span></div></details>`;
+  } else if (m.raspadinhaId) {
+    const nome = typeof clienteLogado !== "undefined" ? clienteLogado?.nome : "";
+    const chegada = `Chegou coisa boa pra você${nome ? ", " + nome : ""}!`;
+    corpo =
+      typeof htmlPersonagemRecompensaPedraoUI === "function"
+        ? htmlPersonagemRecompensaPedraoUI("raspadinha", "", chegada)
+        : `<p>${escaparOperacao(chegada)}</p>`;
+    corpo +=
+      m.raspadinhaStatus === "usada"
+        ? '<span class="raspadinha-status-usada">Usado</span>'
+        : `<button type="button" class="raspa-abrir-mensagem-ui" onclick="abrirRaspadinhaCliente('${escaparOperacao(m.raspadinhaId)}')">Abrir</button>`;
+  }
+  return `<div class="card-mensagem">${remetente}${corpo}<small>${new Date(m.data).toLocaleString("pt-BR")}${m.remetente === "cliente" ? (m.lida ? " • visualizada" : " • enviada") : ""}</small></div>`;
 }
 
 function abrirMensagensCliente() {
@@ -3492,8 +3568,9 @@ window.abrirChamadoCliente = async function (chamadoId) {
           html += `
                     <div class="linha-msg ${ehCliente ? "linha-cliente" : "linha-admin"}">
                         <img
-                            src="${ehCliente ? clienteLogado.avatar || "images/avatar1.png" : "images/avatar-admin.png"}"
+                            src="${ehCliente ? clienteLogado.avatar || "images/avatar1.png" : "images/personagens-pedrao/ui/mago-tranquilo.png"}"
                             class="avatar-msg"
+                            alt="${ehCliente ? "Você" : "Pedrão Lanches"}"
                         >
 
                         <div class="msg-chat ${ehCliente ? "msg-cliente" : "msg-admin"}">
@@ -3702,6 +3779,7 @@ async function atualizarStatusOnline() {
     codigoAtivacao: clienteLogado?.codigoAtivacao || "",
 
     fidelidadeAtiva: !!clienteLogado?.fidelidadeAtiva,
+    nivelCliente: clienteLogado?.nivelCliente || "Sem nível",
 
     ultimaAtividade: new Date().toISOString(),
 
@@ -3718,6 +3796,8 @@ window.addEventListener("load", () => {
 });
 let buscaContadorMensagensUI = null;
 function atualizarContadorMensagens() {
+  if (typeof acompanharContadorClienteUI === "function" && acompanharContadorClienteUI())
+    return Promise.resolve();
   if (!buscaContadorMensagensUI)
     buscaContadorMensagensUI = buscarContadorMensagensUI()
       .catch(console.error)
@@ -3892,7 +3972,7 @@ async function atualizarNivelCliente(clienteId) {
 
   const fidelidade = !!cliente.fidelidadeAtiva;
 
-  let nivel = "Sem nível";
+  let nivel = fidelidade ? "Bronze" : "Sem nível";
 
   if (!fidelidade) {
     nivel = "Sem nível";
@@ -3900,7 +3980,7 @@ async function atualizarNivelCliente(clienteId) {
     nivel = "Bronze";
   }
 
-  if (pedidos >= 5 || gasto >= 300) {
+  if (fidelidade && (pedidos >= 5 || gasto >= 300)) {
     nivel = "Prata";
   }
 
@@ -3913,7 +3993,7 @@ async function atualizarNivelCliente(clienteId) {
   }
 
   if (fidelidade && (pedidos >= 60 || gasto >= 4000)) {
-    nivel = "Lenda";
+    nivel = "Imortal";
   }
 
   await ref.update({

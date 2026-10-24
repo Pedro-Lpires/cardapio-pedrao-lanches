@@ -281,9 +281,7 @@ async function abrirRetiradaAtendente() {
     <div
         id="lista-pedidos-retirada-atendente"
     >
-        <p>
-            Carregando...
-        </p>
+        ${htmlCarregandoUI("Carregando…")}
     </div>
 
 `;
@@ -1774,432 +1772,7 @@ function continuarNovoPedidoRetirada() {
   abrirMontagemPedidoRetirada();
 }
 function abrirMontagemPedidoRetirada() {
-  const area = document.getElementById("area-retirada-atendente");
-
-  if (!area || !pedidoRetiradaAtual) {
-    return;
-  }
-
-  let htmlItens = "<p>Nenhum item adicionado.</p>";
-
-  if (pedidoRetiradaAtual.itens.length > 0) {
-    htmlItens = pedidoRetiradaAtual.itens
-      .map((item, index) => {
-        const htmlTipo = item.tipo
-          ? `
-                            <br>
-                            Tipo: ${item.tipo}
-                        `
-          : "";
-
-        let htmlAdicionais = "";
-
-        if (item.adicionais && item.adicionais.length > 0) {
-          htmlAdicionais = `
-
-                        <br>
-
-                        <small>
-                            ➕ ${item.adicionais
-                              .map((adicional) => {
-                                return `${adicional.qtd} ${adicional.nome}`;
-                              })
-                              .join(" + ")}
-                        </small>
-
-                    `;
-        }
-
-        const htmlObservacao = item.observacao
-          ? `
-
-                            <br>
-
-                            <small>
-                                📝 ${item.observacao}
-                            </small>
-
-                        `
-          : "";
-
-        // =========================
-        // COMBO
-        // =========================
-
-        let htmlCombo = "";
-
-        if (item.categoria === "combos" && item.lanchesCombo && item.lanchesCombo.length > 0) {
-          const personalizados = item.lanchesCombo.filter(
-            (lanche) =>
-              (lanche.adicionais || []).length > 0 || (lanche.observacao || "").trim() !== "",
-          );
-
-          if (personalizados.length > 0) {
-            htmlCombo = `
-
-                            <div
-                                style="
-                                    margin-top:8px;
-                                    margin-left:10px;
-                                "
-                            >
-
-                                ${personalizados
-                                  .map((lanche) => {
-                                    const adicionais = (lanche.adicionais || [])
-                                      .map((adicional) => {
-                                        return `${adicional.qtd} ${adicional.nome}`;
-                                      })
-                                      .join(" + ");
-
-                                    return `
-
-                                            <div
-                                                style="
-                                                    margin-bottom:5px;
-                                                "
-                                            >
-
-                                                <strong>
-                                                    Lanche ${lanche.numero}
-                                                </strong>
-
-                                                ${
-                                                  adicionais
-                                                    ? `
-                                                            <br>
-                                                            <small>
-                                                                ➕ ${adicionais}
-                                                            </small>
-                                                        `
-                                                    : ""
-                                                }
-
-                                                ${
-                                                  lanche.observacao
-                                                    ? `
-                                                            <br>
-                                                            <small>
-                                                                📝 ${lanche.observacao}
-                                                            </small>
-                                                        `
-                                                    : ""
-                                                }
-
-                                            </div>
-
-                                        `;
-                                  })
-                                  .join("")}
-
-                            </div>
-
-                        `;
-          }
-        }
-
-        // =========================
-        // MOLHOS
-        // =========================
-
-        let htmlMolhos = "";
-
-        if (item.molhosGratis && item.molhosGratis.length > 0) {
-          const configurados = item.molhosGratis.filter((molho) => molho.tipo !== "semmolho");
-
-          if (configurados.length > 0) {
-            htmlMolhos += `
-
-                            <br>
-
-                            <small>
-                                🍶 Molhos:
-                                <br>
-
-                                ${configurados
-                                  .map((molho) => {
-                                    return `#${molho.unidade}: ${molho.texto}`;
-                                  })
-                                  .join("<br>")}
-
-                            </small>
-
-                        `;
-          }
-        }
-
-        if (item.molhosPagos && item.molhosPagos.length > 0) {
-          htmlMolhos += `
-
-                        <br>
-
-                        <small>
-                            💰 Molhos extras:
-                            ${item.molhosPagos
-                              .map((molho) => {
-                                return `${molho.qtd} ${molho.nome}`;
-                              })
-                              .join(" + ")}
-                        </small>
-
-                    `;
-        }
-
-        const podeTerMolhos =
-          item.categoria === "lanches" ||
-          item.categoria === "combos" ||
-          item.categoria === "batatas";
-
-        const htmlBotaoMolhos = podeTerMolhos
-          ? `
-
-                            <br><br>
-
-                            <button
-                                type="button"
-                                onclick="
-                                    abrirMolhosPedidoRetirada(
-                                        ${index}
-                                    )
-                                "
-                            >
-                                🍶 Configurar Molhos
-                            </button>
-
-                        `
-          : "";
-
-        return `
-
-                    <div
-                        style="
-                            margin-bottom:12px;
-                            padding:10px;
-                            border:1px solid #444;
-                            border-radius:8px;
-                        "
-                    >
-
-                        <strong>
-                            ${item.quantidade}
-                            ${item.nome}
-                        </strong>
-
-                        ${htmlTipo}
-
-                        ${htmlAdicionais}
-
-                        ${htmlObservacao}
-
-                        ${htmlCombo}
-
-                        ${htmlMolhos}
-
-                        ${htmlBotaoMolhos}
-
-                        <br><br>
-
-                        <strong>
-                            R$ ${Number(item.subtotal || 0).toFixed(2)}
-                        </strong>
-
-                        <br><br>
-
-
-                        <button
-                            type="button"
-                            onclick="
-                                editarItemPedidoRetirada(
-                                    ${index}
-                                )
-                            "
-                        >
-                            ✏️ Editar
-                        </button>
-
-
-                        <button
-                            type="button"
-                            onclick="
-                                excluirItemPedidoRetirada(
-                                    ${index}
-                                )
-                            "
-                        >
-                            🗑️ Excluir
-                        </button>
-
-                    </div>
-
-                `;
-      })
-      .join("");
-  }
-
-  const subtotalPedido = pedidoRetiradaAtual.itens.reduce((total, item) => {
-    return total + Number(item.subtotal || 0) + Number(item.totalMolhosPagos || 0);
-  }, 0);
-  area.innerHTML = `
-
-        <button
-            type="button"
-            onclick="
-                criarNovoPedidoRetirada()
-            "
-        >
-            ⬅ Voltar
-        </button>
-
-
-        <h3>
-            📦 Novo Pedido de Retirada
-        </h3>
-
-
-        <p>
-            <strong>Cliente:</strong>
-            ${pedidoRetiradaAtual.nome}
-        </p>
-
-
-        ${
-          pedidoRetiradaAtual.telefone
-            ? `
-
-                    <p>
-                        <strong>Telefone:</strong>
-                        ${pedidoRetiradaAtual.telefone}
-                    </p>
-
-                `
-            : ""
-        }
-
-
-        <hr>
-
-
-        <h4>
-            Itens do pedido
-        </h4>
-
-
-        <div
-    id="itens-pedido-retirada"
->
-    ${htmlItens}
-</div>
-
-
-        <button
-            type="button"
-            onclick="
-                abrirProdutosPedidoRetirada()
-            "
-        >
-            ➕ Adicionar Item
-        </button>
-
-
-        <hr>
-
-
-        <p>
-    Subtotal:
-    <strong>
-        R$ ${subtotalPedido.toFixed(2)}
-    </strong>
-</p>
-<hr>
-
-
-<h3>
-    Forma de pagamento
-</h3>
-
-
-<label>
-    <input
-        type="radio"
-        name="pagamento-retirada-atendente"
-        value="Pix"
-        ${pedidoRetiradaAtual.formaPagamento === "Pix" ? "checked" : ""}
-        onchange="
-            pedidoRetiradaAtual.formaPagamento =
-                this.value
-        "
-    >
-    Pix
-</label>
-
-
-<br><br>
-
-
-<label>
-    <input
-        type="radio"
-        name="pagamento-retirada-atendente"
-        value="Dinheiro"
-        ${pedidoRetiradaAtual.formaPagamento === "Dinheiro" ? "checked" : ""}
-        onchange="
-            pedidoRetiradaAtual.formaPagamento =
-                this.value
-        "
-    >
-    Dinheiro
-</label>
-
-
-<br><br>
-
-
-<label>
-    <input
-        type="radio"
-        name="pagamento-retirada-atendente"
-        value="Débito"
-        ${pedidoRetiradaAtual.formaPagamento === "Débito" ? "checked" : ""}
-        onchange="
-            pedidoRetiradaAtual.formaPagamento =
-                this.value
-        "
-    >
-    Débito
-</label>
-
-
-<br><br>
-
-
-<label>
-    <input
-        type="radio"
-        name="pagamento-retirada-atendente"
-        value="Crédito"
-        ${pedidoRetiradaAtual.formaPagamento === "Crédito" ? "checked" : ""}
-        onchange="
-            pedidoRetiradaAtual.formaPagamento =
-                this.value
-        "
-    >
-    Crédito
-</label>
-
-
-<br><br>
-
-
-<button
-    type="button"
-    onclick="
-        salvarPedidoRetiradaAtendente()
-    "
->
-    ✅ Criar Pedido
-</button>
-
-    `;
+  montarPedidoAtendenteUI("retirada");
 }
 async function salvarPedidoRetiradaAtendente() {
   if (!pedidoRetiradaAtual) {
@@ -2365,156 +1938,10 @@ async function salvarPedidoRetiradaAtendente() {
   }
 }
 async function abrirProdutosPedidoRetirada() {
-  const area = document.getElementById("area-retirada-atendente");
-
-  if (!area || !pedidoRetiradaAtual) {
-    return;
-  }
-
-  area.innerHTML = `
-
-        <button
-            type="button"
-            onclick="
-                abrirMontagemPedidoRetirada()
-            "
-        >
-            ⬅ Voltar para Pedido
-        </button>
-
-
-        <h3>
-            ➕ Adicionar Item
-        </h3>
-
-
-        <button
-            type="button"
-            onclick="
-                listarProdutosPedidoRetirada(
-                    'lanches'
-                )
-            "
-        >
-            🍔 Lanches
-        </button>
-
-
-        <button
-            type="button"
-            onclick="
-                listarProdutosPedidoRetirada(
-                    'combos'
-                )
-            "
-        >
-            🎁 Combos
-        </button>
-
-
-        <button
-            type="button"
-            onclick="
-                listarProdutosPedidoRetirada(
-                    'batatas'
-                )
-            "
-        >
-            🍟 Batatas
-        </button>
-
-
-        <button
-            type="button"
-            onclick="
-                listarProdutosPedidoRetirada(
-                    'bebidas'
-                )
-            "
-        >
-            🥤 Bebidas
-        </button>
-
-
-        <hr>
-
-
-        <div
-            id="lista-produtos-pedido-retirada"
-        >
-
-            <p>
-                Escolha uma categoria.
-            </p>
-
-        </div>
-
-    `;
+  return abrirCatalogoPedidoAtendenteUI("retirada");
 }
-async function listarProdutosPedidoRetirada(categoria) {
-  const areaLista = document.getElementById("lista-produtos-pedido-retirada");
-
-  if (!areaLista) {
-    return;
-  }
-
-  areaLista.innerHTML = "<p>Carregando...</p>";
-
-  const snap = await db.collection("produtos").where("categoria", "==", categoria).get();
-
-  if (snap.empty) {
-    areaLista.innerHTML = "<p>Nenhum produto encontrado.</p>";
-
-    return;
-  }
-
-  let html = "";
-
-  snap.forEach((doc) => {
-    const produto = doc.data();
-    if (produto.ativo === false || produto.esgotado) return;
-
-    const preco = Number(produto.preco || 0);
-
-    html += `
-
-            <div
-                style="
-                    margin-bottom:12px;
-                    padding:10px;
-                    border:1px solid #444;
-                    border-radius:8px;
-                "
-            >
-
-                <strong>
-                    ${produto.nome}
-                </strong>
-
-                <br>
-
-                R$ ${preco.toFixed(2)}
-
-                <br><br>
-
-
-                <button
-                    type="button"
-                    onclick="
-                        abrirProdutoPedidoRetirada(
-                            '${doc.id}'
-                        )
-                    "
-                >
-                    Adicionar
-                </button>
-
-            </div>
-
-        `;
-  });
-
-  areaLista.innerHTML = html;
+async function listarProdutosPedidoRetirada() {
+  return abrirProdutosPedidoRetirada();
 }
 async function abrirProdutoPedidoRetirada(produtoId) {
   contextoPainelProduto = "retirada";
@@ -2663,473 +2090,7 @@ function continuarNovoPedidoEntrega() {
   abrirMontagemPedidoEntrega();
 }
 function abrirMontagemPedidoEntrega() {
-  const area = document.getElementById("area-entrega-atendente");
-
-  if (!area || !pedidoEntregaAtual) {
-    return;
-  }
-  let htmlItens = "<p>Nenhum item adicionado.</p>";
-
-  if (pedidoEntregaAtual.itens.length > 0) {
-    htmlItens = pedidoEntregaAtual.itens
-      .map((item, index) => {
-        // =========================
-        // TIPO
-        // =========================
-
-        const htmlTipo = item.tipo
-          ? `
-                        <br>
-                        Tipo: ${item.tipo}
-                    `
-          : "";
-
-        // =========================
-        // ADICIONAIS PRODUTO NORMAL
-        // =========================
-
-        let htmlAdicionais = "";
-
-        if (item.adicionais && item.adicionais.length > 0) {
-          htmlAdicionais = `
-
-                    <br>
-
-                    <small>
-                        ➕ ${item.adicionais
-                          .map((adicional) => {
-                            return `${adicional.qtd} ${adicional.nome}`;
-                          })
-                          .join(" + ")}
-                    </small>
-
-                `;
-        }
-
-        // =========================
-        // OBSERVAÇÃO PRODUTO NORMAL
-        // =========================
-
-        const htmlObservacao = item.observacao
-          ? `
-
-                        <br>
-
-                        <small>
-                            📝 ${item.observacao}
-                        </small>
-
-                    `
-          : "";
-
-        // =========================
-        // RESUMO DOS MOLHOS
-        // =========================
-
-        let htmlMolhos = "";
-
-        if (item.molhosGratis && item.molhosGratis.length > 0) {
-          const configurados = item.molhosGratis.filter((molho) => molho.tipo !== "semmolho");
-
-          if (configurados.length > 0) {
-            htmlMolhos += `
-
-            <br>
-
-            <small>
-                🍶 Molhos:
-                <br>
-
-                ${configurados
-                  .map((molho) => {
-                    return `#${molho.unidade}: ${molho.texto}`;
-                  })
-                  .join("<br>")}
-
-            </small>
-
-        `;
-          }
-        }
-
-        if (item.molhosPagos && item.molhosPagos.length > 0) {
-          htmlMolhos += `
-
-        <br>
-
-        <small>
-            💰 Molhos extras:
-            ${item.molhosPagos
-              .map((molho) => {
-                return `${molho.qtd} ${molho.nome}`;
-              })
-              .join(" + ")}
-        </small>
-
-    `;
-        }
-        // =========================
-        // BOTÃO DE MOLHOS
-        // =========================
-
-        const podeTerMolhos =
-          item.categoria === "lanches" ||
-          item.categoria === "combos" ||
-          item.categoria === "batatas";
-
-        const htmlBotaoMolhos = podeTerMolhos
-          ? `
-
-            <br><br>
-
-            <button
-                type="button"
-                onclick="
-                    abrirMolhosPedidoEntrega(
-                        ${index}
-                    )
-                "
-            >
-                🍶 Configurar Molhos
-            </button>
-
-        `
-          : "";
-
-        // =========================
-        // PERSONALIZAÇÃO DO COMBO
-        // =========================
-
-        let htmlCombo = "";
-
-        if (item.categoria === "combos" && item.lanchesCombo && item.lanchesCombo.length > 0) {
-          const lanchesPersonalizados = item.lanchesCombo.filter((lanche) => {
-            return (lanche.adicionais || []).length > 0 || (lanche.observacao || "").trim() !== "";
-          });
-
-          if (lanchesPersonalizados.length > 0) {
-            htmlCombo = `
-
-                        <div
-                            style="
-                                margin-top:8px;
-                                margin-left:10px;
-                            "
-                        >
-
-                            ${lanchesPersonalizados
-                              .map((lanche) => {
-                                const adicionais = (lanche.adicionais || [])
-                                  .map((adicional) => {
-                                    return `${adicional.qtd} ${adicional.nome}`;
-                                  })
-                                  .join(" + ");
-
-                                return `
-
-                                        <div
-                                            style="
-                                                margin-bottom:5px;
-                                            "
-                                        >
-
-                                            <strong>
-                                                Lanche ${lanche.numero}
-                                            </strong>
-
-                                            ${
-                                              adicionais
-                                                ? `
-                                                        <br>
-                                                        <small>
-                                                            ➕ ${adicionais}
-                                                        </small>
-                                                    `
-                                                : ""
-                                            }
-
-                                            ${
-                                              lanche.observacao
-                                                ? `
-                                                        <br>
-                                                        <small>
-                                                            📝 ${lanche.observacao}
-                                                        </small>
-                                                    `
-                                                : ""
-                                            }
-
-                                        </div>
-
-                                    `;
-                              })
-                              .join("")}
-
-                        </div>
-
-                    `;
-          }
-        }
-
-        return `
-
-                <div
-                    style="
-                        margin-bottom:12px;
-                        padding:10px;
-                        border:1px solid #444;
-                        border-radius:8px;
-                    "
-                >
-
-                    <strong>
-                        ${item.quantidade}
-                        ${item.nome}
-                    </strong>
-
-                    ${htmlTipo}
-
-                    ${htmlAdicionais}
-
-                ${htmlObservacao}
-
-${htmlCombo}
-
-${htmlMolhos}
-
-${htmlBotaoMolhos}
-
-<br><br>
-
-<strong>
-    R$ ${Number(item.subtotal || 0).toFixed(2)}
-</strong>
-<br><br>
-
-
-<button
-    type="button"
-    onclick="
-        editarItemPedidoEntrega(
-            ${index}
-        )
-    "
->
-    ✏️ Editar
-</button>
-
-
-<button
-    type="button"
-    onclick="
-        excluirItemPedidoEntrega(
-            ${index}
-        )
-    "
->
-    🗑️ Excluir
-</button>
-
-                </div>
-
-            `;
-      })
-      .join("");
-  }
-  const subtotalPedido = pedidoEntregaAtual.itens.reduce((total, item) => {
-    return total + Number(item.subtotal || 0) + Number(item.totalMolhosPagos || 0);
-  }, 0);
-
-  area.innerHTML = `
-
-        <button
-            type="button"
-            onclick="
-                criarNovoPedidoEntrega()
-            "
-        >
-            ⬅ Voltar
-        </button>
-
-
-        <h3>
-            🛵 Novo Pedido de Entrega
-        </h3>
-
-
-        <p>
-            <strong>Cliente:</strong>
-            ${pedidoEntregaAtual.nome}
-        </p>
-
-
-        ${
-          pedidoEntregaAtual.telefone
-            ? `
-
-                    <p>
-                        <strong>Telefone:</strong>
-                        ${pedidoEntregaAtual.telefone}
-                    </p>
-
-                `
-            : ""
-        }
-
-
-        <p>
-            <strong>Endereço:</strong>
-            ${pedidoEntregaAtual.endereco}
-        </p>
-
-
-        <hr>
-
-
-        <h4>
-            Itens do pedido
-        </h4>
-
-
-       <div
-    id="itens-pedido-entrega"
->
-    ${htmlItens}
-</div>
-
-
-        <button
-            type="button"
-            onclick="
-                abrirProdutosPedidoEntrega()
-            "
-        >
-            ➕ Adicionar Item
-        </button>
-
-
-        <hr>
-
-
-        <p>
-            Subtotal:
-            <strong
-                id="subtotal-pedido-entrega"
-            >
-                R$ ${subtotalPedido.toFixed(2)}
-            </strong>
-        </p>
-        <hr>
-
-
-<h3>
-    Taxa de entrega
-</h3>
-
-
-<label>
-    R$
-</label>
-
-<input
-    type="number"
-    id="taxa-pedido-entrega"
-    min="0"
-    step="0.01"
-    value="${Number(pedidoEntregaAtual.taxaEntrega || 0).toFixed(2)}"
-    oninput="
-        atualizarTotalPedidoEntrega()
-    "
->
-
-
-<br><br>
-
-
-<p>
-    Total:
-    <strong
-        id="total-pedido-entrega"
-    >
-        R$ ${(subtotalPedido + Number(pedidoEntregaAtual.taxaEntrega || 0)).toFixed(2)}
-    </strong>
-</p>
-
-
-<hr>
-
-
-<h3>
-    Forma de pagamento
-</h3>
-
-
-<label>
-    <input
-        type="radio"
-        name="pagamento-entrega-atendente"
-        value="Pix"
-        ${pedidoEntregaAtual.formaPagamento === "Pix" ? "checked" : ""}
-    >
-    Pix
-</label>
-
-
-<br><br>
-
-
-<label>
-    <input
-        type="radio"
-        name="pagamento-entrega-atendente"
-        value="Dinheiro"
-        ${pedidoEntregaAtual.formaPagamento === "Dinheiro" ? "checked" : ""}
-    >
-    Dinheiro
-</label>
-
-
-<br><br>
-
-
-<label>
-    <input
-        type="radio"
-        name="pagamento-entrega-atendente"
-        value="Débito"
-        ${pedidoEntregaAtual.formaPagamento === "Débito" ? "checked" : ""}
-    >
-    Débito
-</label>
-
-
-<br><br>
-
-
-<label>
-    <input
-        type="radio"
-        name="pagamento-entrega-atendente"
-        value="Crédito"
-        ${pedidoEntregaAtual.formaPagamento === "Crédito" ? "checked" : ""}
-    >
-    Crédito
-</label>
-
-
-<br><br>
-
-
-<button
-    type="button"
-    onclick="
-        salvarPedidoEntregaAtendente()
-    "
->
-    ✅ Criar Pedido
-</button>
-
-    `;
+  montarPedidoAtendenteUI("entrega");
 }
 function atualizarTotalPedidoEntrega() {
   if (!pedidoEntregaAtual) {
@@ -3374,6 +2335,12 @@ async function editarItemPedidoEntrega(index) {
 
   await abrirPainelProduto(null, item.produtoId);
 
+  if (item.categoria === "combos") {
+    const tipoSalvo = String(item.tipo || item.tipoCarne || "").toLowerCase();
+    const radio = document.querySelector(`input[name="tipo-produto"][value="${tipoSalvo}"]`);
+    if (radio) radio.checked = true;
+  }
+
   // =========================
   // QUANTIDADE
   // =========================
@@ -3443,7 +2410,7 @@ async function editarItemPedidoEntrega(index) {
       observacao: primeiroLanche?.observacao || "",
     };
 
-    selecionarModoCombo("todos");
+    modoPersonalizacaoCombo = "todos";
 
     atualizarResumoTodosCombo();
   } else if (item.modoPersonalizacaoCombo === "individual") {
@@ -3457,7 +2424,7 @@ async function editarItemPedidoEntrega(index) {
       }
     });
 
-    selecionarModoCombo("individual");
+    modoPersonalizacaoCombo = "individual";
 
     atualizarTodosStatusLanchesCombo();
   }
@@ -3490,6 +2457,12 @@ async function editarItemPedidoRetirada(index) {
   // =========================
 
   await abrirPainelProduto(null, item.produtoId);
+
+  if (item.categoria === "combos") {
+    const tipoSalvo = String(item.tipo || item.tipoCarne || "").toLowerCase();
+    const radio = document.querySelector(`input[name="tipo-produto"][value="${tipoSalvo}"]`);
+    if (radio) radio.checked = true;
+  }
 
   // =========================
   // QUANTIDADE
@@ -3568,7 +2541,7 @@ async function editarItemPedidoRetirada(index) {
       observacao: primeiroLanche?.observacao || "",
     };
 
-    selecionarModoCombo("todos");
+    modoPersonalizacaoCombo = "todos";
 
     atualizarResumoTodosCombo();
   }
@@ -3587,7 +2560,7 @@ async function editarItemPedidoRetirada(index) {
       }
     });
 
-    selecionarModoCombo("individual");
+    modoPersonalizacaoCombo = "individual";
 
     atualizarTodosStatusLanchesCombo();
   }
@@ -3606,421 +2579,11 @@ function abrirMolhosPedidoEntrega(index) {
 }
 
 function abrirMolhosPedido(index) {
-  const pedidoAtual = contextoMolhosPedido === "entrega" ? pedidoEntregaAtual : pedidoRetiradaAtual;
-
-  if (!pedidoAtual || !pedidoAtual.itens[index]) {
-    return;
-  }
-
-  const item = pedidoAtual.itens[index];
-
-  const area = document.getElementById(
-    contextoMolhosPedido === "entrega" ? "area-entrega-atendente" : "area-retirada-atendente",
-  );
-
-  if (!area) return;
-
-  // =========================
-  // QUANTIDADE DE DIREITOS
-  // =========================
-
-  let qtdDireitos = Number(item.quantidade || 1);
-
-  // Combo:
-  // cada lanche do combo
-  // possui sua configuração.
-
-  if (item.categoria === "combos") {
-    qtdDireitos = Number(item.comboQtdLanches || 1) * Number(item.quantidade || 1);
-  }
-
-  // =========================
-  // MONTAR LANCHES / UNIDADES
-  // =========================
-
-  let blocos = "";
-
-  for (let i = 1; i <= qtdDireitos; i++) {
-    const molhoSalvo = (item.molhosGratis || []).find((molho) => Number(molho.unidade) === i);
-
-    const tipoSalvo = molhoSalvo?.tipo || "semmolho";
-
-    blocos += `
-
-            <div
-                style="
-                    margin-bottom:15px;
-                    padding:10px;
-                    border:1px solid #444;
-                    border-radius:8px;
-                "
-            >
-
-                <strong>
-
-                    ${item.categoria === "combos" ? `Lanche ${i}` : `${item.nome} #${i}`}
-
-                </strong>
-
-
-                <br><br>
-
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="tipo-molho-entrega-${i}"
-                        value="semmolho"
-
-                        ${tipoSalvo === "semmolho" ? "checked" : ""}
-
-                      onchange="
-    renderizarOpcoesMolhoPedido(
-        ${index},
-        ${i}
-    )
-"
-                    >
-
-                    Sem molho
-
-                </label>
-
-
-                <br><br>
-
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="tipo-molho-entrega-${i}"
-                        value="umdecada"
-
-                        ${tipoSalvo === "umdecada" ? "checked" : ""}
-
-                      onchange="
-    renderizarOpcoesMolhoPedido(
-        ${index},
-        ${i}
-    )
-"
-                    >
-
-                    1 de cada escolhido
-
-                </label>
-
-
-                <br><br>
-
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="tipo-molho-entrega-${i}"
-                        value="doisiguais"
-
-                        ${tipoSalvo === "doisiguais" ? "checked" : ""}
-
-                     onchange="
-    renderizarOpcoesMolhoPedido(
-        ${index},
-        ${i}
-    )
-"
-                    >
-
-                    2 iguais
-
-                </label>
-
-
-                <div
-                    id="opcoes-molho-entrega-${i}"
-                    style="
-                        margin-top:10px;
-                    "
-                ></div>
-
-            </div>
-
-        `;
-  }
-
-  area.innerHTML = `
-
-       <button
-    type="button"
-    onclick="
-        ${
-          contextoMolhosPedido === "entrega"
-            ? "abrirMontagemPedidoEntrega()"
-            : "abrirMontagemPedidoRetirada()"
-        }
-    "
->
-    ⬅ Voltar
-</button>
-
-
-        <h3>
-            🍶 Molhos
-        </h3>
-
-
-        <p>
-            <strong>
-                ${item.nome}
-            </strong>
-        </p>
-
-
-        ${blocos}
-
-
-        <hr>
-
-
-        <h3>
-            💰 Molhos extras
-        </h3>
-
-
-        <button
-            type="button"
-            onclick="
-                alternarMolhosPagosEntrega()
-            "
-        >
-            ➕ Adicionar molhos pagos
-        </button>
-
-
-        <div
-            id="area-molhos-pagos-entrega"
-            style="
-                display:none;
-                margin-top:15px;
-            "
-        >
-
-            <p>
-                R$ 2,00 cada unidade
-            </p>
-
-            ${montarMolhosPagosEntrega(item.molhosPagos || [])}
-
-        </div>
-
-
-        <br>
-
-
-        <strong
-            id="total-molhos-pagos-entrega"
-        >
-            Extras:
-            R$ ${Number(item.totalMolhosPagos || 0).toFixed(2)}
-        </strong>
-
-
-        <br><br>
-
-
-        <button
-            type="button"
-         onclick="
-    salvarMolhosPedido(
-        ${index},
-        ${qtdDireitos}
-    )
-"
-        >
-            💾 Salvar Molhos
-        </button>
-
-    `;
-
-  // Mostrar as opções corretas
-  // que já estavam salvas.
-
-  for (let i = 1; i <= qtdDireitos; i++) {
-    renderizarOpcoesMolhoPedido(index, i);
-  }
+  return abrirMolhosPedidoUI(index);
 }
 function renderizarOpcoesMolhoPedido(index, unidade) {
-  const pedidoAtual = contextoMolhosPedido === "entrega" ? pedidoEntregaAtual : pedidoRetiradaAtual;
-
-  const item = pedidoAtual?.itens[index];
-
-  if (!item) return;
-
-  const salvo = (item.molhosGratis || []).find((molho) => Number(molho.unidade) === unidade);
-
-  const tipo = document.querySelector(`input[name="tipo-molho-entrega-${unidade}"]:checked`)?.value;
-
-  const area = document.getElementById(`opcoes-molho-entrega-${unidade}`);
-
-  if (!area) return;
-
-  // =========================
-  // SEM MOLHO
-  // =========================
-
-  if (tipo === "semmolho") {
-    area.innerHTML = "<small>Sem molho nesta unidade.</small>";
-
-    return;
-  }
-
-  // =========================
-  // 1 DE CADA
-  // =========================
-
-  if (tipo === "umdecada") {
-    const salvos = salvo?.molhos || [];
-
-    area.innerHTML = `
-
-            <p>
-                Escolha os molhos:
-            </p>
-
-
-            <label>
-                <input
-                    type="checkbox"
-                    class="molho-um-entrega-${unidade}"
-                    value="Maionese"
-                    ${salvos.includes("Maionese") ? "checked" : ""}
-                >
-                Maionese
-            </label>
-
-            <br>
-
-
-            <label>
-                <input
-                    type="checkbox"
-                    class="molho-um-entrega-${unidade}"
-                    value="Ketchup"
-                    ${salvos.includes("Ketchup") ? "checked" : ""}
-
-                >
-                Ketchup
-            </label>
-
-            <br>
-
-
-            <label>
-                <input
-                    type="checkbox"
-                    class="molho-um-entrega-${unidade}"
-                    value="Mostarda"
-                    ${salvos.includes("Mostarda") ? "checked" : ""}
-
-                >
-                Mostarda
-            </label>
-
-            <br>
-
-
-            <label>
-                <input
-                    type="checkbox"
-                    class="molho-um-entrega-${unidade}"
-                    value="Barbecue"
-                    ${salvos.includes("Barbecue") ? "checked" : ""}
-
-                >
-                Barbecue
-            </label>
-
-        `;
-
-    return;
-  }
-
-  // =========================
-  // 2 IGUAIS
-  // =========================
-
-  if (tipo === "doisiguais") {
-    const molho = salvo?.molho || "Maionese";
-
-    area.innerHTML = `
-
-            <label>
-
-                <input
-                    type="radio"
-                    name="molho-dois-entrega-${unidade}"
-                    value="Maionese"
-                    ${molho === "Maionese" ? "checked" : ""}
-                >
-
-                2 Maionese
-
-            </label>
-
-            <br>
-
-
-            <label>
-
-                <input
-                    type="radio"
-                    name="molho-dois-entrega-${unidade}"
-                    value="Ketchup"
-                    ${molho === "Ketchup" ? "checked" : ""}
-                >
-
-                2 Ketchup
-
-            </label>
-
-            <br>
-
-
-            <label>
-
-                <input
-                    type="radio"
-                    name="molho-dois-entrega-${unidade}"
-                    value="Mostarda"
-                    ${molho === "Mostarda" ? "checked" : ""}
-                >
-
-                2 Mostarda
-
-            </label>
-
-            <br>
-
-
-            <label>
-
-                <input
-                    type="radio"
-                    name="molho-dois-entrega-${unidade}"
-                    value="Barbecue"
-                    ${molho === "Barbecue" ? "checked" : ""}
-                >
-
-                2 Barbecue
-
-            </label>
-
-        `;
-  }
+  return renderizarMolhoPedidoUI(index, unidade);
 }
-
 function montarMolhosGratisEntrega(selecionados = {}) {
   const molhos = ["Maionese", "Ketchup", "Mostarda", "Barbecue"];
 
@@ -4080,62 +2643,7 @@ function montarMolhosGratisEntrega(selecionados = {}) {
     .join("");
 }
 function montarMolhosPagosEntrega(selecionados = []) {
-  const molhos = ["Maionese", "Ketchup", "Mostarda", "Barbecue"];
-
-  return molhos
-    .map((molho) => {
-      const salvo = selecionados.find((item) => item.nome === molho);
-
-      const qtd = Number(salvo?.qtd || 0);
-
-      return `
-
-                <div
-                    style="
-                        margin-bottom:10px;
-                    "
-                >
-
-                    ${molho}
-
-                    <button
-                        type="button"
-                        onclick="
-                            alterarMolhoPagoEntrega(
-                                '${molho}',
-                                -1
-                            )
-                        "
-                    >
-                        −
-                    </button>
-
-                    <span
-                        id="molho-pago-${molho}"
-                        style="
-                            margin:0 10px;
-                        "
-                    >
-                        ${qtd}
-                    </span>
-
-                    <button
-                        type="button"
-                        onclick="
-                            alterarMolhoPagoEntrega(
-                                '${molho}',
-                                1
-                            )
-                        "
-                    >
-                        +
-                    </button>
-
-                </div>
-
-            `;
-    })
-    .join("");
+  return molhosPagosPedidoHtmlUI(selecionados);
 }
 function alternarMolhosPagosEntrega() {
   const area = document.getElementById("area-molhos-pagos-entrega");
@@ -4306,164 +2814,10 @@ function salvarMolhosPedido(index, qtdDireitos) {
 }
 
 async function abrirProdutosPedidoEntrega() {
-  const area = document.getElementById("area-entrega-atendente");
-
-  if (!area || !pedidoEntregaAtual) {
-    return;
-  }
-
-  area.innerHTML = `
-
-        <button
-            type="button"
-            onclick="
-                abrirMontagemPedidoEntrega()
-            "
-        >
-            ⬅ Voltar para Pedido
-        </button>
-
-
-        <h3>
-            ➕ Adicionar Item
-        </h3>
-
-
-        <button
-            type="button"
-            onclick="
-                listarProdutosPedidoEntrega(
-                    'lanches'
-                )
-            "
-        >
-            🍔 Lanches
-        </button>
-
-
-        <button
-            type="button"
-            onclick="
-                listarProdutosPedidoEntrega(
-                    'combos'
-                )
-            "
-        >
-            🎁 Combos
-        </button>
-
-
-        <button
-            type="button"
-            onclick="
-                listarProdutosPedidoEntrega(
-                    'batatas'
-                )
-            "
-        >
-            🍟 Batatas
-        </button>
-
-
-        <button
-            type="button"
-            onclick="
-                listarProdutosPedidoEntrega(
-                    'bebidas'
-                )
-            "
-        >
-            🥤 Bebidas
-        </button>
-
-
-        <hr>
-
-
-        <div
-            id="lista-produtos-pedido-entrega"
-        >
-
-            <p>
-                Escolha uma categoria.
-            </p>
-
-        </div>
-
-    `;
+  return abrirCatalogoPedidoAtendenteUI("entrega");
 }
-async function listarProdutosPedidoEntrega(categoria) {
-  const areaLista = document.getElementById("lista-produtos-pedido-entrega");
-
-  if (!areaLista) {
-    return;
-  }
-
-  areaLista.innerHTML = "<p>Carregando...</p>";
-
-  // =========================
-  // BUSCAR PRODUTOS
-  // =========================
-
-  const snap = await db.collection("produtos").where("categoria", "==", categoria).get();
-
-  if (snap.empty) {
-    areaLista.innerHTML = "<p>Nenhum produto encontrado.</p>";
-
-    return;
-  }
-
-  // =========================
-  // MONTAR LISTA
-  // =========================
-
-  let html = "";
-
-  snap.forEach((doc) => {
-    const produto = doc.data();
-    if (produto.ativo === false || produto.esgotado) return;
-
-    const preco = Number(produto.preco || 0);
-
-    html += `
-
-            <div
-                style="
-                    margin-bottom:12px;
-                    padding:10px;
-                    border:1px solid #444;
-                    border-radius:8px;
-                "
-            >
-
-                <strong>
-                    ${produto.nome}
-                </strong>
-
-                <br>
-
-                R$ ${preco.toFixed(2)}
-
-                <br><br>
-
-
-                <button
-                    type="button"
-                    onclick="
-                        abrirProdutoPedidoEntrega(
-                            '${doc.id}'
-                        )
-                    "
-                >
-                    Adicionar
-                </button>
-
-            </div>
-
-        `;
-  });
-
-  areaLista.innerHTML = html;
+async function listarProdutosPedidoEntrega() {
+  return abrirProdutosPedidoEntrega();
 }
 async function abrirProdutoPedidoEntrega(produtoId) {
   contextoPainelProduto = "entrega";
@@ -4692,6 +3046,10 @@ function adicionarComboConfiguradoEntrega(produtoId, produto, quantidade, observ
 }
 
 function adicionarComboConfiguradoPedido(produtoId, produto, quantidade, observacao, contexto) {
+  produto = aplicarTipoComboOperacao(
+    produto,
+    document.querySelector('input[name="tipo-produto"]:checked')?.value,
+  );
   const pedidoAtual = contexto === "entrega" ? pedidoEntregaAtual : pedidoRetiradaAtual;
 
   if (!pedidoAtual) {
@@ -4802,6 +3160,7 @@ function adicionarComboConfiguradoPedido(produtoId, produto, quantidade, observa
     nome: produto.nome,
 
     categoria: produto.categoria || "combos",
+    tipo: produto.tipoCarne || "",
 
     quantidade,
 
@@ -4889,6 +3248,7 @@ function adicionarComboConfiguradoPedido(produtoId, produto, quantidade, observa
       (item) =>
         item.produtoId === produtoId &&
         item.categoria === "combos" &&
+        (item.tipo || "") === (novoItem.tipo || "") &&
         !item.comboPersonalizado &&
         (item.observacao || "") === observacao &&
         (item.molhosGratis || []).length === 0 &&
@@ -5173,7 +3533,7 @@ function renderizarChamadosMesaAtendente() {
 
     html += `
 
-                <div
+                <div class="chamado-mesa-card-ui"
                     style="
                         margin-bottom:15px;
                         padding:12px;
@@ -5688,13 +4048,13 @@ async function abrirMesaAtendente(mesaId) {
   });
 
   areaMesa.innerHTML = `
-
+        <div class="mesa-detalhe-conteudo">
         <h3>
             Mesa ${mesa.numero}
         </h3>
 
         <div class="mesa-comandas-grade">${htmlComandas}</div>
-
+        <div class="mesa-gestao-acoes">
         <button
             onclick="
                 novaComandaMesa(
@@ -5702,7 +4062,7 @@ async function abrirMesaAtendente(mesaId) {
                 )
             "
         >
-            ➕ Nova Comanda
+            Nova comanda
         </button>
 
         <button
@@ -5713,9 +4073,10 @@ async function abrirMesaAtendente(mesaId) {
         )
     "
 >
-    🔗 Vincular Pedido Existente
+    Vincular comanda
 </button>
-
+        </div>
+        </div>
     `;
 }
 async function abrirPedidosParaVincularNaMesa(mesaId) {
@@ -6618,7 +4979,7 @@ async function editarItemComanda(comandaId, index) {
   // PRODUTO NORMAL
   // =========================
 
-  editarProdutoNormalComanda(comandaId, index, item);
+  await editarProdutoNormalComanda(comandaId, index, item);
 }
 async function editarProdutoNormalComanda(comandaId, index, item) {
   if (!item.produtoId) {
@@ -6691,9 +5052,6 @@ async function editarProdutoNormalComanda(comandaId, index, item) {
   // ADICIONAIS
   // =========================
 
-  if (item.adicionais && item.adicionais.length > 0) {
-    mostrarAcrescimosProduto(true);
-  }
   (item.adicionais || []).forEach((adicional) => {
     const quantidade = document.getElementById(`qtd-adicional-${adicional.id}`);
 
@@ -6765,6 +5123,12 @@ async function editarComboComanda(comandaId, index, item) {
 
   await abrirPainelProduto(comandaId, item.produtoId);
 
+  if (item.categoria === "combos") {
+    const tipoSalvo = String(item.tipo || item.tipoCarne || "").toLowerCase();
+    const radio = document.querySelector(`input[name="tipo-produto"][value="${tipoSalvo}"]`);
+    if (radio) radio.checked = true;
+  }
+
   // =========================
   // QUANTIDADE
   // =========================
@@ -6833,7 +5197,7 @@ async function editarComboComanda(comandaId, index, item) {
     // Faz a interface mostrar
     // o modo Personalizado
 
-    selecionarModoCombo("individual");
+    modoPersonalizacaoCombo = "individual";
 
     atualizarTodosStatusLanchesCombo();
   }
@@ -6860,7 +5224,7 @@ async function editarComboComanda(comandaId, index, item) {
       };
     }
 
-    selecionarModoCombo("todos");
+    modoPersonalizacaoCombo = "todos";
 
     atualizarResumoTodosCombo();
   }

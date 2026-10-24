@@ -46,7 +46,7 @@ function ref(path) {
 function query(path, filters = [], lim = Infinity, after = null, ordered = false) {
   return {
     doc: (id) => ref(path + "/" + (id || "c" + ++seq)),
-    where: (k, op, v) => query(path, [...filters, [k, v]], lim, after, ordered),
+    where: (k, op, v) => query(path, [...filters, [k, v, op]], lim, after, ordered),
     orderBy: () => query(path, filters, lim, after, true),
     limit: (n) => query(path, filters, n, after, ordered),
     startAfter: (d) => query(path, filters, lim, d.id, ordered),
@@ -55,7 +55,7 @@ function query(path, filters = [], lim = Infinity, after = null, ordered = false
         ([p, d]) =>
           p.startsWith(path + "/") &&
           !p.slice(path.length + 1).includes("/") &&
-          filters.every(([k, v]) => d[k] === v),
+          filters.every(([k, v, op]) => (op === "in" ? v.includes(d[k]) : d[k] === v)),
       );
       if (ordered) entries.sort((a, b) => (b[1].criadoEm || 0) - (a[1].criadoEm || 0));
       if (after)
@@ -162,6 +162,24 @@ function form(canal, publico, finalidade = "aviso") {
   await ctx.publicarCampanhaAdmin();
   assert.equal(docs.get("campanhas/" + id).status, "publicada");
   assert.equal([...docs.keys()].filter((p) => p.endsWith("/mensagens/" + id)).length, 401);
+  docs.set("clientes/imortal", { nome: "Imortal", nivelCliente: "Imortal", fidelidadeAtiva: true });
+  docs.set("clientes/lenda-legado", {
+    nome: "Legado",
+    nivelCliente: "Lenda",
+    fidelidadeAtiva: true,
+  });
+  docs.set("clientes/lenda-inativo", {
+    nome: "Inativo",
+    nivelCliente: "Lenda",
+    fidelidadeAtiva: false,
+  });
+  form("admin", "rank");
+  el("campanha-rank").value = "Imortal";
+  await ctx.prepararCampanhaAdmin();
+  assert.deepEqual([...ctx.window.previaCampanhaPedrao.clientes].sort(), [
+    "imortal",
+    "lenda-legado",
+  ]);
   console.log(
     "PASS: campanhas ADM/Geral, pessoa/CDA/nível/todos, cupom existente intacto, validação, histórico e retomada após falha sem duplicação.",
   );

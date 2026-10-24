@@ -14,9 +14,9 @@
   position: relative !important;
   bottom: auto !important;
   width: min(600px, 100%);
-  padding: 60px 16px 16px !important;
+  padding: 72px 16px 16px !important;
   gap: 12px;
-  max-height: calc(100dvh - 100px) !important;
+  max-height: min(70dvh, calc(100dvh - 100px)) !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column;
@@ -29,9 +29,7 @@
   bottom: auto;
   left: auto;
   width: 100%;
-  /* Fallback antes do limite em dvh para navegadores antigos. */
   max-height: none !important;
-  overflow: visible;
   z-index: auto;
   padding: 0;
   margin: 0;
@@ -39,7 +37,9 @@
   overflow-y: auto !important;
   flex: 1 1 auto;
   min-height: 0;
-  max-height: calc(100dvh - 260px) !important;
+}
+#modal-carrinho #lista-carrinho > .item-carrinho {
+  flex: 0 0 auto;
 }
 #modal-carrinho .acoes-carrinho {
   /* Limpar/Finalizar ficam fora da região rolável dos itens. */
@@ -51,11 +51,18 @@
   padding-top: 8px;
 }
 #modal-carrinho .topo-carrinho {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   margin: 0 !important;
   padding: 12px !important;
-  min-height: 0 !important;
+  min-height: 50px !important;
 }
 #modal-carrinho .topo-carrinho h3 {
   margin: 0 !important;
   font-size: 18px;
+  line-height: 1.35;
+}
+#modal-carrinho .topo-carrinho > strong {
+  white-space: nowrap;
 }

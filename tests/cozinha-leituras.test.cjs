@@ -21,16 +21,16 @@ const campos = Object.fromEntries(
   ]),
 );
 const eventos = {};
-function observar(chave, cb) {
-  const l = { chave, cb, ativo: true };
+function observar(chave, cb, erro) {
+  const l = { chave, cb, erro, ativo: true };
   listeners.push(l);
   return () => (l.ativo = false);
 }
 function consulta(c, f = "") {
   return {
     where: (k, op, v) => consulta(c, `/${k}${op}${v}`),
-    onSnapshot: (cb) => observar(c + f, cb),
-    doc: (id) => ({ onSnapshot: (cb) => observar(c + "/" + id, cb) }),
+    onSnapshot: (cb, erro) => observar(c + f, cb, erro),
+    doc: (id) => ({ onSnapshot: (cb, erro) => observar(c + "/" + id, cb, erro) }),
     get() {
       assert.fail("A cozinha não deve carregar coleções inteiras");
     },
@@ -42,6 +42,7 @@ const ctx = vm.createContext({
   URLSearchParams,
   location: { search: "" },
   db: { collection: consulta },
+  htmlCarregandoUI: (texto) => `<div class="ui-carregando">${texto}</div>`,
   sessionStorage: { getItem: () => "funcionario" },
   setTimeout: (fn, ms) => {
     timers.set(++timerId, { fn, ms });
@@ -64,6 +65,8 @@ ctx.iniciarCozinhaOperacao();
 ctx.iniciarCozinhaOperacao();
 assert.equal(listeners.length, 2);
 assert.match(filaAtiva().chave, /criadoEmMs>=/);
+assert.match(campos["fila-cozinha"].innerHTML, /ui-carregando/);
+assert.doesNotMatch(campos["fila-cozinha"].innerHTML, /Tudo em dia/);
 const fila = [
   {
     id: "a",
@@ -89,9 +92,11 @@ const fila = [
 const emitir = (itens) => filaAtiva().cb({ docs: itens.map((r) => registro(r.id, r)) });
 emitir([...fila, { ...fila[0], id: "velho", origemId: "ontem", criadoEmMs: agora - 86400000 }]);
 assert.equal(listeners.length, 4, "Somente origens da jornada atual");
+assert.match(campos["fila-cozinha"].innerHTML, /ui-carregando/, "Espera conferir a origem");
 ativo("comandas/c1").cb(registro("c1", { status: "Aberta" }));
 ativo("pedidos/p1").cb(registro("p1", { tipo: "Retirada" }));
 assert.match(campos["quantidade-cozinha"].textContent, /^2 /);
+assert.doesNotMatch(campos["fila-cozinha"].innerHTML, /ui-carregando/);
 emitir(fila);
 assert.equal(listeners.length, 4, "Reutiliza origens");
 ativo("comandas/c1").cb(registro("c1", { status: "Fechada", valorPago: 25 }));
@@ -112,11 +117,13 @@ assert.ok(virada.ms <= 1100);
 agora += 2000;
 virada.fn();
 assert.equal(anterior.ativo, false);
-assert.match(campos["quantidade-cozinha"].textContent, /^0 /);
+assert.match(campos["fila-cozinha"].innerHTML, /ui-carregando/, "Reconecta na virada do dia");
 assert.ok(!campos["concluidos-cozinha"].innerHTML.includes("Ana"));
 assert.equal(listeners.filter((l) => l.ativo).length, 2);
 emitir(fila);
 assert.match(campos["quantidade-cozinha"].textContent, /^0 /, "Não ressuscita a jornada anterior");
+assert.doesNotMatch(campos["fila-cozinha"].innerHTML, /ui-carregando/);
+assert.match(campos["fila-cozinha"].innerHTML, /Tudo em dia/);
 const antesReset = filaAtiva();
 ativo("config/producaoTela").cb(registro("producaoTela", { limpaAntes: agora }));
 assert.equal(antesReset.ativo, false);
@@ -127,6 +134,11 @@ assert.match(campos["quantidade-cozinha"].textContent, /^1 /);
 for (const cb of eventos.pagehide) cb();
 assert.equal(listeners.filter((l) => l.ativo).length, 0);
 assert.equal(timers.size, 0);
+ctx.iniciarCozinhaOperacao();
+filaAtiva().erro(new Error("Sem conexão"));
+assert.match(campos["fila-cozinha"].textContent, /Não foi possível conectar/);
+assert.match(campos["quantidade-cozinha"].textContent, /Falha ao conectar/);
+for (const cb of eventos.pagehide) cb();
 console.log(
   "PASS: fila do dia, origens reutilizadas, pagamento preservado, concluídos sem consulta histórica, virada às 2h, reset compartilhado e encerramento de assinaturas.",
 );

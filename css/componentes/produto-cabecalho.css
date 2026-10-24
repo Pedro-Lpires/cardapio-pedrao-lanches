@@ -1,0 +1,79 @@
+/* Cabeçalho compartilhado dos produtos do cardápio e do autoatendimento. */
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("../../fonts/source-sans-3/SourceSans3VF-Upright.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+}
+
+:is(#modal-produto, #modal-produto-auto, #modal-combo-auto) .modal-conteudo {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  column-gap: 14px;
+  row-gap: 0;
+}
+:is(#modal-produto, #modal-produto-auto, #modal-combo-auto) .modal-conteudo > * {
+  grid-column: 1 / -1;
+}
+:is(#modal-produto, #modal-produto-auto, #modal-combo-auto) .imagem-produto-ampliar-ui {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  width: 88px;
+  height: 100px;
+  margin: 0 !important;
+}
+:is(#modal-produto, #modal-produto-auto, #modal-combo-auto)
+  :is(#modal-img, #modal-img-auto, #combo-img-auto) {
+  width: 88px;
+  height: 100px;
+  margin: 0 !important;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+}
+:is(#modal-produto, #modal-produto-auto, #modal-combo-auto)
+  :is(#modal-nome, #modal-nome-auto, #combo-nome-auto) {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  margin: 0 0 10px;
+  padding: 0 0 8px;
+  border: 0;
+  border-bottom: 3px solid #ed0014;
+  font-family: "Source Sans 3", Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+:is(#modal-produto, #modal-produto-auto, #modal-combo-auto)
+  :is(#modal-desc, #modal-desc-auto, #combo-desc-auto) {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  margin: 0;
+  color: #f2f2f2;
+  font-family: "Source Sans 3", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 450;
+  font-synthesis: none;
+  letter-spacing: 0.1px;
+  line-height: 1.5;
+}
+@media (max-width: 360px) {
+  :is(#modal-produto, #modal-produto-auto, #modal-combo-auto) .modal-conteudo {
+    grid-template-columns: 76px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+  :is(#modal-produto, #modal-produto-auto, #modal-combo-auto) .imagem-produto-ampliar-ui,
+  :is(#modal-produto, #modal-produto-auto, #modal-combo-auto)
+    :is(#modal-img, #modal-img-auto, #combo-img-auto) {
+    width: 76px;
+    height: 88px;
+  }
+  :is(#modal-produto, #modal-produto-auto, #modal-combo-auto)
+    :is(#modal-nome, #modal-nome-auto, #combo-nome-auto) {
+    font-size: 18px;
+  }
+}

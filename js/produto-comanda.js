@@ -80,14 +80,14 @@ async function abrirPainelProduto(comandaId, produtoId) {
   // =========================
 
   if (contextoPainelProduto === "entrega") {
-    painel = document.getElementById("area-entrega-atendente");
+    painel = obterPainelProdutoPedidoUI();
   }
 
   // =========================
   // RETIRADA
   // =========================
   else if (contextoPainelProduto === "retirada") {
-    painel = document.getElementById("area-retirada-atendente");
+    painel = obterPainelProdutoPedidoUI();
   }
 
   // =========================
@@ -116,24 +116,16 @@ async function abrirPainelProduto(comandaId, produtoId) {
   const tipos = tiposCarneProdutoOperacao(produto);
   const htmlOpcoes =
     tipos.length > 1
-      ? "<hr><h3>Escolha o tipo</h3>" +
+      ? '<hr><h3>Escolha o tipo</h3><div class="tipos-carne-ui" data-quantidade="' +
+        tipos.length +
+        '">' +
         tipos
           .map(
             (tipo, index) =>
-              '<label class="tipo-produto-opcao"><input type="radio" name="tipo-produto" value="' +
-              tipo.valor +
-              '" data-preco="' +
-              tipo.preco +
-              '" ' +
-              (index === 0 ? "checked" : "") +
-              ' onchange="atualizarPrecoProduto()">' +
-              tipo.nome +
-              " " +
-              moedaOperacao(tipo.preco) +
-              "</label>",
+              `<label class="tipo-produto-opcao"><input type="radio" name="tipo-produto" value="${tipo.valor}" data-preco="${tipo.preco}" ${index === 0 ? "checked" : ""} onchange="${produto.categoria === "combos" ? "atualizarPrecoComboPersonalizado" : "atualizarPrecoProduto"}()"><span>${tipo.nome}</span><small>${moedaOperacao(tipo.preco)}</small></label>`,
           )
           .join("") +
-        "<hr>"
+        "</div><hr>"
       : "";
 
   // =========================
@@ -168,8 +160,9 @@ async function abrirPainelProduto(comandaId, produtoId) {
 </button>
 
 
-        <h2>
+        <h2 class="produto-nome-painel-ui">
             ${produto.nome}
+            ${produto.imagem || produto.img ? `<button type="button" class="foto-produto-atalho-ui" data-imagem="${escaparOperacao(resolverImagemProduto(produto.imagem || produto.img))}" data-nome="${escaparOperacao(produto.nome)}" onclick="abrirFotoProdutoUI(this)">Ver foto</button>` : ""}
         </h2>
 
 
@@ -329,7 +322,7 @@ async function carregarCategoriaProdutos(comandaId, categoria) {
 
   const lista = document.getElementById("lista-categoria-produtos");
 
-  lista.innerHTML = "Carregando...";
+  lista.innerHTML = htmlCarregandoUI("Carregando produtos…");
 
   const snap = await db.collection("produtos").orderBy("ordem").get();
 
@@ -807,6 +800,11 @@ async function adicionarProdutoConfiguradoComanda(comandaId, produtoId) {
     }
 
     const itemAntigo = itens[indice];
+    const edicoesPendentesCozinha = registrarEdicaoPreparoComandaOperacao(
+      comanda,
+      indice,
+      novoItem,
+    );
 
     const pedidoOrigemId = itemAntigo.pedidoOrigemId || null;
 
@@ -836,6 +834,7 @@ async function adicionarProdutoConfiguradoComanda(comandaId, produtoId) {
       itens,
 
       valorTotal: novoTotal,
+      edicoesPendentesCozinha,
     });
     if (pedidoOrigemId) {
       await sincronizarPedidoOrigemDaComanda(comandaId, pedidoOrigemId);
@@ -1217,7 +1216,7 @@ async function abrirConfiguracaoLancheCombo(numeroLanche) {
 
   modal.style.display = "block";
 
-  modal.innerHTML = "<p>Carregando...</p>";
+  modal.innerHTML = htmlCarregandoUI("Carregando…");
 
   const snap = await buscarAdicionaisPainelUI();
 
@@ -1323,7 +1322,7 @@ async function abrirConfiguracaoTodosCombo() {
 
   modal.style.display = "block";
 
-  modal.innerHTML = "<p>Carregando...</p>";
+  modal.innerHTML = htmlCarregandoUI("Carregando…");
 
   const snap = await buscarAdicionaisPainelUI();
 
@@ -1651,7 +1650,8 @@ function atualizarPrecoComboPersonalizado() {
 
   if (!precoTela) return;
 
-  const precoBase = Number(precoTela.dataset.precoBase || 0);
+  const opcaoTipo = document.querySelector('input[name="tipo-produto"]:checked');
+  const precoBase = Number(opcaoTipo?.dataset.preco || precoTela.dataset.precoBase || 0);
 
   let totalAdicionais = 0;
 
@@ -1723,6 +1723,10 @@ async function adicionarComboConfiguradoComanda(
   quantidade,
   observacao,
 ) {
+  produto = aplicarTipoComboOperacao(
+    produto,
+    document.querySelector('input[name="tipo-produto"]:checked')?.value,
+  );
   const qtdLanches = Number(produto.comboQtdLanches || 0);
 
   // =========================
@@ -1863,6 +1867,7 @@ async function adicionarComboConfiguradoComanda(
     nome: produto.nome,
 
     categoria: produto.categoria || "combos",
+    tipo: produto.tipoCarne || "",
 
     quantidade,
 
@@ -1902,6 +1907,11 @@ async function adicionarComboConfiguradoComanda(
       return;
     }
     const itemAntigo = itens[indice];
+    const edicoesPendentesCozinha = registrarEdicaoPreparoComandaOperacao(
+      comanda,
+      indice,
+      novoItem,
+    );
 
     const pedidoOrigemId = itemAntigo.pedidoOrigemId || null;
 
@@ -1928,6 +1938,7 @@ async function adicionarComboConfiguradoComanda(
       itens,
 
       valorTotal: novoTotal,
+      edicoesPendentesCozinha,
     });
     if (pedidoOrigemId) {
       await sincronizarPedidoOrigemDaComanda(comandaId, pedidoOrigemId);
@@ -1959,6 +1970,7 @@ async function adicionarComboConfiguradoComanda(
       (item) =>
         item.produtoId === produtoId &&
         item.categoria === "combos" &&
+        (item.tipo || "") === (novoItem.tipo || "") &&
         !item.comboPersonalizado &&
         (item.observacao || "") === observacao,
     );

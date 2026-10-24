@@ -141,11 +141,60 @@
       },
     }),
   );
+  if (cenarioFixture === "cda-inativo") {
+    docs.get("clientes/" + cliente).fidelidadeAtiva = false;
+    docs.get("clientes/" + cliente).nivelCliente = "Sem nível";
+  }
+  if (cenarioFixture === "loja-fechada") docs.get("config/loja").aberta = false;
+  if (cenarioFixture === "beneficios") {
+    docs.set("clientes/65888888888", {
+      nome: "Cliente Sem Prêmios",
+      telefone: "65888888888",
+      codigoAtivacao: "4321",
+      fidelidadeAtiva: false,
+      nivelCliente: "Sem nível",
+    });
+    docs.set("campanhasRaspadinhas/demo", {
+      nome: "Presente do Pedrão",
+      modo: "manual",
+      publico: "todos",
+      ativa: true,
+      premio: "uma batata frita média",
+      termos: "Use na próxima compra de pelo menos R$ 20.",
+      minimoCompra: 100,
+      minimoResgate: 20,
+      validadeDias: 7,
+      criadoEm: agora,
+    });
+    docs.get("clientes/" + cliente).nivelCliente = "Bronze";
+    docs.set("chamadosMesa/teste-chamado", {
+      mesaId: "mesa6",
+      mesaNumero: 6,
+      cliente: "Rafa Teste",
+      tipo: "conta",
+      status: "aberto",
+      criadoEmMs: agora - 60000,
+    });
+    docs.set("clientes/" + cliente + "/mensagens/comunicado-teste", {
+      tipo: "geral",
+      remetente: "admin",
+      texto: "Hoje tem novidade no Pedrão. Boa noite, Rafa!",
+      data: new Date(agora).toISOString(),
+      lida: false,
+    });
+    // Campanhas reais enviam /mensagens, sem criar um vínculo em /cupons.
+    docs.set("clientes/" + cliente + "/chamados/suporte1/mensagens/m2", {
+      remetente: "admin",
+      texto: "Olá, Rafa! Vamos conferir seu pedido juntos.",
+      data: new Date(agora + 1000).toISOString(),
+      lida: false,
+    });
+  }
   for (const [cat, prefixo, preco, img] of [
     ["lanches", "lanche", 25, "lanche.png"],
-    ["bebidas", "bebida", 5, "refri-latas.jpg"],
-    ["batatas", "batata", 15, "batata-frita.media-cortada.png"],
-    ["combos", "combo", 40, "combo.png"],
+    ["bebidas", "bebida", 5, "coca-lata.webp"],
+    ["batatas", "batata", 15, "batata-frita-media-cortada.webp"],
+    ["combos", "combo", 40, "3baguncinha.webp"],
   ])
     for (let i = 1; i <= 8; i++)
       docs.set("produtos/" + prefixo + i, {
@@ -166,6 +215,14 @@
   docs.set("adicionais/cheddar", { nome: "Cheddar", preco: 3, ativo: true, ordem: 3 });
   docs.set("adicionais/alface", { nome: "Alface", preco: 2, ativo: true, ordem: 1 });
   docs.set("adicionais/calabresa", { nome: "Calabresa", preco: 5, ativo: true, ordem: 2 });
+  docs.set("adicionais/bacon", { nome: "Bacon", preco: 5, ativo: true, ordem: 4 });
+  docs.set("adicionais/tomate", { nome: "Tomate", preco: 2, ativo: true, ordem: 5 });
+  docs.set("adicionais/hamburguer", {
+    nome: "Hambúrguer Caseiro",
+    preco: 8,
+    ativo: true,
+    ordem: 6,
+  });
   Object.assign(docs.get("pedidos/retirada1").itens[0], {
     molhosGratis: [{ unidade: 1, tipo: "doisiguais", texto: "2 Maionese" }],
     molhosPagos: [{ nome: "Barbecue", qtd: 2, preco: 2 }],
@@ -241,6 +298,34 @@
     { nome: "Coca 2L", categoria: "bebidas", quantidade: 1 },
   ];
   if (window.combosConferidosFixture) {
+    docs.set("produtos/xtudo-real", {
+      nome: "X-Tudo",
+      categoria: "lanches",
+      descricao:
+        "Pão, hambúrguer artesanal, filé mignon, filé de frango, salsicha, calabresa, bacon, ovo, presunto, mussarela, alface, tomate, batata palha e milho verde",
+      imagem: "x-tudo.webp",
+      preco: 45,
+      precoIndustrial: 43,
+      opcoes: { artesanal: true, industrial: true },
+      ativo: true,
+      esgotado: false,
+      permiteAdicionais: true,
+      ordem: -2,
+    });
+    docs.set("produtos/burrito-real", {
+      nome: "Burrito cuiabano",
+      categoria: "lanches",
+      descricao: "Pão, hambúrguer triturado, molho vermelho, alface, tomate, presunto e mussarela.",
+      imagem: "burrito.webp",
+      preco: 20,
+      precoIndustrial: 18,
+      precoFrango: 20,
+      opcoes: { artesanal: true, industrial: true, frango: true },
+      ativo: true,
+      esgotado: false,
+      permiteAdicionais: true,
+      ordem: -1,
+    });
     for (const [id, produto] of docs)
       if (id.startsWith("produtos/") && produto.categoria === "combos") docs.delete(id);
     window.combosConferidosFixture.forEach((combo, n) =>
@@ -336,14 +421,75 @@
         },
       ];
       const total = itens.reduce((s, i) => s + i.subtotal, 0);
+      const completarAdicional = (ad) => {
+        const ref = [...docs].find(
+          ([id, dado]) => id.startsWith("adicionais/") && dado.nome === ad.nome,
+        );
+        return ref ? { ...ad, id: ref[0].split("/")[1], preco: ref[1].preco } : ad;
+      };
+      for (const item of itens) {
+        item.adicionais = (item.adicionais || []).map(completarAdicional);
+        for (const lanche of item.lanchesCombo || [])
+          lanche.adicionais = (lanche.adicionais || []).map(completarAdicional);
+      }
       Object.assign(docs.get("comandas/comanda1"), { itens: clone(itens), valorTotal: total });
       Object.assign(docs.get("filaCozinha/entrega-fila"), {
+        origemColecao: "comandas",
+        origemId: "comanda1",
         itens: clone(itens),
         tipo: "Consumo no local",
         mesa: 1,
         cliente: "Rafa Teste",
       });
     }
+  }
+  if (cenarioFixture === "chapeiro-agrupado") {
+    const lanche = { nome: "Baguncinha", categoria: "lanches", tipo: "artesanal", quantidade: 1 };
+    const combo = (qtd, lanchesCombo = []) => ({
+      nome: `Combo ${qtd} Caseiro`,
+      categoria: "combos",
+      quantidade: 1,
+      comboComponentes: [
+        { nome: "Baguncinha", categoria: "lanches", tipoCarne: "Artesanal", quantidade: qtd },
+        { nome: "Refrigerante 1,5L", categoria: "bebidas", quantidade: 1 },
+      ],
+      modoPersonalizacaoCombo: "individual",
+      lanchesCombo,
+    });
+    const itens = [
+      { ...lanche, quantidade: 3 },
+      combo(2),
+      combo(3, [
+        { numero: 1, adicionais: [{ nome: "Bacon", qtd: 2 }] },
+        { numero: 2, adicionais: [{ nome: "Tomate", qtd: 1 }] },
+      ]),
+      { ...lanche, observacao: "Sem salada" },
+      {
+        ...lanche,
+        adicionais: [{ nome: "Hambúrguer caseiro", qtd: 1 }],
+        observacao: "Sem salsicha",
+      },
+      { ...lanche, tipo: "industrial", quantidade: 2 },
+      { nome: "Batata Grande", categoria: "batatas", quantidade: 1 },
+    ];
+    const novos = [{ ...lanche, quantidade: 6 }];
+    docs.delete("filaCozinha/entrega-fila");
+    docs.delete("filaCozinha/retirada-fila");
+    Object.assign(docs.get("comandas/comanda1"), { mesa: 2, itens: clone([...itens, ...novos]) });
+    for (const [id, lote, horario] of [
+      ["primeiro", itens, agora - 120000],
+      ["segundo", novos, agora - 60000],
+    ])
+      docs.set("filaCozinha/" + id, {
+        origemColecao: "comandas",
+        origemId: "comanda1",
+        tipo: "Local",
+        mesa: 2,
+        cliente: "Rafa Teste",
+        status: "aguardando",
+        criadoEmMs: horario,
+        itens: clone(lote),
+      });
   }
   docs.set("filaCozinha/antigo-fila", {
     origemColecao: "pedidos",
@@ -365,7 +511,9 @@
   let contador = 0;
   const ouvintes = [];
   function avisar() {
-    queueMicrotask(() => ouvintes.forEach((o) => o.fn(snapshot(o.path, o.filtros))));
+    queueMicrotask(() =>
+      ouvintes.forEach((o) => o.fn(o.documento ? snapDoc(o.path) : snapshot(o.path, o.filtros))),
+    );
   }
   function doc(path) {
     return {
@@ -386,8 +534,15 @@
         avisar();
       },
       onSnapshot: (fn) => {
-        queueMicrotask(() => fn(snapDoc(path)));
-        return () => {};
+        const o = { path, fn, documento: true };
+        ouvintes.push(o);
+        queueMicrotask(() => {
+          if (ouvintes.includes(o)) fn(snapDoc(path));
+        });
+        return () => {
+          const i = ouvintes.indexOf(o);
+          if (i >= 0) ouvintes.splice(i, 1);
+        };
       },
     };
   }
@@ -442,8 +597,13 @@
       onSnapshot: (fn) => {
         const o = { path, filtros, fn };
         ouvintes.push(o);
-        queueMicrotask(() => fn(snapshot(path, filtros)));
-        return () => ouvintes.splice(ouvintes.indexOf(o), 1);
+        const emitir = () => fn(snapshot(path, filtros));
+        const espera = cenarioFixture === "lento" ? setTimeout(emitir, 6000) : null;
+        if (!espera) queueMicrotask(emitir);
+        return () => {
+          clearTimeout(espera);
+          ouvintes.splice(ouvintes.indexOf(o), 1);
+        };
       },
     };
   }
@@ -473,6 +633,64 @@
     },
   };
   const firestore = () => db;
+  window.addEventListener("message", (evento) => {
+    if (evento.source !== window.parent || evento.origin !== new URL(document.baseURI).origin)
+      return;
+    if (evento.data?.tipo === "revisao-medir-layout") {
+      const largura = document.documentElement.clientWidth;
+      const total = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+      const alinhamentos = [
+        ...document.querySelectorAll(
+          ".painel-atendente-body > :is(h1, div[id^='area-'], #central-operacao)",
+        ),
+      ]
+        .filter((e) => {
+          const r = e.getBoundingClientRect();
+          return r.width && r.height && getComputedStyle(e).display !== "none";
+        })
+        .map((e) => {
+          const r = e.getBoundingClientRect();
+          const esquerda = Math.round(r.left * 10) / 10;
+          const direita = Math.round((largura - r.right) * 10) / 10;
+          return `${e.id || e.tagName}: margem esquerda ${esquerda}px / direita ${direita}px (${Math.abs(esquerda - direita) <= 1 ? "centralizado" : "desalinhado"})`;
+        });
+      const excessos = [...document.querySelectorAll("body *")]
+        .filter((e) => {
+          const r = e.getBoundingClientRect();
+          return r.width && r.height && (r.left < -1 || r.right > largura + 1);
+        })
+        .slice(0, 6)
+        .map((e) => e.id || e.className || e.tagName);
+      window.parent.postMessage(
+        {
+          tipo: "revisao-medidas-layout",
+          texto: `Tela: ${largura}px · Conteúdo: ${total}px · ${total <= largura ? "Sem rolagem lateral" : "Excesso lateral"}${excessos.length ? " · " + excessos.join(", ") : ""}${alinhamentos.length ? " · " + alinhamentos.join(" · ") : ""}`,
+        },
+        evento.origin,
+      );
+      return;
+    }
+    if (evento.data?.tipo === "revisao-alternar-loja") {
+      doc("config/loja").update({ aberta: !docs.get("config/loja").aberta });
+      return;
+    }
+    if (cenarioFixture !== "beneficios") return;
+    if (evento.data?.tipo === "revisao-previa-ativacao") window.mostrarAtivacaoCdaPedraoUI?.();
+    if (evento.data?.tipo === "revisao-subir-nivel") {
+      const niveis = ["Bronze", "Prata", "Ouro", "Diamante", "Imortal"];
+      const indice = niveis.indexOf(docs.get("clientes/" + cliente).nivelCliente);
+      doc("clientes/" + cliente).update({ nivelCliente: niveis[Math.min(indice + 1, 4)] });
+    }
+    if (evento.data?.tipo === "revisao-enviar-cupom")
+      doc("clientes/" + cliente + "/mensagens/cupom-chegou-" + ++contador).set({
+        tipo: "admin",
+        remetente: "admin",
+        cupomCodigo: "COCA200",
+        lida: false,
+        texto: "Seu presente acabou de chegar. Use na sua próxima compra.",
+        data: new Date().toISOString(),
+      });
+  });
   firestore.FieldValue = {
     delete: () => null,
     serverTimestamp: () => agora,

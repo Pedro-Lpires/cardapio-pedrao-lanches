@@ -1,0 +1,24 @@
+/* O aviso e a conta mantêm contraste; apenas as áreas de compra ficam apagadas. */
+.loja-fechada-ui .header-loja,
+.loja-fechada-ui #tela-inicio,
+.loja-fechada-ui #tela-finalizar,
+.loja-fechada-ui .abas-navegacao,
+.loja-fechada-ui .busca-produto-box,
+.loja-fechada-ui .menu-inferior button:not([onclick*="perfil"]) {
+  opacity: 0.45;
+}
+#aviso-loja-fechada-ui {
+  margin: 16px auto;
+  max-width: 640px;
+  padding: 12px 16px;
+  border: 1px solid #86414a;
+  border-radius: 12px;
+  background: #291317;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1.4;
+  text-align: center;
+}
+#aviso-loja-fechada-ui[hidden] {
+  display: none;
+}

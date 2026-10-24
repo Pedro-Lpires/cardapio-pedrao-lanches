@@ -83,6 +83,16 @@ function snap(mensagens) {
   assert.equal(marcacoes, 1);
   assert.match(html, /mensagem-descricao">Descrição<\/p>/);
   assert.match(html, /mensagem-cupom/);
+  assert.match(html, /summary aria-label="Abrir ou recolher cupom AB10"/);
+  assert.doesNotMatch(html, /mensagem-ver-ui|Ver cupom/);
+  assert.match(
+    contexto.htmlMensagemCliente({ remetente: "admin", texto: "Aviso", data: 0 }),
+    /mago-tranquilo\.png/,
+  );
+  assert.doesNotMatch(
+    contexto.htmlMensagemCliente({ remetente: "cliente", texto: "Olá", data: 0 }),
+    /mago-tranquilo/,
+  );
   assert.doesNotMatch(html, /condições de uso/);
   assert.match(contexto.htmlMensagemCliente({ texto: "<script>", data: 0 }), /&lt;script>/);
 

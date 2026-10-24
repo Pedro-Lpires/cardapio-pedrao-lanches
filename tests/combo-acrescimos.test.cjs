@@ -20,9 +20,18 @@ const ctx = vm.createContext({
   atualizarCarrinhoAuto() {},
   fecharComboAuto() {},
   alert() {},
-  document: { getElementById: campo, querySelectorAll: () => [opcao] },
+  document: { getElementById: campo, querySelector: () => null, querySelectorAll: () => [opcao] },
 });
+const operacao = fs.readFileSync("js/operacao.js", "utf8");
+vm.runInContext(
+  operacao.slice(
+    operacao.indexOf("function tiposCarneProdutoOperacao("),
+    operacao.indexOf("function cupomUsoUnicoOperacao("),
+  ),
+  ctx,
+);
 for (const nome of [
+  "comboAutoSelecionado",
   "abrirConfiguracaoTodosComboAuto",
   "alterarAdicionalTodosComboAuto",
   "sincronizarConfiguracaoTodosComboAuto",

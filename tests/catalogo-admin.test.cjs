@@ -15,6 +15,7 @@ const ctx = vm.createContext({
   document: { addEventListener() {}, getElementById: el },
   escaparOperacao: (s) => String(s ?? "").replaceAll("<", "&lt;"),
   normalizarBuscaUI: (s) => String(s || "").toLowerCase(),
+  htmlCarregandoUI: (texto) => texto,
   db: {
     collection: () => ({
       get: async () => {

@@ -35,6 +35,7 @@
         <option value="index.html">Cardápio</option>
         <option value="admin.html">Admin</option>
         <option value="painel-atendente.html">Atendente</option>
+        <option value="atendente.html">Login do atendente</option>
         <option value="autoatendimento.html">Autoatendimento</option>
         <option value="autoatendimento.html?mesa=6">Autoatendimento · mesa 6 nova</option>
         <option value="financeiro.html">Financeiro</option>
@@ -43,6 +44,16 @@
       </select></label
     ><button onclick="largura(320)">320 px</button><button onclick="largura(375)">375 px</button
     ><button onclick="largura(430)">430 px</button>
+    <button onclick="largura(1024)">1024 px</button>
+    <button onclick="largura(1200)">1200 px</button>
+    <button onclick="largura(1440)">1440 px</button>
+    <button onclick="largura(1920)">1920 px</button>
+    <button
+      onclick="frame.contentWindow.postMessage({tipo: 'revisao-medir-layout'}, location.origin)"
+    >
+      Conferir largura
+    </button>
+    <p id="medidas-layout" role="status"></p>
     <p>Senha fictícia dos painéis: teste1234</p>
     <label
       >Cenário<select id="cenario">
@@ -50,7 +61,11 @@
         <option value="lento">Busca lenta</option>
         <option value="falha">Falha ao buscar mensagens</option>
         <option value="combos">Combos conferidos nas imagens</option>
+        <option value="cda-inativo">Conta com CDA ainda não ativado</option>
+        <option value="beneficios">Magos, benefícios e chamados</option>
+        <option value="loja-fechada">Loja fechada pelo ADM</option>
         <option value="comanda-mista">Comanda com itens diferentes</option>
+        <option value="chapeiro-agrupado">Chapeiro · dez lanches + novo envio</option>
       </select></label
     >
     <button
@@ -59,13 +74,55 @@
     >
       Simular retorno ao site
     </button>
+    <button
+      id="subir-nivel"
+      hidden
+      onclick="frame.contentWindow.postMessage({tipo: 'revisao-subir-nivel'}, location.origin)"
+    >
+      Simular próximo rank
+    </button>
+    <button
+      id="enviar-cupom-teste"
+      hidden
+      onclick="frame.contentWindow.postMessage({tipo: 'revisao-enviar-cupom'}, location.origin)"
+    >
+      Receber cupom fictício
+    </button>
+    <button
+      id="previa-ativacao"
+      hidden
+      onclick="frame.contentWindow.postMessage({tipo: 'revisao-previa-ativacao'}, location.origin)"
+    >
+      Prévia da ativação do CDA
+    </button>
+    <button
+      onclick="frame.contentWindow.postMessage({tipo: 'revisao-alternar-loja'}, location.origin)"
+    >
+      Simular abrir / fechar loja
+    </button>
     <iframe id="mobile" title="Prévia isolada"></iframe>
     <script>
       const frame = document.getElementById("mobile");
       function largura(n) {
         frame.style.width = n + "px";
+        frame.style.height = n >= 900 ? "640px" : "667px";
       }
+      window.addEventListener("message", (evento) => {
+        if (
+          evento.source !== frame.contentWindow ||
+          evento.origin !== location.origin ||
+          evento.data?.tipo !== "revisao-medidas-layout"
+        )
+          return;
+        document.getElementById("medidas-layout").textContent = evento.data.texto;
+      });
       async function abrir() {
+        document.getElementById("subir-nivel").hidden =
+          document.getElementById("cenario").value !== "beneficios";
+        document.getElementById("enviar-cupom-teste").hidden =
+          document.getElementById("cenario").value !== "beneficios";
+        document.getElementById("previa-ativacao").hidden =
+          document.getElementById("cenario").value !== "beneficios";
         const pagina = document.getElementById("pagina").value;
         let html = await (await fetch("../" + pagina)).text();
         const combosConferidos = ["combos", "comanda-mista"].includes(

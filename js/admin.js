@@ -181,7 +181,7 @@ async function buscarClienteAdmin() {
                 <input type="number" id="admin-bonus-disponivel" value="${Number(c.bonusDisponivel || 0)}">
 
                 <label>Nível do cliente</label>
-                <select id="admin-nivel-cliente">${["Sem nível", "Bronze", "Prata", "Ouro", "Diamante", "Lenda"].map((n) => `<option ${n === (c.nivelCliente || "Sem nível") ? "selected" : ""}>${n}</option>`).join("")}</select>
+                <select id="admin-nivel-cliente">${["Sem nível", "Bronze", "Prata", "Ouro", "Diamante", "Imortal"].map((n) => `<option ${n === nivelFidelidadeOperacao(c) ? "selected" : ""}>${n}</option>`).join("")}</select>
 
                 <button type="button" onclick="salvarClienteAdmin('${telefoneFinal}')">Salvar alterações</button>
             </div>
@@ -210,7 +210,8 @@ async function salvarClienteAdmin(telefoneAntigo) {
   const bonusDisponivel = Number(document.getElementById("admin-bonus-disponivel").value) || 0;
 
   if (!nome) return alert("Nome usado no site é obrigatório.");
-  if (telefoneNovo.length < 10) return alert("Telefone inválido.");
+  if (telefoneNovo.length !== 11) return alert("Informe os 11 dígitos do celular com DDD.");
+  if (codigo && !/^\d{4}$/.test(codigo)) return alert("O CDA deve ter exatamente 4 números.");
 
   const refAntigo = db.collection("clientes").doc(telefoneAntigo);
   const docAntigo = await refAntigo.get();
@@ -231,7 +232,10 @@ async function salvarClienteAdmin(telefoneAntigo) {
     totalFidelidade,
     bonusDisponivel,
     bonusGeradoTotal,
-    nivelCliente: document.getElementById("admin-nivel-cliente").value,
+    nivelCliente: nivelFidelidadeOperacao({
+      ...dados,
+      nivelCliente: document.getElementById("admin-nivel-cliente").value,
+    }),
   };
 
   await db.collection("clientes").doc(telefoneNovo).set(novosDados);
@@ -255,7 +259,13 @@ async function alternarFidelidadeAdmin(telefone, novoStatus) {
     dadosAtualizacao.codigoAtivacao = "";
   }
 
-  await db.collection("clientes").doc(telefone).update(dadosAtualizacao);
+  const ref = db.collection("clientes").doc(telefone);
+  await db.runTransaction(async (t) => {
+    const doc = await t.get(ref);
+    if (!doc.exists) throw Error("Cliente não encontrado.");
+    if (novoStatus) dadosAtualizacao.nivelCliente = nivelFidelidadeOperacao(doc.data(), true);
+    t.update(ref, dadosAtualizacao);
+  });
 
   alert(novoStatus ? "Fidelidade ativada!" : "Fidelidade desativada e código removido!");
   buscarClienteAdmin();
@@ -527,6 +537,9 @@ function togglePedidosRecentes() {
 function gerarCodigoCliente() {
   const codigo = Math.floor(1000 + Math.random() * 9000);
   document.getElementById("admin-codigo-cliente").value = codigo;
+  document
+    .getElementById("admin-codigo-cliente")
+    .dispatchEvent(new Event("input", { bubbles: true }));
 }
 function ativarEdicaoClienteAdmin() {
   const form = document.getElementById("form-edicao-cliente-admin");
@@ -1472,7 +1485,7 @@ async function abrirChamadoAdmin(clienteId, chamadoId) {
   clienteChamadoAdmin = clienteId;
   chamadoAdminAberto = chamadoId;
 
-  chat.innerHTML = "<p>Carregando conversa...</p>";
+  chat.innerHTML = htmlCarregandoUI("Carregando conversa…");
 
   const chamadoRef = db.collection("clientes").doc(clienteId).collection("chamados").doc(chamadoId);
 
@@ -1631,7 +1644,7 @@ async function togglePerfilClienteAdmin(clienteId, chamadoId) {
 async function verPerfilClienteAdmin(clienteId, chamadoId) {
   const box = telaSuporteAdmin(`perfil-cliente-${chamadoId}`, "Perfil do cliente");
 
-  box.innerHTML = "<p>Carregando perfil do cliente...</p>";
+  box.innerHTML = htmlCarregandoUI("Carregando perfil do cliente…");
 
   const clienteDoc = await db.collection("clientes").doc(clienteId).get();
 
@@ -1642,15 +1655,13 @@ async function verPerfilClienteAdmin(clienteId, chamadoId) {
 
   const c = clienteDoc.data();
 
-  const nivelCliente = c.fidelidadeAtiva
-    ? c.nivelCliente || c.nivel || "Cliente Bronze"
-    : "Sem nível";
+  const nivelCliente = nivelFidelidadeOperacao(c);
 
   box.innerHTML = `
         <div class="card-perfil-suporte-admin">
 
 
-            <img src="${c.avatar || "images/avatar1.png"}" class="avatar-admin-cliente">
+            ${typeof htmlAvatarClienteUI === "function" ? htmlAvatarClienteUI(c, "avatar-admin-cliente") : `<img src="${c.avatar || "images/avatar1.png"}" class="avatar-admin-cliente">`}
 
             <p><b>Nome:</b> ${c.nome || "-"}</p>
             <p><b>Telefone:</b> ${c.telefone || clienteId}</p>
@@ -1698,7 +1709,7 @@ ${itens}`;
 
 async function togglePedidosClienteSuporteAdmin(clienteId, chamadoId) {
   const box = telaSuporteAdmin(`pedidos-cliente-${chamadoId}`, "Pedidos do cliente");
-  box.innerHTML = "<p>Carregando pedidos...</p>";
+  box.innerHTML = htmlCarregandoUI("Carregando pedidos…");
 
   const pedidosSnap = await db.collection("pedidos").where("clienteId", "==", clienteId).get();
 
@@ -1761,7 +1772,7 @@ async function togglePedidosClienteSuporteAdmin(clienteId, chamadoId) {
 async function verPedidoAnexadoSuporte(pedidoId, colecao = "pedidos") {
   if (!["pedidos", "historicoPagamentosClientes"].includes(colecao)) return;
   const box = telaSuporteAdmin("suporte-pedido-detalhe", "Pedido relacionado");
-  box.innerHTML = "<p>Carregando pedido...</p>";
+  box.innerHTML = htmlCarregandoUI("Carregando pedido…");
   try {
     const doc = await db.collection(colecao).doc(pedidoId).get();
     if (!doc.exists) {
@@ -1848,8 +1859,8 @@ async function listarUsuariosOnline() {
             <div class="card-online-admin">
 
                 <img
-                    src="${u.avatar || "images/avatar1.png"}"
-                    class="avatar-online-admin"
+                    src="${typeof dadosAvatarClienteUI === "function" ? dadosAvatarClienteUI(u).src : u.avatar || "images/avatar1.png"}"
+                    class="avatar-online-admin ${typeof rankAvatarClienteUI === "function" ? "avatar-rank-ui" : ""}" data-avatar-rank="${typeof rankAvatarClienteUI === "function" ? rankAvatarClienteUI(u) : ""}"
                 >
 
                 <div>
@@ -1991,7 +2002,7 @@ async function salvarProdutoAdmin() {
 
 async function listarProdutosAdmin() {
   const box = document.getElementById("lista-produtos-admin");
-  box.innerHTML = "<p>Carregando produtos...</p>";
+  box.innerHTML = htmlCarregandoUI("Carregando produtos…");
 
   if (!produtosCatalogoCacheUI) {
     const snap = await db.collection("produtos").get();
@@ -2557,7 +2568,7 @@ async function importarProdutosFixosParaFirebase() {
 async function listarAdicionaisAdmin() {
   const box = document.getElementById("lista-adicionais-admin");
 
-  box.innerHTML = "<p>Carregando adicionais...</p>";
+  box.innerHTML = htmlCarregandoUI("Carregando adicionais…");
 
   const snap = await db.collection("adicionais").get();
 
@@ -2864,7 +2875,7 @@ async function salvarAtendenteAdmin() {
 async function listarAtendentesAdmin() {
   const box = document.getElementById("lista-atendentes-admin");
 
-  box.innerHTML = "<p>Carregando...</p>";
+  box.innerHTML = htmlCarregandoUI("Carregando…");
 
   const snap = await db.collection("atendentes").get();
 

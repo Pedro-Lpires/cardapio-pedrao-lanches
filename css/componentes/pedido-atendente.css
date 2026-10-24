@@ -1,0 +1,301 @@
+/* Entrega e retirada compartilham os mesmos controles compactos. */
+:is(#area-entrega-atendente, #area-retirada-atendente) {
+  padding: 14px !important;
+}
+/* No computador, desktop.css centraliza estas etapas com a margem automática. */
+@media (max-width: 899px) {
+  :is(#area-entrega-atendente, #area-retirada-atendente) {
+    margin: 12px !important;
+  }
+}
+:is(#area-entrega-atendente, #area-retirada-atendente) > button {
+  min-height: 38px;
+  margin: 8px 0;
+  padding: 9px 13px;
+  font-size: 14px;
+}
+:is(#area-entrega-atendente, #area-retirada-atendente) > :is(input, textarea) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding: 10px;
+  border: 1px solid #555;
+  border-radius: 8px;
+  background: #151515;
+  color: white;
+  font-size: 16px;
+}
+.pedido-montagem-ui {
+  display: grid;
+  gap: 16px;
+}
+.pedido-montagem-ui :is(h3, h4, p) {
+  margin: 0;
+}
+.pedido-caixa-ui {
+  padding: 14px;
+  border: 1px solid #424242;
+  border-radius: 12px;
+  background: #252525;
+}
+.pedido-caixa-ui > p {
+  margin-top: 8px;
+  line-height: 1.45;
+}
+.pedido-itens-ui {
+  display: grid;
+  gap: 12px;
+}
+.pedido-itens-ui .producao-item {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.pedido-itens-ui .producao-item > span {
+  display: block;
+  margin: 8px 0;
+  color: #7eeda9;
+  font-weight: 700;
+}
+.pedido-secao-titulo-ui {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pedido-item-acoes-ui {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.pedido-montagem-ui button,
+.pedido-janela-ui button {
+  min-width: 0;
+  min-height: 38px;
+  width: auto;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.pedido-item-acoes-ui button {
+  background: #363636;
+  border: 1px solid #555;
+}
+.pedido-resumo-ui {
+  display: grid;
+  gap: 12px;
+}
+.pedido-resumo-ui > p {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+}
+.pedido-total-ui {
+  border-top: 1px solid #555;
+  padding-top: 12px;
+  font-size: 19px;
+}
+.pedido-taxa-ui {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pedido-taxa-ui input {
+  box-sizing: border-box;
+  width: 100px;
+  min-height: 38px;
+  border-radius: 8px;
+  border: 1px solid #666;
+  padding: 8px;
+  background: #151515;
+  color: white;
+  font-size: 16px;
+}
+.pedido-pagamento-ui button {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 12px;
+  background: #333;
+  border: 1px solid #666;
+  text-align: left;
+}
+.pedido-pagamento-ui > input[hidden] {
+  display: none;
+}
+.pedido-montagem-ui .pedido-criar-ui {
+  width: 100%;
+  min-height: 42px;
+}
+dialog.pedido-janela-ui {
+  box-sizing: border-box;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+}
+.pedido-busca-ui {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+.pedido-busca-ui input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px;
+  font-size: 16px;
+  background: #121212;
+  color: #fff;
+  border: 1px solid #666;
+  border-radius: 9px;
+}
+.pedido-categorias-ui {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.pedido-categorias-ui button {
+  padding: 8px 4px;
+  font-size: 13px;
+  background: #333;
+  border: 1px solid #555;
+}
+.pedido-categorias-ui button[aria-pressed="true"] {
+  background: #ed0014;
+  border-color: #ff4454;
+}
+.pedido-catalogo-lista-ui {
+  display: grid;
+  gap: 10px;
+}
+.pedido-catalogo-card-ui {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #282828;
+  border: 1px solid #494949;
+  border-radius: 10px;
+}
+.pedido-catalogo-card-ui strong {
+  display: block;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.pedido-catalogo-card-ui small {
+  display: block;
+  margin-top: 6px;
+  color: #7eeda9;
+  font-size: 14px;
+}
+.pedido-catalogo-card-ui > button {
+  flex-shrink: 0;
+  font-size: 13px;
+  padding: 8px 10px;
+}
+.pedido-catalogo-rodape-ui {
+  position: sticky;
+  bottom: -18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 12px 0;
+  background: #1c1c1c;
+  border-top: 1px solid #555;
+}
+.pedido-catalogo-rodape-ui span {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #ddd;
+}
+.pedido-pagamento-opcoes-ui,
+.pedido-molho-escolhas-ui {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+.pedido-pagamento-opcoes-ui label,
+.pedido-molho-escolhas-ui label,
+.pedido-molho-tipos-ui label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #555;
+  background: #292929;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.pedido-janela-ui input:is([type="radio"], [type="checkbox"]) {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: #ed0014;
+}
+.pedido-pagamento-opcoes-ui label:has(:checked),
+.pedido-molho-escolhas-ui label:has(:checked),
+.pedido-molho-tipos-ui label:has(:checked) {
+  border-color: #ed0014;
+  background: #382225;
+}
+.pedido-pagamento-confirmar-ui {
+  width: 100% !important;
+  margin-top: 10px !important;
+}
+.pedido-molho-unidade-ui {
+  background: #242424;
+  border: 1px solid #444;
+  padding: 12px;
+  border-radius: 10px;
+  margin: 12px 0;
+}
+.pedido-molho-tipos-ui {
+  display: grid;
+  gap: 8px;
+}
+.pedido-molho-pago-ui {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px 24px 34px;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+.pedido-molho-pago-ui button {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+}
+.pedido-molho-pago-ui strong {
+  text-align: center;
+}
+.pedido-molhos-total-ui {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+#pedido-produto-painel-ui > h2 {
+  font-size: 22px;
+}
+#pedido-produto-painel-ui .produto-finalizar-ui > button {
+  max-width: 132px;
+}
+/* Só o conteúdo dos acréscimos rola; o cabeçalho permanece visível. */
+body:has(:is(#modal-produto, #modal-produto-auto)) dialog.janela-acrescimos-ui {
+  box-sizing: border-box;
+  width: min(440px, calc(100vw - 32px));
+  max-height: 52dvh;
+  margin: auto;
+  padding-bottom: 14px;
+}

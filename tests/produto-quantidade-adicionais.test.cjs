@@ -51,9 +51,9 @@ const janelaCtx = vm.createContext({
   adicionaisSelecionados: { bacon: { qtd: 1 } },
   structuredClone,
   abrirJanelaElementoUI: () => ({ addEventListener() {} }),
-  configurarRascunhoAcrescimosUI: (janela, a, c) => {
+  configurarAcrescimosImediatosUI: (janela, a) => {
     aplicar = a;
-    cancelar = c;
+    cancelar = a;
   },
   limitarQuantidadeProdutoComAdicionais: () => ajustes++,
 });
@@ -67,10 +67,10 @@ vm.runInContext(
 );
 janelaCtx.abrirAcrescimosJanelaUI("lista-adicionais");
 cancelar();
-assert.equal(ajustes, 0);
+assert.equal(ajustes, 1);
 janelaCtx.abrirAcrescimosJanelaUI("lista-adicionais");
 aplicar();
-assert.equal(ajustes, 1);
+assert.equal(ajustes, 2);
 console.log(
-  "PASS: adicionais limitam a quantidade no + e ao aplicar; sem adicionais aumenta, X descarta sem ajustar.",
+  "PASS: adicionais limitam a quantidade no + e ao fechar por Voltar ou X; sem adicionais aumenta.",
 );

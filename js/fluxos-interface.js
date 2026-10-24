@@ -4,11 +4,35 @@
  * Organização e caminhos: consulte GUIA-DO-CODIGO.md.
  */
 "use strict";
+function configurarAcoesDestinoPedidoUI(janela, imprimir, enviar, rotulo) {
+  janela.innerHTML = `<button class="ui-x" aria-label="Fechar opções">×</button><h2>${rotulo}</h2><div class="operacao-acoes"><button type="button" data-acao="imprimir">Imprimir</button><button type="button" data-acao="enviar">${rotulo === "Motoboy" ? "Enviar WhatsApp" : "Tela"}</button></div>`;
+  janela.querySelector(".ui-x").onclick = () => janela.close();
+  const executar = async (acao) => {
+    const botoes = janela.querySelectorAll(".operacao-acoes button");
+    botoes.forEach((botao) => (botao.disabled = true));
+    try {
+      if ((await acao()) !== false) janela.close();
+    } catch (erro) {
+      avisoOperacao("Não foi possível concluir: " + erro.message);
+    } finally {
+      botoes.forEach((botao) => (botao.disabled = false));
+    }
+  };
+  janela.querySelector('[data-acao="imprimir"]').onclick = () => executar(imprimir);
+  janela.querySelector('[data-acao="enviar"]').onclick = () => executar(enviar);
+}
 function abrirDestinoPedidoUI(destino, colecao, id) {
   const d = document.createElement("dialog");
   d.className = "ui-caixa destino-pedido-ui";
-  const args = `'${colecao}','${escaparOperacao(id)}'`;
-  d.innerHTML = `<button class="ui-x" aria-label="Fechar opções" onclick="this.closest('dialog').close()">×</button><h2>${destino === "cozinha" ? "Cozinha" : "Motoboy"}</h2><div class="operacao-acoes"><button onclick="imprimirRegistroOperacao(${args},'${destino}')">Imprimir</button><button onclick="${destino === "cozinha" ? `confirmarProducaoOperacao(${args})` : `compartilharMotoboyOperacao(${args})`}">${destino === "cozinha" ? "Enviar à tela" : "Enviar WhatsApp"}</button></div>`;
+  configurarAcoesDestinoPedidoUI(
+    d,
+    () => imprimirRegistroOperacao(colecao, id, destino),
+    () =>
+      destino === "cozinha"
+        ? confirmarProducaoOperacao(colecao, id)
+        : compartilharMotoboyOperacao(colecao, id),
+    destino === "cozinha" ? "Cozinha" : "Motoboy",
+  );
   d.addEventListener("close", () => d.remove(), { once: true });
   document.body.append(d);
   d.showModal();
@@ -16,7 +40,12 @@ function abrirDestinoPedidoUI(destino, colecao, id) {
 function abrirCozinhaMesaUI(numero) {
   const d = document.createElement("dialog");
   d.className = "ui-caixa destino-pedido-ui";
-  d.innerHTML = `<button class="ui-x" aria-label="Fechar opções" onclick="this.closest('dialog').close()">×</button><h2>Cozinha · Mesa ${Number(numero)}</h2><div class="operacao-acoes"><button onclick="imprimirMesaOperacao(${Number(numero)},'cozinha')">Imprimir</button><button onclick="enviarMesaCozinhaUI(${Number(numero)})">Enviar à tela</button></div>`;
+  configurarAcoesDestinoPedidoUI(
+    d,
+    () => imprimirMesaOperacao(Number(numero), "cozinha"),
+    () => enviarMesaCozinhaUI(Number(numero)),
+    `Cozinha · Mesa ${Number(numero)}`,
+  );
   d.addEventListener("close", () => d.remove(), { once: true });
   document.body.append(d);
   d.showModal();
@@ -98,6 +127,7 @@ let checkoutEtapaUI = "revisao";
 function montarConsumoLocalUI(itens, nome, telefone, cliente, obs = "", agora = Date.now()) {
   const produtos = itens.map((i) => ({
     nome: i.nome,
+    tipoCarne: i.tipoCarne || i.tipo || "",
     produtoId: i.produtoId || i.id || null,
     categoria: i.categoria || "Lanches",
     quantidade: Number(i.qtd || i.quantidade || 1),
@@ -106,6 +136,7 @@ function montarConsumoLocalUI(itens, nome, telefone, cliente, obs = "", agora = 
     observacao: i.obs || i.observacao || "",
     lanchesCombo: i.lanchesCombo || [],
     comboQtdLanches: i.comboQtdLanches || 0,
+    comboComponentes: i.comboComponentes || [],
     descricao: i.descricao || i.desc || "",
   }));
   const subtotal = produtos.reduce((n, i) => n + i.preco * i.quantidade, 0);
@@ -146,6 +177,7 @@ function montarConsumoLocalUI(itens, nome, telefone, cliente, obs = "", agora = 
 }
 let enviandoConsumoLocalUI = false;
 async function enviarConsumoLocalUI() {
+  if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   if (enviandoConsumoLocalUI) return;
   const nome = document.getElementById("nome-cliente").value.trim(),
     telefone = document.getElementById("telefone-cliente").value.replace(/\D/g, "");
@@ -162,8 +194,10 @@ async function enviarConsumoLocalUI() {
       clienteLogado,
       dadosPedidoTemporario.obs,
     );
-    if (!(await salvarPedidoFirebase(pedido)))
+    if (!(await salvarPedidoFirebase(pedido))) {
+      if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
       return avisoOperacao("Não foi possível salvar. Tente novamente.");
+    }
     window.open("https://wa.me/5565992386045?text=" + encodeURIComponent(mensagem), "_blank");
     carrinho = [];
     dadosPedidoTemporario = {};
@@ -263,6 +297,7 @@ function montarCheckoutUI() {
   document.getElementById("select-endereco-salvo").style.display = "none";
   const original = exibirRevisao;
   window.exibirRevisao = (...args) => {
+    if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
     const local = args[3] === "Local",
       anterior = etapa.hidden;
     revisao.classList.toggle("revisao-local", local);
@@ -293,6 +328,7 @@ function montarCheckoutUI() {
   };
   const finalizarOriginal = finalizarPedido;
   window.finalizarPedido = (...args) => {
+    if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
     etapa.hidden = true;
     revisao.hidden = false;
     return finalizarOriginal(...args);
@@ -384,7 +420,9 @@ async function entrarContaAutoUI() {
   status.textContent = "";
   botao.disabled = true;
   try {
-    if (codigo) {
+    const nome = document.getElementById("login-auto-nome").value.trim();
+    const telefone = document.getElementById("login-auto-telefone").value.replace(/\D/g, "");
+    if (codigo && !(nome && telefone.length === 11)) {
       const conta = await buscarContaPorCodigoAutoUI(db, codigo);
       document.getElementById("login-auto-nome").value = conta.nome;
       document.getElementById("login-auto-telefone").value = conta.telefone;
@@ -392,6 +430,7 @@ async function entrarContaAutoUI() {
     await entrarClienteAutoatendimento();
   } catch (e) {
     status.textContent = e.message;
+    mostrarAvisoUI(e.message);
   } finally {
     botao.disabled = false;
   }

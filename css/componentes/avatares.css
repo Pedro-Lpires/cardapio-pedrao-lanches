@@ -1,0 +1,124 @@
+/* Molduras acompanham o traje; cores e acabamentos identificam cada rank. */
+img.avatar-rank-ui {
+  box-sizing: border-box;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  padding: 3px;
+  object-fit: contain;
+  background:
+    linear-gradient(#191919, #191919) padding-box,
+    conic-gradient(from 30deg, #424242, #a9adb1, #424242, #777d83, #424242) border-box;
+  box-shadow: 0 0 0 1px #282828;
+}
+img.avatar-rank-ui[data-avatar-rank="bronze"] {
+  background:
+    linear-gradient(#221911, #221911) padding-box,
+    conic-gradient(from 30deg, #60371b, #f5c392, #925023, #e4a36d, #60371b) border-box;
+  box-shadow:
+    0 0 0 1px #5d341b,
+    0 0 12px #b96f3533;
+}
+img.avatar-rank-ui[data-avatar-rank="prata"] {
+  border-style: double;
+  border-width: 5px;
+  background:
+    linear-gradient(#1b2026, #1b2026) padding-box,
+    conic-gradient(#8796a8, #fff, #58697f, #dfeafa, #8796a8) border-box;
+  box-shadow:
+    0 0 0 1px #7b8b9f,
+    0 0 14px #a9c3e533;
+}
+img.avatar-rank-ui[data-avatar-rank="ouro"] {
+  border-width: 5px;
+  background:
+    linear-gradient(#261d0c, #261d0c) padding-box,
+    conic-gradient(#a96a09, #fff2ad, #af730d, #ffe481, #a96a09) border-box;
+  box-shadow:
+    0 0 0 1px #d09a31,
+    0 0 0 3px #573c14,
+    0 0 16px #ffc94844;
+}
+img.avatar-rank-ui[data-avatar-rank="diamante"] {
+  border-style: double;
+  border-width: 6px;
+  background:
+    linear-gradient(#102b36, #102b36) padding-box,
+    conic-gradient(#20b3d8, #fff, #7c79ed, #a3ffff, #20b3d8) border-box;
+  box-shadow:
+    0 0 0 1px #a4f4ff,
+    0 0 0 3px #155469,
+    0 0 20px #4cddff55;
+}
+img.avatar-rank-ui[data-avatar-rank="imortal"] {
+  border-width: 6px;
+  background:
+    linear-gradient(#210c10, #210c10) padding-box,
+    conic-gradient(#740d1d, #f5c976, #fd2948, #4c0914, #ffbd64, #e91b37, #740d1d) border-box;
+  box-shadow:
+    0 0 0 1px #e6ab62,
+    0 0 0 3px #570c19,
+    0 0 22px #f3234f66;
+}
+#lista-avatares.lista-avatares,
+.avatares-grade-ui {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 6px;
+  box-sizing: border-box;
+}
+#lista-avatares .avatar-opcao-ui,
+.avatares-grade-ui .avatar-opcao-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 10px 4px;
+  background: #252525;
+  border: 1px solid #515151;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.3;
+  border-radius: 12px;
+}
+.avatar-opcao-ui[aria-pressed="true"] {
+  outline: 2px solid #ed001b;
+  outline-offset: -2px;
+}
+.avatar-opcao-ui:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+#lista-avatares .avatar-opcao-ui img,
+.avatares-grade-ui .avatar-opcao-ui img {
+  width: 76px;
+  height: 76px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+.avatar-opcao-ui span {
+  overflow-wrap: anywhere;
+}
+.avatar-escolha-auto-ui {
+  margin: 16px 0 24px;
+}
+.avatar-escolha-auto-ui summary {
+  cursor: pointer;
+  padding: 10px 14px;
+  border: 1px solid #555;
+  border-radius: 10px;
+  text-align: center;
+}
+.avatar-escolha-auto-ui[open] summary {
+  margin-bottom: 14px;
+}
+.avatar-escolha-auto-ui[aria-busy="true"] button {
+  pointer-events: none;
+  opacity: 0.65;
+}

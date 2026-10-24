@@ -257,7 +257,9 @@ async function localTests() {
     valorTotal: 150,
   });
   assert(!recibo.includes("R$"));
-  assert(recibo.includes("5 Baguncinha"));
+  assert(recibo.includes("6 Baguncinha"));
+  assert(!recibo.includes("padrão"));
+  assert(recibo.includes("1 lanche com:"));
   assert(!recibo.includes("<script>"));
   assert(recibo.includes("Sem queijo"));
   const geral = context.gerarImpressaoOperacao("geral", {
@@ -418,7 +420,7 @@ async function localTests() {
     "PASS: três escolhas de cliente e recuperação da conta pela sessão do autoatendimento",
   );
 }
-module.exports = { context, testarPagamentos, pagamento, patch };
+module.exports = { context, mockDb, testarPagamentos, pagamento, patch };
 if (require.main === module)
   localTests().catch((e) => {
     console.error(e);

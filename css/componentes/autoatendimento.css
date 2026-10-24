@@ -3,6 +3,75 @@
  * IDs refletem a estrutura do HTML; ordem: contêiner, filhos e estados.
  */
 
+@media (max-width: 650px) {
+  #area-autoatendimento .auto-ver-mais {
+    display: block;
+    width: fit-content;
+    min-width: 144px;
+    max-width: calc(100% - 24px);
+    min-height: 40px;
+    margin: 16px auto 24px;
+    padding: 10px 20px;
+    border: 1px solid #75373b;
+    border-radius: 10px;
+    background: #25191a;
+    color: #fff;
+    font-size: 14px;
+  }
+  #area-autoatendimento .auto-ver-mais:hover {
+    transform: none;
+  }
+  #modal-conta-auto button.auto-sair-conta-ui {
+    width: auto;
+    min-height: 40px;
+    margin-top: 18px;
+    padding: 9px 14px;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+}
+
+body:has(#autoatendimento-app) dialog.ui-caixa:not(.ui-form-entrada):has(> form) {
+  box-sizing: border-box;
+  width: min(320px, calc(100vw - 40px));
+  padding: 16px !important;
+  border: 1px solid #484848;
+  border-radius: 18px;
+  background: #202020;
+  color: #fff;
+  box-shadow: 0 12px 36px #0008;
+}
+body:has(#autoatendimento-app) dialog.ui-caixa:not(.ui-form-entrada):has(> form)::backdrop {
+  background: #000b;
+}
+body:has(#autoatendimento-app) dialog.ui-caixa:not(.ui-form-entrada) > form > h3 {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0 48px 16px 0;
+  font-size: 17px;
+  line-height: 1.4;
+}
+body:has(#autoatendimento-app) dialog.ui-caixa:not(.ui-form-entrada) > form > .operacao-acoes {
+  display: flex;
+  margin: 0;
+}
+body:has(#autoatendimento-app)
+  dialog.ui-caixa:not(.ui-form-entrada)
+  > form
+  > .operacao-acoes
+  > button {
+  width: 100%;
+  min-height: 42px;
+  margin: 0;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #e60012;
+  color: #fff;
+  font-weight: 600;
+}
+
 .auto-estado-qr {
   display: grid;
   place-items: center;
@@ -236,27 +305,27 @@
 #modal-produto-auto #lista-adicionais-auto {
   margin-top: 10px;
 }
-#modal-produto-auto .qtd-produto-modal {
+:is(#modal-produto-auto, #modal-combo-auto) .qtd-produto-modal {
   margin: 24px 0 18px;
 }
-#modal-produto-auto .qtd-produto-modal > label {
+:is(#modal-produto-auto, #modal-combo-auto) .qtd-produto-modal > label {
   display: block;
   margin: 0 0 8px;
   line-height: 1.4;
 }
-#modal-produto-auto .qtd-produto-modal > div {
+:is(#modal-produto-auto, #modal-combo-auto) .qtd-produto-modal > div {
   display: flex;
   align-items: center;
   gap: 16px;
 }
-#modal-produto-auto .qtd-produto-modal button {
+:is(#modal-produto-auto, #modal-combo-auto) .qtd-produto-modal button {
   width: 48px;
   min-width: 48px;
   height: 48px;
   margin: 0;
   padding: 0;
 }
-#modal-produto-auto #qtd-produto-auto {
+:is(#qtd-produto-auto, #qtd-combo-auto) {
   min-width: 24px;
   text-align: center;
 }
@@ -344,4 +413,111 @@
 #auto-grupo-codigo[hidden],
 #auto-voltar-escolha[hidden] {
   display: none !important;
+}
+
+/* Produto da mesa: imagem menor e controles compactos, com margem para o X. */
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto) .modal-conteudo {
+  padding: 56px 14px 14px !important;
+  max-height: calc(100dvh - 32px) !important;
+}
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto) .modal-img {
+  display: block;
+  height: clamp(80px, 16dvh, 120px);
+  margin: 0 auto 10px;
+  object-fit: contain;
+}
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto) .modal-conteudo > h2 {
+  margin: 10px 0 8px;
+  font-size: 22px;
+  line-height: 1.2;
+}
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto) .modal-conteudo > p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+#modal-combo-auto #combo-preco-auto {
+  margin: 8px 0;
+  font-size: 17px;
+}
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto)
+  :is(
+    .qtd-produto-modal,
+    #modal-opcoes-tipo-auto,
+    #box-adicionais-auto,
+    #personalizacao-combo-auto
+  ) {
+  padding: 10px;
+  margin: 10px 0;
+}
+#modal-produto-auto #modal-opcoes-tipo-auto {
+  gap: 2px;
+}
+#modal-opcoes-tipo-auto label {
+  min-height: 36px;
+  padding: 4px;
+  font-size: 14px;
+}
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto) .qtd-produto-modal > label {
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto) .qtd-produto-modal > div {
+  gap: 12px;
+}
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto) .qtd-produto-modal button {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  font-size: 18px;
+}
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto) .modal-conteudo > textarea {
+  height: 56px;
+  min-height: 56px;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 13px;
+}
+.modal-produto:is(#modal-produto-auto, #modal-combo-auto)
+  .modal-conteudo
+  > button:not(.btn-fechar-modal-auto) {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  margin: 10px 0 0;
+  font-size: 15px;
+}
+#combo-opcoes-tipo-auto {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+#combo-opcoes-tipo-auto label {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 2px 8px;
+  align-items: center;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  background: #252525;
+  font-size: 14px;
+  cursor: pointer;
+}
+#combo-opcoes-tipo-auto label:has(:checked) {
+  border-color: #e60016;
+}
+#combo-opcoes-tipo-auto input {
+  grid-row: span 2;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #e60016;
+}
+#combo-opcoes-tipo-auto small {
+  grid-column: 2;
+  font-size: 13px;
 }

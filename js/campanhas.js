@@ -18,7 +18,7 @@ function montarCampanhasAdmin() {
   <label>Canal<select id="campanha-canal" onchange="atualizarCanalCampanhaUI()"><option value="admin">ADM · mensagem especial</option><option value="geral">Geral · comunicado da loja</option></select></label>
   <p id="campanha-canal-ajuda" class="campanha-ajuda"></p>
   <label>Público<select id="campanha-publico" onchange="atualizarPublicoCampanhaUI()"></select></label>
-  <label id="campanha-rank-campo" hidden>Nível<select id="campanha-rank"><option>Bronze</option><option>Prata</option><option>Ouro</option><option>Diamante</option><option>Lenda</option><option>Sem nível</option></select></label>
+  <label id="campanha-rank-campo" hidden>Nível<select id="campanha-rank"><option>Bronze</option><option>Prata</option><option>Ouro</option><option>Diamante</option><option>Imortal</option><option>Sem nível</option></select></label>
   <label id="campanha-cliente-campo">Telefone ou código CDA<input id="campanha-cliente" placeholder="Informe a conta do cliente"></label>
   <label>Finalidade<select id="campanha-finalidade" onchange="atualizarFinalidadeCampanhaUI()"><option value="aviso">Aviso · somente mensagem</option><option value="cupom">Cupom · vincular existente</option></select></label>
   <div id="campanha-cupom-campo" hidden><label>Cupom existente<select id="campanha-codigo"><option value="">Carregue os cupons</option></select></label><button type="button" onclick="carregarCuponsCampanha()">Buscar cupons</button><p class="campanha-ajuda">Crie e configure o cupom na seção Cupons de Desconto. A campanha mantém suas condições de uso e define quem recebe a mensagem.</p></div>
@@ -136,14 +136,20 @@ async function prepararCampanhaAdmin() {
         if (contas.length > 1) throw Error("Código CDA duplicado. Busque pelo telefone.");
       }
     } else {
-      if (modo === "rank" && rank !== "Sem nível") query = query.where("nivelCliente", "==", rank);
+      if (modo === "rank" && rank !== "Sem nível")
+        query =
+          rank === "Imortal"
+            ? query.where("nivelCliente", "in", ["Imortal", "Lenda"])
+            : query.where("nivelCliente", "==", rank);
       const snap = await query.get();
       contas = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
       if (modo === "rank")
         contas = contas.filter((c) =>
           rank === "Sem nível"
             ? !c.fidelidadeAtiva || !(c.nivelCliente || c.nivel)
-            : c.fidelidadeAtiva && (c.nivelCliente || c.nivel) === rank,
+            : c.fidelidadeAtiva &&
+              ((c.nivelCliente || c.nivel) === "Lenda" ? "Imortal" : c.nivelCliente || c.nivel) ===
+                rank,
         );
     }
     if (!contas.length) throw Error("Nenhuma conta corresponde ao público escolhido.");
@@ -377,7 +383,7 @@ async function historicoCompletoClienteAdmin(telefone) {
   if (aberta) return aberta.close();
   abrirJanelaElementoUI(box, "Pedidos e pagamentos");
   box.dataset.historicoCliente = telefone;
-  box.textContent = "Carregando histórico…";
+  box.innerHTML = htmlCarregandoUI("Carregando histórico…");
   try {
     const id = String(telefone).replace(/\D/g, "");
     const [pedidos, pagamentos, comandas] = await Promise.all([

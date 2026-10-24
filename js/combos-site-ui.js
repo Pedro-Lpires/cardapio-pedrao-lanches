@@ -96,7 +96,6 @@ function limparExtrasComboSiteUI(n) {
   atualizarComboSiteUI();
 }
 function abrirExtrasComboSiteUI(n) {
-  const anterior = structuredClone(comboSiteUI);
   const area = document.createElement("div");
   const config = comboSiteUI.lanches[n < 0 ? 0 : n];
   const permitidos = adicionais.filter(
@@ -163,22 +162,16 @@ function abrirExtrasComboSiteUI(n) {
   area.append(limpar);
   document.body.append(area);
   const janela = abrirJanelaElementoUI(area, n < 0 ? "Todos os lanches" : `Lanche ${n + 1}`);
-  configurarRascunhoAcrescimosUI(
-    janela,
-    () => {
-      atualizarComboSiteUI();
-      limitarQuantidadeProdutoComAdicionais();
-    },
-    () => {
-      comboSiteUI = anterior;
-      atualizarComboSiteUI();
-    },
-  );
+  configurarAcrescimosImediatosUI(janela, () => {
+    atualizarComboSiteUI();
+    limitarQuantidadeProdutoComAdicionais();
+  });
   janela.addEventListener("close", () => area.remove(), { once: true });
 }
 document.addEventListener("DOMContentLoaded", () => {
   const abrir = abrirProduto;
   window.abrirProduto = (item, categoria) => {
+    if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
     abrir(item, categoria);
     if (String(categoria || "").toLowerCase() !== "combos") return;
     comboSiteUI = {
@@ -201,9 +194,17 @@ document.addEventListener("DOMContentLoaded", () => {
     opcoes.innerHTML =
       '<button class="combo-abrir-ui" onclick="abrirEscolhaAcrescimosComboUI(\'site\')">Acréscimos</button><div class="combo-selecao-ui" data-site-resumo="-2"></div>';
     document.getElementById("obs-produto").hidden = false;
+    document.querySelectorAll('#modal-opcoes-tipo input[name="tipo-produto"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        const selecionado = aplicarTipoComboOperacao(item, radio.value);
+        document.getElementById("modal-desc").textContent =
+          selecionado.descricao || selecionado.desc || "";
+      });
+    });
   };
   const adicionar = adicionarProdutoFinal;
   window.adicionarProdutoFinal = () => {
+    if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
     if (String(categoriaProdutoAtual).toLowerCase() !== "combos") return adicionar();
     const extras = extrasComboSiteUI();
     if (limitarQuantidadeProdutoComAdicionais()) return;
@@ -211,6 +212,12 @@ document.addEventListener("DOMContentLoaded", () => {
     adicionar();
     if (carrinho.length <= tamanho) return;
     const item = carrinho[carrinho.length - 1];
+    const produto = aplicarTipoComboOperacao(
+      produtoAtual,
+      document.querySelector('input[name="tipo-produto"]:checked')?.value,
+    );
+    item.tipoCarne = produto.tipoCarne || "";
+    item.descricao = produto.descricao || produto.desc || "";
     item.lanchesCombo = comboSiteUI.lanches.map((c, n) => ({
       numero: n + 1,
       adicionais: Object.values(c.adicionais).filter((a) => a.qtd > 0),
@@ -221,6 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   const abrirComCombo = window.abrirProduto;
   window.abrirProduto = (...args) => {
+    if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
     const opcoes = document.getElementById("combo-site-opcoes-ui");
     if (opcoes) opcoes.hidden = true;
     document.getElementById("obs-produto").hidden = false;

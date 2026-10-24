@@ -6,6 +6,7 @@ let closed = 0;
 const parent = { matches: () => false };
 const outer = {
   matches: () => true,
+  querySelector: () => ({}),
   close: () => {
     closed++;
   },
