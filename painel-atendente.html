@@ -1,16 +1,43 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
+    <script src="js/imagens-webp.js?v=20261025-2"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Painel Atendente</title>
 
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/painel-atendente.css?v=20261024-9" />
+    <link rel="stylesheet" href="css/paginas/painel-atendente.css?v=20261025-2" />
+    <link rel="stylesheet" href="css/componentes/alertas-chamados.css?v=20261026-9" />
   </head>
   <body class="painel-atendente-body">
-    <h1>👨‍💼 Painel do Atendente</h1>
+    <h1 class="titulo-painel-atendente-ui">
+      <span>👨‍💼 Painel do Atendente</span
+      ><button
+        type="button"
+        id="btn-som-chamados"
+        aria-label="Ativar som dos chamados"
+        title="Ativar som dos chamados"
+        aria-pressed="false"
+        onclick="alternarSomChamadosAtendenteUI()"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+          <path class="sino-desligado-ui" d="m3 3 18 18" />
+        </svg>
+      </button>
+    </h1>
 
     <p id="nome-atendente"></p>
 
@@ -64,18 +91,20 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <script src="js/ui-comum.js?v=20261024-3"></script>
-    <script src="js/script.js?v=20261024-9"></script>
-    <script src="js/produto-comanda.js?v=20261023-21"></script>
-    <script src="js/atendente.js?v=20261024-2"></script>
+    <script src="js/ui-comum.js?v=20261025-2"></script>
+    <script src="js/som-chamados.js?v=20261026-9"></script>
+    <script src="js/script.js?v=20261025-2"></script>
+    <script src="js/produto-comanda.js?v=20261025-2"></script>
+    <script src="js/atendente.js?v=20261026-5"></script>
 
-    <script src="js/pedido-atendente-ui.js?v=20261023-19"></script>
-    <script src="js/operacao.js?v=20261024-9"></script>
-    <script src="js/app-ui.js?v=20261023-19"></script>
-    <script src="js/raspadinhas-recuperacao.js?v=20261020-3"></script>
-    <script src="js/raspadinhas.js?v=20261024-9"></script>
-    <script src="js/fluxos-interface.js?v=20261024-1"></script>
-    <script src="js/janelas-fluxos.js?v=20261023-19"></script>
-    <script src="js/pagamento-ui.js?v=20261022-2"></script>
+    <script src="js/pedido-atendente-ui.js?v=20261025-2"></script>
+    <script src="js/operacao.js?v=20261025-2"></script>
+    <script src="js/mesas-limpeza.js?v=20261025-2"></script>
+    <script src="js/app-ui.js?v=20261025-2"></script>
+    <script src="js/raspadinhas-recuperacao.js?v=20261025-2"></script>
+    <script src="js/raspadinhas.js?v=20261025-2"></script>
+    <script src="js/fluxos-interface.js?v=20261025-2"></script>
+    <script src="js/janelas-fluxos.js?v=20261025-2"></script>
+    <script src="js/pagamento-ui.js?v=20261025-2"></script>
   </body>
 </html>

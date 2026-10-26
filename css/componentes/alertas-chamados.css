@@ -1,0 +1,182 @@
+.painel-atendente-body > h1.titulo-painel-atendente-ui {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  font-size: clamp(22px, 5.5vw, 30px);
+}
+.titulo-painel-atendente-ui > span {
+  min-width: 0;
+}
+.titulo-painel-atendente-ui #btn-som-chamados {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  margin: 0;
+  padding: 9px;
+  border: 1px solid #5c5c5c;
+  border-radius: 50%;
+  background: #242424;
+  color: #bbb;
+}
+.titulo-painel-atendente-ui #btn-som-chamados[aria-pressed="true"] {
+  background: #392d12;
+  border-color: #e9bc54;
+  color: #ffd76a;
+}
+#btn-som-chamados[aria-pressed="true"] .sino-desligado-ui {
+  display: none;
+}
+#btn-som-chamados:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+dialog.interface-janela.som-escolha-janela-ui,
+dialog.interface-janela.som-ativacao-janela-ui {
+  width: min(480px, calc(100vw - 24px));
+  max-width: 480px;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+}
+.som-ativacao-conteudo-ui p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+dialog.interface-janela.som-ativacao-janela-ui {
+  width: min(400px, calc(100vw - 40px));
+  max-width: 400px;
+}
+.som-ativacao-conteudo-ui #estado-som-chamados:empty {
+  display: none;
+}
+.som-ativacao-conteudo-ui .som-ativacao-pergunta-ui {
+  font-size: 16px;
+  font-weight: 700;
+}
+.som-ativacao-conteudo-ui .som-ativacao-limite-ui {
+  padding: 10px;
+  border-left: 3px solid #e9bc54;
+  border-radius: 4px;
+  background: #2c271c;
+  color: #f2e5bf;
+  font-size: 13px;
+}
+.som-ativacao-acoes-ui {
+  display: flex;
+  gap: 10px;
+}
+.som-ativacao-acoes-ui > button {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px;
+  font-size: 14px;
+}
+.som-ativacao-acoes-ui .som-nao-ui {
+  background: #333;
+  border: 1px solid #666;
+}
+.som-escolha-janela-ui .alertas-chamados-ui {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+#config-som-chamados-atalho {
+  margin: 12px 0 20px;
+}
+#config-som-chamados-atalho > button {
+  width: auto;
+  min-height: 40px;
+  margin: 0;
+  padding: 9px 14px;
+  background: #333;
+  border: 1px solid #666;
+  font-size: 14px;
+}
+.alertas-chamados-ui .som-concluir-ui {
+  width: 100%;
+  margin: 4px 0 0;
+  min-height: 44px;
+}
+.alertas-chamados-ui > strong {
+  font-size: 17px;
+}
+.alertas-chamados-ui p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.alertas-chamados-ui small {
+  display: block;
+  color: #c6c6c6;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.toques-chamados-ui {
+  display: grid;
+  gap: 8px;
+}
+.toque-chamado-ui {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  min-width: 0;
+}
+.toque-chamado-ui:has(input:checked) {
+  border-color: #df5968;
+  background: #2a1b1e;
+}
+.toque-chamado-ui label {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  cursor: pointer;
+}
+.toque-chamado-ui input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin: 0;
+  accent-color: #ed0014;
+}
+.toque-chamado-ui span {
+  min-width: 0;
+}
+.toque-chamado-ui strong {
+  font-size: 15px;
+}
+.toque-chamado-ui button {
+  width: auto;
+  min-height: 40px;
+  flex-shrink: 0;
+  padding: 8px 10px;
+  margin: 0;
+  background: #333;
+  border: 1px solid #686868;
+  font-size: 13px;
+}
+.alertas-chamados-ui #ultimo-chamado-sonoro {
+  padding-top: 10px;
+  border-top: 1px solid #444;
+  overflow-wrap: anywhere;
+}
+@media print {
+  .alertas-chamados-ui,
+  #btn-som-chamados {
+    display: none !important;
+  }
+}

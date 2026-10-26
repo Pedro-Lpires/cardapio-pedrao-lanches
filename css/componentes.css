@@ -1,16 +1,18 @@
 /* Estilos finais por componente. A sequência mantém as prioridades atuais. */
-@import url("componentes/avisos.css?v=20261019-3");
-@import url("componentes/navegacao-e-busca.css?v=20261019-2");
-@import url("componentes/delivery-produto.css?v=20261023-15");
-@import url("componentes/delivery-carrinho.css?v=20261023-11");
-@import url("componentes/delivery-checkout.css?v=20261019-2");
-@import url("componentes/perfil.css?v=20261021-11");
-@import url("componentes/autoatendimento.css?v=20261024-8");
-@import url("componentes/atendente.css?v=20261024-2");
-@import url("componentes/raspadinhas.css?v=20261024-5");
-@import url("componentes/produto-cabecalho.css?v=20261023-20");
-@import url("componentes/pedido-atendente.css?v=20261024-8");
-@import url("componentes/tipos-carne.css?v=20261023-21");
-@import url("componentes/personagens.css?v=20261024-9");
-@import url("componentes/loja-publica.css?v=20261024-5");
-@import url("componentes/desktop.css?v=20261024-8");
+@import url("componentes/avisos.css?v=20261025-2");
+@import url("componentes/navegacao-e-busca.css?v=20261025-2");
+@import url("componentes/delivery-produto.css?v=20261025-2");
+@import url("componentes/delivery-carrinho.css?v=20261025-2");
+@import url("componentes/delivery-checkout.css?v=20261025-2");
+@import url("componentes/perfil.css?v=20261025-2");
+@import url("componentes/autoatendimento.css?v=20261026-2");
+@import url("componentes/atendente.css?v=20261025-2");
+@import url("componentes/raspadinhas.css?v=20261025-2");
+@import url("componentes/produto-cabecalho.css?v=20261025-2");
+@import url("componentes/pedido-atendente.css?v=20261025-2");
+@import url("componentes/tipos-carne.css?v=20261025-2");
+@import url("componentes/personagens.css?v=20261025-2");
+@import url("componentes/loja-publica.css?v=20261025-2");
+@import url("componentes/desktop.css?v=20261025-2");
+
+@import url("componentes/avatares.css?v=20261025-2");

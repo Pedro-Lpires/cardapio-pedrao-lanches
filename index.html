@@ -1,12 +1,14 @@
 <!doctype html>
 <html lang="pt-br">
   <head>
+    <script src="js/imagens-webp.js?v=20261025-2"></script>
+    <script src="js/avatares-ui.js?v=20261026-2"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pedrão Lanches</title>
-    <link rel="icon" href="images/logo-trailer.png" />
+    <link rel="icon" href="images/logo-trailer.webp" />
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/index.css?v=20261024-9" />
+    <link rel="stylesheet" href="css/paginas/index.css?v=20261025-2" />
   </head>
   <body>
     <!-- HEADER — cabeçalho da página -->
@@ -14,7 +16,7 @@
       <div class="banner-loja"></div>
 
       <div class="header-loja-topo">
-        <img src="images/logo-trailer.png" class="logo-loja" alt="Pedrão Lanches" />
+        <img src="images/logo-trailer.webp" class="logo-loja" alt="Pedrão Lanches" />
         <div class="header-loja-nome">
           <h1>PEDRÃO LANCHES</h1>
           <p class="subtitulo">O melhor da cidade desde 2014</p>
@@ -305,7 +307,7 @@
           </div>
 
           <img
-            src="images/mascote-batata-frita.png"
+            src="images/mascote-batata-frita.webp"
             class="mascote-perfil"
             alt="Mascote de batatas fritas do Pedrão dando boas-vindas"
           />
@@ -319,17 +321,21 @@
           <h2 id="titulo-form-perfil">Login</h2>
 
           <div id="box-avatar-form" class="box-avatar-cliente" style="display: none">
-            <img id="avatar-cliente-preview" src="images/avatar1.png" class="avatar-preview" />
+            <img
+              id="avatar-cliente-preview"
+              src="images/avatares/sem-rank/maionese.webp"
+              class="avatar-preview"
+            />
 
             <button type="button" onclick="toggleAvatares()">Escolher avatar</button>
 
-            <div id="lista-avatares" class="lista-avatares" style="display: none">
-              <img src="images/avatar1.png" onclick="selecionarAvatar('images/avatar1.png')" />
-              <img src="images/avatar2.png" onclick="selecionarAvatar('images/avatar2.png')" />
-              <img src="images/avatar3.png" onclick="selecionarAvatar('images/avatar3.png')" />
-              <img src="images/avatar4.png" onclick="selecionarAvatar('images/avatar4.png')" />
-              <img src="images/avatar5.png" onclick="selecionarAvatar('images/avatar5.png')" />
-            </div>
+            <div
+              id="lista-avatares"
+              class="lista-avatares"
+              role="group"
+              aria-label="Escolha seu personagem"
+              style="display: none"
+            ></div>
           </div>
 
           <input type="text" id="perfil-nome" placeholder="Nome" autocomplete="new-password" />
@@ -382,7 +388,11 @@
             <span id="perfil-logado-nome">cliente</span>
           </h2>
 
-          <img id="perfil-logado-avatar" src="images/avatar1.png" class="avatar-preview grande" />
+          <img
+            id="perfil-logado-avatar"
+            src="images/avatares/sem-rank/maionese.webp"
+            class="avatar-preview grande"
+          />
           <button type="button" class="btn-mensagens-perfil" onclick="abrirMensagensCliente()">
             Mensagens
           </button>
@@ -619,19 +629,19 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="js/produtos.js?v=20261023-12"></script>
-    <script src="js/ui-comum.js?v=20261024-3"></script>
-    <script src="js/personagens-ui.js?v=20261024-9"></script>
-    <script src="js/loja-publica-ui.js?v=20261024-5"></script>
-    <script src="js/script.js?v=20261024-9"></script>
-    <script src="js/mensagens-tempo-real-ui.js?v=20261024-3"></script>
-    <script src="js/operacao.js?v=20261024-9"></script>
-    <script src="js/cardapio-ui.js?v=20261018-1"></script>
-    <script src="js/app-ui.js?v=20261023-19"></script>
-    <script src="js/raspadinhas-recuperacao.js?v=20261020-3"></script>
-    <script src="js/raspadinhas.js?v=20261024-9"></script>
-    <script src="js/fluxos-interface.js?v=20261024-5"></script>
-    <script src="js/janelas-fluxos.js?v=20261023-19"></script>
-    <script src="js/combos-site-ui.js?v=20261024-5"></script>
+    <script src="js/produtos.js?v=20261025-2"></script>
+    <script src="js/ui-comum.js?v=20261025-2"></script>
+    <script src="js/personagens-ui.js?v=20261025-2"></script>
+    <script src="js/loja-publica-ui.js?v=20261025-2"></script>
+    <script src="js/script.js?v=20261025-2"></script>
+    <script src="js/mensagens-tempo-real-ui.js?v=20261025-2"></script>
+    <script src="js/operacao.js?v=20261025-2"></script>
+    <script src="js/cardapio-ui.js?v=20261025-2"></script>
+    <script src="js/app-ui.js?v=20261025-2"></script>
+    <script src="js/raspadinhas-recuperacao.js?v=20261025-2"></script>
+    <script src="js/raspadinhas.js?v=20261025-2"></script>
+    <script src="js/fluxos-interface.js?v=20261025-2"></script>
+    <script src="js/janelas-fluxos.js?v=20261025-2"></script>
+    <script src="js/combos-site-ui.js?v=20261025-2"></script>
   </body>
 </html>

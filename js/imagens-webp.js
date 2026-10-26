@@ -1,0 +1,281 @@
+const imagensWebpPedraoUI = {
+  "images/avatares/avatares/normal/guardiao-da-maionese.png":
+    "images/avatares/sem-rank/maionese.webp",
+  "images/avatares/avatares/bronze/guardiao-da-maionese.png":
+    "images/avatares/bronze/maionese.webp",
+  "images/avatares/avatares/prata/guardiao-da-maionese.png": "images/avatares/prata/maionese.webp",
+  "images/avatares/avatares/ouro/guardiao-da-maionese.png": "images/avatares/ouro/maionese.webp",
+  "images/avatares/avatares/diamante/guardiao-da-maionese.png":
+    "images/avatares/diamante/maionese.webp",
+  "images/avatares/avatares/imortal/guardiao-da-maionese.png":
+    "images/avatares/imortal/maionese.webp",
+  "images/avatares/avatares/normal/dama-do-ketchup.png": "images/avatares/sem-rank/ketchup.webp",
+  "images/avatares/avatares/bronze/dama-do-ketchup.png": "images/avatares/bronze/ketchup.webp",
+  "images/avatares/avatares/prata/dama-do-ketchup.png": "images/avatares/prata/ketchup.webp",
+  "images/avatares/avatares/ouro/dama-do-ketchup.png": "images/avatares/ouro/ketchup.webp",
+  "images/avatares/avatares/diamante/dama-do-ketchup.png": "images/avatares/diamante/ketchup.webp",
+  "images/avatares/avatares/imortal/dama-do-ketchup.png": "images/avatares/imortal/ketchup.webp",
+  "images/avatares/avatares/normal/mestre-do-defumado.png":
+    "images/avatares/sem-rank/barbecue.webp",
+  "images/avatares/avatares/bronze/mestre-do-defumado.png": "images/avatares/bronze/barbecue.webp",
+  "images/avatares/avatares/prata/mestre-do-defumado.png": "images/avatares/prata/barbecue.webp",
+  "images/avatares/avatares/ouro/mestre-do-defumado.png": "images/avatares/ouro/barbecue.webp",
+  "images/avatares/avatares/diamante/mestre-do-defumado.png":
+    "images/avatares/diamante/barbecue.webp",
+  "images/avatares/avatares/imortal/mestre-do-defumado.png":
+    "images/avatares/imortal/barbecue.webp",
+  "images/avatares/avatares/normal/artesa-do-hamburguer.png":
+    "images/avatares/sem-rank/caseiro.webp",
+  "images/avatares/avatares/bronze/artesa-do-hamburguer.png": "images/avatares/bronze/caseiro.webp",
+  "images/avatares/avatares/prata/artesa-do-hamburguer.png": "images/avatares/prata/caseiro.webp",
+  "images/avatares/avatares/ouro/artesa-do-hamburguer.png": "images/avatares/ouro/caseiro.webp",
+  "images/avatares/avatares/diamante/artesa-do-hamburguer.png":
+    "images/avatares/diamante/caseiro.webp",
+  "images/avatares/avatares/imortal/artesa-do-hamburguer.png":
+    "images/avatares/imortal/caseiro.webp",
+  "images/avatares/avatares/normal/lorde-do-mignon.png": "images/avatares/sem-rank/mignon.webp",
+  "images/avatares/avatares/bronze/lorde-do-mignon.png": "images/avatares/bronze/mignon.webp",
+  "images/avatares/avatares/prata/lorde-do-mignon.png": "images/avatares/prata/mignon.webp",
+  "images/avatares/avatares/ouro/lorde-do-mignon.png": "images/avatares/ouro/mignon.webp",
+  "images/avatares/avatares/diamante/lorde-do-mignon.png": "images/avatares/diamante/mignon.webp",
+  "images/avatares/avatares/imortal/lorde-do-mignon.png": "images/avatares/imortal/mignon.webp",
+  "images/avatares/avatares/normal/guardia-da-horta.png": "images/avatares/sem-rank/salada.webp",
+  "images/avatares/avatares/bronze/guardia-da-horta.png": "images/avatares/bronze/salada.webp",
+  "images/avatares/avatares/prata/guardia-da-horta.png": "images/avatares/prata/salada.webp",
+  "images/avatares/avatares/ouro/guardia-da-horta.png": "images/avatares/ouro/salada.webp",
+  "images/avatares/avatares/diamante/guardia-da-horta.png": "images/avatares/diamante/salada.webp",
+  "images/avatares/avatares/imortal/guardia-da-horta.png": "images/avatares/imortal/salada.webp",
+  "images/avatares/avatares/normal/cavaleiro-da-coquinha.png":
+    "images/avatares/sem-rank/coquinha.webp",
+  "images/avatares/avatares/bronze/cavaleiro-da-coquinha.png":
+    "images/avatares/bronze/coquinha.webp",
+  "images/avatares/avatares/prata/cavaleiro-da-coquinha.png": "images/avatares/prata/coquinha.webp",
+  "images/avatares/avatares/ouro/cavaleiro-da-coquinha.png": "images/avatares/ouro/coquinha.webp",
+  "images/avatares/avatares/diamante/cavaleiro-da-coquinha.png":
+    "images/avatares/diamante/coquinha.webp",
+  "images/avatares/avatares/imortal/cavaleiro-da-coquinha.png":
+    "images/avatares/imortal/coquinha.webp",
+  "images/avatares/avatares/normal/barda-do-balcao.png": "images/avatares/sem-rank/conversa.webp",
+  "images/avatares/avatares/bronze/barda-do-balcao.png": "images/avatares/bronze/conversa.webp",
+  "images/avatares/avatares/prata/barda-do-balcao.png": "images/avatares/prata/conversa.webp",
+  "images/avatares/avatares/ouro/barda-do-balcao.png": "images/avatares/ouro/conversa.webp",
+  "images/avatares/avatares/diamante/barda-do-balcao.png": "images/avatares/diamante/conversa.webp",
+  "images/avatares/avatares/imortal/barda-do-balcao.png": "images/avatares/imortal/conversa.webp",
+  "images/avatares/avatares/normal/cacador-de-adicionais.png":
+    "images/avatares/sem-rank/adicionais.webp",
+  "images/avatares/avatares/bronze/cacador-de-adicionais.png":
+    "images/avatares/bronze/adicionais.webp",
+  "images/avatares/avatares/prata/cacador-de-adicionais.png":
+    "images/avatares/prata/adicionais.webp",
+  "images/avatares/avatares/ouro/cacador-de-adicionais.png": "images/avatares/ouro/adicionais.webp",
+  "images/avatares/avatares/diamante/cacador-de-adicionais.png":
+    "images/avatares/diamante/adicionais.webp",
+  "images/avatares/avatares/imortal/cacador-de-adicionais.png":
+    "images/avatares/imortal/adicionais.webp",
+  "images/avatares/avatares/normal/mestra-da-barganha.png":
+    "images/avatares/sem-rank/desconto.webp",
+  "images/avatares/avatares/bronze/mestra-da-barganha.png": "images/avatares/bronze/desconto.webp",
+  "images/avatares/avatares/prata/mestra-da-barganha.png": "images/avatares/prata/desconto.webp",
+  "images/avatares/avatares/ouro/mestra-da-barganha.png": "images/avatares/ouro/desconto.webp",
+  "images/avatares/avatares/diamante/mestra-da-barganha.png":
+    "images/avatares/diamante/desconto.webp",
+  "images/avatares/avatares/imortal/mestra-da-barganha.png":
+    "images/avatares/imortal/desconto.webp",
+  "images/avatar-admin.png": "images/avatar-admin.webp",
+  "images/avatar1.png": "images/avatar1.webp",
+  "images/avatar2.png": "images/avatar2.webp",
+  "images/avatar3.png": "images/avatar3.webp",
+  "images/banner-pedrao.jpeg": "images/banner-pedrao.webp",
+  "images/lanche.png": "images/lanche.webp",
+  "images/logo-trailer.png": "images/logo-trailer.webp",
+  "images/mascote-batata-frita.png": "images/mascote-batata-frita.webp",
+  "images/personagens-pedrao/celular-pedrao.png": "images/personagens-pedrao/celular-pedrao.webp",
+  "images/personagens-pedrao/mago-acenando.png": "images/personagens-pedrao/mago-acenando.webp",
+  "images/personagens-pedrao/mago-apontando-baixo.png":
+    "images/personagens-pedrao/mago-apontando-baixo.webp",
+  "images/personagens-pedrao/mago-apontando-lado.png":
+    "images/personagens-pedrao/mago-apontando-lado.webp",
+  "images/personagens-pedrao/mago-aviso.png": "images/personagens-pedrao/mago-aviso.webp",
+  "images/personagens-pedrao/mago-boas-vindas.png":
+    "images/personagens-pedrao/mago-boas-vindas.webp",
+  "images/personagens-pedrao/mago-brincalhao.png": "images/personagens-pedrao/mago-brincalhao.webp",
+  "images/personagens-pedrao/mago-comemorando.png":
+    "images/personagens-pedrao/mago-comemorando.webp",
+  "images/personagens-pedrao/mago-desapontado.png":
+    "images/personagens-pedrao/mago-desapontado.webp",
+  "images/personagens-pedrao/mago-desculpas.png": "images/personagens-pedrao/mago-desculpas.webp",
+  "images/personagens-pedrao/mago-intrigado.png": "images/personagens-pedrao/mago-intrigado.webp",
+  "images/personagens-pedrao/mago-joinha.png": "images/personagens-pedrao/mago-joinha.webp",
+  "images/personagens-pedrao/mago-novo-nivel.png": "images/personagens-pedrao/mago-novo-nivel.webp",
+  "images/personagens-pedrao/mago-pedido-confirmado.png":
+    "images/personagens-pedrao/mago-pedido-confirmado.webp",
+  "images/personagens-pedrao/mago-pensando.png": "images/personagens-pedrao/mago-pensando.webp",
+  "images/personagens-pedrao/mago-piscando.png": "images/personagens-pedrao/mago-piscando.webp",
+  "images/personagens-pedrao/mago-saboreando.png": "images/personagens-pedrao/mago-saboreando.webp",
+  "images/personagens-pedrao/mago-sobrancelha.png":
+    "images/personagens-pedrao/mago-sobrancelha.webp",
+  "images/personagens-pedrao/mago-sorrindo.png": "images/personagens-pedrao/mago-sorrindo.webp",
+  "images/personagens-pedrao/mago-surpreso.png": "images/personagens-pedrao/mago-surpreso.webp",
+  "images/personagens-pedrao/mago-tranquilo.png": "images/personagens-pedrao/mago-tranquilo.webp",
+  "images/personagens-pedrao/mago-trono-novidades.png":
+    "images/personagens-pedrao/mago-trono-novidades.webp",
+  "images/personagens-pedrao/ui/fogo-realista.png":
+    "images/personagens-pedrao/ui/fogo-realista.webp",
+  "images/personagens-pedrao/ui/mago-acenando.png":
+    "images/personagens-pedrao/ui/mago-acenando.webp",
+  "images/personagens-pedrao/ui/mago-aviso.png": "images/personagens-pedrao/ui/mago-aviso.webp",
+  "images/personagens-pedrao/ui/mago-boas-vindas.png":
+    "images/personagens-pedrao/ui/mago-boas-vindas.webp",
+  "images/personagens-pedrao/ui/mago-brincalhao.png":
+    "images/personagens-pedrao/ui/mago-brincalhao.webp",
+  "images/personagens-pedrao/ui/mago-comemorando.png":
+    "images/personagens-pedrao/ui/mago-comemorando.webp",
+  "images/personagens-pedrao/ui/mago-desculpas.png":
+    "images/personagens-pedrao/ui/mago-desculpas.webp",
+  "images/personagens-pedrao/ui/mago-intrigado.png":
+    "images/personagens-pedrao/ui/mago-intrigado.webp",
+  "images/personagens-pedrao/ui/mago-joinha.png": "images/personagens-pedrao/ui/mago-joinha.webp",
+  "images/personagens-pedrao/ui/mago-novo-nivel.png":
+    "images/personagens-pedrao/ui/mago-novo-nivel.webp",
+  "images/personagens-pedrao/ui/mago-pedido-confirmado.png":
+    "images/personagens-pedrao/ui/mago-pedido-confirmado.webp",
+  "images/personagens-pedrao/ui/mago-pensando.png":
+    "images/personagens-pedrao/ui/mago-pensando.webp",
+  "images/personagens-pedrao/ui/mago-piscando.png":
+    "images/personagens-pedrao/ui/mago-piscando.webp",
+  "images/personagens-pedrao/ui/mago-saboreando.png":
+    "images/personagens-pedrao/ui/mago-saboreando.webp",
+  "images/personagens-pedrao/ui/mago-sobrancelha.png":
+    "images/personagens-pedrao/ui/mago-sobrancelha.webp",
+  "images/personagens-pedrao/ui/mago-surpreso.png":
+    "images/personagens-pedrao/ui/mago-surpreso.webp",
+  "images/personagens-pedrao/ui/mago-tranquilo.png":
+    "images/personagens-pedrao/ui/mago-tranquilo.webp",
+  "images/avatares/avatares/normal/guardiao-da-maionese.webp":
+    "images/avatares/sem-rank/maionese.webp",
+  "images/avatares/avatares/bronze/guardiao-da-maionese.webp":
+    "images/avatares/bronze/maionese.webp",
+  "images/avatares/avatares/prata/guardiao-da-maionese.webp": "images/avatares/prata/maionese.webp",
+  "images/avatares/avatares/ouro/guardiao-da-maionese.webp": "images/avatares/ouro/maionese.webp",
+  "images/avatares/avatares/diamante/guardiao-da-maionese.webp":
+    "images/avatares/diamante/maionese.webp",
+  "images/avatares/avatares/imortal/guardiao-da-maionese.webp":
+    "images/avatares/imortal/maionese.webp",
+  "images/avatares/avatares/normal/dama-do-ketchup.webp": "images/avatares/sem-rank/ketchup.webp",
+  "images/avatares/avatares/bronze/dama-do-ketchup.webp": "images/avatares/bronze/ketchup.webp",
+  "images/avatares/avatares/prata/dama-do-ketchup.webp": "images/avatares/prata/ketchup.webp",
+  "images/avatares/avatares/ouro/dama-do-ketchup.webp": "images/avatares/ouro/ketchup.webp",
+  "images/avatares/avatares/diamante/dama-do-ketchup.webp": "images/avatares/diamante/ketchup.webp",
+  "images/avatares/avatares/imortal/dama-do-ketchup.webp": "images/avatares/imortal/ketchup.webp",
+  "images/avatares/avatares/normal/mestre-do-defumado.webp":
+    "images/avatares/sem-rank/barbecue.webp",
+  "images/avatares/avatares/bronze/mestre-do-defumado.webp": "images/avatares/bronze/barbecue.webp",
+  "images/avatares/avatares/prata/mestre-do-defumado.webp": "images/avatares/prata/barbecue.webp",
+  "images/avatares/avatares/ouro/mestre-do-defumado.webp": "images/avatares/ouro/barbecue.webp",
+  "images/avatares/avatares/diamante/mestre-do-defumado.webp":
+    "images/avatares/diamante/barbecue.webp",
+  "images/avatares/avatares/imortal/mestre-do-defumado.webp":
+    "images/avatares/imortal/barbecue.webp",
+  "images/avatares/avatares/normal/artesa-do-hamburguer.webp":
+    "images/avatares/sem-rank/caseiro.webp",
+  "images/avatares/avatares/bronze/artesa-do-hamburguer.webp":
+    "images/avatares/bronze/caseiro.webp",
+  "images/avatares/avatares/prata/artesa-do-hamburguer.webp": "images/avatares/prata/caseiro.webp",
+  "images/avatares/avatares/ouro/artesa-do-hamburguer.webp": "images/avatares/ouro/caseiro.webp",
+  "images/avatares/avatares/diamante/artesa-do-hamburguer.webp":
+    "images/avatares/diamante/caseiro.webp",
+  "images/avatares/avatares/imortal/artesa-do-hamburguer.webp":
+    "images/avatares/imortal/caseiro.webp",
+  "images/avatares/avatares/normal/lorde-do-mignon.webp": "images/avatares/sem-rank/mignon.webp",
+  "images/avatares/avatares/bronze/lorde-do-mignon.webp": "images/avatares/bronze/mignon.webp",
+  "images/avatares/avatares/prata/lorde-do-mignon.webp": "images/avatares/prata/mignon.webp",
+  "images/avatares/avatares/ouro/lorde-do-mignon.webp": "images/avatares/ouro/mignon.webp",
+  "images/avatares/avatares/diamante/lorde-do-mignon.webp": "images/avatares/diamante/mignon.webp",
+  "images/avatares/avatares/imortal/lorde-do-mignon.webp": "images/avatares/imortal/mignon.webp",
+  "images/avatares/avatares/normal/guardia-da-horta.webp": "images/avatares/sem-rank/salada.webp",
+  "images/avatares/avatares/bronze/guardia-da-horta.webp": "images/avatares/bronze/salada.webp",
+  "images/avatares/avatares/prata/guardia-da-horta.webp": "images/avatares/prata/salada.webp",
+  "images/avatares/avatares/ouro/guardia-da-horta.webp": "images/avatares/ouro/salada.webp",
+  "images/avatares/avatares/diamante/guardia-da-horta.webp": "images/avatares/diamante/salada.webp",
+  "images/avatares/avatares/imortal/guardia-da-horta.webp": "images/avatares/imortal/salada.webp",
+  "images/avatares/avatares/normal/cavaleiro-da-coquinha.webp":
+    "images/avatares/sem-rank/coquinha.webp",
+  "images/avatares/avatares/bronze/cavaleiro-da-coquinha.webp":
+    "images/avatares/bronze/coquinha.webp",
+  "images/avatares/avatares/prata/cavaleiro-da-coquinha.webp":
+    "images/avatares/prata/coquinha.webp",
+  "images/avatares/avatares/ouro/cavaleiro-da-coquinha.webp": "images/avatares/ouro/coquinha.webp",
+  "images/avatares/avatares/diamante/cavaleiro-da-coquinha.webp":
+    "images/avatares/diamante/coquinha.webp",
+  "images/avatares/avatares/imortal/cavaleiro-da-coquinha.webp":
+    "images/avatares/imortal/coquinha.webp",
+  "images/avatares/avatares/normal/barda-do-balcao.webp": "images/avatares/sem-rank/conversa.webp",
+  "images/avatares/avatares/bronze/barda-do-balcao.webp": "images/avatares/bronze/conversa.webp",
+  "images/avatares/avatares/prata/barda-do-balcao.webp": "images/avatares/prata/conversa.webp",
+  "images/avatares/avatares/ouro/barda-do-balcao.webp": "images/avatares/ouro/conversa.webp",
+  "images/avatares/avatares/diamante/barda-do-balcao.webp":
+    "images/avatares/diamante/conversa.webp",
+  "images/avatares/avatares/imortal/barda-do-balcao.webp": "images/avatares/imortal/conversa.webp",
+  "images/avatares/avatares/normal/cacador-de-adicionais.webp":
+    "images/avatares/sem-rank/adicionais.webp",
+  "images/avatares/avatares/bronze/cacador-de-adicionais.webp":
+    "images/avatares/bronze/adicionais.webp",
+  "images/avatares/avatares/prata/cacador-de-adicionais.webp":
+    "images/avatares/prata/adicionais.webp",
+  "images/avatares/avatares/ouro/cacador-de-adicionais.webp":
+    "images/avatares/ouro/adicionais.webp",
+  "images/avatares/avatares/diamante/cacador-de-adicionais.webp":
+    "images/avatares/diamante/adicionais.webp",
+  "images/avatares/avatares/imortal/cacador-de-adicionais.webp":
+    "images/avatares/imortal/adicionais.webp",
+  "images/avatares/avatares/normal/mestra-da-barganha.webp":
+    "images/avatares/sem-rank/desconto.webp",
+  "images/avatares/avatares/bronze/mestra-da-barganha.webp": "images/avatares/bronze/desconto.webp",
+  "images/avatares/avatares/prata/mestra-da-barganha.webp": "images/avatares/prata/desconto.webp",
+  "images/avatares/avatares/ouro/mestra-da-barganha.webp": "images/avatares/ouro/desconto.webp",
+  "images/avatares/avatares/diamante/mestra-da-barganha.webp":
+    "images/avatares/diamante/desconto.webp",
+  "images/avatares/avatares/imortal/mestra-da-barganha.webp":
+    "images/avatares/imortal/desconto.webp",
+};
+// Caminhos salvos no Firebase antes da conversão continuam válidos na interface.
+function resolverImagemWebpUI(valor) {
+  if (typeof valor !== "string" || /^(data:|blob:)/i.test(valor)) return valor;
+  if (/^https?:/i.test(valor)) {
+    try {
+      const url = new URL(valor);
+      if (typeof location === "undefined" || url.origin !== location.origin) return valor;
+      const novo = resolverImagemWebpUI(url.pathname + url.search + url.hash);
+      return novo === url.pathname + url.search + url.hash
+        ? valor
+        : url.origin + "/" + novo.replace(/^\//, "");
+    } catch {
+      return valor;
+    }
+  }
+  const partes = valor.match(/^([^?#]*)(.*)$/);
+  const caminho = partes[1].replace(/^\.\//, "").replace(/^\//, "");
+  return imagensWebpPedraoUI[caminho] ? imagensWebpPedraoUI[caminho] + partes[2] : valor;
+}
+function atualizarImagensWebpUI(raiz) {
+  const imagens = raiz.matches?.("img[src]") ? [raiz] : [];
+  imagens.push(...(raiz.querySelectorAll?.("img[src]") || []));
+  for (const img of imagens) {
+    const atual = img.getAttribute("src");
+    const novo = resolverImagemWebpUI(atual);
+    if (novo !== atual) img.setAttribute("src", novo);
+  }
+}
+if (typeof MutationObserver !== "undefined" && typeof document !== "undefined") {
+  new MutationObserver((mudancas) => {
+    for (const mudanca of mudancas) {
+      if (mudanca.type === "attributes") atualizarImagensWebpUI(mudanca.target);
+      else for (const no of mudanca.addedNodes) if (no.nodeType === 1) atualizarImagensWebpUI(no);
+    }
+  }).observe(document, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["src"],
+  });
+}

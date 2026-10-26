@@ -464,3 +464,19 @@ dialog.ui-caixa.raspa-consulta-atendente {
   padding: 10px 16px;
   font-size: 15px;
 }
+/* Limpeza de encerramento separada dos botões das mesas. */
+.mesas-limpeza-acoes-ui {
+  display: flex;
+  justify-content: flex-end;
+  margin: 4px 0 18px;
+}
+.mesas-limpeza-acoes-ui .mesas-limpar-ui {
+  width: auto;
+  min-height: 40px;
+  margin: 0;
+  padding: 9px 14px;
+  background: #321b1e;
+  border: 1px solid #b85661;
+  color: #fff;
+  font-size: 14px;
+}

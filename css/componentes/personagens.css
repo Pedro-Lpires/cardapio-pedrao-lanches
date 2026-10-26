@@ -349,7 +349,8 @@ dialog[data-personagem="acordo"] [data-enquadramento="busto"] .aviso-personagem-
 .fogo-lingua-ui {
   position: absolute;
   inset: 0;
-  background: url("../../images/personagens-pedrao/ui/fogo-realista.png") center / contain no-repeat;
+  background: url("../../images/personagens-pedrao/ui/fogo-realista.webp") center / contain
+    no-repeat;
   filter: drop-shadow(0 0 3px #ff201c88);
   transform-origin: 50% 100%;
   animation: chama-maos-ui 470ms ease-in-out infinite alternate;

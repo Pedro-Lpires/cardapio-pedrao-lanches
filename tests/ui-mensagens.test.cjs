@@ -87,7 +87,7 @@ function snap(mensagens) {
   assert.doesNotMatch(html, /mensagem-ver-ui|Ver cupom/);
   assert.match(
     contexto.htmlMensagemCliente({ remetente: "admin", texto: "Aviso", data: 0 }),
-    /mago-tranquilo\.png/,
+    /mago-tranquilo\.webp/,
   );
   assert.doesNotMatch(
     contexto.htmlMensagemCliente({ remetente: "cliente", texto: "Olá", data: 0 }),

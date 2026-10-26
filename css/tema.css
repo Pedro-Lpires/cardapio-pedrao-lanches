@@ -33,7 +33,7 @@ body {
 .banner-loja {
   height: 150px;
   background:
-    url("../images/banner-pedrao.jpeg") center/cover no-repeat,
+    url("../images/banner-pedrao.webp") center/cover no-repeat,
     linear-gradient(135deg, #3a0a0a, #1a1a1a);
   border-bottom: 3px solid var(--primary-color);
 }
@@ -1905,7 +1905,7 @@ body {
   height: 150px;
   background:
     linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
-    url("../images/banner-pedrao.jpeg") center/px cover;
+    url("../images/banner-pedrao.webp") center/px cover;
 }
 
 /* main / section — conteúdo e componentes */

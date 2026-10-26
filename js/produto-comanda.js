@@ -317,7 +317,23 @@ function atualizarPrecoProduto() {
     atualizarResumoAdicionaisProdutoUI("area-acrescimos-produto");
 }
 
-async function carregarCategoriaProdutos(comandaId, categoria) {
+async function carregarCategoriaProdutos(comandaId, categoria, manterAberta = false) {
+  const area = document.getElementById("area-produtos-comanda");
+  if (area?.dataset) {
+    if (
+      !manterAberta &&
+      !area.dataset.buscaAtivaUi &&
+      area.dataset.categoriaAtivaUi === categoria
+    ) {
+      area.dataset.categoriaAtivaUi = "";
+      document.getElementById("lista-categoria-produtos").innerHTML = "";
+      return;
+    }
+    area.dataset.categoriaAtivaUi = categoria;
+    area.dataset.buscaAtivaUi = "";
+    const busca = document.getElementById("busca-produto-atendente");
+    if (busca) busca.value = "";
+  }
   contextoPainelProduto = "comanda";
 
   const lista = document.getElementById("lista-categoria-produtos");

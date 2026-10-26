@@ -10,7 +10,9 @@ for (const [id] of vm.runInContext("personagensAvatarPedraoUI", ctx)) {
     const cliente = { avatar, nivelCliente, fidelidadeAtiva: nivelCliente !== "Sem nível" };
     const dados = ctx.dadosAvatarClienteUI(cliente);
     assert.equal(dados.id, id, "A evolução mantém o personagem escolhido");
-    assert.match(dados.src, new RegExp("/" + id + "\\.png$"));
+    assert.match(dados.src, new RegExp("/" + id + "\\.webp$"));
+    assert.ok(fs.existsSync(dados.src), "Todos os sessenta trajes existem");
+    assert.ok(fs.statSync(dados.src).size < 40000, "Avatar adequado ao tamanho usado no perfil");
     const opcoes = ctx.htmlOpcoesAvataresUI(cliente, avatar);
     assert.equal((opcoes.match(/<button /g) || []).length, 10);
     assert.equal((opcoes.match(/aria-pressed="true"/g) || []).length, 1);
@@ -29,7 +31,7 @@ for (const [id] of vm.runInContext("personagensAvatarPedraoUI", ctx)) {
     "sem-rank",
   );
 }
-assert.equal(ctx.identidadeAvatarClienteUI("images/avatar2.png"), "ketchup");
+assert.equal(ctx.identidadeAvatarClienteUI("images/avatar2.webp"), "ketchup");
 assert.equal(
   ctx.dadosAvatarClienteUI({ fidelidadeAtiva: true, nivelCliente: "Lenda" }).rank,
   "imortal",

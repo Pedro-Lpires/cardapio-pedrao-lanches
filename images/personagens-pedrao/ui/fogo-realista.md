@@ -1,6 +1,6 @@
 # Fogo nas mãos do mago
 
-Arquivo usado: `images/personagens-pedrao/ui/fogo-realista.png` (128 × 192, PNG com transparência, aproximadamente 29 KB).
+Arquivo usado: `images/personagens-pedrao/ui/fogo-realista.webp` (128 × 192, PNG com transparência, aproximadamente 29 KB).
 
 Gerado pela ferramenta integrada de imagens (habilidade imagegen), sem CLI. O original foi preservado na pasta de imagens geradas; a cópia do projeto foi reduzida com o canal alpha preservado. O CSS anima a chama e acrescenta partículas independentes que sobem acima das mãos, respeitando a preferência por movimento reduzido.
 

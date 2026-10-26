@@ -1544,7 +1544,7 @@ async function abrirChamadoAdmin(clienteId, chamadoId) {
         html += `
                     <div class="linha-msg ${ehAdmin ? "linha-admin" : "linha-cliente"}">
                         <img
-                            src="${ehAdmin ? "images/avatar-admin.png" : chamado.clienteAvatar || "images/avatar1.png"}"
+                            src="${ehAdmin ? "images/avatar-admin.webp" : chamado.clienteAvatar || "images/avatar1.webp"}"
                             class="avatar-msg"
                         >
 
@@ -1661,7 +1661,7 @@ async function verPerfilClienteAdmin(clienteId, chamadoId) {
         <div class="card-perfil-suporte-admin">
 
 
-            ${typeof htmlAvatarClienteUI === "function" ? htmlAvatarClienteUI(c, "avatar-admin-cliente") : `<img src="${c.avatar || "images/avatar1.png"}" class="avatar-admin-cliente">`}
+            ${typeof htmlAvatarClienteUI === "function" ? htmlAvatarClienteUI(c, "avatar-admin-cliente") : `<img src="${c.avatar || "images/avatar1.webp"}" class="avatar-admin-cliente">`}
 
             <p><b>Nome:</b> ${c.nome || "-"}</p>
             <p><b>Telefone:</b> ${c.telefone || clienteId}</p>
@@ -1859,7 +1859,7 @@ async function listarUsuariosOnline() {
             <div class="card-online-admin">
 
                 <img
-                    src="${typeof dadosAvatarClienteUI === "function" ? dadosAvatarClienteUI(u).src : u.avatar || "images/avatar1.png"}"
+                    src="${typeof dadosAvatarClienteUI === "function" ? dadosAvatarClienteUI(u).src : u.avatar || "images/avatar1.webp"}"
                     class="avatar-online-admin ${typeof rankAvatarClienteUI === "function" ? "avatar-rank-ui" : ""}" data-avatar-rank="${typeof rankAvatarClienteUI === "function" ? rankAvatarClienteUI(u) : ""}"
                 >
 

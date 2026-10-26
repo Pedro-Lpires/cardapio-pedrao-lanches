@@ -39,7 +39,7 @@
         fidelidadeAtiva: true,
         bonusDisponivel: 20,
         totalGasto: 100,
-        avatar: "images/avatar1.png",
+        avatar: "images/avatar1.webp",
         enderecos: [
           {
             nome: "Casa",
@@ -56,7 +56,7 @@
         status: "aberto",
         clienteNome: "Rafa Teste",
         clienteTelefone: cliente,
-        clienteAvatar: "images/avatar1.png",
+        clienteAvatar: "images/avatar1.webp",
         criadoEm: new Date(agora).toISOString(),
         possuiPedidoRelacionado: true,
         pedidoRelacionadoId: "entrega1",
@@ -672,6 +672,22 @@
     }
     if (evento.data?.tipo === "revisao-alternar-loja") {
       doc("config/loja").update({ aberta: !docs.get("config/loja").aberta });
+      return;
+    }
+    if (
+      evento.data?.tipo === "revisao-chamado-mesa" &&
+      ["atendente", "conta"].includes(evento.data.chamadoTipo)
+    ) {
+      const tipo = evento.data.chamadoTipo;
+      doc("chamadosMesa/chamado-sonoro-" + ++contador).set({
+        mesaId: tipo === "conta" ? "mesa6" : "mesa2",
+        mesaNumero: tipo === "conta" ? 6 : 2,
+        cliente: "Cliente Fictício",
+        tipo,
+        status: "aberto",
+        criadoEmMs: Date.now(),
+        criadoEm: new Date().toISOString(),
+      });
       return;
     }
     if (cenarioFixture !== "beneficios") return;

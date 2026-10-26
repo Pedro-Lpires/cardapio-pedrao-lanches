@@ -397,28 +397,24 @@ function mostrarIdentificacaoAutoatendimento() {
 
   area.innerHTML = `
 
-        <div
-            style="
-                max-width:420px;
-                margin:40px auto;
-                padding:20px;
-                text-align:center;
-            "
-        >
+        <div class="auto-identificacao-ui">
 
             <h2>
                 🍔 Pedrão Lanches
             </h2>
 
+            <div class="auto-identificacao-mago-ui" aria-hidden="true">
+                <img src="images/personagens-pedrao/mago-apontando-baixo.webp" width="800" height="1200" alt="" decoding="async">
+            </div>
 
             <h3>
                 Mesa ${mesaAutoatendimentoAtual.numero}
             </h3>
 
 
-            <p>
+            <label for="nome-autoatendimento">
                 Como podemos te chamar?
-            </p>
+            </label>
 
 
             <input
@@ -428,9 +424,6 @@ function mostrarIdentificacaoAutoatendimento() {
                 placeholder="Seu nome"
                 autocomplete="off"
             >
-
-
-            <br><br>
 
 
             <button
@@ -3387,7 +3380,7 @@ async function abrirContaAutoatendimento() {
     // =========================
 
     const avatar =
-      cliente.avatar || sessaoAutoatendimentoAtual.clienteAvatar || "images/avatar1.png";
+      cliente.avatar || sessaoAutoatendimentoAtual.clienteAvatar || "images/avatar1.webp";
 
     // =========================
     // BÔNUS
@@ -3845,7 +3838,7 @@ async function entrarClienteAutoatendimento() {
     const cliente = clienteDoc.data();
     const nomeConta = cliente.nome || nome;
 
-    const avatarConta = cliente.avatar || "images/avatar1.png";
+    const avatarConta = cliente.avatar || "images/avatar1.webp";
 
     const nomeTemporario =
       sessaoAutoatendimentoAtual.clienteLogado === true
@@ -3986,7 +3979,7 @@ async function entrarClienteAutoatendimento() {
 
           nome: cliente.nome || nome,
 
-          avatar: cliente.avatar || "images/avatar1.png",
+          avatar: cliente.avatar || "images/avatar1.webp",
         }),
       );
     } else {
@@ -4091,7 +4084,7 @@ function atualizarIconeLoginAuto() {
   }
 
   if (sessaoAutoatendimentoAtual?.clienteLogado === true) {
-    const avatar = sessaoAutoatendimentoAtual.clienteAvatar || "images/avatar1.png";
+    const avatar = sessaoAutoatendimentoAtual.clienteAvatar || "images/avatar1.webp";
 
     botao.innerHTML = `
 

@@ -205,9 +205,10 @@ function lerComPrazoUI(promessa, prazo = 12000) {
 document.addEventListener("DOMContentLoaded", exibirProximoAvisoUI);
 
 function resolverImagemProduto(valor) {
-  if (!valor) return "images/logo-trailer.png";
+  if (!valor) return "images/logo-trailer.webp";
   if (/^(https?:\/\/|data:image\/(png|jpeg|webp);base64,|blob:)/i.test(valor)) return valor;
-  return String(valor).startsWith("images/") ? valor : "images/" + valor;
+  const caminho = String(valor).startsWith("images/") ? valor : "images/" + valor;
+  return typeof resolverImagemWebpUI === "function" ? resolverImagemWebpUI(caminho) : caminho;
 }
 async function copiarCupomClienteUI(botao) {
   const codigo = botao.dataset.codigo;

@@ -54,6 +54,20 @@
       Conferir largura
     </button>
     <p id="medidas-layout" role="status"></p>
+    <button
+      id="simular-chamado-normal"
+      hidden
+      onclick="frame.contentWindow.postMessage({tipo:'revisao-chamado-mesa',chamadoTipo:'atendente'},location.origin)"
+    >
+      Simular chamar atendente
+    </button>
+    <button
+      id="simular-chamado-conta"
+      hidden
+      onclick="frame.contentWindow.postMessage({tipo:'revisao-chamado-mesa',chamadoTipo:'conta'},location.origin)"
+    >
+      Simular pedir a conta
+    </button>
     <p>Senha fictícia dos painéis: teste1234</p>
     <label
       >Cenário<select id="cenario">
@@ -117,6 +131,9 @@
         document.getElementById("medidas-layout").textContent = evento.data.texto;
       });
       async function abrir() {
+        const atendente = document.getElementById("pagina").value === "painel-atendente.html";
+        document.getElementById("simular-chamado-normal").hidden = !atendente;
+        document.getElementById("simular-chamado-conta").hidden = !atendente;
         document.getElementById("subir-nivel").hidden =
           document.getElementById("cenario").value !== "beneficios";
         document.getElementById("enviar-cupom-teste").hidden =

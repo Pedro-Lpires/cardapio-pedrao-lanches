@@ -1,15 +1,15 @@
 /* A identidade fica no nome do arquivo. O rank escolhe apenas o traje e a moldura. */
 const personagensAvatarPedraoUI = [
   ["maionese", "Guardião da Maionese"],
-  ["ketchup", "Rainha do Ketchup"],
-  ["barbecue", "Mestre do Barbecue"],
-  ["caseiro", "Fã do Caseiro"],
-  ["mignon", "Lorde do Mignon"],
-  ["salada", "Guardiã da Salada"],
-  ["coquinha", "Parceiro da Coquinha"],
-  ["conversa", "Voz do Balcão"],
-  ["adicionais", "Mestre dos Adicionais"],
-  ["desconto", "Mestre da Barganha"],
+  ["ketchup", "Dama do Ketchup"],
+  ["barbecue", "Bárbaro do Barbecue"],
+  ["caseiro", "Artesã do Hambúrguer"],
+  ["mignon", "Guerreiro do Mignon"],
+  ["salada", "Guardiã da Horta"],
+  ["coquinha", "Cavaleiro da Coquinha"],
+  ["conversa", "Pescadora da Resenha"],
+  ["adicionais", "Caçador de Adicionais"],
+  ["desconto", "Guerreira da Barganha"],
 ];
 
 function rankAvatarClienteUI(cliente = {}) {
@@ -20,12 +20,14 @@ function rankAvatarClienteUI(cliente = {}) {
 }
 
 function identidadeAvatarClienteUI(caminho = "") {
-  const valor = String(caminho);
+  const valor = String(
+    typeof resolverImagemWebpUI === "function" ? resolverImagemWebpUI(caminho) : caminho,
+  );
   const personagem = personagensAvatarPedraoUI.find(
     ([id]) => valor === id || new RegExp("/" + id + "\\.(?:png|webp)(?:\\?.*)?$").test(valor),
   );
   if (personagem) return personagem[0];
-  const antigo = valor.match(/(?:^|\/)avatar([1-5])\.png$/);
+  const antigo = valor.match(/(?:^|\/)avatar([1-5])\.(?:png|webp)$/);
   return personagensAvatarPedraoUI[antigo ? Number(antigo[1]) - 1 : 0][0];
 }
 
@@ -36,7 +38,7 @@ function dadosAvatarClienteUI(cliente = {}, caminho = cliente.avatar) {
     id,
     rank,
     nome: personagensAvatarPedraoUI.find(([chave]) => chave === id)[1],
-    src: `images/avatares/${rank}/${id}.png`,
+    src: `images/avatares/${rank}/${id}.webp`,
   };
 }
 
@@ -50,9 +52,9 @@ function aplicarAvatarClienteUI(imagem, cliente, caminho) {
   imagem.alt = avatar.nome;
 }
 
-function htmlAvatarClienteUI(cliente, classe = "", caminho) {
+function htmlAvatarClienteUI(cliente, classe = "", caminho, lazy = false) {
   const avatar = dadosAvatarClienteUI(cliente, caminho);
-  return `<img src="${avatar.src}" alt="${avatar.nome}" class="${classe} avatar-rank-ui" data-avatar-rank="${avatar.rank}" data-avatar-personagem="${avatar.id}">`;
+  return `<img src="${avatar.src}" alt="${avatar.nome}" decoding="async" loading="${lazy ? "lazy" : "eager"}" class="${classe} avatar-rank-ui" data-avatar-rank="${avatar.rank}" data-avatar-personagem="${avatar.id}">`;
 }
 
 function htmlOpcoesAvataresUI(cliente, caminho, modo = "perfil") {
@@ -61,7 +63,7 @@ function htmlOpcoesAvataresUI(cliente, caminho, modo = "perfil") {
   return personagensAvatarPedraoUI
     .map(
       ([id, nome]) =>
-        `<button type="button" class="avatar-opcao-ui" aria-label="Escolher ${nome}" aria-pressed="${id === selecionado}" onclick="${funcao}('${id}')">${htmlAvatarClienteUI(cliente, "", id)}<span>${nome}</span></button>`,
+        `<button type="button" class="avatar-opcao-ui" aria-label="Escolher ${nome}" aria-pressed="${id === selecionado}" onclick="${funcao}('${id}')">${htmlAvatarClienteUI(cliente, "", id, true)}<span>${nome}</span></button>`,
     )
     .join("");
 }

@@ -28,7 +28,19 @@ const personagensPedraoUI = {
 };
 function imagemPersonagemPedraoUI(tipo) {
   const personagem = personagensPedraoUI[tipo];
-  return personagem ? `images/personagens-pedrao/ui/${personagem.arte}.png` : "";
+  return personagem ? `images/personagens-pedrao/ui/${personagem.arte}.webp` : "";
+}
+// Prepara apenas os avisos mais frequentes quando o navegador estiver ocioso.
+if (typeof window !== "undefined" && typeof Image !== "undefined") {
+  const preparar = () => {
+    for (const tipo of ["boasVindas", "acrescimos", "codigoLogin"]) {
+      const imagem = new Image();
+      imagem.decoding = "async";
+      imagem.src = imagemPersonagemPedraoUI(tipo);
+    }
+  };
+  if (window.requestIdleCallback) window.requestIdleCallback(preparar, { timeout: 3000 });
+  else window.setTimeout(preparar, 1500);
 }
 function personagemAvisoPedraoUI(aviso) {
   const texto = String(aviso.mensagem || "");
@@ -62,6 +74,7 @@ function decorarAvisoPersonagemPedraoUI(dialogo, aviso) {
   imagem.width = 140;
   imagem.height = 132;
   imagem.decoding = "async";
+  imagem.fetchPriority = "high";
   imagem.onerror = () => {
     imagem.hidden = true;
   };

@@ -469,7 +469,7 @@ async function criarContaAutoUI() {
         totalGasto: 0,
         totalFidelidade: 0,
         bonusGeradoTotal: 0,
-        avatar: "images/avatar1.png",
+        avatar: "images/avatar1.webp",
         criadoEm: Date.now(),
       });
     });

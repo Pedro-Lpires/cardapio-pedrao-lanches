@@ -69,6 +69,7 @@ if (boxNome && nomeAtendente) {
 }
 
 function logoutAtendente() {
+  if (typeof encerrarSomChamadosAtendenteUI === "function") encerrarSomChamadosAtendenteUI();
   localStorage.removeItem("atendenteId");
 
   localStorage.removeItem("atendenteNome");
@@ -3474,6 +3475,8 @@ function renderizarChamadosMesaAtendente() {
             </p>
 
         `;
+    if (typeof montarConfiguracaoSomChamadosUI === "function")
+      montarConfiguracaoSomChamadosUI(area);
 
     return;
   }
@@ -3594,6 +3597,7 @@ function renderizarChamadosMesaAtendente() {
   });
 
   area.innerHTML = html;
+  if (typeof montarConfiguracaoSomChamadosUI === "function") montarConfiguracaoSomChamadosUI(area);
 }
 function calcularTempoChamadoMesa(criadoEmMs) {
   const tempo = Date.now() - Number(criadoEmMs || Date.now());
@@ -3662,6 +3666,8 @@ function iniciarListenerChamadosMesaAtendente() {
         });
 
         chamadosMesaAbertosAtendente = chamados;
+        if (typeof processarSomChamadosAtendenteUI === "function")
+          processarSomChamadosAtendenteUI(chamados, janela.inicioMs);
 
         atualizarContadorChamadosMesa();
 
@@ -3679,6 +3685,8 @@ function iniciarListenerChamadosMesaAtendente() {
 
       (erro) => {
         console.error("Erro ao ouvir chamados das mesas:", erro);
+        if (typeof informarFalhaChamadosAtendenteUI === "function")
+          informarFalhaChamadosAtendenteUI();
       },
     );
 }
@@ -4450,7 +4458,7 @@ async function areaConsumoLocalRecarregar() {
     if (!mesas.has(numero)) mesas.set(numero, { numero, ocupada: false });
   }
   area.innerHTML =
-    '<div class="mesas-atendente-grade">' +
+    '<div class="mesas-limpeza-acoes-ui"><button type="button" class="mesas-limpar-ui" onclick="limparTodasMesasAtendente()">Limpar todas as mesas</button></div><div class="mesas-atendente-grade">' +
     [...mesas.values()]
       .sort((a, b) => a.numero - b.numero)
       .map(
@@ -4676,6 +4684,11 @@ async function abrirBuscaProdutos(comandaId) {
   document.getElementById("area-comanda-atendente").style.display = "none";
 
   const area = document.getElementById("area-produtos-comanda");
+  if (area.dataset.comandaCatalogoUi !== comandaId) {
+    area.dataset.comandaCatalogoUi = comandaId;
+    area.dataset.categoriaAtivaUi = "";
+    area.dataset.buscaAtivaUi = "";
+  }
 
   area.style.display = "block";
 
@@ -4775,8 +4788,16 @@ id="lista-categoria-produtos"
 ></div>
 
 `;
+  if (area.dataset.buscaAtivaUi) {
+    document.getElementById("busca-produto-atendente").value = area.dataset.buscaAtivaUi;
+    await pesquisarProdutoAtendente(comandaId);
+  } else if (area.dataset.categoriaAtivaUi)
+    await carregarCategoriaProdutos(comandaId, area.dataset.categoriaAtivaUi, true);
 }
 async function pesquisarProdutoAtendente(comandaId) {
+  const catalogo = document.getElementById("area-produtos-comanda");
+  if (catalogo?.dataset)
+    catalogo.dataset.buscaAtivaUi = document.getElementById("busca-produto-atendente").value;
   const termo = normalizarBuscaUI(document.getElementById("busca-produto-atendente").value);
 
   const listaCategoria = document.getElementById("lista-categoria-produtos");
@@ -5247,111 +5268,33 @@ async function editarComboComanda(comandaId, index, item) {
   atualizarPrecoComboPersonalizado();
 }
 async function cancelarComandaAtendente(comandaId) {
-  const confirmar = await confirmarOperacao(
-    "Cancelar esta comanda? Os itens pendentes também serão retirados da cozinha.",
+  const doc = await db.collection("comandas").doc(comandaId).get();
+  if (!doc.exists) return alert("Comanda não encontrada.");
+  if (doc.data().status !== "Aberta") return alert("Esta comanda não está aberta.");
+  const temPagamento = (doc.data().pagamentos || []).length > 0;
+  const confirmou = await confirmarOperacao(
+    "Cancelar esta comanda sem finalizar a venda? Os itens pendentes sairão da cozinha." +
+      (temPagamento
+        ? " Atenção: há pagamento registrado. Você pode cancelar; os pagamentos já registrados permanecerão no histórico."
+        : ""),
   );
-
-  if (!confirmar) {
-    return;
+  if (!confirmou) return;
+  try {
+    const mesaId = mesaAbertaAtual;
+    await cancelarComandasMesasOperacao({ comandaId, pagamentosConfirmados: temPagamento });
+    modoRemoverItem = false;
+    modoEditarItem = false;
+    itemComandaEmEdicao = null;
+    selecaoPagamentoSeparado = [];
+    comandaAbertaAtual = null;
+    if (typeof limparHistoricoComandaUI === "function") limparHistoricoComandaUI(comandaId);
+    await areaConsumoLocalRecarregar();
+    if (mesaId) await abrirMesaAtendente(mesaId);
+    else await abrirConsumoLocal();
+  } catch (erro) {
+    alert("Não foi possível cancelar: " + erro.message);
   }
-
-  // =========================
-  // BUSCAR COMANDA
-  // =========================
-
-  const refComanda = db.collection("comandas").doc(comandaId);
-
-  const docComanda = await refComanda.get();
-
-  if (!docComanda.exists) {
-    alert("Comanda não encontrada.");
-
-    return;
-  }
-
-  const comanda = docComanda.data();
-
-  // =========================
-  // SEGURANÇA
-  // =========================
-
-  if (comanda.status !== "Aberta") {
-    alert("Esta comanda não está aberta.");
-
-    return;
-  }
-
-  // =========================
-  // VERIFICAR PAGAMENTOS
-  // =========================
-
-  const pagamentos = comanda.pagamentos || [];
-
-  if (pagamentos.length > 0) {
-    alert("Esta comanda já possui pagamento registrado e não pode ser cancelada diretamente.");
-
-    return;
-  }
-
-  // =========================
-  // CANCELAR
-  // =========================
-
-  await refComanda.update({
-    status: "Cancelada",
-
-    canceladoEm: Date.now(),
-  });
-  await cancelarPreparoComandaOperacao(comandaId);
-
-  // =========================
-  // VER SE EXISTE OUTRA
-  // COMANDA ABERTA NA MESA
-  // =========================
-
-  const outrasComandas = await db
-    .collection("comandas")
-    .where("mesa", "==", comanda.mesa)
-    .where("status", "==", "Aberta")
-    .get();
-
-  // =========================
-  // LIBERAR MESA
-  // =========================
-
-  if (outrasComandas.empty && mesaAbertaAtual) {
-    await db.collection("mesas").doc(mesaAbertaAtual).update({
-      ocupada: false,
-    });
-  }
-
-  // =========================
-  // LIMPAR ESTADOS
-  // =========================
-
-  modoRemoverItem = false;
-
-  modoEditarItem = false;
-
-  itemComandaEmEdicao = null;
-
-  selecaoPagamentoSeparado = [];
-
-  comandaAbertaAtual = null;
-
-  // =========================
-  // ATUALIZAR MESAS
-  // =========================
-
-  await areaConsumoLocalRecarregar();
-
-  // =========================
-  // VOLTAR PARA MESA
-  // =========================
-
-  await abrirMesaAtendente(mesaAbertaAtual);
 }
-
 async function calcularFidelidadeComandaAtendente(comanda) {
   // =========================
   // SEM CLIENTE VINCULADO

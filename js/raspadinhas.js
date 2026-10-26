@@ -320,7 +320,7 @@ async function abrirRaspadinhaCliente(codigo) {
       ctx.drawImage(logo, 235, 70, 130, 130);
     }
   };
-  logo.src = "images/logo-trailer.png";
+  logo.src = "images/logo-trailer.webp";
   let raspando = false;
   function raspar(e) {
     if (!raspando) return;

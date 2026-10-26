@@ -29,7 +29,6 @@
   .auto-grid-produtos {
     grid-template-columns: 1fr;
     gap: 10px;
-
   }
 
   /* Lanches, batatas e bebidas usam o mesmo modal; combos seguem o mesmo espaço. */
@@ -41,8 +40,6 @@
   #btn-toggle-adicionais-auto {
     margin-top: 0;
   }
-
- 
 }
 /* =========================================
    CABEÇALHO
@@ -248,9 +245,9 @@
 
 #modal-combo-auto .combo-modo-auto button {
   min-width: 0;
-  white-space: normal;      /* Permite quebrar a linha */
-  overflow-wrap: anywhere;  /* Quebra palavras se faltar espaço */
-  height: auto;            /* Botão cresce conforme o texto */
+  white-space: normal; /* Permite quebrar a linha */
+  overflow-wrap: anywhere; /* Quebra palavras se faltar espaço */
+  height: auto; /* Botão cresce conforme o texto */
   padding: 12px 8px;
 }
 

@@ -85,7 +85,7 @@ function gerarItens(lista, containerId, imagemPadrao) {
     imagemCard?.addEventListener(
       "error",
       () => {
-        imagemCard.src = "images/logo-trailer.png";
+        imagemCard.src = "images/logo-trailer.webp";
       },
       { once: true },
     );
@@ -147,7 +147,7 @@ let produtoAtual = {};
 let focoAntesProduto = null;
 let categoriaProdutoAtual = "Lanches";
 let adicionaisSelecionados = {};
-let avatarClienteAtual = "images/avatar1.png";
+let avatarClienteAtual = "images/avatar1.webp";
 let cupomDescontoAplicado = null;
 let onlineSessionId = localStorage.getItem("onlineSessionIdPedrao");
 let indiceMolhoAtual = null;
@@ -1736,7 +1736,7 @@ async function buscarCliente() {
       alert("Nome e telefone não conferem com o cadastro.");
       return;
     }
-    avatarClienteAtual = clienteLogado.avatar || "images/avatar1.png";
+    avatarClienteAtual = clienteLogado.avatar || "images/avatar1.webp";
     selecionarAvatar(avatarClienteAtual);
 
     if (codigo) {
@@ -2968,7 +2968,7 @@ function logoutCliente() {
   document.getElementById("codigo-ativacao").value = "";
   if (document.getElementById("area-perfil")) document.getElementById("area-perfil").innerHTML = "";
 
-  selecionarAvatar("images/avatar1.png");
+  selecionarAvatar("images/avatar1.webp");
 
   abrirPerfilModo("home");
   limparTelaMensagensCliente();
@@ -2995,7 +2995,7 @@ window.addEventListener("load", async () => {
 
     clienteLogado = doc.data();
 
-    avatarClienteAtual = clienteLogado.avatar || "images/avatar1.png";
+    avatarClienteAtual = clienteLogado.avatar || "images/avatar1.webp";
 
     document.getElementById("perfil-nome").value = clienteLogado.nome || "";
 
@@ -3064,7 +3064,7 @@ function abrirPerfilModo(modo) {
 
       document.getElementById("perfil-telefone").value = clienteLogado.telefone || "";
 
-      selecionarAvatar(clienteLogado.avatar || "images/avatar1.png");
+      selecionarAvatar(clienteLogado.avatar || "images/avatar1.webp");
     }
   }
 
@@ -3098,7 +3098,7 @@ function atualizarTelaClienteLogado() {
   if (ativarCda) ativarCda.hidden = clienteLogado.fidelidadeAtiva === true;
 
   document.getElementById("perfil-logado-avatar").src =
-    clienteLogado.avatar || "images/avatar1.png";
+    clienteLogado.avatar || "images/avatar1.webp";
   if (typeof aplicarAvatarClienteUI === "function")
     aplicarAvatarClienteUI(document.getElementById("perfil-logado-avatar"), clienteLogado);
 
@@ -3153,7 +3153,7 @@ function htmlMensagemCliente(m) {
   const daLoja = m.remetente === "admin";
   const remetente =
     daLoja && !m.cupomCodigo
-      ? '<div class="mensagem-remetente-ui"><img src="images/personagens-pedrao/ui/mago-tranquilo.png" alt="" width="40" height="40"><strong>Pedrão Lanches</strong></div>'
+      ? '<div class="mensagem-remetente-ui"><img src="images/personagens-pedrao/ui/mago-tranquilo.webp" alt="" width="40" height="40"><strong>Pedrão Lanches</strong></div>'
       : "";
   const recompensa =
     daLoja && typeof htmlPersonagemRecompensaPedraoUI === "function"
@@ -3568,7 +3568,7 @@ window.abrirChamadoCliente = async function (chamadoId) {
           html += `
                     <div class="linha-msg ${ehCliente ? "linha-cliente" : "linha-admin"}">
                         <img
-                            src="${ehCliente ? clienteLogado.avatar || "images/avatar1.png" : "images/personagens-pedrao/ui/mago-tranquilo.png"}"
+                            src="${ehCliente ? clienteLogado.avatar || "images/avatar1.webp" : "images/personagens-pedrao/ui/mago-tranquilo.webp"}"
                             class="avatar-msg"
                             alt="${ehCliente ? "Você" : "Pedrão Lanches"}"
                         >
@@ -3771,7 +3771,7 @@ async function atualizarStatusOnline() {
 
     telefone: clienteLogado?.telefone || "",
 
-    avatar: clienteLogado?.avatar || "images/avatar1.png",
+    avatar: clienteLogado?.avatar || "images/avatar1.webp",
 
     clienteId: clienteLogado?.telefone || "",
 

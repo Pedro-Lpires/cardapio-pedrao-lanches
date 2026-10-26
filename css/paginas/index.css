@@ -2,11 +2,11 @@
  * Ordem: base da página → tema → operação → celular → navegação → componentes.
  * Altere os componentes, não replique seus estilos aqui.
  */
-@import url("../variaveis.css?v=20261019-2");
-@import url("../base.css?v=20261019-2");
-@import url("../responsividade.css?v=20261019-2");
-@import url("../tema.css?v=20261019-2");
-@import url("../operacao.css?v=20261019-2");
-@import url("../mobile.css?v=20261019-2");
-@import url("../navegacao.css?v=20261020-16");
-@import url("../componentes.css?v=20261024-9");
+@import url("../variaveis.css?v=20261025-2");
+@import url("../base.css?v=20261025-2");
+@import url("../responsividade.css?v=20261025-2");
+@import url("../tema.css?v=20261025-2");
+@import url("../operacao.css?v=20261025-2");
+@import url("../mobile.css?v=20261025-2");
+@import url("../navegacao.css?v=20261025-2");
+@import url("../componentes.css?v=20261025-2");

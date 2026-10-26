@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "name": "Avatares Pedrão Lanches",
+  "ranks": [
+    "sem-rank",
+    "bronze",
+    "prata",
+    "ouro",
+    "diamante",
+    "imortal"
+  ],
+  "characters": [
+    {
+      "id": "guardiao-da-maionese",
+      "name": "Guardião da Maionese",
+      "files": {
+        "sem-rank": "sem-rank/maionese.webp",
+        "bronze": "bronze/maionese.webp",
+        "prata": "prata/maionese.webp",
+        "ouro": "ouro/maionese.webp",
+        "diamante": "diamante/maionese.webp",
+        "imortal": "imortal/maionese.webp"
+      },
+      "identity": "maionese"
+    },
+    {
+      "id": "dama-do-ketchup",
+      "name": "Dama do Ketchup",
+      "files": {
+        "sem-rank": "sem-rank/ketchup.webp",
+        "bronze": "bronze/ketchup.webp",
+        "prata": "prata/ketchup.webp",
+        "ouro": "ouro/ketchup.webp",
+        "diamante": "diamante/ketchup.webp",
+        "imortal": "imortal/ketchup.webp"
+      },
+      "identity": "ketchup"
+    },
+    {
+      "id": "mestre-do-defumado",
+      "name": "Bárbaro do Barbecue",
+      "files": {
+        "sem-rank": "sem-rank/barbecue.webp",
+        "bronze": "bronze/barbecue.webp",
+        "prata": "prata/barbecue.webp",
+        "ouro": "ouro/barbecue.webp",
+        "diamante": "diamante/barbecue.webp",
+        "imortal": "imortal/barbecue.webp"
+      },
+      "identity": "barbecue"
+    },
+    {
+      "id": "artesa-do-hamburguer",
+      "name": "Artesã do Hambúrguer",
+      "files": {
+        "sem-rank": "sem-rank/caseiro.webp",
+        "bronze": "bronze/caseiro.webp",
+        "prata": "prata/caseiro.webp",
+        "ouro": "ouro/caseiro.webp",
+        "diamante": "diamante/caseiro.webp",
+        "imortal": "imortal/caseiro.webp"
+      },
+      "identity": "caseiro"
+    },
+    {
+      "id": "lorde-do-mignon",
+      "name": "Guerreiro do Mignon",
+      "files": {
+        "sem-rank": "sem-rank/mignon.webp",
+        "bronze": "bronze/mignon.webp",
+        "prata": "prata/mignon.webp",
+        "ouro": "ouro/mignon.webp",
+        "diamante": "diamante/mignon.webp",
+        "imortal": "imortal/mignon.webp"
+      },
+      "identity": "mignon"
+    },
+    {
+      "id": "guardia-da-horta",
+      "name": "Guardiã da Horta",
+      "files": {
+        "sem-rank": "sem-rank/salada.webp",
+        "bronze": "bronze/salada.webp",
+        "prata": "prata/salada.webp",
+        "ouro": "ouro/salada.webp",
+        "diamante": "diamante/salada.webp",
+        "imortal": "imortal/salada.webp"
+      },
+      "identity": "salada"
+    },
+    {
+      "id": "cavaleiro-da-coquinha",
+      "name": "Cavaleiro da Coquinha",
+      "files": {
+        "sem-rank": "sem-rank/coquinha.webp",
+        "bronze": "bronze/coquinha.webp",
+        "prata": "prata/coquinha.webp",
+        "ouro": "ouro/coquinha.webp",
+        "diamante": "diamante/coquinha.webp",
+        "imortal": "imortal/coquinha.webp"
+      },
+      "identity": "coquinha"
+    },
+    {
+      "id": "barda-do-balcao",
+      "name": "Pescadora da Resenha",
+      "files": {
+        "sem-rank": "sem-rank/conversa.webp",
+        "bronze": "bronze/conversa.webp",
+        "prata": "prata/conversa.webp",
+        "ouro": "ouro/conversa.webp",
+        "diamante": "diamante/conversa.webp",
+        "imortal": "imortal/conversa.webp"
+      },
+      "identity": "conversa"
+    },
+    {
+      "id": "cacador-de-adicionais",
+      "name": "Caçador de Adicionais",
+      "files": {
+        "sem-rank": "sem-rank/adicionais.webp",
+        "bronze": "bronze/adicionais.webp",
+        "prata": "prata/adicionais.webp",
+        "ouro": "ouro/adicionais.webp",
+        "diamante": "diamante/adicionais.webp",
+        "imortal": "imortal/adicionais.webp"
+      },
+      "identity": "adicionais"
+    },
+    {
+      "id": "mestra-da-barganha",
+      "name": "Guerreira da Barganha",
+      "files": {
+        "sem-rank": "sem-rank/desconto.webp",
+        "bronze": "bronze/desconto.webp",
+        "prata": "prata/desconto.webp",
+        "ouro": "ouro/desconto.webp",
+        "diamante": "diamante/desconto.webp",
+        "imortal": "imortal/desconto.webp"
+      },
+      "identity": "desconto"
+    }
+  ]
+}
