@@ -6,4 +6,84 @@
 @import url("../base.css?v=20261025-2");
 @import url("../mobile.css?v=20261025-2");
 @import url("../navegacao.css?v=20261025-2");
-@import url("../componentes.css?v=20261025-2");
+@import url("../componentes.css?v=20261031-1");
+
+.login-atendente.funcionario-login-ui {
+  width: min(440px, calc(100% - 32px));
+  margin: clamp(32px, 10vh, 90px) auto;
+  padding: 28px;
+  background: #1b1b1b;
+  border: 1px solid #444;
+  border-top: 3px solid #e60016;
+  border-radius: 16px;
+  text-align: left;
+}
+.funcionario-login-ui h1 {
+  margin: 0;
+  font-size: 28px;
+}
+.funcionario-login-ui > p {
+  margin: 8px 0 24px;
+  color: #c7c7c7;
+}
+.funcionario-login-ui form {
+  display: grid;
+  gap: 12px;
+}
+.funcionario-login-ui input {
+  width: 100%;
+  padding: 12px;
+  margin: 0;
+  border-radius: 8px;
+  background: #242424;
+  border: 1px solid #666;
+  color: #fff;
+  font-size: 16px;
+}
+.funcionario-login-ui button {
+  width: auto;
+  padding: 12px 16px;
+  margin: 0;
+  font-size: 16px;
+  min-height: 44px;
+  transform: none;
+}
+.funcionario-login-ui [hidden] {
+  display: none !important;
+}
+.funcionario-login-ui #login-funcionario-status:empty {
+  display: none;
+}
+.funcionario-login-ui #destinos-funcionario {
+  padding: 0;
+  margin: 20px 0 0;
+  border: 0;
+  background: none;
+}
+.funcionario-destinos-ui {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+.funcionario-destinos-ui:has(> button[hidden]) {
+  grid-template-columns: 1fr;
+}
+.funcionario-destinos-ui button {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.funcionario-destinos-ui span {
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 1.4;
+}
+.funcionario-login-ui .funcionario-trocar-ui {
+  background: #333;
+  font-size: 14px;
+  padding: 10px 14px;
+}

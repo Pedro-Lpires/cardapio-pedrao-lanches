@@ -46,7 +46,12 @@ const html = ctx.itensHtmlChapeiroOperacao(itens);
 assert.match(html, /10 Baguncinha/);
 assert.doesNotMatch(html, /padrão|preparo-padrao/);
 assert.match(html, /4 Baguncinha/);
-assert.match(html, /1 porção com:/);
+assert.match(html, /<strong>porção com:/);
+const unico = ctx.itensHtmlChapeiroOperacao([
+  { ...lanche, adicionais: [{ nome: "Alface", qtd: 1 }] },
+]);
+assert.match(unico, /<strong>lanche com:/);
+assert.doesNotMatch(unico, /<strong>1 lanche com:/);
 assert.doesNotMatch(html, /Refrigerante|Combo \d|Lanche 2/);
 assert.equal(JSON.stringify(itens), antes);
 const quatroLanches = ctx.itensHtmlChapeiroOperacao([

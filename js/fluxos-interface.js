@@ -141,6 +141,7 @@ function montarConsumoLocalUI(itens, nome, telefone, cliente, obs = "", agora = 
   }));
   const subtotal = produtos.reduce((n, i) => n + i.preco * i.quantidade, 0);
   const pedido = {
+    origem: "site_delivery",
     nome,
     telefone,
     telefoneLimpo: telefone.replace(/\D/g, ""),
@@ -159,20 +160,31 @@ function montarConsumoLocalUI(itens, nome, telefone, cliente, obs = "", agora = 
     dataMs: agora,
   };
   const linhas = produtos
-    .map(
-      (i) =>
-        `${i.quantidade} ${i.nome}${i.adicionais.map((a) => `\n  + ${a.qtd || a.quantidade || 1} ${a.nome}`).join("")}${i.observacao ? "\n  Obs.: " + i.observacao : ""}${i.lanchesCombo
-          .map((l, n) => {
-            const ad = (l.adicionais || []).map((a) => `+ ${a.qtd || 1} ${a.nome}`);
-            if (l.observacao || l.obs) ad.push("Obs.: " + (l.observacao || l.obs));
-            return ad.length ? "\n  Lanche " + (n + 1) + ": " + ad.join("; ") : "";
-          })
-          .join("")}`,
-    )
+    .map((i) => {
+      const texto = [i.quantidade + " " + i.nome + " - " + moedaOperacao(i.preco * i.quantidade)];
+      const grupos = (i.lanchesCombo || []).map((l) =>
+        [
+          (l.adicionais || []).map((a) => a.qtd + " " + a.nome).join(" + "),
+          l.observacao ? "Obs.: " + l.observacao : "",
+        ]
+          .filter(Boolean)
+          .join("; "),
+      );
+      if (grupos.length && grupos.every((t) => t === grupos[0])) {
+        if (grupos[0]) texto.push("Todos os lanches: " + grupos[0]);
+      } else
+        grupos.forEach((g, n) => {
+          if (g) texto.push("Lanche " + (n + 1) + ": " + g);
+        });
+      if (i.adicionais.length)
+        texto.push("Acréscimos: " + i.adicionais.map((a) => a.qtd + " " + a.nome).join(" + "));
+      if (i.observacao) texto.push("Obs.: " + i.observacao);
+      return texto.join("\n");
+    })
     .join("\n\n");
   return {
     pedido,
-    mensagem: `*PEDRÃO LANCHES*\n*Consumir no local*\nNome: ${nome}\nCelular: ${telefone}\n\n${linhas}\n\nSubtotal: ${moedaOperacao(subtotal)}${obs ? "\nObservação: " + obs : ""}`,
+    mensagem: `*PEDRÃO LANCHES - CONSUMO NO LOCAL*\nNome: ${nome}\nCelular: ${telefone}\n\n${linhas}\n\nSubtotal: ${moedaOperacao(subtotal)}${obs ? "\nObservação: " + obs : ""}`,
   };
 }
 let enviandoConsumoLocalUI = false;
@@ -198,9 +210,16 @@ async function enviarConsumoLocalUI() {
       if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
       return avisoOperacao("Não foi possível salvar. Tente novamente.");
     }
-    window.open("https://wa.me/5565992386045?text=" + encodeURIComponent(mensagem), "_blank");
+    if (typeof abrirMensagemWhatsPedidoUI === "function") abrirMensagemWhatsPedidoUI(mensagem);
+    else
+      window.open(
+        "https://wa.me/5565992386045?text=" +
+          encodeURIComponent(textoWhatsAppSemEmojisUI(mensagem)),
+        "_blank",
+      );
     carrinho = [];
     dadosPedidoTemporario = {};
+    if (document.getElementById("observacao")) document.getElementById("observacao").value = "";
     revisaoCarrinhoVersao = -1;
     atualizarCarrinho();
     fecharCheckoutUI("inicio");
@@ -469,7 +488,7 @@ async function criarContaAutoUI() {
         totalGasto: 0,
         totalFidelidade: 0,
         bonusGeradoTotal: 0,
-        avatar: "images/avatar1.webp",
+        avatar: "images/avatares/sem-rank/maionese.webp",
         criadoEm: Date.now(),
       });
     });

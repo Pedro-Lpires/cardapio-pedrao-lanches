@@ -7,4 +7,48 @@
 @import url("../operacao.css?v=20261025-2");
 @import url("../mobile.css?v=20261025-2");
 @import url("../navegacao.css?v=20261025-2");
-@import url("../componentes.css?v=20261025-2");
+@import url("../componentes.css?v=20261031-1");
+
+.cozinha-som-ui {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 16px;
+}
+.cozinha-som-ui button {
+  width: 42px;
+  min-height: 42px;
+  padding: 6px;
+  margin: 0;
+  font-size: 22px;
+  flex: none;
+  background: #303030;
+  border: 1px solid #666;
+  border-radius: 50%;
+}
+.cozinha-som-ui button[aria-pressed="true"] {
+  background: #165a35;
+  border-color: #47d98a;
+}
+.cozinha-som-ui p {
+  max-width: 320px;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+  text-align: left;
+}
+.cozinha-body.cozinha-monitor > header {
+  display: block;
+  padding: 8px 0;
+  margin: 0 0 16px;
+  border: 0;
+}
+.cozinha-body.cozinha-monitor > header > :not(.cozinha-som-ui) {
+  display: none;
+}
+.cozinha-monitor .cozinha-som-ui {
+  justify-content: flex-end;
+  max-width: 1500px;
+  margin: auto;
+}

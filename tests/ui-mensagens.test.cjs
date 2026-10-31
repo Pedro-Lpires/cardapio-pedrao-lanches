@@ -27,6 +27,7 @@ const consulta = {
 const contexto = vm.createContext({
   document: { getElementById: (id) => elementos[id] },
   window: {},
+  janelaSuporteClienteUI: null,
   clienteLogado: { telefone: "123" },
   db: { collection: () => consulta },
   htmlCarregandoUI: (texto) => "loading:" + texto,

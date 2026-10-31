@@ -41,12 +41,30 @@ function alternarCuponsPagamentoUI() {
     once: true,
   });
 }
+function abrirPagamentosRealizadosJanelaUI() {
+  const area = document.getElementById("pagamentos-realizados");
+  if (!area) return;
+  const aberta = area.parentElement?.matches("dialog.interface-janela") ? area.parentElement : null;
+  if (aberta) {
+    aberta.close();
+    return;
+  }
+  area.style.display = "none";
+  if (!area.textContent.trim()) area.textContent = "Nenhum pagamento registrado nesta comanda.";
+  const janela = abrirJanelaElementoUI(area, "Pagamentos realizados");
+  janela.classList.add("pagamento-secundario-ui");
+}
 function desativarPagamentoMistoUI(id) {
   const area = document.getElementById(id);
   if (!area) return;
   delete area.dataset.ativo;
-  const resumo = area.parentElement.querySelector(".pagamento-misto-resumo-ui");
+  const resumo = botaoPagamentoMistoUI(area, id)?.parentElement.querySelector(
+    ".pagamento-misto-resumo-ui",
+  );
   if (resumo) resumo.remove();
+}
+function botaoPagamentoMistoUI(area, id) {
+  return document.querySelector?.(`[data-misto-alvo="${id}"]`) || area.previousElementSibling;
 }
 function abrirPagamentoMistoJanelaUI(id) {
   const area = document.getElementById(id);
@@ -57,7 +75,7 @@ function abrirPagamentoMistoJanelaUI(id) {
     return;
   }
   const anteriores = [...area.querySelectorAll("input")].map((el) => [el, el.value]);
-  const botao = area.previousElementSibling;
+  const botao = botaoPagamentoMistoUI(area, id);
   organizarCamposPagamentoMistoUI(area);
   area.style.display = "none";
   const janela = abrirJanelaElementoUI(area, "Dividir entre formas de pagamento");
@@ -95,6 +113,37 @@ function organizarFechamentoUI() {
   const area = document.getElementById("area-fechamento-comanda");
   if (!area) return;
   area.classList.add("pagamento-compacto-ui");
+  const modos = area.querySelector(".pagamento-separado-modos");
+  const realizados = area.querySelector('button[onclick*="alternarPagamentosRealizados"]');
+  if (modos && realizados && !modos.contains(realizados)) {
+    while (realizados.previousElementSibling?.tagName === "BR")
+      realizados.previousElementSibling.remove();
+    realizados.textContent = realizados.textContent
+      .replace("✅", "")
+      .replace("pagamento(s) realizado(s)", "pagamentos realizados")
+      .replace("▸", "")
+      .trim();
+    modos.append(realizados);
+    const historico = area.querySelector("#pagamentos-realizados");
+    if (historico) modos.after(historico);
+  }
+  const misto = area.querySelector('button[onclick*="alternarPagamentoMisto"]');
+  if (misto && !misto.closest(".pagamento-titulo-forma-ui")) {
+    const titulo = [...area.querySelectorAll("h4")].find(
+      (h) => h.textContent.trim() === "Forma de pagamento",
+    );
+    if (titulo) {
+      while (misto.previousElementSibling?.tagName === "BR") misto.previousElementSibling.remove();
+      const linha = document.createElement("div");
+      linha.className = "pagamento-titulo-forma-ui";
+      titulo.before(linha);
+      misto.dataset.mistoAlvo = area.querySelector("#area-pagamento-misto")
+        ? "area-pagamento-misto"
+        : "area-pagamento-misto-separado";
+      misto.textContent = "Usar mais de uma forma";
+      linha.append(titulo, misto);
+    }
+  }
   const campo = area.querySelector("#busca-cliente-separado");
   if (campo && !campo.closest(".pagamento-busca-linha-ui")) {
     const box = campo.parentElement;
@@ -120,6 +169,8 @@ function organizarFechamentoUI() {
   });
 }
 document.addEventListener("DOMContentLoaded", () => {
+  if (typeof alternarPagamentosRealizados === "function")
+    window.alternarPagamentosRealizados = abrirPagamentosRealizadosJanelaUI;
   if (typeof alternarPagamentoMisto === "function")
     window.alternarPagamentoMisto = () => abrirPagamentoMistoJanelaUI("area-pagamento-misto");
   if (typeof alternarPagamentoMistoSeparado === "function")

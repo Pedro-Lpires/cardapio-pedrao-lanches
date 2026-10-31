@@ -1,4 +1,134 @@
 /* Entrega e retirada compartilham os mesmos controles compactos. */
+.pedido-lista-valor-ui {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+}
+.pedido-lista-valor-ui > p {
+  margin: 0;
+  min-width: 0;
+}
+.pedido-lista-valor-ui > button {
+  flex: none;
+  width: auto;
+  min-height: 36px;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 14px;
+  transform: none;
+}
+.pedido-lista-atalhos-ui,
+.pedido-lista-acoes-ui {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.pedido-lista-atalhos-ui > button,
+.pedido-lista-acoes-ui > button {
+  width: auto;
+  min-height: 38px;
+  margin: 0;
+  padding: 9px 12px;
+  font-size: 14px;
+  line-height: 1.25;
+}
+.menu-atendente > button:has(.contador-pedidos-site-ui) {
+  position: relative;
+  overflow: visible;
+}
+.contador-pedidos-site-ui {
+  position: absolute;
+  top: -9px;
+  right: -6px;
+  min-width: 24px;
+  padding: 3px 6px;
+  border: 1px solid #f44;
+  border-radius: 50px;
+  background: #fff;
+  color: #a60010;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 18px;
+}
+.menu-atendente > button:has(#contador-chamados-mesa) {
+  position: relative;
+  overflow: visible;
+}
+.menu-atendente :is(.contador-pedidos-site-ui, #contador-chamados-mesa) {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  right: 8px;
+  transform: translateY(-50%);
+  height: 22px;
+  min-width: 22px;
+  padding: 0 5px;
+  margin: 0;
+  box-sizing: border-box;
+  border: 1px solid #f44;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+  text-align: center;
+}
+.menu-atendente :is(.contador-pedidos-site-ui, #contador-chamados-mesa)[hidden] {
+  display: none !important;
+}
+.pedido-distancia-aviso-ui {
+  background: #382c16;
+  color: #ffdc95;
+  padding: 12px;
+  margin: 14px 0;
+  border: 1px solid #997b3d;
+  border-radius: 8px;
+  line-height: 1.45;
+}
+.pedidos-site-status-ui {
+  margin: 14px auto;
+  padding: 12px;
+  color: #ffdc9e;
+}
+.pedidos-local-site-atalho-ui {
+  margin: 8px 0 22px;
+  padding: 12px 16px;
+  font-size: 15px;
+}
+.pedidos-local-site-janela-ui .mesas-atendente-grade {
+  margin: 16px 0;
+}
+.operacao-imprimir-mesa-ui {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+.operacao-imprimir-mesa-ui label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+.operacao-imprimir-mesa-ui input {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px;
+}
+.operacao-imprimir-mesa-ui > button {
+  width: fit-content;
+  margin: 0;
+}
+@media (min-width: 900px) {
+  .operacao-imprimir-mesa-ui {
+    grid-template-columns: minmax(180px, 280px) max-content;
+    align-items: end;
+  }
+}
 :is(#area-entrega-atendente, #area-retirada-atendente) {
   padding: 14px !important;
 }

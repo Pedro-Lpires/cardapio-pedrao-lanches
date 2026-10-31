@@ -3,6 +3,16 @@
  * IDs refletem a estrutura do HTML; ordem: contêiner, filhos e estados.
  */
 
+#perfil-form .btn-voltar-perfil {
+  width: auto;
+  min-height: 38px;
+  padding: 8px 12px !important;
+  background: #e60016 !important;
+  color: #fff !important;
+  border-radius: 8px;
+  text-align: center;
+}
+
 /* Mascote de boas-vindas: imagem inteira, sem o recorte circular de avatar. */
 #perfil-home .mascote-perfil {
   display: block;

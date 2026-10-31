@@ -1,4 +1,18 @@
 /* Card compartilhado de mensagens: dialog fica acima dos outros modais. */
+body:has(#tela-inicio) dialog.ui-aviso-operacao {
+  width: min(300px, calc(100vw - 64px));
+}
+dialog.aviso-ui .aviso-ui-rural {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #777;
+  background: #303030;
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+}
 dialog.aviso-ui.aviso-ui-boas-vindas {
   border-color: #444;
   padding-top: 58px;

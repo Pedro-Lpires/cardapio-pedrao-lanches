@@ -9,7 +9,9 @@ const ctx = vm.createContext({
   carrinho: [{ nome: "Lanche", qtd: 1, molhosPagos: [{ nome: "Mostarda", qtd: 1, preco: 2 }] }],
   dadosPedidoTemporario: {},
   PRECO_MOLHO_PAGO: 2,
-  configurarEventosMolhoPorUnidade() {},
+  molhosGratisTempUI: [],
+  janelaMolhoUnidadeUI: null,
+  escaparOperacao: String,
   exibirRevisao() {},
   alert() {
     avisos++;
@@ -25,6 +27,9 @@ for (const nome of [
   "alterarMolhoPago",
   "salvarMolhosItem",
   "fecharModalMolhos",
+  "normalizarMolhoGratisUI",
+  "htmlBlocoMolhoUI",
+  "htmlOpcaoMolhoUI",
 ]) {
   const inicio = fonte.indexOf(`function ${nome}(`);
   const fim = fonte.indexOf("\nfunction ", inicio + 1);
@@ -34,7 +39,7 @@ ctx.abrirMolhosItem(0);
 assert.match(campo("conteudo-molhos").innerHTML, /id="molho-pago-Mostarda">1<\/strong>/);
 ctx.alterarMolhoPago("Mostarda", 1);
 assert.equal(campo("molho-pago-Mostarda").textContent, 2);
-ctx.salvarMolhosItem();
+ctx.fecharModalMolhos();
 assert.equal(ctx.carrinho[0].totalMolhosPagos, 4);
 assert.equal(avisos, 0);
 ctx.abrirMolhosItem(0);
@@ -42,7 +47,7 @@ assert.match(campo("conteudo-molhos").innerHTML, /id="molho-pago-Mostarda">2<\/s
 ctx.alterarMolhoPago("Mostarda", -1);
 ctx.alterarMolhoPago("Mostarda", -1);
 ctx.alterarMolhoPago("Mostarda", -1);
-ctx.salvarMolhosItem();
+ctx.fecharModalMolhos();
 assert.equal(ctx.carrinho[0].totalMolhosPagos, 0);
 assert.equal(ctx.carrinho[0].molhosPagos.length, 0);
 console.log(

@@ -122,43 +122,42 @@ async function carregarFinanceiro() {
       partes.forEach((p) => {
         const ms = p.pagoEm || p.criadoEmMs || c.fechadoEm;
         if (!dentro(ms)) return;
-        const itens = legado
-          ? c.itens
-          : (p.itens || [])
-              .map((i) => {
-                const item = c.itens?.[i.itemIndex];
-                if (!item) return null;
-                const qtd = Number(i.quantidade || 1),
-                  original = Number(item.quantidade || item.qtd || 1);
-                return {
-                  ...item,
-                  quantidade: qtd,
-                  subtotal:
-                    (Number(item.subtotal ?? Number(item.preco || 0) * original) * qtd) / original,
-                  totalMolhosPagos: (Number(item.totalMolhosPagos || 0) * qtd) / original,
-                };
-              })
-              .filter(Boolean);
+        const itens =
+          p.itensFinanceiro ||
+          (legado
+            ? c.itens
+            : (p.itens || [])
+                .map((i) => {
+                  const item = c.itens?.[i.itemIndex];
+                  if (!item) return null;
+                  const qtd = Number(i.quantidade || 1),
+                    original = Number(item.quantidade || item.qtd || 1);
+                  return {
+                    ...item,
+                    quantidade: qtd,
+                    subtotal:
+                      (Number(item.subtotal ?? Number(item.preco || 0) * original) * qtd) /
+                      original,
+                    totalMolhosPagos: (Number(item.totalMolhosPagos || 0) * qtd) / original,
+                  };
+                })
+                .filter(Boolean));
         dadosFinanceiro.push({ ...p, valor: Number(p.valorPago ?? p.valor ?? 0), itens });
       });
     });
     pedidos.docs.forEach((doc) => {
       const p = doc.data();
-      if (
-        p.cancelado ||
-        locais.has(doc.id) ||
-        /local/i.test(p.tipo || "") ||
-        !(p.pagamentoConfirmado === true || /^pago$/i.test(p.status || ""))
-      )
-        return;
-      const ms = p.pagamentoConfirmadoEm || p.pagoEm || p.dataMs || new Date(p.data || 0).getTime();
-      if (!dentro(ms)) return;
-      const valor = Number(p.valorPago ?? p.valorTotal ?? 0);
-      dadosFinanceiro.push({
-        ...p,
-        valor,
-        taxaEntrega: /entrega/i.test(p.tipo || "") ? Number(p.taxaEntrega || 0) : 0,
-        formas: p.formas || [{ forma: p.pagamento || p.formaPagamento || "Não informado", valor }],
+      if (p.cancelado || locais.has(doc.id) || /local/i.test(p.tipo || "")) return;
+      recebimentosPedidoOperacao(p).forEach((recebimento) => {
+        if (!dentro(recebimento.pagoEm)) return;
+        dadosFinanceiro.push({
+          ...p,
+          ...recebimento,
+          valor: Number(recebimento.valor || 0),
+          formas: recebimento.formas || [
+            { forma: recebimento.forma || "Não informado", valor: Number(recebimento.valor || 0) },
+          ],
+        });
       });
     });
     const resumo = resumoEntradasFinanceiro(

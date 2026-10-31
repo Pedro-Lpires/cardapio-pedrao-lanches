@@ -5,6 +5,97 @@
  */
 "use strict";
 
+function textoWhatsAppSemEmojisUI(texto) {
+  return String(texto ?? "")
+    .replace(/\uFFFD/g, "")
+    .replace(
+      /\p{Extended_Pictographic}|\p{Regional_Indicator}|\p{Emoji_Modifier}|[\uFE0F\u200D\u20E3]/gu,
+      "",
+    )
+    .replace(/^[ \t]+(?=\*)/gm, "")
+    .replace(/[ \t]+$/gm, "")
+    .trim();
+}
+
+function montarMensagemPedidoWhatsUI(p) {
+  const moeda = (v) =>
+    Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const linhas = [
+    `*PEDRÃO LANCHES - ${p.tipo === "Local" ? "CONSUMO NO LOCAL" : String(p.tipo || "Entrega").toLocaleUpperCase("pt-BR")}*`,
+    `Feito em: ${p.data || new Date().toLocaleString("pt-BR")}`,
+    `Cliente: ${p.nome || ""}`,
+    `Telefone: ${p.telefone || ""}`,
+  ];
+  for (const i of p.itens || []) {
+    const qtd = Number(i.qtd ?? i.quantidade ?? 1);
+    const total =
+      Number(i.subtotal ?? Number(i.precoUnitario ?? i.preco ?? 0) * qtd) +
+      Number(i.totalMolhosPagos || 0);
+    linhas.push("", `*${qtd} ${i.nome} - ${moeda(total)}*`);
+    const textoGrupo = (g) =>
+      [
+        (g.adicionais || [])
+          .filter((a) => Number(a.qtd) > 0)
+          .map((a) => `${a.qtd} ${a.nome}`)
+          .join(" + "),
+        g.observacao ? `Obs.: ${g.observacao}` : "",
+      ]
+        .filter(Boolean)
+        .join("; ");
+    const grupos = i.lanchesCombo || [];
+    if (grupos.length) {
+      const textos = grupos.map(textoGrupo);
+      if (textos.every((t) => t === textos[0])) {
+        if (textos[0]) linhas.push("Todos os lanches: " + textos[0]);
+      } else
+        textos.forEach((t, n) => {
+          if (t) linhas.push(`Lanche ${n + 1}: ${t}`);
+        });
+    } else if (i.adicionais?.length)
+      linhas.push(
+        "Acréscimos: " +
+          i.adicionais
+            .filter((a) => Number(a.qtd) > 0)
+            .map((a) => `${a.qtd} ${a.nome}`)
+            .join(" + "),
+      );
+    if (i.obs || i.observacao) linhas.push("Obs.: " + (i.obs || i.observacao));
+    const gratis = i.molhosGratis || [];
+    const unidade = /batata/i.test(i.categoria || i.nome) ? "batata" : "lanche";
+    gratis.forEach((m, n) =>
+      linhas.push(
+        (gratis.length === 1
+          ? "Molhos: "
+          : `${n + 1}ª ${unidade === "batata" ? "batata" : "unidade"} - molhos: `) +
+          (m.texto || m.molhos?.join(" + ") || m.molho || "Sem molho"),
+      ),
+    );
+    const pagos = (i.molhosPagos || []).filter((m) => Number(m.qtd) > 0);
+    if (pagos.length)
+      linhas.push("Molhos extras: " + pagos.map((m) => `${m.qtd} ${m.nome}`).join(" + "));
+  }
+  if (p.observacao) linhas.push("", "Obs. do pedido: " + p.observacao);
+  linhas.push("");
+  if (p.descontoCupom > 0) linhas.push("Desconto de cupom: -" + moeda(p.descontoCupom));
+  if (p.descontoFidelidade > 0) linhas.push("Fidelidade: -" + moeda(p.descontoFidelidade));
+  if (p.tipo === "Entrega") linhas.push("Taxa de entrega: " + moeda(p.taxa));
+  linhas.push("*Total: " + moeda(p.total) + "*", "Pagamento: " + (p.pagamento || ""));
+  if (p.trocoPara) linhas.push("Troco para: " + moeda(p.trocoPara));
+  if (p.tipo === "Entrega") {
+    linhas.push("");
+    if (p.endereco) linhas.push("Endereço: " + p.endereco);
+    if (p.mapa) linhas.push("Localização: " + p.mapa);
+    if (p.condominio === "Sim") linhas.push("Condomínio: Sim · CNH: " + (p.cnh || "Não"));
+    linhas.push("Acessível: " + (p.acessivel === false ? "Não" : "Sim"));
+    if (Number(p.km) > 15)
+      linhas.push(
+        "Fora da área de entrega (mais de 15 km). Verificar disponibilidade. Pode haver demora.",
+      );
+    else if (Number(p.km) > 10) linhas.push("Entrega acima de 10 km. Pode haver demora.");
+  }
+  return textoWhatsAppSemEmojisUI(linhas.join("\n"));
+}
+
 // Compara termos de busca sem acentos, caixa, pontuação ou espaços.
 function normalizarBuscaUI(texto) {
   return String(texto ?? "")
@@ -30,8 +121,8 @@ function mostrarBoasVindasUI(nome, novoPerfil = false) {
   });
   exibirProximoAvisoUI();
 }
-function mostrarAjudaComLinkUI(mensagem, url) {
-  filaAvisosUI.push({ mensagem, url, informativo: true });
+function mostrarAjudaComLinkUI(mensagem, url, personagem) {
+  filaAvisosUI.push({ mensagem, url, personagem, informativo: true });
   exibirProximoAvisoUI();
 }
 function pedirPermissaoLocalizacaoUI() {
@@ -40,6 +131,18 @@ function pedirPermissaoLocalizacaoUI() {
       mensagem:
         "Autorize sua localização para calcularmos a taxa de entrega. Ao continuar, o navegador pedirá sua permissão.",
       localizacao: true,
+      resolver,
+    });
+    exibirProximoAvisoUI();
+  });
+}
+function perguntarZonaRuralUI() {
+  return new Promise((resolver) => {
+    filaAvisosUI.push({
+      mensagem:
+        "Os motoboys não atendem estradas de terra, regiões de mato e localidades como Barreiro Branco, Tenda de Abraão e Terra Prometida.\n\nSe estiver tudo certo com seu endereço, continue e permita sua localização para calcular a taxa.",
+      personagem: "zonaRural",
+      areaEntrega: true,
       resolver,
     });
     exibirProximoAvisoUI();
@@ -85,13 +188,32 @@ function exibirProximoAvisoUI() {
     dialogo.removeAttribute("aria-labelledby");
     dialogo.querySelector(".aviso-ui-entendi").textContent = "Autorizo";
   }
+  if (aviso.areaEntrega) {
+    dialogo.querySelector(".aviso-ui-entendi").textContent = "Tudo certo com meu endereço";
+    const rural = document.createElement("button");
+    rural.type = "button";
+    rural.className = "aviso-ui-rural";
+    rural.textContent = "Meu endereço está nessas áreas";
+    dialogo.append(rural);
+  }
   if (typeof decorarAvisoPersonagemPedraoUI === "function")
     decorarAvisoPersonagemPedraoUI(dialogo, aviso);
+  if (aviso.areaEntrega) dialogo.classList.add("aviso-entrega-criterios-ui");
   dialogo.querySelectorAll("button").forEach((botao) => {
     botao.addEventListener("click", () => {
       const confirmou = botao.classList.contains("aviso-ui-entendi");
       if (confirmou && aviso.url) window.open(aviso.url, "_blank", "noopener,noreferrer");
-      dialogo.close(confirmou ? "autorizado" : "cancelado");
+      dialogo.close(
+        aviso.areaEntrega
+          ? confirmou
+            ? "urbana"
+            : botao.classList.contains("aviso-ui-rural")
+              ? "rural"
+              : "cancelado"
+          : confirmou
+            ? "autorizado"
+            : "cancelado",
+      );
     });
   });
   dialogo.addEventListener(
@@ -99,7 +221,9 @@ function exibirProximoAvisoUI() {
     () => {
       dialogo.remove();
       avisoAtualUI = null;
-      aviso.resolver?.(dialogo.returnValue === "autorizado");
+      aviso.resolver?.(
+        aviso.areaEntrega ? dialogo.returnValue : dialogo.returnValue === "autorizado",
+      );
       if (focoAntesAvisoUI?.isConnected) focoAntesAvisoUI.focus({ preventScroll: true });
       exibirProximoAvisoUI();
     },
@@ -278,10 +402,12 @@ function configurarCamposNumericosUI(raiz = document) {
 function padronizarFechamentosUI(raiz = document) {
   configurarCamposNumericosUI(raiz);
   [...(raiz.matches?.("button") ? [raiz] : []), ...raiz.querySelectorAll("button")].forEach((b) => {
-    if (b.closest("dialog.aviso-ui, dialog.editor-endereco-cliente")) return;
+    if (b.closest("dialog.aviso-ui, dialog.editor-endereco-cliente, dialog.editor-pedido-ui"))
+      return;
     if (/removerItem|excluirItem|fecharConfiguracao/i.test(b.getAttribute("onclick") || "")) return;
     if (b.classList.contains("ui-x") || b.classList.contains("busca-limpar")) return;
-    if (b.classList.contains("cozinha-remover-x")) return;
+    if (b.classList.contains("cozinha-remover-x") || b.classList.contains("cancelar-pedido-x-ui"))
+      return;
     const texto = b.textContent.trim();
     if (!/^(Fechar|✕|×|✖|X|❌)$/i.test(texto)) return;
     b.textContent = "×";

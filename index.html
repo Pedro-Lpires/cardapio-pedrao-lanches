@@ -1,14 +1,14 @@
 <!doctype html>
 <html lang="pt-br">
   <head>
-    <script src="js/imagens-webp.js?v=20261025-2"></script>
-    <script src="js/avatares-ui.js?v=20261026-2"></script>
+    <script src="js/imagens-webp.js?v=20261031-2"></script>
+    <script src="js/avatares-ui.js?v=20261027-1"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pedrão Lanches</title>
     <link rel="icon" href="images/logo-trailer.webp" />
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/index.css?v=20261025-2" />
+    <link rel="stylesheet" href="css/paginas/index.css?v=20261031-2" />
   </head>
   <body>
     <!-- HEADER — cabeçalho da página -->
@@ -25,36 +25,36 @@
     </header>
 
     <div class="info-rapida-loja">
-      <div class="info-rapida-item">
-        <span>⏱️</span>
-        <div>
+      <button type="button" class="info-rapida-item" onclick="abrirInfoLojaUI('preparo')">
+        <span aria-hidden="true">⏱️</span>
+        <span class="info-rapida-texto">
           <strong>Tempo de espera</strong>
           <small>A partir de 15 minutos</small>
-        </div>
-      </div>
+        </span>
+      </button>
 
-      <a class="info-rapida-item" href="https://wa.me/5565992386045" target="_blank" rel="noopener">
-        <span>💬</span>
-        <div>
+      <button type="button" class="info-rapida-item" onclick="abrirInfoLojaUI('whatsapp')">
+        <span aria-hidden="true">💬</span>
+        <span class="info-rapida-texto">
           <strong>WhatsApp</strong>
           <small>Chamar no zap</small>
-        </div>
-      </a>
+        </span>
+      </button>
 
-      <div class="info-rapida-item">
-        <span>🛵</span>
-        <div>
+      <button type="button" class="info-rapida-item" onclick="abrirInfoLojaUI('entrega')">
+        <span aria-hidden="true">🛵</span>
+        <span class="info-rapida-texto">
           <strong>Taxa de entrega</strong>
           <small>Calculada no pedido</small>
-        </div>
-      </div>
+        </span>
+      </button>
     </div>
 
     <nav class="abas-navegacao">
-      <a href="#" onclick="irParaCategoria('lanches')">🍔 Lanches</a>
-      <a href="#" onclick="irParaCategoria('combos')">🍔🥤 Combos</a>
-      <a href="#" onclick="irParaCategoria('bebidas')">🥤 Bebidas</a>
-      <a href="#" onclick="irParaCategoria('batatas')">🍟 Batatas</a>
+      <a href="#lanches" onclick="event.preventDefault();irParaCategoria('lanches')">🍔 Lanches</a>
+      <a href="#combos" onclick="event.preventDefault();irParaCategoria('combos')">🍔🥤 Combos</a>
+      <a href="#bebidas" onclick="event.preventDefault();irParaCategoria('bebidas')">🥤 Bebidas</a>
+      <a href="#batatas" onclick="event.preventDefault();irParaCategoria('batatas')">🍟 Batatas</a>
     </nav>
     <div id="horario-funcionamento" class="horario-box">⏰ Carregando horário...</div>
 
@@ -179,6 +179,14 @@
               maxlength="11"
             />
           </div>
+          <label class="observacao-pedido-ui" for="observacao"
+            >Observação do pedido (opcional)</label
+          >
+          <textarea
+            id="observacao"
+            maxlength="500"
+            placeholder="Ex.: entregar na portaria, bebidas separadas dos lanches..."
+          ></textarea>
           <div class="grupo-botoes-acao">
             <button id="btn-apagar" onclick="limparCarrinho()">🗑️ APAGAR PEDIDO</button>
             <button id="btn-finalizar" onclick="finalizarPedido()">✅ FINALIZAR PEDIDO</button>
@@ -198,7 +206,7 @@
               <div id="box-cupom-desconto" class="campo-espacado">
                 <label class="label-cupom">
                   <input type="checkbox" id="check-cupom" onchange="toggleCupomDesconto()" />
-                  Possui cupom de desconto?
+                  <span>Possui cupom de desconto?</span>
                 </label>
               </div>
               <div id="area-cupom-desconto" style="display: none; margin-top: 10px">
@@ -349,7 +357,7 @@
             name="pedrao_telefone_sem_autocomplete"
           />
 
-          <div id="box-codigo-login" class="linha-codigo">
+          <div id="box-codigo-login" class="linha-codigo" hidden>
             <input
               type="text"
               id="codigo-ativacao"
@@ -517,6 +525,14 @@
     <!-- MODAL — modal-carrinho -->
     <div id="modal-carrinho" class="modal-carrinho">
       <div class="conteudo-carrinho">
+        <button
+          type="button"
+          id="editar-carrinho-ui"
+          aria-pressed="false"
+          onclick="alternarEdicaoCarrinhoUI()"
+        >
+          Editar
+        </button>
         <h2>🛒 Seu Pedido</h2>
 
         <div id="lista-carrinho"></div>
@@ -532,11 +548,20 @@
     <!-- MODAL — modal-molhos -->
     <div id="modal-molhos" class="modal" style="display: none">
       <div class="modal-content">
-        <h2>🍶 Configurar molhos</h2>
+        <div class="molhos-cabecalho-ui">
+          <button type="button" class="ui-voltar" onclick="fecharModalMolhos()">← Voltar</button>
+          <h2>Molhos</h2>
+          <button
+            type="button"
+            class="ui-x"
+            aria-label="Fechar molhos"
+            onclick="fecharModalMolhos()"
+          >
+            ×
+          </button>
+        </div>
 
         <div id="conteudo-molhos"></div>
-
-        <button onclick="fecharModalMolhos()">Fechar</button>
       </div>
     </div>
 
@@ -553,7 +578,9 @@
         <div class="topo-mensagens">
           <h2>📩 Mensagens</h2>
 
-          <button onclick="fecharMensagensCliente()">✖</button>
+          <button class="ui-x" aria-label="Fechar mensagens" onclick="fecharMensagensCliente()">
+            ×
+          </button>
         </div>
 
         <div class="abas-mensagens">
@@ -579,16 +606,14 @@
           <div id="lista-chamados-cliente"></div>
 
           <div id="suporte-menu" class="suporte-menu">
-            <button type="button" onclick="etapaSuporteCliente('lista')">
+            <button id="btn-suportes-abertos" type="button" onclick="etapaSuporteCliente('lista')">
               <strong>Suportes abertos</strong><span>Acompanhe suas conversas</span></button
             ><button id="btn-novo-suporte" type="button" onclick="abrirFormNovoChamado()">
               <strong>Novo suporte</strong><span>Envie uma mensagem</span>
             </button>
           </div>
 
-          <div id="form-novo-chamado" style="display: none; margin-top: 15px">
-            <button type="button" onclick="etapaSuporteCliente()">← Voltar</button>
-            <h3>Novo suporte</h3>
+          <div id="form-novo-chamado" style="display: none">
             <label for="categoria-chamado">Tipo do suporte</label
             ><select id="categoria-chamado">
               <option value="">Escolha o tipo</option>
@@ -622,26 +647,32 @@
             <button type="button" onclick="criarChamadoSuporte()">Enviar suporte</button>
           </div>
 
-          <div id="chat-chamado-cliente" style="display: none; margin-top: 15px"></div>
+          <div id="chat-chamado-cliente" style="display: none"></div>
         </div>
       </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="js/produtos.js?v=20261025-2"></script>
-    <script src="js/ui-comum.js?v=20261025-2"></script>
-    <script src="js/personagens-ui.js?v=20261025-2"></script>
-    <script src="js/loja-publica-ui.js?v=20261025-2"></script>
-    <script src="js/script.js?v=20261025-2"></script>
+    <script src="js/produtos.js?v=20261031-2"></script>
+    <script src="js/ui-comum.js?v=20261031-3"></script>
+    <script src="js/personagens-ui.js?v=20261031-5"></script>
+    <script src="js/loja-publica-ui.js?v=20261031-5"></script>
+    <script src="js/script.js?v=20261031-5"></script>
     <script src="js/mensagens-tempo-real-ui.js?v=20261025-2"></script>
-    <script src="js/operacao.js?v=20261025-2"></script>
+    <script src="js/cupons-rank.js?v=20261031-5"></script>
+    <script src="js/operacao.js?v=20261031-5"></script>
     <script src="js/cardapio-ui.js?v=20261025-2"></script>
-    <script src="js/app-ui.js?v=20261025-2"></script>
+    <script src="js/app-ui.js?v=20261031-3"></script>
     <script src="js/raspadinhas-recuperacao.js?v=20261025-2"></script>
     <script src="js/raspadinhas.js?v=20261025-2"></script>
-    <script src="js/fluxos-interface.js?v=20261025-2"></script>
+    <script src="js/fluxos-interface.js?v=20261031-2"></script>
     <script src="js/janelas-fluxos.js?v=20261025-2"></script>
     <script src="js/combos-site-ui.js?v=20261025-2"></script>
+    <script src="js/editor-pedido-ui.js?v=20261031-2"></script>
+    <script src="js/editor-pedido-personalizacao-ui.js?v=20261031-2"></script>
+    <script src="js/carrinho-edicao-ui.js?v=20261031-2"></script>
+    <script src="js/whatsapp-pedido-ui.js?v=20261031-2"></script>
+    <script src="js/beneficios-pedido.js?v=20261031-2"></script>
   </body>
 </html>

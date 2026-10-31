@@ -9,7 +9,7 @@ function atualizarEstadoLojaPublicaUI(estado) {
   document.body.classList.toggle("loja-fechada-ui", !lojaAberta);
   const faixa = document.getElementById("aviso-loja-fechada-ui");
   if (faixa) {
-    faixa.hidden = lojaAberta;
+    faixa.hidden = lojaAberta || estado === "fechada";
     faixa.textContent =
       estado === "fechada"
         ? "Estamos fechados. Novos pedidos estão indisponíveis; sua conta continua acessível."
@@ -56,6 +56,7 @@ async function salvarPedidoLojaAbertaUI(ref, pedido) {
       pedido.cupomDescontoCodigo,
       pedido.clienteId,
       ref.path,
+      typeof contextoCupomPedidoRankUI === "function" ? contextoCupomPedidoRankUI(pedido) : null,
     );
     registrarUso();
     t.set(ref, pedido);

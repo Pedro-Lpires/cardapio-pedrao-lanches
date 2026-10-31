@@ -220,7 +220,7 @@ async function salvarClienteAdmin(telefoneAntigo) {
 
   const dados = docAntigo.data();
 
-  const bonusGeradoTotal = Math.floor(totalFidelidade / 300) * 20;
+  const bonusGeradoTotal = bonusAcumuladoFidelidadeOperacao(dados, totalFidelidade);
 
   const novosDados = {
     ...dados,
@@ -495,36 +495,7 @@ function formatarItemPedidoAdmin(i) {
 }
 
 async function cancelarPedidoAdmin(idPedido) {
-  if (!(await confirmarOperacao("Cancelar esse pedido?"))) return;
-
-  const ref = db.collection("pedidos").doc(idPedido);
-  const doc = await ref.get();
-
-  if (!doc.exists) return alert("Pedido não encontrado.");
-
-  const pedido = doc.data();
-
-  await ref.update({ cancelado: true });
-
-  const telefone = pedido.telefoneLimpo || (pedido.telefone || "").replace(/\D/g, "");
-
-  if (telefone) {
-    const refCliente = db.collection("clientes").doc(telefone);
-    const docCliente = await refCliente.get();
-
-    if (docCliente.exists) {
-      const c = docCliente.data();
-
-      let novoTotal = Number(c.totalGasto || 0) - Number(pedido.valorTotal || 0);
-      if (novoTotal < 0) novoTotal = 0;
-
-      await refCliente.update({
-        totalGasto: novoTotal,
-      });
-    }
-  }
-
-  alert("Pedido cancelado!");
+  return cancelarPedidoPerfilUI(idPedido);
 }
 
 function togglePedidosRecentes() {
@@ -617,207 +588,7 @@ function pedidoContaFidelidade(pedido) {
   return pedido.clienteId && pedido.fidelidadeAtivaNoPedido === true;
 }
 async function editarPedidoAdmin(idPedido) {
-  const ref = db.collection("pedidos").doc(idPedido);
-  const doc = await ref.get();
-
-  if (!doc.exists) return alert("Pedido não encontrado.");
-
-  const pedido = doc.data();
-  const pedidoAntigo = { ...pedido };
-  const itens = pedido.itens || [];
-
-  let textoItens = "Itens atuais:\n\n";
-
-  itens.forEach((item, index) => {
-    textoItens += `${index + 1}. ${item.nome} - Qtd: ${item.quantidade} - R$ ${item.preco}\n`;
-  });
-
-  const opcao = await solicitarTextoUI(
-    textoItens +
-      "\nO que deseja fazer?\n" +
-      "1 - Adicionar item\n" +
-      "2 - Remover item\n" +
-      "3 - Alterar taxa de entrega\n" +
-      "4 - Alterar tipo do pedido\n" +
-      "5 - Alterar vale fidelidade\n" +
-      "6 - Alterar cupom\n" +
-      "7 - Alterar molhos pagos\n" +
-      "8 - Editar acréscimos\n",
-  );
-
-  if (opcao === "1") {
-    const termo = await solicitarTextoUI(
-      "Digite parte do nome do item. Ex: coca, big, bacon, combo",
-    );
-    if (!termo) return;
-
-    const resultados = buscarItensAdmin(termo);
-
-    if (resultados.length === 0) {
-      const addManual = await confirmarOperacao(
-        "Nenhum item encontrado. Deseja adicionar manualmente?",
-      );
-      if (!addManual) return;
-
-      const nomeItem = await solicitarTextoUI("Nome do item:");
-      const qtd = Number(await solicitarTextoUI("Quantidade:", "1")) || 1;
-      const preco = Number(await solicitarTextoUI("Preço unitário:", "0")) || 0;
-      const categoria =
-        (await solicitarTextoUI("Categoria: Lanches, Bebidas, Combos ou Batatas", "Lanches")) ||
-        "Lanches";
-
-      itens.push({ nome: nomeItem, quantidade: qtd, preco, categoria });
-    } else {
-      let listaTexto = "Itens encontrados:\n\n";
-
-      resultados.forEach((item, index) => {
-        listaTexto += `${index + 1}. ${item.nome} - R$ ${Number(item.preco).toFixed(2)} (${item.categoria})\n`;
-      });
-
-      const escolha = Number(await solicitarTextoUI(listaTexto + "\nDigite o número do item:"));
-
-      if (!escolha || escolha < 1 || escolha > resultados.length) {
-        return alert("Opção inválida.");
-      }
-
-      const selecionado = resultados[escolha - 1];
-      const qtd = Number(await solicitarTextoUI("Quantidade:", "1")) || 1;
-
-      itens.push({
-        nome: selecionado.nome,
-        quantidade: qtd,
-        preco: Number(selecionado.preco) || 0,
-        categoria: selecionado.categoria,
-      });
-    }
-
-    await ref.update({
-      itens,
-      editadoEm: new Date().toISOString(),
-    });
-
-    await recalcularPedidoAdmin(idPedido, pedidoAntigo);
-    alert("Item adicionado!");
-    return;
-  } else if (opcao === "2") {
-    const numeroItem = Number(
-      await solicitarTextoUI(textoItens + "\nDigite o número do item que deseja remover:"),
-    );
-
-    if (!numeroItem || numeroItem < 1 || numeroItem > itens.length) {
-      return alert("Item inválido.");
-    }
-
-    itens.splice(numeroItem - 1, 1);
-
-    await ref.update({
-      itens,
-      editadoEm: new Date().toISOString(),
-    });
-
-    await recalcularPedidoAdmin(idPedido, pedidoAntigo);
-    alert("Item removido!");
-    return;
-  } else if (opcao === "3") {
-    const respostaTaxa = await solicitarTextoUI("Nova taxa de entrega:", pedido.taxaEntrega || 0);
-
-    if (respostaTaxa === null) {
-      return;
-    }
-
-    const novaTaxa = Number(respostaTaxa);
-
-    if (isNaN(novaTaxa)) {
-      return alert("Taxa inválida.");
-    }
-
-    await ref.update({
-      taxaEntrega: novaTaxa,
-      editadoEm: new Date().toISOString(),
-    });
-
-    await recalcularPedidoAdmin(idPedido, pedidoAntigo);
-    alert("Taxa alterada!");
-    return;
-  } else if (opcao === "4") {
-    const escolhaTipo = await solicitarTextoUI(
-      "Escolha o tipo do pedido:\n" + "1 - Entrega\n" + "2 - Retirada\n" + "3 - Consumir no local",
-    );
-
-    let novoTipo = "";
-
-    if (escolhaTipo === "1") novoTipo = "Entrega";
-    else if (escolhaTipo === "2") novoTipo = "Retirada";
-    else if (escolhaTipo === "3") novoTipo = "Local";
-    else return alert("Opção inválida.");
-
-    await ref.update({
-      tipo: novoTipo,
-      editadoEm: new Date().toISOString(),
-    });
-
-    alert("Tipo alterado!");
-    return;
-  } else if (opcao === "5") {
-    const novoVale =
-      Number(await solicitarTextoUI("Valor do vale fidelidade:", pedido.descontoFidelidade || 0)) ||
-      0;
-
-    await ref.update({
-      descontoFidelidade: novoVale,
-      editadoEm: new Date().toISOString(),
-    });
-
-    await recalcularPedidoAdmin(idPedido, pedidoAntigo);
-    alert("Vale fidelidade alterado!");
-    return;
-  } else if (opcao === "6") {
-    const acaoCupom = await solicitarTextoUI(
-      "O que deseja fazer?\n" + "1 - Adicionar cupom\n" + "2 - Remover cupom",
-    );
-
-    if (acaoCupom === "1") {
-      const tipoCupom = await solicitarTextoUI(
-        "Qual tipo de cupom deseja adicionar?\n" +
-          "1 - Cupom do pedido\n" +
-          "2 - Cupom da taxa de entrega\n" +
-          "3 - Cupom de item",
-      );
-
-      if (tipoCupom === "1") {
-        await aplicarCupomPedidoAdmin(idPedido, pedidoAntigo);
-      } else if (tipoCupom === "2") {
-        await aplicarCupomTaxaAdmin(idPedido, pedidoAntigo);
-      } else if (tipoCupom === "3") {
-        await aplicarCupomItemAdmin(idPedido, pedidoAntigo);
-      } else {
-        return alert("Tipo de cupom inválido.");
-      }
-
-      return;
-    } else if (acaoCupom === "2") {
-      const tipoCupom = await solicitarTextoUI(
-        "Qual cupom deseja remover?\n" +
-          "1 - Cupom do pedido\n" +
-          "2 - Cupom da taxa de entrega\n" +
-          "3 - Cupom de item\n" +
-          "4 - Todos os cupons",
-      );
-
-      await removerCupomAdmin(idPedido, pedidoAntigo, tipoCupom);
-      return;
-    } else {
-      return alert("Opção inválida.");
-    }
-  } else if (opcao === "7") {
-    await editarMolhosPagosPedidoAdmin(idPedido, pedidoAntigo);
-    return;
-  } else if (opcao === "8") {
-    await editarAcrescimosPedidoAdmin(idPedido, pedidoAntigo);
-    return;
-  } else {
-    return;
-  }
+  return abrirEditorPedidoUI(idPedido, { modo: "admin", aoSalvar: () => listarPedidosAdmin() });
 }
 async function editarMolhosPagosPedidoAdmin(idPedido, pedidoAntigo) {
   const ref = db.collection("pedidos").doc(idPedido);
@@ -957,11 +728,20 @@ async function criarCupomDesconto() {
   const temPedidoMinimo = document.getElementById("cupom-tem-minimo")?.checked || false;
   const pedidoMinimo = Number(document.getElementById("cupom-pedido-minimo")?.value) || 0;
 
+  let rankRegra;
+  try {
+    rankRegra = typeof lerRegraCupomRankAdminUI === "function" ? lerRegraCupomRankAdminUI() : null;
+  } catch (e) {
+    return alert(e.message);
+  }
+  const porRank = !!rankRegra?.descontoPorRank;
+
   if (!nome) return alert("Digite o nome do cupom.");
   if (!/^[A-Z0-9_-]{3,30}$/.test(codigo))
     return alert("Use um código de 3 a 30 letras ou números, sem espaços.");
   if (!tipo) return alert("Escolha o tipo do cupom.");
   if (
+    !porRank &&
     tipo !== "item" &&
     !(tipo === "taxa" ? ["valor", "porcentagem", "gratis"] : ["valor", "porcentagem"]).includes(
       modo,
@@ -973,7 +753,7 @@ async function criarCupomDesconto() {
     return alert("Digite o valor mínimo do pedido.");
   }
 
-  if (tipo !== "item" && !(tipo === "taxa" && modo === "gratis")) {
+  if (!porRank && tipo !== "item" && !(tipo === "taxa" && modo === "gratis")) {
     if (valor <= 0) return alert("Digite o valor do desconto.");
   }
 
@@ -982,9 +762,10 @@ async function criarCupomDesconto() {
     if (!itemGeral) {
       if (!itemNome) return alert("Digite o nome do item.");
       if (
-        document.getElementById("cupom-item-preco-promocional").value === "" ||
-        !Number.isFinite(itemPrecoPromocional) ||
-        itemPrecoPromocional < 0
+        !porRank &&
+        (document.getElementById("cupom-item-preco-promocional").value === "" ||
+          !Number.isFinite(itemPrecoPromocional) ||
+          itemPrecoPromocional < 0)
       ) {
         return alert("Digite o preço promocional. Use zero para oferecer o item grátis.");
       }
@@ -996,17 +777,17 @@ async function criarCupomDesconto() {
         return alert("Escolha o grupo do cupom.");
       }
 
-      if (!itemGeralModo) {
+      if (!porRank && !itemGeralModo) {
         return alert("Escolha o modo do desconto.");
       }
 
-      if (itemGeralValor <= 0) {
+      if (!porRank && itemGeralValor <= 0) {
         return alert("Digite o valor do desconto.");
       }
     }
   }
 
-  if (tipo === "taxa" && modo === "gratis" && kmGratis <= 0) {
+  if (!porRank && tipo === "taxa" && modo === "gratis" && kmGratis <= 0) {
     return alert("Digite até quantos km a taxa grátis vale.");
   }
 
@@ -1028,6 +809,7 @@ async function criarCupomDesconto() {
     ativo: true,
     uso: document.getElementById("cupom-uso")?.value === "unico" ? "unico" : "diversos",
     editadoEm: new Date().toISOString(),
+    rankRegra,
   };
 
   const botao = document.getElementById("cupom-salvar-ui");
@@ -1162,6 +944,13 @@ async function aplicarCupomPedidoAdmin(idPedido, pedidoAntigo) {
     desconto = base - totalComDesconto;
   }
 
+  if (cupom.rankRegra) {
+    const clienteDoc = pedido.clienteId
+      ? await db.collection("clientes").doc(String(pedido.clienteId)).get()
+      : null;
+    const efetivo = resolverCupomRankUI(cupom, clienteDoc?.exists ? clienteDoc.data() : null);
+    desconto = calcularCupomRankUI(efetivo, contextoCupomPedidoRankUI(pedido)).desconto;
+  }
   if (desconto < 0) desconto = 0;
   if (desconto > base) desconto = base;
 
@@ -1171,6 +960,9 @@ async function aplicarCupomPedidoAdmin(idPedido, pedidoAntigo) {
       codigo,
       pedido.clienteId,
       ref.path,
+      typeof contextoCupomPedidoRankUI === "function"
+        ? { ...contextoCupomPedidoRankUI(pedido), desconto }
+        : null,
     );
     t.update(ref, {
       descontoCupomPedido: desconto,
@@ -1200,6 +992,10 @@ async function removerCupomAdmin(idPedido, pedidoAntigo, tipoCupom) {
   alert("Função de remover cupom ainda será criada.");
 }
 function atualizarCamposCupomAdmin() {
+  for (const id of ["cupom-item-geral-modo", "cupom-item-geral-valor"]) {
+    const campo = document.getElementById(id);
+    if (campo) campo.style.display = "";
+  }
   const tipo = document.getElementById("cupom-tipo")?.value;
   const modo = document.getElementById("cupom-modo")?.value;
   const temMinimo = document.getElementById("cupom-tem-minimo")?.checked;
@@ -1289,6 +1085,7 @@ function atualizarCamposCupomAdmin() {
 
     if (campoItemGeralValor) campoItemGeralValor.style.display = "none";
   }
+  if (typeof atualizarCamposRankCupomAdminUI === "function") atualizarCamposRankCupomAdminUI();
   document.querySelectorAll("#cupons-editor-corpo .cupom-campo-ui").forEach((label) => {
     const campo = document.getElementById(label.htmlFor);
     label.hidden = !!campo && campo.style.display === "none";
@@ -1467,118 +1264,104 @@ function telaSuporteAdmin(id, titulo, aoFechar) {
 let chatAbertoAdmin = null;
 
 async function abrirChamadoAdmin(clienteId, chamadoId) {
-  if (window.listenerChamadoAdmin) {
-    window.listenerChamadoAdmin();
-    window.listenerChamadoAdmin = null;
-  }
-  document.querySelectorAll(".suporte-admin-tela [id^=chat-chamado-]").forEach((el) => {
-    if (el.id !== `chat-chamado-${chamadoId}`) el.closest("dialog").close();
-  });
-  const chat = telaSuporteAdmin(`chat-chamado-${chamadoId}`, "Conversa do suporte", () => {
+  window.listenerChamadoAdmin?.();
+  window.listenerAvatarSuporteAdmin?.();
+  window.listenerChamadoAdmin = null;
+  window.listenerAvatarSuporteAdmin = null;
+  document.querySelectorAll(".suporte-admin-chat-ui").forEach((d) => d.close());
+  const chat = telaSuporteAdmin("chat-chamado-" + chamadoId, "Conversa do suporte", () => {
     if (chatAbertoAdmin === chamadoId) {
-      if (window.listenerChamadoAdmin) window.listenerChamadoAdmin();
+      window.listenerChamadoAdmin?.();
+      window.listenerAvatarSuporteAdmin?.();
       window.listenerChamadoAdmin = null;
+      window.listenerAvatarSuporteAdmin = null;
       chatAbertoAdmin = null;
     }
   });
+  chat.closest("dialog").classList.add("suporte-admin-chat-ui");
   chatAbertoAdmin = chamadoId;
   clienteChamadoAdmin = clienteId;
   chamadoAdminAberto = chamadoId;
-
+  const ref = db.collection("clientes").doc(clienteId),
+    chamadoRef = ref.collection("chamados").doc(chamadoId);
   chat.innerHTML = htmlCarregandoUI("Carregando conversa…");
-
-  const chamadoRef = db.collection("clientes").doc(clienteId).collection("chamados").doc(chamadoId);
-
-  const chamadoDoc = await chamadoRef.get();
+  const [cd, perfil] = await Promise.all([chamadoRef.get(), ref.get()]);
   if (!chat.isConnected) return;
-  if (!chamadoDoc.exists) {
-    chat.innerHTML = "<p>Chamado não encontrado.</p>";
+  if (!cd.exists) {
+    chat.textContent = "Chamado não encontrado.";
     return;
   }
-  const chamado = chamadoDoc.data();
-
-  if (window.listenerChamadoAdmin) {
-    window.listenerChamadoAdmin();
-    window.listenerChamadoAdmin = null;
-  }
-
+  const chamado = cd.data();
+  let cliente = perfil.exists ? perfil.data() : { nome: chamado.clienteNome };
+  chat.innerHTML =
+    '<div class="chat-admin-box"><div class="suporte-admin-resumo"><strong>' +
+    escaparOperacao(cliente.nome || chamado.clienteNome || "Cliente") +
+    '</strong><button type="button" data-perfil>Ver perfil</button>' +
+    (chamado.possuiPedidoRelacionado && chamado.pedidoRelacionadoId
+      ? '<button type="button" data-pedido>Ver pedido relacionado</button>'
+      : "") +
+    '</div><div class="suporte-admin-mensagens-ui" role="log" aria-label="Mensagens do suporte"></div><div class="suporte-admin-rodape-ui">' +
+    (chamado.status !== "finalizado"
+      ? '<div class="suporte-admin-compositor"><textarea id="resposta-admin-chamado" aria-label="Resposta ao cliente" placeholder="Responder cliente..."></textarea><button type="button" aria-label="Enviar resposta" onclick="responderChamadoAdmin()">➤</button></div><button type="button" onclick="finalizarChamadoAdmin()">Encerrar chamado</button>'
+      : "<p>Chamado finalizado.</p>") +
+    "</div></div>";
+  chat.querySelector("[data-perfil]").onclick = () =>
+    togglePerfilClienteAdmin(clienteId, chamadoId);
+  chat
+    .querySelector("[data-pedido]")
+    ?.addEventListener("click", () =>
+      verPedidoAnexadoSuporte(
+        chamado.pedidoRelacionadoId,
+        chamado.pedidoRelacionadoColecao || "pedidos",
+      ),
+    );
+  const lista = chat.querySelector(".suporte-admin-mensagens-ui");
+  let primeira = true;
+  const atualizarAvatares = () =>
+    lista
+      .querySelectorAll("[data-avatar-cliente]")
+      .forEach((img) => aplicarAvatarClienteUI(img, cliente));
+  window.listenerAvatarSuporteAdmin = ref.onSnapshot((doc) => {
+    if (!chat.isConnected) return;
+    cliente = doc.exists ? doc.data() : cliente;
+    atualizarAvatares();
+  });
   window.listenerChamadoAdmin = chamadoRef
     .collection("mensagens")
     .orderBy("data")
     .onSnapshot((snapshot) => {
-      let mensagens = [];
-
-      snapshot.forEach((doc) => {
-        mensagens.push(doc.data());
-      });
-
-      let html = `
-                <div class="chat-admin-box">
-                    <div class="suporte-admin-resumo"><strong>${escaparOperacao(chamado.clienteNome || "Cliente")}</strong><button type="button" onclick="togglePerfilClienteAdmin('${clienteId}', '${chamadoId}')">Ver perfil</button></div>
-
-                    <p><b>Status:</b> ${chamado.status}</p>
-
-                    ${
-                      chamado.possuiPedidoRelacionado && chamado.pedidoRelacionadoId
-                        ? `
-                            <div class="pedido-anexado-suporte">
-                                <p><b>📦 Pedido anexado:</b></p>
-                                <button type="button" onclick="verPedidoAnexadoSuporte('${chamado.pedidoRelacionadoId}', '${chamado.pedidoRelacionadoColecao || "pedidos"}')">
-                                    Ver pedido relacionado
-                                </button>
-                            </div>
-                        `
-                        : ""
-                    }
-
-                    ${
-                      chamado.status === "finalizado"
-                        ? `<p><b>Finalizado por:</b> ${chamado.finalizadoPor === "cliente" ? "Cliente" : "Admin"}</p>`
-                        : ""
-                    }
-            `;
-
-      mensagens.forEach((m) => {
-        const ehAdmin = m.remetente === "admin";
-
-        html += `
-                    <div class="linha-msg ${ehAdmin ? "linha-admin" : "linha-cliente"}">
-                        <img
-                            src="${ehAdmin ? "images/avatar-admin.webp" : chamado.clienteAvatar || "images/avatar1.webp"}"
-                            class="avatar-msg"
-                        >
-
-                        <div class="msg-chat ${ehAdmin ? "msg-admin" : "msg-cliente"}">
-                            <strong>${ehAdmin ? "Admin" : chamado.clienteNome || "Cliente"}</strong>
-                            <p>${escaparOperacao(m.texto)}</p>
-                            <small>
-                                ${new Date(m.data).toLocaleString("pt-BR")}
-                                ${
-                                  m.remetente === "admin"
-                                    ? m.lida
-                                      ? " • visualizada"
-                                      : " • enviada"
-                                    : ""
-                                }
-                            </small>
-                        </div>
-                    </div>
-                `;
-      });
-
-      if (chamado.status !== "finalizado") {
-        html += `
-                    <div class="suporte-admin-compositor">
-                      <textarea id="resposta-admin-chamado" aria-label="Resposta ao cliente" placeholder="Responder cliente..."></textarea>
-                      <button type="button" aria-label="Enviar resposta" onclick="responderChamadoAdmin()">➤</button>
-                    </div>
-                    <button type="button" onclick="finalizarChamadoAdmin()">Encerrar chamado</button>
-                `;
-      }
-
-      html += `</div>`;
-
-      chat.innerHTML = html;
+      if (!chat.isConnected || chatAbertoAdmin !== chamadoId) return;
+      const perto = lista.scrollHeight - lista.scrollTop - lista.clientHeight < 90;
+      lista.innerHTML = snapshot.docs
+        .map((doc) => {
+          const m = doc.data(),
+            admin = m.remetente === "admin";
+          return (
+            '<div class="linha-msg ' +
+            (admin ? "linha-admin" : "linha-cliente") +
+            '">' +
+            (admin
+              ? '<img src="images/personagens-pedrao/ui/mago-tranquilo.webp" class="avatar-msg" alt="Pedrão Lanches">'
+              : htmlAvatarClienteUI(cliente, "avatar-msg").replace(
+                  "<img ",
+                  "<img data-avatar-cliente ",
+                )) +
+            '<div class="msg-chat ' +
+            (admin ? "msg-admin" : "msg-cliente") +
+            '"><strong>' +
+            escaparOperacao(
+              admin ? "Pedrão Lanches" : cliente.nome || chamado.clienteNome || "Cliente",
+            ) +
+            "</strong><p>" +
+            escaparOperacao(m.texto) +
+            "</p><small>" +
+            new Date(m.data).toLocaleString("pt-BR") +
+            "</small></div></div>"
+          );
+        })
+        .join("");
+      if (primeira || perto) lista.scrollTop = lista.scrollHeight;
+      primeira = false;
     });
 }
 
@@ -1661,7 +1444,7 @@ async function verPerfilClienteAdmin(clienteId, chamadoId) {
         <div class="card-perfil-suporte-admin">
 
 
-            ${typeof htmlAvatarClienteUI === "function" ? htmlAvatarClienteUI(c, "avatar-admin-cliente") : `<img src="${c.avatar || "images/avatar1.webp"}" class="avatar-admin-cliente">`}
+            ${typeof htmlAvatarClienteUI === "function" ? htmlAvatarClienteUI(c, "avatar-admin-cliente") : `<img src="${c.avatar || "images/avatares/sem-rank/maionese.webp"}" class="avatar-admin-cliente">`}
 
             <p><b>Nome:</b> ${c.nome || "-"}</p>
             <p><b>Telefone:</b> ${c.telefone || clienteId}</p>
@@ -1859,7 +1642,7 @@ async function listarUsuariosOnline() {
             <div class="card-online-admin">
 
                 <img
-                    src="${typeof dadosAvatarClienteUI === "function" ? dadosAvatarClienteUI(u).src : u.avatar || "images/avatar1.webp"}"
+                    src="${typeof dadosAvatarClienteUI === "function" ? dadosAvatarClienteUI(u).src : u.avatar || "images/avatares/sem-rank/maionese.webp"}"
                     class="avatar-online-admin ${typeof rankAvatarClienteUI === "function" ? "avatar-rank-ui" : ""}" data-avatar-rank="${typeof rankAvatarClienteUI === "function" ? rankAvatarClienteUI(u) : ""}"
                 >
 
@@ -2006,7 +1789,10 @@ async function listarProdutosAdmin() {
 
   if (!produtosCatalogoCacheUI) {
     const snap = await db.collection("produtos").get();
-    produtosCatalogoCacheUI = snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    produtosCatalogoCacheUI = snap.docs.map((doc) => {
+      const p = doc.data();
+      return { ...p, id: doc.id, ativo: p.somenteAtendente ? p.disponivelAtendimento : p.ativo };
+    });
   }
   let produtos = [...produtosCatalogoCacheUI];
 
@@ -2054,7 +1840,7 @@ async function listarProdutosAdmin() {
                 </p>
 
                 <p>
-                    ${p.ativo ? "✅ Ativo" : "🙈 Invisível"} |
+                    ${p.ativo ? "✅ Ativo" : "🙈 Invisível"} ${p.somenteAtendente ? "· Só atendimento" : ""} |
                     ${p.esgotado ? "❌ Esgotado" : "🟢 Disponível"}
                 </p>
 
@@ -2134,9 +1920,13 @@ async function carregarAdicionaisProduto() {
   box.innerHTML = html;
 }
 async function alternarProdutoAtivo(id, novoStatus) {
-  await db.collection("produtos").doc(id).update({
-    ativo: novoStatus,
-  });
+  const ref = db.collection("produtos").doc(id);
+  const p = (await ref.get()).data();
+  await ref.update(
+    p.somenteAtendente
+      ? { ativo: false, disponivelAtendimento: novoStatus }
+      : { ativo: novoStatus },
+  );
 
   produtosCatalogoCacheUI = null;
   await listarProdutosAdmin();
@@ -2165,6 +1955,7 @@ async function editarProdutoAdmin(id) {
   if (!doc.exists) return alert("Produto não encontrado.");
 
   const p = { ...doc.data() };
+  if (p.somenteAtendente) p.ativo = p.disponivelAtendimento;
   for (const chave of ["nome", "descricao", "imagem", "img"])
     if (p[chave]) p[chave] = escaparOperacao(p[chave]);
 
@@ -2479,6 +2270,11 @@ async function salvarEdicaoProdutoAdmin(id) {
     normalizarProdutoCatalogoUI(produto);
   } catch (erro) {
     return avisoOperacao(erro.message);
+  }
+  const atualProduto = (await db.collection("produtos").doc(id).get()).data();
+  if (atualProduto.somenteAtendente) {
+    produto.disponivelAtendimento = produto.ativo;
+    produto.ativo = false;
   }
   await db.collection("produtos").doc(id).update(produto);
   await concluirProdutoCatalogoUI(true);
@@ -2847,6 +2643,9 @@ async function salvarAtendenteAdmin() {
   const nome = document.getElementById("atendente-nome").value.trim();
 
   const codigo = document.getElementById("atendente-codigo").value.trim();
+  const perfil = document.getElementById("atendente-perfil").value;
+  if (!["atendimento", "chapa", "ambos"].includes(perfil))
+    return alert("Escolha o acesso do funcionário.");
 
   if (!nome) {
     return alert("Digite o nome.");
@@ -2859,28 +2658,40 @@ async function salvarAtendenteAdmin() {
   await db.collection("atendentes").add({
     nome,
     codigo,
+    perfil,
 
     ativo: true,
 
     criadoEm: new Date().toISOString(),
   });
 
-  alert("Atendente salvo!");
+  alert("Funcionário salvo!");
 
   document.getElementById("atendente-nome").value = "";
   document.getElementById("atendente-codigo").value = "";
 
   listarAtendentesAdmin();
 }
-async function listarAtendentesAdmin() {
+async function listarAtendentesAdmin(alternar = false) {
   const box = document.getElementById("lista-atendentes-admin");
+  const botao = document.querySelector('[aria-controls="lista-atendentes-admin"]');
+  if (alternar && box.dataset.aberto === "sim") {
+    delete box.dataset.aberto;
+    box.hidden = true;
+    botao?.setAttribute("aria-expanded", "false");
+    return;
+  }
+  box.dataset.aberto = "sim";
+  box.hidden = false;
+  botao?.setAttribute("aria-expanded", "true");
 
   box.innerHTML = htmlCarregandoUI("Carregando…");
 
   const snap = await db.collection("atendentes").get();
+  if (box.dataset.aberto !== "sim") return;
 
   if (snap.empty) {
-    box.innerHTML = "<p>Nenhum atendente cadastrado.</p>";
+    box.innerHTML = "<p>Nenhum funcionário cadastrado.</p>";
 
     return;
   }
@@ -2894,12 +2705,15 @@ async function listarAtendentesAdmin() {
 
     <div class="card-atendente-admin">
 
-        <strong>${a.nome}</strong>
+        <strong>${escaparOperacao(a.nome)}</strong>
 
         <p>
             Código:
-            ${a.codigo}
+            ${escaparOperacao(a.codigo)}
         </p>
+        <label>Acesso liberado<select id="perfil-funcionario-${doc.id}">${["atendimento", "chapa", "ambos"].map((p) => `<option value="${p}" ${perfilFuncionarioUI(a) === p ? "selected" : ""}>${p === "ambos" ? "Ambos" : p === "chapa" ? "Chapa" : "Atendimento"}</option>`).join("")}</select></label>
+        <button type="button" onclick="salvarPerfilFuncionarioAdminUI('${doc.id}')">Salvar acesso</button>
+        <button type="button" onclick="excluirFuncionarioAdminUI('${doc.id}')">Excluir funcionário</button>
 
         <p>
             Status:
@@ -2929,6 +2743,30 @@ async function toggleAtendenteAdmin(id, ativoAtual) {
   });
 
   listarAtendentesAdmin();
+}
+async function salvarPerfilFuncionarioAdminUI(id) {
+  const perfil = document.getElementById("perfil-funcionario-" + id).value;
+  if (!["atendimento", "chapa", "ambos"].includes(perfil)) return;
+  try {
+    await db.collection("atendentes").doc(id).update({ perfil });
+    await listarAtendentesAdmin();
+  } catch (e) {
+    avisoOperacao("Não foi possível salvar o acesso. Tente novamente.");
+  }
+}
+async function excluirFuncionarioAdminUI(id) {
+  if (
+    !(await confirmarOperacao(
+      "Excluir este funcionário? O código deixará de permitir novas entradas. O histórico de pedidos será mantido.",
+    ))
+  )
+    return;
+  try {
+    await db.collection("atendentes").doc(id).delete();
+    await listarAtendentesAdmin();
+  } catch (e) {
+    avisoOperacao("Não foi possível excluir o funcionário. Tente novamente.");
+  }
 }
 let adminAvancadoLiberado = false;
 

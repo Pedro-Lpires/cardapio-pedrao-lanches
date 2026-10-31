@@ -7,6 +7,22 @@ dialog.aviso-ui.aviso-ui-com-personagem {
   background: #1b1b1b;
   box-shadow: 0 20px 64px #000b;
 }
+dialog.aviso-ui.aviso-entrega-criterios-ui {
+  width: min(300px, calc(100vw - 56px));
+  max-width: 300px;
+  padding: 14px;
+}
+dialog.aviso-ui.aviso-entrega-criterios-ui .aviso-personagem-retrato-ui {
+  width: 170px;
+  height: 138px;
+}
+dialog.aviso-ui.aviso-entrega-criterios-ui #aviso-ui-texto {
+  font-size: 15px;
+  line-height: 1.4;
+}
+dialog.aviso-ui.aviso-entrega-criterios-ui h2 {
+  font-size: 19px;
+}
 dialog.aviso-ui-com-personagem .aviso-personagem-retrato-ui {
   position: relative;
   width: 190px;

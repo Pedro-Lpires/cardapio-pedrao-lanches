@@ -62,7 +62,7 @@ function montarPedidoAtendenteUI(contexto) {
       <p class="pedido-total-ui">Total <strong id="total-pedido-${contexto}">${moedaOperacao(subtotal + (entrega ? Number(pedido.taxaEntrega || 0) : 0))}</strong></p>
     </section>
     <section class="pedido-caixa-ui pedido-pagamento-ui"><h4>Forma de pagamento</h4>
-      <button type="button" id="pedido-pagamento-resumo-${contexto}" onclick="abrirPagamentoPedidoUI('${contexto}')">${escaparOperacao(pedido.formaPagamento || "Escolher pagamento")} <span>›</span></button>
+      <button type="button" id="pedido-pagamento-resumo-${contexto}" onclick="abrirPagamentoPedidoUI('${contexto}')">${escaparOperacao(resumoPagamentoPedidoUI(pedido))} <span>›</span></button>
       <input hidden type="radio" name="pagamento-${contexto}-atendente" value="${escaparOperacao(pedido.formaPagamento || "")}" ${pedido.formaPagamento ? "checked" : ""}>
     </section>
     <button class="pedido-criar-ui" type="button" onclick="salvarPedido${sufixo}Atendente()">Criar pedido</button>
@@ -87,7 +87,9 @@ async function abrirCatalogoPedidoAtendenteUI(contexto) {
     if (!conteudo.isConnected) return;
     const produtos = snap.docs
       .map((d) => ({ ...d.data(), id: d.id }))
-      .filter((p) => p.ativo !== false && !p.esgotado);
+      .filter(
+        (p) => (p.somenteAtendente ? p.disponivelAtendimento : p.ativo !== false) && !p.esgotado,
+      );
     produtos.sort(
       (a, b) =>
         Number(a.ordem || 0) - Number(b.ordem || 0) ||
@@ -189,22 +191,46 @@ function abrirJanelaProdutoPedidoUI() {
 function abrirPagamentoPedidoUI(contexto) {
   const pedido = pedidoEmMontagemUI(contexto);
   if (!pedido) return;
-  const conteudo = novaJanelaPedidoUI(
-    "pedido-pagamento-ui",
-    "Pagamento",
-    `<p>Como o cliente vai pagar?</p><div class="pedido-pagamento-opcoes-ui">${["Pix", "Dinheiro", "Débito", "Crédito"].map((forma) => `<label><input type="radio" name="pedido-pagamento-escolha-ui" value="${forma}" ${pedido.formaPagamento === forma ? "checked" : ""}>${forma}</label>`).join("")}</div><button type="button" class="pedido-pagamento-confirmar-ui">Confirmar pagamento</button>`,
-  );
-  conteudo.querySelector("button").onclick = () => {
-    const selecionado = conteudo.querySelector("input:checked");
-    if (!selecionado) return mostrarAvisoUI("Escolha uma forma de pagamento.");
-    pedido.formaPagamento = selecionado.value;
+  const rascunho = {
+    ...pedido,
+    tipo: contexto === "entrega" ? "Entrega" : "Retirada",
+    pagamento: pedido.formaPagamento || "Pix",
+    formas: (pedido.formas || []).map((f) => ({ ...f })),
+  };
+  abrirPagamentoEditorUI(rascunho, 0, () => {
+    pedido.formaPagamento = rascunho.pagamento;
+    pedido.formas = rascunho.formas;
     const radio = document.querySelector(`input[name="pagamento-${contexto}-atendente"]`);
-    radio.value = selecionado.value;
+    radio.value = pedido.formaPagamento;
     radio.checked = true;
     document.getElementById(`pedido-pagamento-resumo-${contexto}`).innerHTML =
-      escaparOperacao(selecionado.value) + " <span>›</span>";
-    fecharJanelaPedidoUI("pedido-pagamento-ui");
-  };
+      escaparOperacao(resumoPagamentoPedidoUI(pedido)) + " <span>›</span>";
+  });
+}
+function resumoPagamentoPedidoUI(pedido) {
+  return pedido.formas?.length > 1
+    ? pedido.formas.map((f) => `${f.forma}: ${moedaOperacao(f.valor)}`).join(" + ")
+    : pedido.formaPagamento || "Escolher pagamento";
+}
+function validarDivisaoPedidoAtendenteUI(pedido, total) {
+  const formas = pedido.formas || [];
+  if (!formas.length) return true;
+  if (
+    formas.length < 2 ||
+    formas.some(
+      (f) =>
+        !["Pix", "Dinheiro", "Cartão", "Débito", "Crédito"].includes(f.forma) ||
+        !Number.isFinite(Number(f.valor)) ||
+        Number(f.valor) <= 0,
+    ) ||
+    formas.reduce((n, f) => n + centavosOperacao(f.valor), 0) !== centavosOperacao(total)
+  ) {
+    mostrarAvisoUI(
+      "O total mudou ou a divisão está incompleta. Confira os valores na forma de pagamento.",
+    );
+    return false;
+  }
+  return true;
 }
 function abrirMolhosPedidoUI(index) {
   const item = pedidoEmMontagemUI(contextoMolhosPedido)?.itens[index];

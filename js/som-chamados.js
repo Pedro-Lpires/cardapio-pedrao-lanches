@@ -69,7 +69,7 @@ function atualizarControleSomChamadosUI() {
   const ativo =
     somChamadosAtendenteUI.ligado && somChamadosAtendenteUI.contexto?.state === "running";
   if (botao) {
-    const rotulo = ativo ? "Silenciar chamados" : "Ativar som dos chamados";
+    const rotulo = ativo ? "Silenciar avisos" : "Ativar som dos avisos";
     botao.setAttribute("aria-label", rotulo);
     botao.setAttribute("title", rotulo);
     botao.setAttribute("aria-pressed", String(ativo));
@@ -86,7 +86,9 @@ function atualizarControleSomChamadosUI() {
           (somChamadosAtendenteUI.iniciando
             ? "Liberando o áudio…"
             : ativo
-              ? "Som ligado para chamar atendente e pedir a conta."
+              ? document.getElementById("fila-cozinha")
+                ? "Som ligado para novas levas de itens na chapa."
+                : "Som ligado para chamados das mesas e novos pedidos de entrega e retirada."
               : somChamadosAtendenteUI.ligado
                 ? "O navegador pausou o áudio. Toque no sino para reativar."
                 : document.getElementById("confirmar-som-chamados")
@@ -285,6 +287,15 @@ function processarSomChamadosAtendenteUI(chamados, jornada) {
   if (ultimo) ultimo.textContent = estado.ultimo;
   // Não depende de document.hidden: a aba minimizada também precisa avisar.
   tocarSomChamadoAtendenteUI(novos.some((c) => c.tipo === "conta") ? "conta" : "atendente");
+}
+function avisarSomPedidosSiteUI(pedidos) {
+  pedidos = pedidos.filter((p) => ["Entrega", "Retirada"].includes(p.tipo));
+  if (!pedidos.length) return;
+  const pedido = pedidos[pedidos.length - 1];
+  somChamadosAtendenteUI.ultimo = `${pedidos.length > 1 ? pedidos.length + " novos pedidos do site. " : "Novo pedido do site: "}${pedido.tipo || "Pedido"} #${pedido.numero || "-"}. Confira antes de liberar para o chapeiro.`;
+  const status = document.getElementById("ultimo-chamado-sonoro");
+  if (status) status.textContent = somChamadosAtendenteUI.ultimo;
+  tocarSomChamadoAtendenteUI("atendente");
 }
 
 function encerrarSomChamadosAtendenteUI() {

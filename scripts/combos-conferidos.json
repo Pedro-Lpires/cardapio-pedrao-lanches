@@ -1,7 +1,7 @@
 [
   {
     "nome": "Combo 3 Caseiro",
-    "imagem": "3baguncinha.webp",
+    "imagem": "images/combos/combo-3-caseiro.webp",
     "preco": 80,
     "descricao": "3 Baguncinha artesanal + 1 Refrigerante 1,5L",
     "comboQtdLanches": 3,
@@ -21,7 +21,7 @@
   },
   {
     "nome": "Combo 3 X-Bacon",
-    "imagem": "3xbacon.webp",
+    "imagem": "images/combos/combo-3-x-bacon.webp",
     "preco": 80,
     "descricao": "3 X-Bacon artesanal + 1 Refrigerante 1,5L",
     "comboQtdLanches": 3,
@@ -49,7 +49,7 @@
   },
   {
     "nome": "Combo 3 X-Bagunça",
-    "imagem": "3xbagunca.webp",
+    "imagem": "images/combos/combo-3-x-bagunca.webp",
     "preco": 95,
     "descricao": "3 X-Bagunça artesanal + 1 Refrigerante 1,5L",
     "comboQtdLanches": 3,
@@ -77,7 +77,7 @@
   },
   {
     "nome": "Combo 3 Big Big",
-    "imagem": "3big.webp",
+    "imagem": "images/combos/combo-3-big-big.webp",
     "preco": 95,
     "descricao": "3 Big Big artesanal + 1 Refrigerante 1,5L",
     "comboQtdLanches": 3,
@@ -105,7 +105,7 @@
   },
   {
     "nome": "Combo 5 Artesanal",
-    "imagem": "5baguncinha.webp",
+    "imagem": "images/combos/combo-5-artesanal.webp",
     "preco": 130,
     "descricao": "5 Baguncinha artesanal + 1 Refrigerante 2L",
     "comboQtdLanches": 5,
@@ -125,7 +125,7 @@
   },
   {
     "nome": "Combo 4 Industrial",
-    "imagem": "4baguncinha.webp",
+    "imagem": "images/combos/combo-4-industrial.webp",
     "preco": 75,
     "descricao": "4 Baguncinha industrial + 1 Refrigerante 1,5L",
     "comboQtdLanches": 4,
@@ -145,7 +145,7 @@
   },
   {
     "nome": "Combo 2 X-Tudo",
-    "imagem": "2tudo.webp",
+    "imagem": "images/combos/combo-2-x-tudo.webp",
     "preco": 110,
     "descricao": "2 X-Tudo artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     "comboQtdLanches": 2,
@@ -178,7 +178,7 @@
   },
   {
     "nome": "Combo 2 Filé Bagunça",
-    "imagem": "2filebagunca.webp",
+    "imagem": "images/combos/combo-2-file-bagunca.webp",
     "preco": 85,
     "descricao": "2 X-Filé Bagunça + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     "comboQtdLanches": 2,
@@ -203,7 +203,7 @@
   },
   {
     "nome": "Combo 2 X-Bagunça",
-    "imagem": "2xbagunca.webp",
+    "imagem": "images/combos/combo-2-x-bagunca.webp",
     "preco": 80,
     "descricao": "2 X-Bagunça artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     "comboQtdLanches": 2,
@@ -236,7 +236,7 @@
   },
   {
     "nome": "Combo 2 Big Big",
-    "imagem": "2big.webp",
+    "imagem": "images/combos/combo-2-big-big.webp",
     "preco": 80,
     "descricao": "2 Big Big artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L",
     "comboQtdLanches": 2,
@@ -269,7 +269,7 @@
   },
   {
     "nome": "Combo 2 Artesanal",
-    "imagem": "2baguncinhaartesanal.webp",
+    "imagem": "images/combos/combo-2-artesanal.webp",
     "preco": 70,
     "descricao": "2 Baguncinha artesanal + 1 Batata Frita Média + 2 Refrigerantes em lata",
     "comboQtdLanches": 2,
@@ -294,7 +294,7 @@
   },
   {
     "nome": "Combo 2 Industrial",
-    "imagem": "2baguncinhaindustrial.webp",
+    "imagem": "images/combos/combo-2-industrial.webp",
     "preco": 56,
     "descricao": "2 Baguncinha industrial + 1 Batata Frita Média + 2 Refrigerantes em lata",
     "comboQtdLanches": 2,

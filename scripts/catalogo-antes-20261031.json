@@ -1,0 +1,5321 @@
+{
+  "consultadoEm": "2026-10-31T19:46:59.112Z",
+  "produtos": [
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/3VwHTUj4qUOfUFOkY7Vn",
+      "fields": {
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.343Z"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "preco": {
+          "integerValue": "80"
+        },
+        "editadoEm": {
+          "stringValue": "2026-08-11T18:05:07.178Z"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "comboQtdLanches": {
+          "integerValue": "3"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "Combo 3 Caseiro"
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "Baguncinha"
+                    },
+                    "quantidade": {
+                      "integerValue": "3"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Artesanal"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 1,5L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "ordem": {
+          "integerValue": "30"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "imagem": {
+          "stringValue": "3baguncinha.webp"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "descricao": {
+          "stringValue": "3 Baguncinha artesanal + 1 Refrigerante 1,5L"
+        },
+        "ativo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.352587Z",
+      "updateTime": "2026-10-22T20:36:57.537937Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/4ZwdU6WsSBDd67tWEb9F",
+      "fields": {
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "16"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "descricao": {
+          "stringValue": "Pão, salsicha grelhada na chapa, frango picotado, presunto, mussarela, batata palha e milho verde)"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.588Z"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "prensado.webp"
+        },
+        "preco": {
+          "integerValue": "18"
+        },
+        "nome": {
+          "stringValue": "Hot Dog Prensado de Frango"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.598863Z",
+      "updateTime": "2026-05-25T19:07:26.598863Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/6HVies68bc4yYxYbMxcP",
+      "fields": {
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "xegg.webp"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "preco": {
+          "integerValue": "25"
+        },
+        "nome": {
+          "stringValue": "X-Egg"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.419Z"
+        },
+        "ordem": {
+          "integerValue": "13"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, 2 ovos, presunto, mussarela, alface e tomate"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "precoIndustrial": {
+          "integerValue": "21"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ativo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.458985Z",
+      "updateTime": "2026-05-25T19:07:26.458985Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/6HhCH1omsZSl6lKXLLhg",
+      "fields": {
+        "imagem": {
+          "stringValue": "coca-lata.webp"
+        },
+        "ordem": {
+          "integerValue": "44"
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "descricao": {
+          "stringValue": "290ml a 350ml"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "preco": {
+          "integerValue": "8"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "nome": {
+          "stringValue": "Coca (Lata)"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.045Z"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.061748Z",
+      "updateTime": "2026-05-25T19:07:28.061748Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/7yBGSbhcGAclNgAQxzLC",
+      "fields": {
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "X-Frango Bacon Salada"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "descricao": {
+          "stringValue": "Pão, Filé de frango, bacon, presunto, mussarela, alface e tomate"
+        },
+        "preco": {
+          "integerValue": "28"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.147Z"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "frango-bacon-salada.webp"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ordem": {
+          "integerValue": "9"
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.180034Z",
+      "updateTime": "2026-05-25T19:07:26.180034Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/8PlQp5aRBHBdqfj43XaP",
+      "fields": {
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "X-Filé Bagunça"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.149Z"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "descricao": {
+          "stringValue": "Pão, filé mignon, salsicha, calabresa, bacon, ovo, presunto, mussarela, alface e tomate"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "preco": {
+          "integerValue": "33"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "imagem": {
+          "stringValue": "x-file-bg.webp"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "26"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "esgotado": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.161179Z",
+      "updateTime": "2026-05-25T19:07:27.161179Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/8TuiVhrTN6dreSD2EE87",
+      "fields": {
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "descricao": {
+          "stringValue": "1 Litro"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "47"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "coca-1l-casco.webp"
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "preco": {
+          "integerValue": "10"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.191Z"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "nome": {
+          "stringValue": "Coca (1L)"
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.202667Z",
+      "updateTime": "2026-05-25T19:07:28.202667Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/Ary9y7mLwgzwy29gJL6K",
+      "fields": {
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "4WCfIooYSXauM9fp1X53"
+              },
+              {
+                "stringValue": "AqDss30Ur7fwnpm2D1LE"
+              },
+              {
+                "stringValue": "EfO30Bbe1Ub2U8PSoEjG"
+              },
+              {
+                "stringValue": "XproydAODGSu6z9A6jHO"
+              }
+            ]
+          }
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "editadoEm": {
+          "stringValue": "2026-08-11T17:19:35.576Z"
+        },
+        "nome": {
+          "stringValue": "Batata Média"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.519Z"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "54"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "descricao": {
+          "stringValue": "Porção de 300g"
+        },
+        "modoAdicional": {
+          "stringValue": "selecionar"
+        },
+        "comboQtdLanches": {
+          "integerValue": "1"
+        },
+        "preco": {
+          "integerValue": "20"
+        },
+        "categoria": {
+          "stringValue": "batatas"
+        },
+        "imagem": {
+          "stringValue": "batata-frita-media-cortada.webp"
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.531702Z",
+      "updateTime": "2026-08-11T17:19:35.616574Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/BlP2fv9uW0qZ90XFAlre",
+      "fields": {
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "precoIndustrial": {
+          "doubleValue": 86
+        },
+        "ordem": {
+          "integerValue": "32"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.436Z"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "3xbagunca.webp"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "descricao": {
+          "stringValue": "3 X-Bagunça artesanal + 1 Refrigerante 1,5L"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "X-Bagunça"
+                    },
+                    "quantidade": {
+                      "integerValue": "3"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Artesanal"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 1,5L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "nome": {
+          "stringValue": "Combo 3 X-Bagunça"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "comboQtdLanches": {
+          "integerValue": "3"
+        },
+        "preco": {
+          "integerValue": "95"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.445389Z",
+      "updateTime": "2026-10-23T18:38:20.337026Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/C8F87mfKljSkrZo2Wxlx",
+      "fields": {
+        "esgotado": {
+          "booleanValue": false
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "preco": {
+          "integerValue": "28"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "paulistinha.webp"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "descricao": {
+          "stringValue": "Pão, filé mignon, cebola grelhada,  presunto, mussarela e tomate"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "nome": {
+          "stringValue": "Paulistinha"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.958Z"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "ordem": {
+          "integerValue": "23"
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.968254Z",
+      "updateTime": "2026-05-25T19:07:26.968254Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/CGKb65A2E1YBR59Zzsyc",
+      "fields": {
+        "nome": {
+          "stringValue": "Hot Dog simples"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "4WCfIooYSXauM9fp1X53"
+              },
+              {
+                "stringValue": "AqDss30Ur7fwnpm2D1LE"
+              },
+              {
+                "stringValue": "EfO30Bbe1Ub2U8PSoEjG"
+              },
+              {
+                "stringValue": "dmFYnb0DsYVztWrl3Fc8"
+              },
+              {
+                "stringValue": "gYuh8F4uIY1REJE0hsxW"
+              }
+            ]
+          }
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "imagem": {
+          "stringValue": "hot-dog.webp"
+        },
+        "modoAdicional": {
+          "stringValue": "selecionar"
+        },
+        "comboQtdLanches": {
+          "integerValue": "1"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "preco": {
+          "integerValue": "9"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "ordem": {
+          "integerValue": "19"
+        },
+        "descricao": {
+          "stringValue": "Pão, 1 salsicha, molho, batata palha"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-27T19:30:59.294Z"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.778991Z",
+      "updateTime": "2026-05-27T19:30:59.415813Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/COGMcXTDEejqOGV5ZDGv",
+      "fields": {
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "X-Bacon"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ordem": {
+          "integerValue": "6"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:23.915Z"
+        },
+        "preco": {
+          "integerValue": "25"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, bacon, presunto e mussarela"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "precoIndustrial": {
+          "integerValue": "23"
+        },
+        "imagem": {
+          "stringValue": "x-bacon.webp"
+        }
+      },
+      "createTime": "2026-05-25T19:07:25.939614Z",
+      "updateTime": "2026-05-25T19:07:25.939614Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/DNtJ5mqUcZCqxrfAOHfO",
+      "fields": {
+        "preco": {
+          "integerValue": "5"
+        },
+        "imagem": {
+          "stringValue": "agua.mineral.webp"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "comboQtdLanches": {
+          "integerValue": "1"
+        },
+        "descricao": {
+          "stringValue": "500ml"
+        },
+        "permiteAdicionais": {
+          "booleanValue": false
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "editadoEm": {
+          "stringValue": "2026-08-11T18:03:28.123Z"
+        },
+        "ordem": {
+          "integerValue": "43"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.998Z"
+        },
+        "nome": {
+          "stringValue": "Água sem gás"
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.008722Z",
+      "updateTime": "2026-08-11T18:03:28.227266Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/DcdMJxzxV1pNwwapkBJK",
+      "fields": {
+        "imagem": {
+          "stringValue": "3big.webp"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "ordem": {
+          "integerValue": "33"
+        },
+        "descricao": {
+          "stringValue": "3 Big Big artesanal + 1 Refrigerante 1,5L"
+        },
+        "nome": {
+          "stringValue": "Combo 3 Big Big"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "precoIndustrial": {
+          "doubleValue": 89
+        },
+        "comboQtdLanches": {
+          "integerValue": "3"
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "Big Big"
+                    },
+                    "quantidade": {
+                      "integerValue": "3"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Artesanal"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 1,5L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "preco": {
+          "integerValue": "95"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.482Z"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.493433Z",
+      "updateTime": "2026-10-23T18:38:20.337026Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/Hk32cOeLtFcos6kwnP9o",
+      "fields": {
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "ordem": {
+          "integerValue": "12"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "Bauru"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "descricao": {
+          "stringValue": "Pão, 2 fatias de presunto, 2 fatias de mussarela"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.348Z"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "imagem": {
+          "stringValue": "bauru.webp"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "preco": {
+          "integerValue": "11"
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.380254Z",
+      "updateTime": "2026-05-25T19:07:26.380254Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/Ir2zLBGHHYkqqrBfNnY9",
+      "fields": {
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "ordem": {
+          "integerValue": "1"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "precoIndustrial": {
+          "integerValue": "35"
+        },
+        "nome": {
+          "stringValue": "x-home"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-24T20:13:14.547Z"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "descricao": {
+          "stringValue": "ingredientes da casa"
+        },
+        "esgotado": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "imagem": {
+          "stringValue": "baguncinha"
+        },
+        "preco": {
+          "integerValue": "40"
+        }
+      },
+      "createTime": "2026-05-24T20:13:14.301117Z",
+      "updateTime": "2026-05-27T19:38:20.036828Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/J82D1gRNrhJmtE0Ym146",
+      "fields": {
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "7"
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, bacon, presunto, mussarela, alface e tomate"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "nome": {
+          "stringValue": "X-Bacon Salada"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoIndustrial": {
+          "integerValue": "25"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:23.977Z"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "preco": {
+          "integerValue": "28"
+        },
+        "imagem": {
+          "stringValue": "bacon-salada.webp"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.011313Z",
+      "updateTime": "2026-05-25T19:07:26.011313Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/KjvVtBw6RcAQ7Et0qXEp",
+      "fields": {
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "preco": {
+          "integerValue": "20"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "nome": {
+          "stringValue": "Hot Dog Prensado Bacon"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.714Z"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "ordem": {
+          "integerValue": "18"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "descricao": {
+          "stringValue": "Pão, salsicha grelhada na chapa, bacon, presunto, mussarela, batata palha e milho verde)"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "imagem": {
+          "stringValue": "prensado.webp"
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.732968Z",
+      "updateTime": "2026-05-25T19:07:26.732968Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/LPmnXCG1Qe4rMrnwGDVx",
+      "fields": {
+        "imagem": {
+          "stringValue": "batata-frita-grande-cortada.webp"
+        },
+        "ordem": {
+          "integerValue": "55"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "4WCfIooYSXauM9fp1X53"
+              },
+              {
+                "stringValue": "AqDss30Ur7fwnpm2D1LE"
+              },
+              {
+                "stringValue": "EfO30Bbe1Ub2U8PSoEjG"
+              },
+              {
+                "stringValue": "XproydAODGSu6z9A6jHO"
+              }
+            ]
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.569Z"
+        },
+        "categoria": {
+          "stringValue": "batatas"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "comboQtdLanches": {
+          "integerValue": "1"
+        },
+        "descricao": {
+          "stringValue": "Porção de 450g"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "editadoEm": {
+          "stringValue": "2026-08-11T17:20:00.688Z"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "modoAdicional": {
+          "stringValue": "selecionar"
+        },
+        "preco": {
+          "integerValue": "30"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "nome": {
+          "stringValue": "Batata Grande"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.575196Z",
+      "updateTime": "2026-08-11T17:20:00.755200Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/NQctF0hGZBo1KsI5WkJr",
+      "fields": {
+        "descricao": {
+          "stringValue": "Pão, filé de frango, presunto, mussarela, alface, tomate e milho verde)"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.218Z"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "10"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "preco": {
+          "integerValue": "23"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "nome": {
+          "stringValue": "Frango Salada"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "frango-salada.webp"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "esgotado": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.241971Z",
+      "updateTime": "2026-05-25T19:07:26.241971Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/Po05YUmTJMJK1OY9eM4n",
+      "fields": {
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "2"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "preco": {
+          "integerValue": "26"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "imagem": {
+          "stringValue": "bg-com-bacon.webp"
+        },
+        "precoIndustrial": {
+          "integerValue": "23"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:23.705Z"
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, salsicha, bacon, ovo, presunto, mussarela, alface e tomate"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "nome": {
+          "stringValue": "Baguncinha com Bacon"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:25.721155Z",
+      "updateTime": "2026-05-25T19:07:25.721155Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/PomZRnrRXcVuuxvWkdxR",
+      "fields": {
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.907Z"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "nome": {
+          "stringValue": "Mignon Salada"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "descricao": {
+          "stringValue": "Pão, filé mignon, presunto, mussarela, alface e tomate"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "preco": {
+          "integerValue": "28"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "imagem": {
+          "stringValue": "xmignon-salada.webp"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "22"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.921671Z",
+      "updateTime": "2026-05-25T19:07:26.921671Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/PvZwTtckofj1EuO2vYSA",
+      "fields": {
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, filé mignon, filé de frango, salsicha, calabresa, bacon, ovo, presunto, mussarela, alface, tomate, batata palha e milho verde)"
+        },
+        "preco": {
+          "integerValue": "45"
+        },
+        "imagem": {
+          "stringValue": "x-tudo.webp"
+        },
+        "nome": {
+          "stringValue": "X-tudo"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.296Z"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "ordem": {
+          "integerValue": "29"
+        },
+        "precoIndustrial": {
+          "integerValue": "43"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.306257Z",
+      "updateTime": "2026-05-25T19:07:27.306257Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/RxC6l3Nfkkm7JF3sGE97",
+      "fields": {
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ordem": {
+          "integerValue": "27"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.198Z"
+        },
+        "imagem": {
+          "stringValue": "frango-bagunca.webp"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "preco": {
+          "integerValue": "30"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "nome": {
+          "stringValue": "Frango Bagunça"
+        },
+        "descricao": {
+          "stringValue": "Pão, filé de frango, salsicha, calabresa, bacon, ovo, presunto, mussarela, alface e tomate"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.206467Z",
+      "updateTime": "2026-05-25T19:07:27.206467Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/SQLbQeIiQEep7hmQQ2Mm",
+      "fields": {
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "ordem": {
+          "integerValue": "14"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.498Z"
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, calabresa, presunto, mussarela"
+        },
+        "nome": {
+          "stringValue": "X-Calabresa"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "imagem": {
+          "stringValue": "x-calabresa.webp"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "precoIndustrial": {
+          "integerValue": "21"
+        },
+        "preco": {
+          "integerValue": "25"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.506741Z",
+      "updateTime": "2026-05-25T19:07:26.506741Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/VCGIwtdpTA0w0J5WBOsf",
+      "fields": {
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "comboQtdLanches": {
+          "integerValue": "2"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "Combo 2 Industrial"
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "Baguncinha"
+                    },
+                    "quantidade": {
+                      "integerValue": "2"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Industrial"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "batatas"
+                    },
+                    "nome": {
+                      "stringValue": "Batata Frita Média"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante em lata"
+                    },
+                    "quantidade": {
+                      "integerValue": "2"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "ordem": {
+          "integerValue": "41"
+        },
+        "imagem": {
+          "stringValue": "2baguncinhaindustrial.webp"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "preco": {
+          "integerValue": "56"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.893Z"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "descricao": {
+          "stringValue": "2 Baguncinha industrial + 1 Batata Frita Média + 2 Refrigerantes em lata"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.905550Z",
+      "updateTime": "2026-10-22T20:36:57.537937Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/WgHdktoaUeu0zrRqfvWQ",
+      "fields": {
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.336Z"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ordem": {
+          "integerValue": "50"
+        },
+        "imagem": {
+          "stringValue": "guarana-antarctica-15l.webp"
+        },
+        "preco": {
+          "integerValue": "15"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "nome": {
+          "stringValue": "Guaraná Antarctica (1,5L)"
+        },
+        "descricao": {
+          "stringValue": "1,5 Litros"
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.345431Z",
+      "updateTime": "2026-05-25T19:07:28.345431Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/X6SvIiVLiUAHPCOeyOrl",
+      "fields": {
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "preco": {
+          "integerValue": "20"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "precoFrango": {
+          "integerValue": "20"
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal triturado, molho vermelho, alface e tomate picado, presunto mussarela. * (opção de substituir o hamburguer por filé de frango)"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "imagem": {
+          "stringValue": "burrito.webp"
+        },
+        "precoIndustrial": {
+          "integerValue": "18"
+        },
+        "nome": {
+          "stringValue": "Burrito cuiabano"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:23.823Z"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "ordem": {
+          "integerValue": "4"
+        }
+      },
+      "createTime": "2026-05-25T19:07:25.831285Z",
+      "updateTime": "2026-05-25T19:07:25.831285Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/X8T4VUvjxpHLpXY8YuTq",
+      "fields": {
+        "ordem": {
+          "integerValue": "21"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "xmignon.webp"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "descricao": {
+          "stringValue": "Pão, 2 fatias de presunto e 2 fatias de mussarela"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.863Z"
+        },
+        "preco": {
+          "integerValue": "28"
+        },
+        "nome": {
+          "stringValue": "X-Mignon"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.871050Z",
+      "updateTime": "2026-05-25T19:07:26.871050Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/XmoBdD8EqHdcRbjSDuCm",
+      "fields": {
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "imagem": {
+          "stringValue": "5baguncinha.webp"
+        },
+        "nome": {
+          "stringValue": "Combo 5 Artesanal"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "preco": {
+          "integerValue": "130"
+        },
+        "editadoEm": {
+          "stringValue": "2026-08-11T18:34:28.239Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "Baguncinha"
+                    },
+                    "quantidade": {
+                      "integerValue": "5"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Artesanal"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 2L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.530Z"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "descricao": {
+          "stringValue": "5 Baguncinha artesanal + 1 Refrigerante 2L"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "comboQtdLanches": {
+          "integerValue": "5"
+        },
+        "ordem": {
+          "integerValue": "34"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.567230Z",
+      "updateTime": "2026-10-22T20:36:57.537937Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/YyarBDTCCzTlVuFfL7xQ",
+      "fields": {
+        "descricao": {
+          "stringValue": "1,5 Litros"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.287Z"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "nome": {
+          "stringValue": "Coca (1,5L)"
+        },
+        "ordem": {
+          "integerValue": "49"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "preco": {
+          "integerValue": "15"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "imagem": {
+          "stringValue": "coca15l.webp"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "esgotado": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.298376Z",
+      "updateTime": "2026-05-25T19:07:28.298376Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/bYZ1A3ObCIdldizpARCP",
+      "fields": {
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "preco": {
+          "integerValue": "30"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.243Z"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "nome": {
+          "stringValue": "Big Big"
+        },
+        "precoIndustrial": {
+          "integerValue": "28"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "descricao": {
+          "stringValue": "Pão, 2 hambúrguer artesanal, 2 ovos, 2 fatias de presunto, 2 fatias de mussarela, batata palha, milho verde, alface e tomate"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "imagem": {
+          "stringValue": "big.webp"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "28"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.260075Z",
+      "updateTime": "2026-05-25T19:07:27.260075Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/bl9rQaDAaR1NTo4Jw20E",
+      "fields": {
+        "comboQtdLanches": {
+          "integerValue": "2"
+        },
+        "nome": {
+          "stringValue": "Combo 2 Artesanal"
+        },
+        "preco": {
+          "integerValue": "70"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "Baguncinha"
+                    },
+                    "quantidade": {
+                      "integerValue": "2"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Artesanal"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "batatas"
+                    },
+                    "nome": {
+                      "stringValue": "Batata Frita Média"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante em lata"
+                    },
+                    "quantidade": {
+                      "integerValue": "2"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "imagem": {
+          "stringValue": "2baguncinhaartesanal.webp"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "descricao": {
+          "stringValue": "2 Baguncinha artesanal + 1 Batata Frita Média + 2 Refrigerantes em lata"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.847Z"
+        },
+        "ordem": {
+          "integerValue": "40"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.856225Z",
+      "updateTime": "2026-10-22T20:36:57.537937Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/bnjPUfF7zmrFYzuH0C9S",
+      "fields": {
+        "descricao": {
+          "stringValue": "2 Big Big artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L"
+        },
+        "imagem": {
+          "stringValue": "2big.webp"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "preco": {
+          "integerValue": "80"
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "Big Big"
+                    },
+                    "quantidade": {
+                      "integerValue": "2"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Artesanal"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "batatas"
+                    },
+                    "nome": {
+                      "stringValue": "Batata Frita Média"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 1,5L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoIndustrial": {
+          "doubleValue": 76
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.797Z"
+        },
+        "comboQtdLanches": {
+          "integerValue": "2"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "nome": {
+          "stringValue": "Combo 2 Big Big"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "39"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": true
+              }
+            }
+          }
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.810311Z",
+      "updateTime": "2026-10-23T18:38:20.337026Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/dLDCEEg8zdGNlhi4snSX",
+      "fields": {
+        "ordem": {
+          "integerValue": "15"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "imagem": {
+          "stringValue": "calabresa-salada.webp"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.543Z"
+        },
+        "nome": {
+          "stringValue": "X-Calabresa Salada"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, calabresa, presunto, mussarela, alface e tomate"
+        },
+        "precoIndustrial": {
+          "integerValue": "23"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "preco": {
+          "integerValue": "26"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.552494Z",
+      "updateTime": "2026-05-25T19:07:26.552494Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/efgO4ayct4UEEimR8EXS",
+      "fields": {
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "prensado.webp"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.636Z"
+        },
+        "descricao": {
+          "stringValue": "Pão, salsicha grelhada na chapa, frango picotado, presunto, mussarela, batata palha e milho verde)"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "preco": {
+          "integerValue": "18"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "ordem": {
+          "integerValue": "17"
+        },
+        "nome": {
+          "stringValue": "Hot Dog Prensado de Calabresa"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.675990Z",
+      "updateTime": "2026-05-25T19:07:26.675990Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/gLpChO1aJa6q11ZUxwCI",
+      "fields": {
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "nome": {
+          "stringValue": "Coca 2L"
+        },
+        "preco": {
+          "integerValue": "20"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.382Z"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "descricao": {
+          "stringValue": "2 Litros"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "51"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "imagem": {
+          "stringValue": "coca2l.webp"
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.392068Z",
+      "updateTime": "2026-05-25T19:07:28.392068Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/ik7fqSGx5ECbmFOwXtFT",
+      "fields": {
+        "imagem": {
+          "stringValue": "fanta-1l.webp"
+        },
+        "ordem": {
+          "integerValue": "48"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.239Z"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "Fanta (1L)"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "descricao": {
+          "stringValue": "1 Litro"
+        },
+        "preco": {
+          "integerValue": "10"
+        },
+        "esgotado": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.250679Z",
+      "updateTime": "2026-05-25T19:07:28.250679Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/jKFWeHFY4DktCzJlCGPI",
+      "fields": {
+        "nome": {
+          "stringValue": "Paulistão"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.006Z"
+        },
+        "imagem": {
+          "stringValue": "paulistao.webp"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "24"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "descricao": {
+          "stringValue": "Pão, filé mignon, cebola grelhada, calabresa, ovo, presunto, mussarela e tomate"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "preco": {
+          "integerValue": "31"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.042913Z",
+      "updateTime": "2026-05-25T19:07:27.042913Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/jhj2mVXYRNjt8CNOq7s9",
+      "fields": {
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "25"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.081Z"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoIndustrial": {
+          "integerValue": "27"
+        },
+        "imagem": {
+          "stringValue": "x-bg.webp"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "preco": {
+          "integerValue": "30"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "nome": {
+          "stringValue": "X-Bagunça"
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, salsicha, calabresa, bacon, ovo, presunto, mussarela, alface e tomate"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.111680Z",
+      "updateTime": "2026-05-25T19:07:27.111680Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/kUDF2AEpg7hw47KTEWXI",
+      "fields": {
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "20"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "4WCfIooYSXauM9fp1X53"
+              },
+              {
+                "stringValue": "AqDss30Ur7fwnpm2D1LE"
+              },
+              {
+                "stringValue": "EfO30Bbe1Ub2U8PSoEjG"
+              },
+              {
+                "stringValue": "gYuh8F4uIY1REJE0hsxW"
+              }
+            ]
+          }
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "descricao": {
+          "stringValue": "Pão, 2 salsicha, molho, mussarela, milho verde e batata palha"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "Hot Dog especial"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "comboQtdLanches": {
+          "integerValue": "1"
+        },
+        "imagem": {
+          "stringValue": "hot-dog.webp"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-27T19:32:13.486Z"
+        },
+        "modoAdicional": {
+          "stringValue": "selecionar"
+        },
+        "preco": {
+          "integerValue": "15"
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.826359Z",
+      "updateTime": "2026-05-27T19:32:13.581285Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/lHIUYiKJ02DAr2PzRMYB",
+      "fields": {
+        "esgotado": {
+          "booleanValue": false
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "descricao": {
+          "stringValue": "450ml a 600ml"
+        },
+        "preco": {
+          "integerValue": "9"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "imagem": {
+          "stringValue": "coca-500ml.webp"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ordem": {
+          "integerValue": "46"
+        },
+        "nome": {
+          "stringValue": "Coca (Garrafinha)"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.146Z"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.154211Z",
+      "updateTime": "2026-05-25T19:07:28.154211Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/mSoKHAHltuXgAaYfTjlr",
+      "fields": {
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "imagem": {
+          "stringValue": "4baguncinha.webp"
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "Baguncinha"
+                    },
+                    "quantidade": {
+                      "integerValue": "4"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Industrial"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 1,5L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "ordem": {
+          "integerValue": "35"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "comboQtdLanches": {
+          "integerValue": "4"
+        },
+        "nome": {
+          "stringValue": "Combo 4 Industrial"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.606Z"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "descricao": {
+          "stringValue": "4 Baguncinha industrial + 1 Refrigerante 1,5L"
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "preco": {
+          "integerValue": "75"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.617687Z",
+      "updateTime": "2026-10-22T20:36:57.537937Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/miandjyuQ9o3UWI0T8WN",
+      "fields": {
+        "imagem": {
+          "stringValue": "baguncinha-de-frango.webp"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "3"
+        },
+        "descricao": {
+          "stringValue": "Pão, filé de frango, salsicha, ovo, presunto, mussarela, alface e tomate"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "nome": {
+          "stringValue": "Baguncinha de Frango"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:23.758Z"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "preco": {
+          "integerValue": "25"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        }
+      },
+      "createTime": "2026-05-25T19:07:25.785850Z",
+      "updateTime": "2026-05-25T19:07:25.785850Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/oZB6tVh0aVubljJza74N",
+      "fields": {
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "preco": {
+          "integerValue": "20"
+        },
+        "nome": {
+          "stringValue": "Guaraná Antarctica 2L"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "52"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.428Z"
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "imagem": {
+          "stringValue": "guarana-antarctica-2l.webp"
+        },
+        "descricao": {
+          "stringValue": "2 Litros"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "ativo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.436905Z",
+      "updateTime": "2026-05-25T19:07:28.436905Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/on9OUpS5YOUDXPUFri8a",
+      "fields": {
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "imagem": {
+          "stringValue": "xsalada.webp"
+        },
+        "nome": {
+          "stringValue": "X-Salada"
+        },
+        "preco": {
+          "integerValue": "20"
+        },
+        "precoIndustrial": {
+          "integerValue": "17"
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, presunto, mussarela, alface e tomate"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.048Z"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "8"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.109948Z",
+      "updateTime": "2026-05-25T19:07:26.109948Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/ov6acgMmtTCx2ouU7wIp",
+      "fields": {
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, salsicha, ovo, presunto, mussarela, alface e tomate"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:23.556Z"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "nome": {
+          "stringValue": "Baguncinha"
+        },
+        "ordem": {
+          "integerValue": "1"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "bg.webp"
+        },
+        "preco": {
+          "integerValue": "25"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "precoIndustrial": {
+          "integerValue": "18"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:25.661379Z",
+      "updateTime": "2026-05-25T19:14:19.365656Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/qbR51hHbK0fWdDqPuGZs",
+      "fields": {
+        "descricao": {
+          "stringValue": "2 X-Tudo artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L"
+        },
+        "imagem": {
+          "stringValue": "2tudo.webp"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "X-Tudo"
+                    },
+                    "quantidade": {
+                      "integerValue": "2"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Artesanal"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "batatas"
+                    },
+                    "nome": {
+                      "stringValue": "Batata Frita Média"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 1,5L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "nome": {
+          "stringValue": "Combo 2 X-Tudo"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "precoIndustrial": {
+          "doubleValue": 106
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "preco": {
+          "integerValue": "110"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "comboQtdLanches": {
+          "integerValue": "2"
+        },
+        "ordem": {
+          "integerValue": "36"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.655Z"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.664453Z",
+      "updateTime": "2026-10-23T18:38:20.337026Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/rO212Tcapy8aAKmHWPVg",
+      "fields": {
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "nome": {
+          "stringValue": "Guaraná Antarctica (Lata)"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "ordem": {
+          "integerValue": "45"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "descricao": {
+          "stringValue": "290ml a 350ml"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "imagem": {
+          "stringValue": "guarana-lata.webp"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.099Z"
+        },
+        "preco": {
+          "integerValue": "8"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.109757Z",
+      "updateTime": "2026-05-25T19:07:28.109757Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/sREhhQ0E0bzwgp7vAqfU",
+      "fields": {
+        "imagem": {
+          "stringValue": "2xbagunca.webp"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "precoIndustrial": {
+          "doubleValue": 74
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.753Z"
+        },
+        "preco": {
+          "integerValue": "80"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "X-Bagunça"
+                    },
+                    "quantidade": {
+                      "integerValue": "2"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Artesanal"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "batatas"
+                    },
+                    "nome": {
+                      "stringValue": "Batata Frita Média"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 1,5L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "ordem": {
+          "integerValue": "38"
+        },
+        "nome": {
+          "stringValue": "Combo 2 X-Bagunça"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "comboQtdLanches": {
+          "integerValue": "2"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "descricao": {
+          "stringValue": "2 X-Bagunça artesanal + 1 Batata Frita Média + 1 Refrigerante 1,5L"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.760661Z",
+      "updateTime": "2026-10-23T18:38:20.337026Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/sVsIG2ThtxcZdZY8FdgT",
+      "fields": {
+        "ordem": {
+          "integerValue": "53"
+        },
+        "editadoEm": {
+          "stringValue": "2026-08-11T17:19:09.704Z"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "imagem": {
+          "stringValue": "batata-frita-pequena-cortada.webp"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "modoAdicional": {
+          "stringValue": "selecionar"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "nome": {
+          "stringValue": "Batata Pequena"
+        },
+        "descricao": {
+          "stringValue": "Porção de 150g"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {
+            "values": [
+              {
+                "stringValue": "4WCfIooYSXauM9fp1X53"
+              },
+              {
+                "stringValue": "AqDss30Ur7fwnpm2D1LE"
+              },
+              {
+                "stringValue": "EfO30Bbe1Ub2U8PSoEjG"
+              },
+              {
+                "stringValue": "XproydAODGSu6z9A6jHO"
+              }
+            ]
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:26.473Z"
+        },
+        "preco": {
+          "integerValue": "15"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "comboQtdLanches": {
+          "integerValue": "1"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "batatas"
+        }
+      },
+      "createTime": "2026-05-25T19:07:28.481018Z",
+      "updateTime": "2026-08-11T17:19:10.006609Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/srfixIKzka5udy9LO3MW",
+      "fields": {
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "americano-especial.webp"
+        },
+        "preco": {
+          "integerValue": "26"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:24.280Z"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, 2 ovos, 2 fatias de presunto, 2 fatias de mussarela, alface e tomate"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "precoIndustrial": {
+          "integerValue": "23"
+        },
+        "nome": {
+          "stringValue": "Americano Especial"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "ordem": {
+          "integerValue": "11"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        }
+      },
+      "createTime": "2026-05-25T19:07:26.311754Z",
+      "updateTime": "2026-05-25T19:07:26.311754Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/tdvVqYkcdyHgYBgcouC8",
+      "fields": {
+        "esgotado": {
+          "booleanValue": false
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "precoIndustrial": {
+          "integerValue": "15"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "xburguer.webp"
+        },
+        "ordem": {
+          "integerValue": "5"
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "nome": {
+          "stringValue": "X-Burguer"
+        },
+        "preco": {
+          "integerValue": "18"
+        },
+        "categoria": {
+          "stringValue": "lanches"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:23.869Z"
+        },
+        "descricao": {
+          "stringValue": "Pão, hambúrguer artesanal, 1 fatia de presunto e 1 de mussarela"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:25.877542Z",
+      "updateTime": "2026-05-25T19:07:25.877542Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/upO9OHaKfkT2Twb5eVIh",
+      "fields": {
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "comboQtdLanches": {
+          "integerValue": "3"
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "X-Bacon"
+                    },
+                    "quantidade": {
+                      "integerValue": "3"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Artesanal"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 1,5L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "imagem": {
+          "stringValue": "3xbacon.webp"
+        },
+        "editadoEm": {
+          "stringValue": "2026-05-31T07:38:14.680Z"
+        },
+        "ordem": {
+          "integerValue": "31"
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.390Z"
+        },
+        "nome": {
+          "stringValue": "Combo 3 X-Bacon"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "preco": {
+          "integerValue": "80"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": true
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "precoIndustrial": {
+          "doubleValue": 74
+        },
+        "descricao": {
+          "stringValue": "3 X-Bacon artesanal + 1 Refrigerante 1,5L"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.398926Z",
+      "updateTime": "2026-10-23T18:38:20.337026Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/xPl8LAwMtTu5SHk6j1hD",
+      "fields": {
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "nome": {
+          "stringValue": "Combo 2 Filé Bagunça"
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "preco": {
+          "integerValue": "85"
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "file": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "industrial": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              }
+            }
+          }
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "tipoBase": {
+          "stringValue": "hamburguer"
+        },
+        "categoria": {
+          "stringValue": "combos"
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.701Z"
+        },
+        "descricao": {
+          "stringValue": "2 X-Filé Bagunça + 1 Batata Frita Média + 1 Refrigerante 1,5L"
+        },
+        "comboComponentes": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "lanches"
+                    },
+                    "nome": {
+                      "stringValue": "X-Filé Bagunça"
+                    },
+                    "quantidade": {
+                      "integerValue": "2"
+                    },
+                    "tipoCarne": {
+                      "stringValue": "Filé mignon"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "batatas"
+                    },
+                    "nome": {
+                      "stringValue": "Batata Frita Média"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "categoria": {
+                      "stringValue": "bebidas"
+                    },
+                    "nome": {
+                      "stringValue": "Refrigerante 1,5L"
+                    },
+                    "quantidade": {
+                      "integerValue": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "ordem": {
+          "integerValue": "37"
+        },
+        "comboQtdLanches": {
+          "integerValue": "2"
+        },
+        "imagem": {
+          "stringValue": "2filebagunca.webp"
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.715465Z",
+      "updateTime": "2026-10-22T20:36:57.537937Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/produtos/xs2YRcSgFnNla68Y0ZzW",
+      "fields": {
+        "imagem": {
+          "stringValue": "agua.mineral.webp"
+        },
+        "descricao": {
+          "stringValue": "500ml"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T19:07:25.943Z"
+        },
+        "modoAdicional": {
+          "stringValue": "todos"
+        },
+        "precoFrango": {
+          "integerValue": "0"
+        },
+        "preco": {
+          "integerValue": "5"
+        },
+        "tipoBase": {
+          "stringValue": "outro"
+        },
+        "nome": {
+          "stringValue": "Água com gás "
+        },
+        "importadoDoCodigo": {
+          "booleanValue": true
+        },
+        "categoria": {
+          "stringValue": "bebidas"
+        },
+        "precoIndustrial": {
+          "integerValue": "0"
+        },
+        "ordem": {
+          "integerValue": "42"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "permiteAdicionais": {
+          "booleanValue": true
+        },
+        "opcoes": {
+          "mapValue": {
+            "fields": {
+              "industrial": {
+                "booleanValue": false
+              },
+              "frango": {
+                "booleanValue": false
+              },
+              "artesanal": {
+                "booleanValue": true
+              },
+              "file": {
+                "booleanValue": false
+              }
+            }
+          }
+        },
+        "adicionaisPermitidos": {
+          "arrayValue": {}
+        },
+        "precoFile": {
+          "integerValue": "0"
+        },
+        "ativo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T19:07:27.960068Z",
+      "updateTime": "2026-05-25T19:07:27.960068Z"
+    }
+  ],
+  "adicionais": [
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/4WCfIooYSXauM9fp1X53",
+      "fields": {
+        "ativo": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "Mussarela"
+        },
+        "preco": {
+          "integerValue": "3"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.630Z"
+        },
+        "ordem": {
+          "integerValue": "9"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.597705Z",
+      "updateTime": "2026-05-25T21:01:49.597705Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/63gDvkj08fJkdJFl7igQ",
+      "fields": {
+        "ativo": {
+          "booleanValue": true
+        },
+        "preco": {
+          "integerValue": "2"
+        },
+        "nome": {
+          "stringValue": "Tomate"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.743Z"
+        },
+        "ordem": {
+          "integerValue": "11"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.725803Z",
+      "updateTime": "2026-05-25T21:01:49.725803Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/9JmhNv6CybJzL6JrOYaR",
+      "fields": {
+        "preco": {
+          "integerValue": "2"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.802Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "12"
+        },
+        "nome": {
+          "stringValue": "Cebola"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.770735Z",
+      "updateTime": "2026-05-25T21:01:49.770735Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/AqDss30Ur7fwnpm2D1LE",
+      "fields": {
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.440Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "ordem": {
+          "integerValue": "5"
+        },
+        "preco": {
+          "integerValue": "5"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "Bacon"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.413014Z",
+      "updateTime": "2026-05-25T21:01:49.413014Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/DpNAeK0TaAz6K05H4xNZ",
+      "fields": {
+        "ordem": {
+          "integerValue": "3"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.329Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "nome": {
+          "stringValue": "Filé de Frango"
+        },
+        "preco": {
+          "integerValue": "6"
+        },
+        "ativo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.319946Z",
+      "updateTime": "2026-05-25T21:01:49.319946Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/EfO30Bbe1Ub2U8PSoEjG",
+      "fields": {
+        "nome": {
+          "stringValue": "Cheddar"
+        },
+        "ordem": {
+          "integerValue": "15"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "preco": {
+          "integerValue": "3"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.978Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.945985Z",
+      "updateTime": "2026-05-25T21:01:49.945985Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/FnlNDeKlTuQuhMRPJM88",
+      "fields": {
+        "ordem": {
+          "integerValue": "8"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.584Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "preco": {
+          "integerValue": "2"
+        },
+        "nome": {
+          "stringValue": "Presunto"
+        },
+        "ativo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.554151Z",
+      "updateTime": "2026-05-25T21:01:49.554151Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/JAfbA9ieTi7ilQxBBYrC",
+      "fields": {
+        "nome": {
+          "stringValue": "Filé Mignon"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.396Z"
+        },
+        "ordem": {
+          "integerValue": "4"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "preco": {
+          "integerValue": "9"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.364255Z",
+      "updateTime": "2026-05-25T21:01:49.364255Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/OB4EJBcKCnnFseBYVv2h",
+      "fields": {
+        "ordem": {
+          "integerValue": "10"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.673Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "nome": {
+          "stringValue": "Alface"
+        },
+        "preco": {
+          "integerValue": "2"
+        },
+        "ativo": {
+          "booleanValue": true
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.667196Z",
+      "updateTime": "2026-05-25T21:01:49.667196Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/XproydAODGSu6z9A6jHO",
+      "fields": {
+        "ativo": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "Calabresa"
+        },
+        "preco": {
+          "integerValue": "4"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.540Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "ordem": {
+          "integerValue": "7"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.508205Z",
+      "updateTime": "2026-05-25T21:01:49.508205Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/dmFYnb0DsYVztWrl3Fc8",
+      "fields": {
+        "preco": {
+          "integerValue": "2"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "ordem": {
+          "integerValue": "13"
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.846Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "nome": {
+          "stringValue": "Milho"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.840403Z",
+      "updateTime": "2026-05-25T21:01:49.840403Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/gYuh8F4uIY1REJE0hsxW",
+      "fields": {
+        "ordem": {
+          "integerValue": "6"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.489Z"
+        },
+        "preco": {
+          "integerValue": "3"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "nome": {
+          "stringValue": "Salsicha"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.464099Z",
+      "updateTime": "2026-05-25T21:01:49.464099Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/j5OxJOeWeEWubGIGPGtz",
+      "fields": {
+        "preco": {
+          "integerValue": "2"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.919Z"
+        },
+        "ordem": {
+          "integerValue": "14"
+        },
+        "nome": {
+          "stringValue": "Batata Palha"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.902486Z",
+      "updateTime": "2026-05-25T21:01:49.902486Z"
+    },
+    {
+      "name": "projects/pedrao-lanches/databases/(default)/documents/adicionais/wl9BzK5Zhhv0YQ6tfG3o",
+      "fields": {
+        "nome": {
+          "stringValue": "Hambúrguer Caseiro"
+        },
+        "ordem": {
+          "integerValue": "1"
+        },
+        "ativo": {
+          "booleanValue": true
+        },
+        "criadoEm": {
+          "stringValue": "2026-05-25T21:01:49.165Z"
+        },
+        "esgotado": {
+          "booleanValue": false
+        },
+        "preco": {
+          "integerValue": "8"
+        }
+      },
+      "createTime": "2026-05-25T21:01:49.196187Z",
+      "updateTime": "2026-05-25T21:01:49.196187Z"
+    }
+  ]
+}

@@ -80,6 +80,36 @@ const cupom = (codigo, extra = {}) =>
   assert.equal(JSON.stringify([...registros]), antes, "abrir conta não grava nem consome cupom");
   assert.equal((await ctx.buscarCuponsClienteAuto("65888888888")).length, 0);
   assert.equal((await ctx.buscarCuponsClienteAuto(null)).length, 0);
+  const operacao = require("./operacao.test.cjs").context;
+  ctx.nivelFidelidadeOperacao = operacao.nivelFidelidadeOperacao;
+  vm.runInContext(fs.readFileSync("js/cupons-rank.js", "utf8"), ctx);
+  registros.set("clientes/" + cliente, { fidelidadeAtiva: true, nivelCliente: "Bronze" });
+  cupom("RANK", {
+    tipo: "item",
+    itemGeral: true,
+    itemGeralTipo: "todos",
+    rankRegra: {
+      acesso: "crescente",
+      nivel: "Prata",
+      descontoPorRank: true,
+      percentuais: { Prata: 7, Ouro: 9, Diamante: 11, Imortal: 13 },
+    },
+  });
+  mensagem("rank", "RANK");
+  assert.equal(
+    (await ctx.buscarCuponsClienteAuto(cliente)).some((c) => c.codigo === "RANK"),
+    false,
+  );
+  registros.get("clientes/" + cliente).nivelCliente = "Ouro";
+  const rankDisponivel = (await ctx.buscarCuponsClienteAuto(cliente)).find(
+    (c) => c.codigo === "RANK",
+  );
+  assert.equal(rankDisponivel.itemGeralValor, 9);
+  registros.get("clientes/" + cliente).fidelidadeAtiva = false;
+  assert.equal(
+    (await ctx.buscarCuponsClienteAuto(cliente)).some((c) => c.codigo === "RANK"),
+    false,
+  );
   console.log(
     "PASS: autoatendimento encontra cupons enviados por campanha e preserva restrições e usos antigos.",
   );

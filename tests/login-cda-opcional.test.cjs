@@ -3,7 +3,8 @@ const fs = require("node:fs"),
   assert = require("node:assert/strict");
 function carregarFuncao(ctx, arquivo, nome) {
   const fonte = fs.readFileSync(arquivo, "utf8");
-  const inicio = fonte.indexOf("async function " + nome + "(");
+  const inicioAsync = fonte.indexOf("async function " + nome + "(");
+  const inicio = inicioAsync >= 0 ? inicioAsync : fonte.indexOf("function " + nome + "(");
   const fim = fonte.slice(inicio + 1).search(/\n(?:async )?function /);
   vm.runInContext(fonte.slice(inicio, fim < 0 ? undefined : inicio + 1 + fim), ctx);
 }
@@ -19,7 +20,14 @@ async function conferir(canal, codigo, nome = "Cliente Teste") {
   };
   let perfilAtualizado = false,
     boasVindas = 0;
-  const campo = (id) => (campos[id] ||= { value: "", checked: false, textContent: "" });
+  const campo = (id) =>
+    (campos[id] ||= {
+      value: "",
+      checked: false,
+      textContent: "",
+      style: {},
+      setAttribute() {},
+    });
   const prefixo = canal === "index" ? "perfil" : "login-auto";
   campo(prefixo + "-nome").value = nome;
   campo(prefixo + "-telefone").value = cliente.telefone;
@@ -64,6 +72,20 @@ async function conferir(canal, codigo, nome = "Cliente Teste") {
     ctx,
   );
   carregarFuncao(ctx, canal === "index" ? "js/script.js" : "js/autoatendimento.js", funcao);
+  if (canal === "index") {
+    carregarFuncao(ctx, "js/script.js", "abrirPerfilModo");
+    ctx.abrirPerfilModo("login");
+    assert.equal(campo("box-codigo-login").hidden, true, "Delivery entra sem campo CDA");
+    ctx.abrirPerfilModo("cadastro");
+    assert.equal(campo("box-codigo-login").hidden, true, "Cadastro do delivery não pede CDA");
+    campo("lista-avatares").style.display = "grid";
+    ctx.abrirPerfilModo("home");
+    assert.equal(campo("lista-avatares").style.display, "none", "Sair fecha o seletor de avatares");
+    ctx.abrirPerfilModo("cadastro");
+    assert.equal(campo("lista-avatares").style.display, "none", "Reabrir não expande os avatares");
+    ctx.abrirPerfilModo("login");
+    assert.equal(campo("box-codigo-login").hidden, true, "Voltar ao login mantém CDA oculto");
+  }
   await ctx[funcao]();
   if (nome !== cliente.nome) {
     assert.equal(perfilAtualizado, false);
@@ -72,6 +94,17 @@ async function conferir(canal, codigo, nome = "Cliente Teste") {
     return;
   }
   assert.equal(perfilAtualizado, true, canal + ": credenciais corretas entram na conta");
+  if (canal === "index") {
+    assert.equal(
+      escritas.length,
+      0,
+      "Login do delivery não ativa CDA, mesmo com valor antigo no campo",
+    );
+    assert.equal(ctx.clienteLogado.fidelidadeAtiva, false);
+    assert.equal(avisos.length, 0, "Login do delivery não valida nem avisa sobre CDA");
+    assert.equal(boasVindas, 1);
+    return;
+  }
   if (codigo === "CDA-CERTO") {
     assert.deepEqual(
       avisos.map((a) => a.personagem),
@@ -112,7 +145,7 @@ async function conferir(canal, codigo, nome = "Cliente Teste") {
     await conferir(canal, "CDA-CERTO", "Nome errado");
   }
   console.log(
-    "PASS: nos dois canais, credenciais corretas entram com CDA errado sem ativar benefícios; válido ativa, nome errado não entra e aviso usa o mago pensando.",
+    "PASS: delivery entra só com nome e telefone, sem campo/validação/ativação de CDA; autoatendimento mantém CDA opcional, ativação e avisos; nome errado não entra.",
   );
 })().catch((erro) => {
   console.error(erro);

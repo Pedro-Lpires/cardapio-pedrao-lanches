@@ -63,6 +63,7 @@ async function abrirEditorCupomAdminUI(codigo = null) {
     '<input type="hidden" id="cupom-uso" value="diversos"><section data-etapa-cupom="uso"><h3>Como este código pode ser usado?</h3><div class="cupons-opcoes-ui"><button type="button" onclick="selecionarUsoCupomUI(\'diversos\')">Uso diverso</button><button type="button" onclick="selecionarUsoCupomUI(\'unico\')">1x · uso único</button></div><p>Uso diverso: continua disponível conforme as regras.<br>1x: após o primeiro uso, o código não vale mais para ninguém.</p></section><section data-etapa-cupom="tipo" hidden><button type="button" onclick="etapaEditorCupomUI(\'uso\')">← Uso</button><h3>Onde aplicar?</h3><div class="cupons-opcoes-ui"><button type="button" onclick="selecionarTipoCupomUI(\'item\')">Item</button><button type="button" onclick="selecionarTipoCupomUI(\'pedido\')">Pedido</button><button type="button" onclick="selecionarTipoCupomUI(\'taxa\')">Taxa de entrega</button></div></section><section data-etapa-cupom="configurar" hidden><button type="button" onclick="etapaEditorCupomUI(\'tipo\')">← Tipo</button><h3 id="cupom-config-titulo"></h3><p id="cupom-config-uso"></p><div class="cupons-config-ui">' +
     formularioCupomModeloUI +
     '</div><p id="cupom-salvar-status" role="status"></p><button id="cupom-salvar-ui" type="button" onclick="criarCupomDesconto()">Salvar cupom</button></section>';
+  montarCamposRankCupomAdminUI(dados);
   if (dados) {
     const campos = {
       nome: "nome",
@@ -184,16 +185,20 @@ async function carregarListaCuponsAdminUI() {
                 (c.uso === "unico" ? "1x por código" : "Diverso") +
                 "</dd></div><div><dt>Condição</dt><dd>" +
                 esc(
-                  c.tipo === "item"
-                    ? c.itemGeral
-                      ? "Grupo: " + c.itemGeralTipo
-                      : c.itemNome + " por " + moedaOperacao(c.itemPrecoPromocional)
-                    : c.modo === "gratis"
-                      ? "Taxa grátis até " + c.kmGratis + " km"
-                      : c.modo === "porcentagem"
-                        ? c.valor + "%"
-                        : moedaOperacao(c.valor),
+                  c.rankRegra?.descontoPorRank
+                    ? "Percentual conforme o rank"
+                    : c.tipo === "item"
+                      ? c.itemGeral
+                        ? "Grupo: " + c.itemGeralTipo
+                        : c.itemNome + " por " + moedaOperacao(c.itemPrecoPromocional)
+                      : c.modo === "gratis"
+                        ? "Taxa grátis até " + c.kmGratis + " km"
+                        : c.modo === "porcentagem"
+                          ? c.valor + "%"
+                          : moedaOperacao(c.valor),
                 ) +
+                "</dd></div><div><dt>Rank</dt><dd>" +
+                esc(textoRegraCupomRankUI(c)) +
                 "</dd></div><div><dt>Pedido mínimo</dt><dd>" +
                 (c.temPedidoMinimo ? moedaOperacao(c.pedidoMinimo) : "Não exige") +
                 "</dd></div></dl>" +

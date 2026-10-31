@@ -66,3 +66,18 @@
 #modal-carrinho .topo-carrinho > strong {
   white-space: nowrap;
 }
+#modal-carrinho #editar-carrinho-ui {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  min-height: 34px;
+  width: auto;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+#modal-carrinho #editar-carrinho-ui[aria-pressed="true"] {
+  background: #fff;
+  color: #a40013;
+}

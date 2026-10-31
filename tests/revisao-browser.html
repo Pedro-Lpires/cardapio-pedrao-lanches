@@ -44,6 +44,7 @@
       </select></label
     ><button onclick="largura(320)">320 px</button><button onclick="largura(375)">375 px</button
     ><button onclick="largura(430)">430 px</button>
+    <button onclick="largura(375, 440)">375 × 440 px</button>
     <button onclick="largura(1024)">1024 px</button>
     <button onclick="largura(1200)">1200 px</button>
     <button onclick="largura(1440)">1440 px</button>
@@ -54,6 +55,14 @@
       Conferir largura
     </button>
     <p id="medidas-layout" role="status"></p>
+    <output id="diagnostico-som" aria-live="polite"></output>
+    <button
+      id="simular-cozinha"
+      hidden
+      onclick="frame.contentWindow.postMessage({tipo:'revisao-nova-leva-cozinha'},location.origin)"
+    >
+      Enviar nova leva à chapa
+    </button>
     <button
       id="simular-chamado-normal"
       hidden
@@ -68,16 +77,40 @@
     >
       Simular pedir a conta
     </button>
+    <div id="simular-pedidos-site" hidden>
+      <button
+        onclick="frame.contentWindow.postMessage({tipo:'revisao-pedido-site',pedidoTipo:'Entrega'},location.origin)"
+      >
+        Receber entrega do site
+      </button>
+      <button
+        onclick="frame.contentWindow.postMessage({tipo:'revisao-pedido-site',pedidoTipo:'Retirada'},location.origin)"
+      >
+        Receber retirada do site
+      </button>
+      <button
+        onclick="frame.contentWindow.postMessage({tipo:'revisao-pedido-site',pedidoTipo:'Local'},location.origin)"
+      >
+        Receber consumo no local do site
+      </button>
+    </div>
     <p>Senha fictícia dos painéis: teste1234</p>
     <label
       >Cenário<select id="cenario">
         <option value="normal">Normal</option>
+        <option value="cupons-rank">Cupons por rank · exemplos fictícios</option>
+        <option value="funcionario-chapa">Funcionário · só Chapa</option>
+        <option value="funcionario-atendimento">Funcionário · só Atendimento</option>
+        <option value="atendimento-edicao">Atendimento · edição e vínculos antigos</option>
         <option value="lento">Busca lenta</option>
         <option value="falha">Falha ao buscar mensagens</option>
+        <option value="catalogo-atual">Catálogo atualizado · dados locais</option>
         <option value="combos">Combos conferidos nas imagens</option>
         <option value="cda-inativo">Conta com CDA ainda não ativado</option>
         <option value="beneficios">Magos, benefícios e chamados</option>
         <option value="loja-fechada">Loja fechada pelo ADM</option>
+        <option value="entrega-distante">Entrega urbana · 12 km fictícios</option>
+        <option value="entrega-fora-area">Entrega urbana · 22 km fictícios</option>
         <option value="comanda-mista">Comanda com itens diferentes</option>
         <option value="chapeiro-agrupado">Chapeiro · dez lanches + novo envio</option>
       </select></label
@@ -117,11 +150,20 @@
     <iframe id="mobile" title="Prévia isolada"></iframe>
     <script>
       const frame = document.getElementById("mobile");
-      function largura(n) {
+      function largura(n, altura) {
         frame.style.width = n + "px";
-        frame.style.height = n >= 900 ? "640px" : "667px";
+        frame.style.height = (altura || (n >= 900 ? 640 : 667)) + "px";
       }
       window.addEventListener("message", (evento) => {
+        if (
+          evento.source === frame.contentWindow &&
+          evento.origin === location.origin &&
+          evento.data?.tipo === "revisao-som"
+        ) {
+          document.getElementById("diagnostico-som").textContent =
+            `Áudio real: ${evento.data.notas} notas iniciadas pelo navegador.`;
+          return;
+        }
         if (
           evento.source !== frame.contentWindow ||
           evento.origin !== location.origin ||
@@ -131,9 +173,14 @@
         document.getElementById("medidas-layout").textContent = evento.data.texto;
       });
       async function abrir() {
+        document.getElementById("diagnostico-som").textContent = "";
+        document.getElementById("simular-cozinha").hidden = !document
+          .getElementById("pagina")
+          .value.startsWith("cozinha.html");
         const atendente = document.getElementById("pagina").value === "painel-atendente.html";
         document.getElementById("simular-chamado-normal").hidden = !atendente;
         document.getElementById("simular-chamado-conta").hidden = !atendente;
+        document.getElementById("simular-pedidos-site").hidden = !atendente;
         document.getElementById("subir-nivel").hidden =
           document.getElementById("cenario").value !== "beneficios";
         document.getElementById("enviar-cupom-teste").hidden =
@@ -147,6 +194,10 @@
         )
           ? await (await fetch("../scripts/combos-conferidos.json")).json()
           : null;
+        const catalogoAtual =
+          document.getElementById("cenario").value === "catalogo-atual"
+            ? await (await fetch("../scripts/catalogo-precos-consulta.json")).json()
+            : null;
         html = html.replace(
           /<script\s+src="https:\/\/www.gstatic.com\/firebasejs[^\"]*"\s*>\s*<\/script>/g,
           "",
@@ -155,6 +206,8 @@
           "<head>",
           "<head><script>window.combosConferidosFixture=" +
             JSON.stringify(combosConferidos) +
+            ";window.catalogoAtualFixture=" +
+            JSON.stringify(catalogoAtual) +
             ';<\/script><base href="' +
             new URL("../", location.href) +
             '"><script src="tests/firebase-ui-mock.js' +

@@ -54,22 +54,26 @@ function gerarItens(lista, containerId, imagemPadrao) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  lista.forEach((item) => {
-    const fotoFinal = item.imagem || item.img || imagemPadrao;
+  window.catalogoProdutosDeliveryUI ||= new Map();
+  lista
+    .filter((item) => !item.somenteAtendente)
+    .forEach((item) => {
+      window.catalogoProdutosDeliveryUI.set(item.id || item.nome, item);
+      const fotoFinal = item.imagem || item.img || imagemPadrao;
 
-    let categoria = "Lanches";
-    if (containerId.includes("bebidas")) categoria = "Bebidas";
-    else if (containerId.includes("batatas")) categoria = "Batatas";
-    else if (containerId.includes("combos")) categoria = "Combos";
+      let categoria = "Lanches";
+      if (containerId.includes("bebidas")) categoria = "Bebidas";
+      else if (containerId.includes("batatas")) categoria = "Batatas";
+      else if (containerId.includes("combos")) categoria = "Combos";
 
-    const card = document.createElement("div");
-    card.classList.add("card");
+      const card = document.createElement("div");
+      card.classList.add("card");
 
-    if (item.esgotado) {
-      card.classList.add("produto-esgotado");
-    }
+      if (item.esgotado) {
+        card.classList.add("produto-esgotado");
+      }
 
-    card.innerHTML = `
+      card.innerHTML = `
     <div class="card-img">
         <img src="${resolverImagemProduto(fotoFinal)}" alt="${item.nome}" loading="lazy">
     </div>
@@ -81,26 +85,26 @@ function gerarItens(lista, containerId, imagemPadrao) {
         ${item.esgotado ? `<span class="tag-esgotado">ESGOTADO</span>` : ""}
     </div>
 `;
-    const imagemCard = card.querySelector("img");
-    imagemCard?.addEventListener(
-      "error",
-      () => {
-        imagemCard.src = "images/logo-trailer.webp";
-      },
-      { once: true },
-    );
+      const imagemCard = card.querySelector("img");
+      imagemCard?.addEventListener(
+        "error",
+        () => {
+          imagemCard.src = "images/logo-trailer.webp";
+        },
+        { once: true },
+      );
 
-    card.onclick = () => {
-      if (item.esgotado) {
-        alert("Produto esgotado no momento.");
-        return;
-      }
+      card.onclick = () => {
+        if (item.esgotado) {
+          alert("Produto esgotado no momento.");
+          return;
+        }
 
-      abrirProduto(item, categoria);
-    };
+        abrirProduto(item, categoria);
+      };
 
-    container.appendChild(card);
-  });
+      container.appendChild(card);
+    });
   if (typeof atualizarVisibilidadeCardapio === "function") atualizarVisibilidadeCardapio();
 }
 let qtdProdutoAtual = 1;
@@ -147,10 +151,15 @@ let produtoAtual = {};
 let focoAntesProduto = null;
 let categoriaProdutoAtual = "Lanches";
 let adicionaisSelecionados = {};
-let avatarClienteAtual = "images/avatar1.webp";
+let avatarClienteAtual = "images/avatares/sem-rank/maionese.webp";
 let cupomDescontoAplicado = null;
 let onlineSessionId = localStorage.getItem("onlineSessionIdPedrao");
 let indiceMolhoAtual = null;
+let molhosGratisTempUI = [];
+let janelaMolhoUnidadeUI = null;
+let escolhaMolhoTempUI = null;
+let unidadeMolhoTempUI = null;
+let etapaMolhoUnidadeUI = "tipo";
 
 if (!onlineSessionId) {
   onlineSessionId = "online_" + Date.now() + "_" + Math.random().toString(36).substring(2, 8);
@@ -167,6 +176,7 @@ let descontosCupons = {
 };
 
 function abrirProduto(item, categoria = "Lanches") {
+  if (item?.somenteAtendente) return;
   if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   focoAntesProduto = document.activeElement;
   produtoAtual = item;
@@ -184,6 +194,12 @@ function abrirProduto(item, categoria = "Lanches") {
   document.getElementById("modal-desc").innerText = item.desc || item.descricao || "";
   document.getElementById("modal-nome").innerText = item.nome;
   document.getElementById("obs-produto").value = "";
+  const categoriaObs = String(item.categoria || categoria).toLowerCase();
+  document.getElementById("obs-produto").placeholder = categoriaObs.includes("batata")
+    ? "Ex.: caprichada, embalar separada..."
+    : categoriaObs.includes("bebida")
+      ? "Ex.: mandar canudo, copo..."
+      : "Ex.: sem cebola, bem passado...";
   document.getElementById("lista-adicionais").style.display = "none";
   document.getElementById("lista-adicionais").classList.remove("aberta");
   document.getElementById("lista-adicionais").hidden = true;
@@ -501,8 +517,7 @@ function renderizarCarrinho() {
             </div>
 
             <div class="acoes-item">
-                <button onclick="diminuirItem(${index})">➖</button>
-                <button onclick="aumentarItem(${index})">➕</button>
+                ${typeof modoEdicaoCarrinhoUI !== "undefined" && modoEdicaoCarrinhoUI ? `<button type="button" aria-label="Editar ${escaparOperacao(item.nome)}" onclick="editarItemCarrinhoUI(${index})">✎</button>` : `<button onclick="diminuirItem(${index})">➖</button><button onclick="aumentarItem(${index})">➕</button>`}
             </div>
         `;
 
@@ -510,6 +525,12 @@ function renderizarCarrinho() {
   });
 }
 function aumentarItem(index) {
+  const item = carrinho[index];
+  if (!item) return;
+  if (!item.lanchesCombo?.length && (item.adicionais || []).some((a) => Number(a.qtd) > 0)) {
+    alert("Com acréscimos, personalize um item por vez. Adicione outro item separadamente.");
+    return;
+  }
   carrinho[index].qtd++;
 
   atualizarCarrinho();
@@ -602,6 +623,23 @@ function irParaFinalizar() {
   }, 100);
 }
 
+function calcularTaxaEntregaSiteUI(km, agora = new Date()) {
+  let taxa;
+  if (km <= 2) taxa = 6;
+  else if (km <= 3) taxa = 7;
+  else if (km <= 4) taxa = 8;
+  else if (km <= 5) taxa = 10;
+  else if (km <= 6) taxa = 11;
+  else if (km <= 7) taxa = 13;
+  else if (km <= 8) taxa = 14;
+  else if (km <= 9) taxa = 15;
+  else if (km <= 10) taxa = 16;
+  else taxa = km * 2;
+  const data = `${agora.getDate()}/${agora.getMonth() + 1}`;
+  if ([0, 6].includes(agora.getDay()) || feriados.includes(data)) taxa += 1;
+  return Math.round((taxa + Number.EPSILON) * 100) / 100;
+}
+
 function finalizarPedido() {
   if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   const nomeContato = document.getElementById("nome-cliente");
@@ -610,8 +648,8 @@ function finalizarPedido() {
     !nomeContato.value.trim() ||
     (telefoneContato?.value || "").replace(/\D/g, "").length !== 11
   ) {
-    avisoOperacao("Informe nome e celular completo com DDD antes de continuar.");
     (!nomeContato.value.trim() ? nomeContato : telefoneContato)?.focus();
+    avisoOperacao("Informe nome e celular completo com DDD antes de continuar.");
     return;
   }
   cupomDescontoAplicado = null;
@@ -662,9 +700,18 @@ function finalizarPedido() {
     return;
   }
 
-  pedirPermissaoLocalizacaoUI().then((autorizado) => {
-    if (!autorizado) return;
-
+  dadosPedidoTemporario = {};
+  revisaoCarrinhoVersao = -1;
+  document.getElementById("revisao-pedido").style.display = "none";
+  return perguntarZonaRuralUI().then((area) => {
+    if (area === "rural") {
+      alert(
+        "Os motoboys não atendem essas localidades, conforme os critérios da empresa que nos fornece o serviço. Você pode pedir para retirar ou comer no local.",
+        "ruralBloqueada",
+      );
+      return;
+    }
+    if (area !== "urbana") return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const latCliente = pos.coords.latitude;
@@ -676,36 +723,15 @@ function finalizarPedido() {
           lonCliente,
         );
 
-        let foraDaArea = false;
-        let taxa = 0;
-        if (kmDistancia > 15) {
-          foraDaArea = true;
-
+        const foraDaArea = kmDistancia > 15;
+        const taxa = calcularTaxaEntregaSiteUI(kmDistancia);
+        if (kmDistancia > 10)
           alert(
-            "🚫 Fora da área de entrega.\n\n" +
-              "Você pode enviar o pedido mesmo assim e vamos verificar 👍",
+            foraDaArea
+              ? "Seu endereço fica a mais de 15 km e está fora da área de entrega. Você pode enviar o pedido para verificarmos se será possível atender. Se a entrega for aceita, pode haver demora pelo percurso longo."
+              : "Seu endereço fica a mais de 10 km. Pode haver demora na entrega por causa do percurso longo.",
+            "entregaDistante",
           );
-        }
-
-        if (kmDistancia <= 2) taxa = 6;
-        else if (kmDistancia <= 3) taxa = 7;
-        else if (kmDistancia <= 4) taxa = 8;
-        else if (kmDistancia <= 5) taxa = 10;
-        else if (kmDistancia <= 6) taxa = 11;
-        else if (kmDistancia <= 7) taxa = 13;
-        else if (kmDistancia <= 8) taxa = 14;
-        else if (kmDistancia <= 9) taxa = 15;
-        else if (kmDistancia <= 10) taxa = 16;
-        else if (kmDistancia <= 11) taxa = 17;
-        else taxa = 17 + Math.ceil(kmDistancia - 11) * 2;
-
-        const agora = new Date();
-        const diaSemana = agora.getDay();
-        const dataFormatada = `${agora.getDate()}/${agora.getMonth() + 1}`;
-
-        if (diaSemana === 0 || diaSemana === 6 || feriados.includes(dataFormatada)) {
-          taxa += 1;
-        }
 
         const localizacaoLink = `https://www.google.com/maps?q=${latCliente},${lonCliente}`;
         exibirRevisao(
@@ -717,6 +743,7 @@ function finalizarPedido() {
           localizacaoLink,
           kmDistancia,
           foraDaArea,
+          true,
         );
       },
       (erro) => {
@@ -743,9 +770,29 @@ function toggleTroco() {
   document.getElementById("valor-troco").style.display = isDinheiro ? "block" : "none";
 }
 
-function exibirRevisao(itens, subtotal, taxa, tipo, obs, mapa = "", km = 0, foraDaArea = false) {
+function exibirRevisao(
+  itens,
+  subtotal,
+  taxa,
+  tipo,
+  obs,
+  mapa = "",
+  km = 0,
+  foraDaArea = false,
+  areaUrbanaConfirmada = false,
+) {
   if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
-  dadosPedidoTemporario = { itens, subtotal, taxa, tipo, obs, mapa, km, foraDaArea };
+  dadosPedidoTemporario = {
+    itens,
+    subtotal,
+    taxa,
+    tipo,
+    obs,
+    mapa,
+    km,
+    foraDaArea,
+    areaUrbanaConfirmada,
+  };
   revisaoCarrinhoVersao = carrinhoVersao;
 
   const itensFormatados = carrinho.map((item) => {
@@ -828,7 +875,7 @@ function exibirRevisao(itens, subtotal, taxa, tipo, obs, mapa = "", km = 0, fora
 
   let total = subtotal + taxa + totalMolhosPagos;
 
-  const totalAntesDesconto = subtotal + taxa;
+  const totalAntesDesconto = subtotal + totalMolhosPagos;
 
   let bonusAtual = Number(clienteLogado?.bonusDisponivel || 0);
   let totalGastoAtual = Number(clienteLogado?.totalFidelidade || 0);
@@ -838,16 +885,16 @@ function exibirRevisao(itens, subtotal, taxa, tipo, obs, mapa = "", km = 0, fora
   const vaiGerarBonusNestePedido =
     clienteLogado &&
     clienteLogado.fidelidadeAtiva &&
-    totalAntesDesconto >= 20 &&
+    totalAntesDesconto >= 10 &&
     totalGastoAtual + totalAntesDesconto >= proximaMeta;
 
   if (
     clienteLogado &&
     clienteLogado.fidelidadeAtiva &&
-    totalAntesDesconto >= 20 &&
-    (bonusAtual >= 20 || vaiGerarBonusNestePedido)
+    totalAntesDesconto >= 10 &&
+    (bonusAtual >= 10 || vaiGerarBonusNestePedido)
   ) {
-    descontoFidelidade = 20;
+    descontoFidelidade = 10;
     total -= descontoFidelidade;
 
     if (total < 0) total = 0;
@@ -907,6 +954,17 @@ function exibirRevisao(itens, subtotal, taxa, tipo, obs, mapa = "", km = 0, fora
   } else {
     if (aviso) aviso.remove();
   }
+
+  let avisoDistancia = document.getElementById("aviso-entrega-distante-ui");
+  if (tipo === "Entrega" && km > 10) {
+    if (!avisoDistancia) {
+      avisoDistancia = document.createElement("p");
+      avisoDistancia.id = "aviso-entrega-distante-ui";
+      avisoDistancia.setAttribute("role", "note");
+      document.getElementById("revisao-pedido").append(avisoDistancia);
+    }
+    avisoDistancia.textContent = "O percurso é longo e pode haver demora na entrega.";
+  } else avisoDistancia?.remove();
 
   let cupomEl = document.getElementById("linha-desconto-cupom");
 
@@ -979,6 +1037,7 @@ function toggleCupomDesconto() {
       dadosPedidoTemporario.mapa,
       dadosPedidoTemporario.km,
       dadosPedidoTemporario.foraDaArea,
+      dadosPedidoTemporario.areaUrbanaConfirmada,
     );
   }
 }
@@ -1032,6 +1091,11 @@ async function confirmarEEnviar() {
   const cnh = selectCNH ? selectCNH.value : "Não";
   const d = dadosPedidoTemporario;
   if (!d) return alert("Erro nos dados do pedido. Tente novamente.");
+  if (d.tipo === "Entrega" && d.areaUrbanaConfirmada !== true)
+    return alert(
+      "Confirme o acesso por asfalto e a área atendida. Clique em FINALIZAR PEDIDO novamente.",
+      "ruralBloqueada",
+    );
 
   const itensProcessados = carrinho.map((item) => {
     return {
@@ -1081,6 +1145,7 @@ async function confirmarEEnviar() {
   totalFinal = arredondarPagamento(totalFinal);
 
   const pedidoFirebase = {
+    origem: "site_delivery",
     nome: nomeCliente || clienteLogado?.nome || "",
     telefone: telefoneFinalCliente,
     telefoneLimpo: telefoneLimpo,
@@ -1096,11 +1161,13 @@ async function confirmarEEnviar() {
     descontoCupom: descontoCupom || 0,
     codigoCliente: clienteLogado ? clienteLogado.codigoAtivacao || "" : "",
     taxaEntrega: Number(d.taxa) || 0,
+    distanciaKm: d.tipo === "Entrega" ? Number(d.km) || 0 : 0,
     tipo: d.tipo,
     endereco: document.getElementById("endereco-escrito")?.value.trim() || "",
     condominio,
     cnh,
     localizacao: d.mapa || "",
+    areaUrbanaConfirmada: d.tipo === "Entrega" ? d.areaUrbanaConfirmada === true : null,
     pagamento: pagamento,
     trocoPara: precisaTroco && valorTroco ? Number(valorTroco) : null,
     observacao: d.obs || "",
@@ -1112,179 +1179,36 @@ async function confirmarEEnviar() {
   const numeroPedido = await salvarPedidoFirebase(pedidoFirebase);
   if (numeroPedido === null) return;
   if (clienteLogado) {
-    const clienteRef = db.collection("clientes").doc(clienteLogado.telefone);
-
-    const clienteDoc = await clienteRef.get();
-
-    if (clienteDoc.exists) {
-      const cliente = clienteDoc.data();
-
-      await clienteRef.update({
-        pedidosTotal: Number(cliente.pedidosTotal || 0) + 1,
-        gastoTotal: Number(cliente.gastoTotal || 0) + Number(totalFinal || 0),
-        ultimaCompra: new Date().toISOString(),
-      });
-
-      await atualizarNivelCliente(clienteLogado.telefone);
-    }
+    const atualizado = await registrarBeneficiosPedidoOperacao(pedidoFirebase.id);
+    if (atualizado) Object.assign(clienteLogado, atualizado);
   }
-  let msg = `*PEDRÃO LANCHES - PEDIDO*\n`;
-  const agora = new Date();
-  const dataHora = agora.toLocaleString("pt-BR");
 
-  msg += `📅 *Feito em:* ${dataHora}\n`;
-  msg += `--------------------------\n`;
-  msg += `--------------------------\n`;
-
-  if (nomeCliente) msg += `*Cliente:* ${nomeCliente}\n`;
-  if (telefoneCliente) msg += `*Telefone:* ${telefoneCliente}\n`;
-
-  msg += `--------------------------\n`;
-  const itensWhats = carrinho.map((item) => {
-    let texto = `*${item.qtd} ${item.nome}*`;
-    if (typeof resumoComboTextoSiteUI === "function" && item.lanchesCombo?.length)
-      texto += "\n" + resumoComboTextoSiteUI(item);
-
-    if (item.adicionais && item.adicionais.length > 0) {
-      const adicionaisTexto = item.adicionais.map((a) => `${a.qtd} ${a.nome}`).join(" + ");
-
-      texto += `\n➕ *Acréscimos:* ${adicionaisTexto}`;
-    }
-
-    texto += `\n💰 *Valor:* R$ ${Number(item.preco || 0).toFixed(2)}`;
-
-    if (item.obs) {
-      texto += `\n📝 *Obs:* ${item.obs}`;
-    }
-    if (item.molhosGratis && item.molhosGratis.length > 0) {
-      const molhosTexto = item.molhosGratis
-        .map((m) => `${m.unidade}º Lanche: ${m.texto}`)
-        .join("\n");
-
-      texto += `\n🍶 *Molhos grátis:*\n${molhosTexto}`;
-    }
-    if (item.molhosPagos && item.molhosPagos.length > 0) {
-      const molhosPagosTexto = item.molhosPagos.map((m) => `• ${m.qtd} ${m.nome}`).join("\n");
-
-      const valorMolhos = item.totalMolhosPagos || 0;
-
-      texto += `\n💰 *Molhos pagos:*\n${molhosPagosTexto}`;
-
-      texto += `\n💵 *Valor dos molhos pagos:* R$ ${valorMolhos.toFixed(2)}`;
-    }
-
-    return texto;
+  const msg = montarMensagemPedidoWhatsUI({
+    nome: nomeCliente,
+    telefone: telefoneCliente,
+    tipo: d.tipo,
+    itens: carrinho,
+    total: totalFinal,
+    taxa: d.taxa,
+    km: d.km,
+    mapa: d.mapa,
+    endereco: document.getElementById("endereco-escrito")?.value.trim(),
+    condominio,
+    cnh,
+    observacao: d.obs,
+    pagamento,
+    descontoCupom,
+    descontoFidelidade,
+    trocoPara: precisaTroco ? valorTroco : null,
   });
-
-  msg += `*Pedido:*\n${itensWhats.join("\n\n")}\n`;
-  msg += `--------------------------\n`;
-
-  if (d.obs && d.obs.trim() !== "") {
-    msg += `*OBS:* ${d.obs}\n`;
-    msg += `--------------------------\n`;
-  }
-  if (descontoCupom > 0) {
-    msg += `🏷️ *Cupom de desconto:* ${cupomDescontoAplicado.codigo} -R$ ${descontoCupom.toFixed(2)}\n`;
-  }
-
-  if (d.tipo === "Local") msg += `*Tipo:* Consumir no local 🍔\n`;
-  else msg += `*Tipo:* ${d.tipo}\n`;
-
-  if (d.tipo === "Entrega") {
-    msg += `*Taxa:* R$ ${Number(d.taxa).toFixed(2)}`;
-
-    if (d.km) {
-      msg += ` (${d.km.toFixed(2)} km)`;
-    }
-
-    msg += `\n`;
-  }
-
-  msg += `--------------------------\n`;
-  if (totalMolhosPagos > 0) {
-    msg += `*Molhos pagos:* R$ ${totalMolhosPagos.toFixed(2)}\n`;
-  }
-
-  totalFinal = arredondarPagamento(totalFinal);
-
-  if (clienteLogado && clienteLogado.fidelidadeAtiva) {
-    const refCliente = db.collection("clientes").doc(clienteLogado.telefone);
-    const docCliente = await refCliente.get();
-    const dadosCliente = docCliente.data();
-
-    const totalFidelidadeAtual = Number(dadosCliente.totalFidelidade) || 0;
-    const bonusDisponivelAtual = Number(dadosCliente.bonusDisponivel) || 0;
-    const bonusGeradoTotalAtual = Number(dadosCliente.bonusGeradoTotal) || 0;
-
-    const valorParaFidelidade = Number(d.subtotal || 0) + Number(d.taxa || 0);
-    const novoTotalFidelidade = totalFidelidadeAtual + valorParaFidelidade;
-
-    const bonusTotalQueDeveriaTer = Math.floor(novoTotalFidelidade / 300) * 20;
-    const bonusNovoGerado = bonusTotalQueDeveriaTer - bonusGeradoTotalAtual;
-
-    let novoBonusDisponivel = bonusDisponivelAtual + bonusNovoGerado;
-
-    if (descontoFidelidade > 0) {
-      novoBonusDisponivel -= descontoFidelidade;
-    }
-
-    if (novoBonusDisponivel < 0) novoBonusDisponivel = 0;
-
-    await refCliente.update({
-      totalGasto: firebase.firestore.FieldValue.increment(valorParaFidelidade),
-      totalFidelidade: novoTotalFidelidade,
-      bonusDisponivel: novoBonusDisponivel,
-      bonusGeradoTotal: bonusTotalQueDeveriaTer,
-    });
-
-    clienteLogado.totalGasto = (clienteLogado.totalGasto || 0) + valorParaFidelidade;
-    clienteLogado.totalFidelidade = novoTotalFidelidade;
-    clienteLogado.bonusDisponivel = novoBonusDisponivel;
-    clienteLogado.bonusGeradoTotal = bonusTotalQueDeveriaTer;
-  }
-
-  msg += `*Total:* ${totalFinal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}\n`;
-  if (descontoFidelidade > 0) {
-    msg += `🎁 *Desconto fidelidade aplicado:* -R$ 20,00\n`;
-  }
-
-  msg += `*Pagamento:* ${pagamento}\n`;
-
-  if (precisaTroco && valorTroco) {
-    msg += `*Troco para:* R$ ${Number(valorTroco).toFixed(2)}\n`;
-  }
-
-  msg += `--------------------------\n`;
-
-  if (d.tipo === "Entrega" && d.mapa) {
-    msg += `📍 *Local:* ${d.mapa}\n\n`;
-  }
-  const enderecoEscrito = document.getElementById("endereco-escrito")?.value.trim();
-
-  if (d.tipo === "Entrega" && enderecoEscrito) {
-    msg += `*Endereço escrito:*\n${enderecoEscrito}\n`;
-    msg += `--------------------------\n`;
-  }
-  msg += `*Condomínio:* ${condominio}\n`;
-
-  if (condominio === "Sim") {
-    msg += `*Precisa de CNH:* ${cnh}\n`;
-  }
-  if (d.foraDaArea) {
-    msg += `\n❌ *FORA DA ÁREA DE ENTREGA*\n`;
-    msg += `Distância: ${d.km.toFixed(2)} km\n`;
-    msg += ` Taxa estimada: R$ ${Number(d.taxa).toFixed(2)}\n`;
-    msg += `-> Estou ciente que a taxa pode sofrer alteração\n`;
-    msg += `- Conseguem entregar mesmo assim?\n`;
-    msg += `--------------------------\n`;
-  }
-
-  const url = `https://wa.me/5565992386045?text=${encodeURIComponent(msg)}`;
-  window.open(url, "_blank");
+  const url = `https://wa.me/5565992386045?text=${encodeURIComponent(textoWhatsAppSemEmojisUI(msg))}`;
+  if (typeof abrirMensagemWhatsPedidoUI === "function") abrirMensagemWhatsPedidoUI(msg);
+  else window.open(url, "_blank");
 
   descontoFidelidade = 0;
   carrinho = [];
   dadosPedidoTemporario = {};
+  if (document.getElementById("observacao")) document.getElementById("observacao").value = "";
   revisaoCarrinhoVersao = -1;
   cupomDescontoAplicado = null;
   descontoCupom = 0;
@@ -1373,6 +1297,7 @@ async function carregarProdutosFirebase() {
       ...doc.data(),
     };
 
+    if (p.somenteAtendente) return;
     if (p.categoria === "lanches") {
       lanches.push(p);
     } else if (p.categoria === "combos") {
@@ -1575,6 +1500,30 @@ if (telInput) {
   });
 }
 
+function abrirInfoLojaUI(tipo) {
+  const informacoes = {
+    preparo: {
+      personagem: "infoPreparo",
+      mensagem:
+        "Esse é o tempo de preparo do seu lanche: no mínimo 15 minutos. O prazo pode aumentar conforme o movimento da cozinha e não inclui o tempo de entrega.",
+    },
+    whatsapp: {
+      personagem: "infoWhatsapp",
+      mensagem: "Vamos te encaminhar para o nosso WhatsApp para tirar suas dúvidas, ok?",
+      url: "https://wa.me/5565992386045",
+    },
+    entrega: {
+      personagem: "infoEntrega",
+      mensagem:
+        "Nossas entregas são terceirizadas. As taxas são predefinidas pela empresa que nos fornece os motoboys e calculadas conforme a distância em quilômetros.\n\nNo fechamento do pedido, autorize a localização GPS no navegador. Assim, calculamos a taxa e mostramos o valor antes de você confirmar.",
+    },
+  };
+  const info = informacoes[tipo];
+  if (!info) return;
+  if (info.url) mostrarAjudaComLinkUI(info.mensagem, info.url, info.personagem);
+  else mostrarAvisoUI(info.mensagem, info.personagem);
+}
+
 function atualizarHorarioFuncionamento() {
   const el = document.getElementById("horario-funcionamento");
   if (!el) return;
@@ -1632,6 +1581,10 @@ if (modalProdutoSite) {
 function abrirTela(nome) {
   if (nome === "finalizar" && typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI())
     return;
+  if (nome !== "perfil") {
+    const avatares = document.getElementById("lista-avatares");
+    if (avatares) avatares.style.display = "none";
+  }
   document.querySelectorAll(".tela-app").forEach((tela) => {
     tela.classList.remove("ativa");
   });
@@ -1708,7 +1661,6 @@ function limparTelefonePerfil() {
 async function buscarCliente() {
   const nome = document.getElementById("perfil-nome").value.trim();
   const telefone = limparTelefonePerfil();
-  const codigo = document.getElementById("codigo-ativacao").value.trim();
   const salvarLogin = document.getElementById("check-salvar-login")?.checked || false;
 
   if (!nome) return alert("Informe seu nome e sobrenome.");
@@ -1736,33 +1688,10 @@ async function buscarCliente() {
       alert("Nome e telefone não conferem com o cadastro.");
       return;
     }
-    avatarClienteAtual = clienteLogado.avatar || "images/avatar1.webp";
+    avatarClienteAtual = clienteLogado.avatar || "images/avatares/sem-rank/maionese.webp";
     selecionarAvatar(avatarClienteAtual);
 
-    if (codigo) {
-      if (codigo === clienteLogado.codigoAtivacao && !clienteLogado.fidelidadeAtiva) {
-        await ref.update({
-          fidelidadeAtiva: true,
-          nivelCliente: nivelFidelidadeOperacao(clienteLogado, true),
-          ativadoEm: new Date().toISOString(),
-          totalFidelidade: clienteLogado.totalFidelidade || 0,
-          avatar: avatarClienteAtual,
-        });
-
-        clienteLogado.fidelidadeAtiva = true;
-        clienteLogado.nivelCliente = nivelFidelidadeOperacao(clienteLogado);
-        clienteLogado.ativadoEm = new Date().toISOString();
-
-        mostrarAtivacaoCdaPedraoUI();
-      } else if (codigo !== clienteLogado.codigoAtivacao) {
-        alert(
-          "Entramos na sua conta, mas o CDA informado está errado. Seria interessante você não esquecer ele!",
-          "codigoLogin",
-        );
-      } else mostrarBoasVindasUI(clienteLogado.nome || nome);
-    } else {
-      mostrarBoasVindasUI(clienteLogado.nome || nome);
-    }
+    mostrarBoasVindasUI(clienteLogado.nome || nome);
   }
 
   document.getElementById("nome-cliente").value = clienteLogado.nome || nome;
@@ -1817,6 +1746,7 @@ async function abrirPedidosCliente() {
   }
 
   const area = document.getElementById("area-perfil");
+  const abaPedido = area.dataset.abaPerfil;
 
   area.innerHTML = htmlCarregandoUI("Buscando pedidos…");
 
@@ -1832,6 +1762,7 @@ async function abrirPedidosCliente() {
       db.collection("historicoPagamentosClientes").where("clienteId", "==", telefone).get(),
     ),
   ]);
+  if (area.dataset.abaPerfil !== abaPedido) return;
 
   const historicoCompleto = [];
 
@@ -2076,9 +2007,12 @@ async function abrirPedidosCliente() {
 
 async function abrirBonusCliente() {
   if (!clienteLogado) return alert("Faça login primeiro");
+  const areaBonus = document.getElementById("area-perfil");
+  const abaBonus = areaBonus.dataset.abaPerfil;
 
   const ref = db.collection("clientes").doc(clienteLogado.telefone);
   const doc = await ref.get();
+  if (areaBonus.dataset.abaPerfil !== abaBonus) return;
   const dados = doc.data();
 
   const fidelidadeAtiva = dados.fidelidadeAtiva || false;
@@ -2100,7 +2034,7 @@ async function abrirBonusCliente() {
   document.getElementById("area-perfil").innerHTML = `
     <h3>🎁 Bônus Fidelidade</h3>
     <p>Bônus disponível: <strong>R$ ${bonusDisponivel.toFixed(2)}</strong></p>
-    <p>Faltam R$ ${falta.toFixed(2)} para gerar mais R$20 de bônus.</p>
+    <p>Faltam R$ ${falta.toFixed(2)} para gerar mais R$10 de bônus.</p>
 
     <div style="background:#222;border-radius:10px;overflow:hidden;margin-top:10px;">
         <div style="
@@ -2205,7 +2139,19 @@ async function salvarEnderecoCliente() {
   abrirEnderecosCliente();
 }
 function mostrarPedidosCliente() {
+  if (!alternarAbaPerfilUI("pedidos")) return;
   abrirPedidosCliente();
+}
+
+function alternarAbaPerfilUI(aba) {
+  const area = document.getElementById("area-perfil");
+  if (area.dataset.abaPerfil === aba) {
+    delete area.dataset.abaPerfil;
+    area.replaceChildren();
+    return false;
+  }
+  area.dataset.abaPerfil = aba;
+  return true;
 }
 
 function mostrarBonusCliente() {
@@ -2220,7 +2166,7 @@ function mostrarBonusCliente() {
     );
   }
 
-  abrirBonusCliente();
+  if (alternarAbaPerfilUI("bonus")) abrirBonusCliente();
 }
 
 function mostrarEnderecosCliente() {
@@ -2460,7 +2406,13 @@ function buscarProdutoAtual(nomePedido) {
     .replace(/\s*\(Frango\)/gi, "")
     .trim();
 
-  const todasListas = [...lanches, ...listaCombos, ...bebidas, ...batatas];
+  const todasListas = [
+    ...(window.catalogoProdutosDeliveryUI?.values() || []),
+    ...lanches,
+    ...listaCombos,
+    ...bebidas,
+    ...batatas,
+  ].filter((p) => !p.somenteAtendente);
 
   return todasListas.find((p) => p.nome.toLowerCase().trim() === nomeBase.toLowerCase());
 }
@@ -2593,9 +2545,31 @@ async function aplicarCupomDesconto() {
   }
 
   let desconto = 0;
+  let cupomResolvido = cupom;
+  if (cupom.rankRegra) {
+    try {
+      const clienteDoc = clienteLogado?.telefone
+        ? await db.collection("clientes").doc(String(clienteLogado.telefone)).get()
+        : null;
+      cupomResolvido = resolverCupomRankUI(cupom, clienteDoc?.exists ? clienteDoc.data() : null);
+      desconto = calcularCupomRankUI(cupomResolvido, {
+        base: subtotal,
+        taxa,
+        km,
+        itens: carrinho,
+      }).desconto;
+    } catch (e) {
+      removerCupomDescontoCliente(e.message);
+      retorno.innerText = e.message;
+      mostrarAvisoUI(e.message, "cupomRank");
+      return;
+    }
+  }
 
   // CUPOM DO PEDIDO
-  if (cupom.tipo === "pedido" || cupom.tipo === "descontoGeral") {
+  if (cupom.rankRegra) {
+    // O cálculo compartilhado acima usa o percentual do rank atual.
+  } else if (cupom.tipo === "pedido" || cupom.tipo === "descontoGeral") {
     if (cupom.modo === "valor") {
       desconto = Number(cupom.valor || 0);
     }
@@ -2650,7 +2624,7 @@ async function aplicarCupomDesconto() {
         const ehIndustrial = nomeItem.includes("industrial");
         const ehArtesanal = nomeItem.includes("artesanal");
 
-        if (cupom.itemGeralTipo === "geral") {
+        if (["geral", "todos"].includes(cupom.itemGeralTipo)) {
           itemCombina = true;
         }
 
@@ -2765,10 +2739,12 @@ async function aplicarCupomDesconto() {
 
   if (desconto > totalBase) desconto = totalBase;
 
-  cupomDescontoAplicado = cupom;
+  cupomDescontoAplicado = { ...cupomResolvido, codigo };
   descontoCupom = desconto;
 
-  retorno.innerText = "Cupom aplicado com sucesso!";
+  retorno.innerText = cupomResolvido.rankRegra?.descontoPorRank
+    ? `Cupom aplicado: ${cupomResolvido.percentualRankAplicado}% para o rank ${cupomResolvido.rankAplicado}!`
+    : "Cupom aplicado com sucesso!";
 
   exibirRevisao(
     dadosPedidoTemporario.itens,
@@ -2779,6 +2755,7 @@ async function aplicarCupomDesconto() {
     dadosPedidoTemporario.mapa,
     dadosPedidoTemporario.km,
     dadosPedidoTemporario.foraDaArea,
+    dadosPedidoTemporario.areaUrbanaConfirmada,
   );
 }
 function arredondarPagamento(valor) {
@@ -2801,15 +2778,15 @@ async function ajustarFidelidadeAposEditarPedido(pedidoAntigo, pedidoNovo) {
 
   const c = docCliente.data();
 
-  const antes = Number(pedidoAntigo.valorAntesDesconto || pedidoAntigo.valorTotal || 0);
-  const depois = Number(pedidoNovo.valorAntesDesconto || pedidoNovo.valorTotal || 0);
+  const antes = baseFidelidadePedidoOperacao(pedidoAntigo);
+  const depois = baseFidelidadePedidoOperacao(pedidoNovo);
 
   const diferenca = depois - antes;
 
   let totalFidelidade = Number(c.totalFidelidade || 0) + diferenca;
   if (totalFidelidade < 0) totalFidelidade = 0;
 
-  const bonusGeradoTotal = Math.floor(totalFidelidade / 300) * 20;
+  const bonusGeradoTotal = bonusAcumuladoFidelidadeOperacao(c, totalFidelidade);
 
   await refCliente.update({
     totalFidelidade,
@@ -2842,6 +2819,7 @@ function removerCupomDescontoCliente(mensagem = "") {
       dadosPedidoTemporario.mapa,
       dadosPedidoTemporario.km,
       dadosPedidoTemporario.foraDaArea,
+      dadosPedidoTemporario.areaUrbanaConfirmada,
     );
   }
 }
@@ -2966,9 +2944,12 @@ function logoutCliente() {
   document.getElementById("perfil-nome").value = "";
   document.getElementById("perfil-telefone").value = "";
   document.getElementById("codigo-ativacao").value = "";
-  if (document.getElementById("area-perfil")) document.getElementById("area-perfil").innerHTML = "";
+  if (document.getElementById("area-perfil")) {
+    document.getElementById("area-perfil").innerHTML = "";
+    delete document.getElementById("area-perfil").dataset.abaPerfil;
+  }
 
-  selecionarAvatar("images/avatar1.webp");
+  selecionarAvatar("images/avatares/sem-rank/maionese.webp");
 
   abrirPerfilModo("home");
   limparTelaMensagensCliente();
@@ -2995,7 +2976,7 @@ window.addEventListener("load", async () => {
 
     clienteLogado = doc.data();
 
-    avatarClienteAtual = clienteLogado.avatar || "images/avatar1.webp";
+    avatarClienteAtual = clienteLogado.avatar || "images/avatares/sem-rank/maionese.webp";
 
     document.getElementById("perfil-nome").value = clienteLogado.nome || "";
 
@@ -3018,6 +2999,8 @@ function abrirPerfilModo(modo) {
   const home = document.getElementById("perfil-home");
   const form = document.getElementById("perfil-form");
   const logado = document.getElementById("perfil-logado");
+  document.getElementById("lista-avatares").style.display = "none";
+  document.getElementById("box-codigo-login").hidden = modo !== "editar";
 
   home.style.display = "none";
   form.style.display = "none";
@@ -3064,7 +3047,7 @@ function abrirPerfilModo(modo) {
 
       document.getElementById("perfil-telefone").value = clienteLogado.telefone || "";
 
-      selecionarAvatar(clienteLogado.avatar || "images/avatar1.webp");
+      selecionarAvatar(clienteLogado.avatar || "images/avatares/sem-rank/maionese.webp");
     }
   }
 
@@ -3098,7 +3081,7 @@ function atualizarTelaClienteLogado() {
   if (ativarCda) ativarCda.hidden = clienteLogado.fidelidadeAtiva === true;
 
   document.getElementById("perfil-logado-avatar").src =
-    clienteLogado.avatar || "images/avatar1.webp";
+    clienteLogado.avatar || "images/avatares/sem-rank/maionese.webp";
   if (typeof aplicarAvatarClienteUI === "function")
     aplicarAvatarClienteUI(document.getElementById("perfil-logado-avatar"), clienteLogado);
 
@@ -3187,6 +3170,7 @@ function abrirMensagensCliente() {
 }
 
 function fecharMensagensCliente() {
+  if (janelaSuporteClienteUI?.open) janelaSuporteClienteUI.close();
   consultaMensagensUI++;
   if (window.listenerChamadoCliente) window.listenerChamadoCliente();
   window.listenerChamadoCliente = null;
@@ -3196,6 +3180,7 @@ function fecharMensagensCliente() {
 async function abrirAbaMensagens(tipo) {
   const consulta = ++consultaMensagensUI;
   abaMensagemAtual = tipo;
+  if (tipo !== "suporte" && janelaSuporteClienteUI?.open) janelaSuporteClienteUI.close();
 
   const lista = document.getElementById("lista-mensagens-cliente");
 
@@ -3305,31 +3290,120 @@ async function responderMensagemAdmin(clienteId) {
   listarMensagensAdmin();
 }
 let chamadoClienteAbertoId = null;
+const enviosChamadoClienteUI = new Set();
+let janelaSuporteClienteUI = null;
+let etapaSuporteClienteUI = "inicio";
+let categoriaSuporteClienteUI = "";
+
+function nomeCategoriaSuporteClienteUI(tipo) {
+  return (
+    { reclamacao: "Reclamação", feedback: "Feedback", outros: "Outros" }[tipo] || "Suportes abertos"
+  );
+}
+function ajustarJanelaSuporteClienteUI() {
+  if (!janelaSuporteClienteUI) return;
+  const viewport = window.visualViewport;
+  janelaSuporteClienteUI.style.setProperty(
+    "--suporte-altura-ui",
+    (viewport?.height || window.innerHeight) + "px",
+  );
+  janelaSuporteClienteUI.style.setProperty("--suporte-top-ui", (viewport?.offsetTop || 0) + "px");
+}
+function atualizarJanelaSuporteClienteUI(etapa) {
+  const titulos = {
+    lista: "Suportes abertos",
+    categoria: nomeCategoriaSuporteClienteUI(categoriaSuporteClienteUI),
+    novo: "Novo suporte",
+    chat: "Conversa do suporte",
+  };
+  if (!janelaSuporteClienteUI?.open) {
+    const retorno = document.getElementById(
+      etapa === "novo" ? "btn-novo-suporte" : "btn-suportes-abertos",
+    );
+    const janela = abrirJanelaElementoUI(
+      document.getElementById("box-enviar-suporte"),
+      titulos[etapa],
+    );
+    janelaSuporteClienteUI = janela;
+    janela.id = "janela-suporte-cliente-ui";
+    janela.classList.add("suporte-cliente-janela-ui");
+    janela.querySelector(".ui-voltar").onclick = voltarSuporteClienteUI;
+    janela.querySelector(".ui-x").onclick = () => etapaSuporteCliente();
+    janela.querySelector(".ui-x").setAttribute("aria-label", "Fechar suporte");
+    janela.addEventListener("cancel", (evento) => {
+      evento.preventDefault();
+      etapaSuporteCliente();
+    });
+    window.visualViewport?.addEventListener("resize", ajustarJanelaSuporteClienteUI);
+    window.visualViewport?.addEventListener("scroll", ajustarJanelaSuporteClienteUI);
+    window.addEventListener("resize", ajustarJanelaSuporteClienteUI);
+    janela.addEventListener(
+      "close",
+      () => {
+        if (janelaSuporteClienteUI !== janela) return;
+        janelaSuporteClienteUI = null;
+        window.visualViewport?.removeEventListener("resize", ajustarJanelaSuporteClienteUI);
+        window.visualViewport?.removeEventListener("scroll", ajustarJanelaSuporteClienteUI);
+        window.removeEventListener("resize", ajustarJanelaSuporteClienteUI);
+        etapaSuporteCliente();
+        document.getElementById("box-enviar-suporte").style.display =
+          abaMensagemAtual === "suporte" ? "block" : "none";
+        if (retorno?.isConnected) retorno.focus({ preventScroll: true });
+      },
+      { once: true },
+    );
+  }
+  janelaSuporteClienteUI.dataset.etapa = etapa;
+  janelaSuporteClienteUI.querySelector(".interface-janela-topo h3").textContent = titulos[etapa];
+  janelaSuporteClienteUI.setAttribute("aria-label", titulos[etapa]);
+  ajustarJanelaSuporteClienteUI();
+}
+function voltarSuporteClienteUI() {
+  if (etapaSuporteClienteUI === "chat")
+    return etapaSuporteCliente(categoriaSuporteClienteUI ? "categoria" : "lista");
+  if (etapaSuporteClienteUI === "categoria") return etapaSuporteCliente("lista");
+  etapaSuporteCliente();
+}
 
 function etapaSuporteCliente(etapa = "inicio") {
-  if (etapa !== "chat") consultaMensagensUI++;
+  etapaSuporteClienteUI = etapa;
+  if (etapa !== "chat" && abaMensagemAtual === "suporte") consultaMensagensUI++;
   if (etapa !== "chat" && window.listenerChamadoCliente) {
     window.listenerChamadoCliente();
     window.listenerChamadoCliente = null;
   }
-  document.getElementById("lista-chamados-cliente").style.display =
-    etapa === "lista" ? "block" : "none";
+  document.getElementById("lista-chamados-cliente").style.display = ["lista", "categoria"].includes(
+    etapa,
+  )
+    ? "block"
+    : "none";
   document.getElementById("suporte-menu").style.display = etapa === "inicio" ? "grid" : "none";
   document.getElementById("form-novo-chamado").style.display = etapa === "novo" ? "grid" : "none";
   document.getElementById("chat-chamado-cliente").style.display =
-    etapa === "chat" ? "block" : "none";
-  if (etapa === "lista")
-    listarChamadosCliente().catch(() => {
-      document.getElementById("lista-chamados-cliente").innerHTML =
-        '<p>Não foi possível buscar seus suportes.</p><button onclick="etapaSuporteCliente(\'lista\')">Tentar novamente</button><button onclick="etapaSuporteCliente()">Voltar</button>';
+    etapa === "chat" ? "flex" : "none";
+  if (etapa === "inicio") {
+    if (janelaSuporteClienteUI?.open) janelaSuporteClienteUI.close();
+    return;
+  }
+  if (etapa === "lista") categoriaSuporteClienteUI = "";
+  atualizarJanelaSuporteClienteUI(etapa);
+  if (["lista", "categoria"].includes(etapa)) {
+    const consulta = consultaMensagensUI;
+    listarChamadosCliente(etapa === "categoria" ? categoriaSuporteClienteUI : "").catch(() => {
+      if (consulta === consultaMensagensUI)
+        document.getElementById("lista-chamados-cliente").innerHTML =
+          '<p>Não foi possível buscar seus suportes.</p><button type="button" onclick="etapaSuporteCliente(\'lista\')">Tentar novamente</button>';
     });
+  }
 }
 function abrirFormNovoChamado() {
   etapaSuporteCliente("novo");
 }
 
-async function listarChamadosCliente() {
+async function listarChamadosCliente(categoriaSelecionada = "") {
   if (!clienteLogado) return;
+  const consulta = consultaMensagensUI;
+  const clienteId = clienteLogado.telefone;
 
   const box = document.getElementById("lista-chamados-cliente");
   box.innerHTML = htmlCarregandoUI("Buscando suportes…");
@@ -3342,9 +3416,10 @@ async function listarChamadosCliente() {
       .where("status", "==", "aberto")
       .get(),
   );
+  if (consulta !== consultaMensagensUI || clienteLogado?.telefone !== clienteId) return;
 
   if (snap.empty) {
-    box.innerHTML = `<button onclick="etapaSuporteCliente()">← Voltar</button><p>Nenhum suporte aberto.</p>`;
+    box.innerHTML = "<p>Nenhum suporte aberto.</p>";
     return;
   }
 
@@ -3359,8 +3434,7 @@ async function listarChamadosCliente() {
 
   chamados.sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm));
 
-  let html =
-    '<button type="button" onclick="etapaSuporteCliente()">← Voltar</button><h3>Suportes abertos</h3><div class="suporte-categorias">';
+  let html = '<div class="suporte-categorias">';
   for (const [tipo, nome] of [
     ["feedback", "Feedback"],
     ["reclamacao", "Reclamação"],
@@ -3394,6 +3468,7 @@ async function listarChamadosCliente() {
       ),
     ),
   );
+  if (consulta !== consultaMensagensUI || clienteLogado?.telefone !== clienteId) return;
   for (let index = 0; index < chamados.length; index++) {
     const c = chamados[index];
 
@@ -3434,13 +3509,24 @@ async function listarChamadosCliente() {
     `;
   }
 
-  box.innerHTML = html + "</div>";
+  box.innerHTML =
+    html +
+    '</div><p id="suporte-categoria-vazia" hidden>Nenhum suporte aberto nesta categoria.</p>';
+  if (categoriaSelecionada) filtrarSuportesCliente(categoriaSelecionada);
 }
 function filtrarSuportesCliente(tipo) {
+  if (!["reclamacao", "feedback", "outros"].includes(tipo)) return;
+  categoriaSuporteClienteUI = tipo;
+  etapaSuporteClienteUI = "categoria";
+  atualizarJanelaSuporteClienteUI("categoria");
+  document.querySelector("#lista-chamados-cliente .suporte-categorias").hidden = true;
   document.getElementById("suporte-blocos").hidden = false;
+  let visiveis = 0;
   document.querySelectorAll("#suporte-blocos .card-chamado-cliente").forEach((card) => {
     card.hidden = card.dataset.categoria !== tipo;
+    if (!card.hidden) visiveis++;
   });
+  document.getElementById("suporte-categoria-vazia").hidden = visiveis > 0;
 }
 async function criarChamadoSuporte() {
   if (!clienteLogado) {
@@ -3493,8 +3579,7 @@ async function criarChamadoSuporte() {
   document.getElementById("mensagem-novo-chamado").value = "";
   document.getElementById("form-novo-chamado").style.display = "none";
 
-  await listarChamadosCliente();
-
+  categoriaSuporteClienteUI = categoria;
   abrirChamadoCliente(chamadoRef.id);
 }
 
@@ -3505,7 +3590,6 @@ window.abrirChamadoCliente = async function (chamadoId) {
   chamadoClienteAbertoId = chamadoId;
 
   const chat = document.getElementById("chat-chamado-cliente");
-  const form = document.getElementById("form-novo-chamado");
 
   etapaSuporteCliente("chat");
   const rascunho = mesmoChamado ? chat.querySelector("textarea")?.value || "" : "";
@@ -3528,16 +3612,34 @@ window.abrirChamadoCliente = async function (chamadoId) {
   } catch (erro) {
     if (consulta === consultaMensagensUI)
       chat.innerHTML =
-        '<button onclick="etapaSuporteCliente()">← Voltar</button><p>Não foi possível abrir a conversa. Confira sua conexão e tente novamente.</p>';
+        '<p>Não foi possível abrir a conversa. Confira sua conexão e tente novamente.</p><button type="button" onclick="abrirChamadoCliente(\'' +
+        chamadoId +
+        "')\">Tentar novamente</button>";
     return;
   }
   if (consulta !== consultaMensagensUI) return;
   const chamado = chamadoDoc.data();
   if (!chamado) {
-    chat.innerHTML =
-      '<p>Este suporte não está mais disponível.</p><button onclick="etapaSuporteCliente()">Voltar</button>';
+    chat.innerHTML = "<p>Este suporte não está mais disponível.</p>";
     return;
   }
+
+  chat.innerHTML = `<div class="suporte-conexao-status-ui" role="status" hidden></div><div class="suporte-mensagens-ui" role="log" aria-label="Mensagens do suporte" aria-live="polite"></div><div class="suporte-chat-rodape-ui">
+    ${
+      chamado.status !== "finalizado"
+        ? `
+      <div class="suporte-compositor">
+        <textarea id="resposta-chamado-cliente" aria-label="Mensagem" placeholder="Continuar conversa..."></textarea>
+        <button type="button" aria-label="Enviar mensagem" onclick="enviarMensagemChamadoCliente()">➤</button>
+      </div>
+      <div class="acoes-chat-cliente"><button type="button" onclick="finalizarChamadoCliente('${chamadoId}')">Encerrar chat</button></div>
+    `
+        : "<p><strong>Este suporte foi finalizado.</strong></p>"
+    }</div>`;
+  const campoResposta = chat.querySelector("textarea");
+  if (campoResposta) campoResposta.value = rascunho;
+  const listaMensagens = chat.querySelector(".suporte-mensagens-ui");
+  let primeiraAtualizacao = true;
 
   window.listenerChamadoCliente = chamadoRef
     .collection("mensagens")
@@ -3545,6 +3647,7 @@ window.abrirChamadoCliente = async function (chamadoId) {
     .onSnapshot(
       async (snapshot) => {
         if (consulta !== consultaMensagensUI) return;
+        chat.querySelector(".suporte-conexao-status-ui").hidden = true;
         let mensagens = [];
 
         for (const doc of snapshot.docs) {
@@ -3560,18 +3663,21 @@ window.abrirChamadoCliente = async function (chamadoId) {
 
         atualizarContadorMensagens();
 
-        let html = `<h3>Conversa do suporte</h3>`;
+        const manterNoFim =
+          primeiraAtualizacao ||
+          listaMensagens.scrollHeight - listaMensagens.scrollTop - listaMensagens.clientHeight < 80;
+        let html = "";
 
         mensagens.forEach((m) => {
           const ehCliente = m.remetente === "cliente";
+          const avatar =
+            ehCliente && typeof htmlAvatarClienteUI === "function"
+              ? htmlAvatarClienteUI(clienteLogado, "avatar-msg")
+              : `<img src="${ehCliente ? escaparOperacao(clienteLogado.avatar || "images/avatares/sem-rank/maionese.webp") : "images/personagens-pedrao/ui/mago-tranquilo.webp"}" class="avatar-msg" alt="${ehCliente ? "Você" : "Pedrão Lanches"}">`;
 
           html += `
                     <div class="linha-msg ${ehCliente ? "linha-cliente" : "linha-admin"}">
-                        <img
-                            src="${ehCliente ? clienteLogado.avatar || "images/avatar1.webp" : "images/personagens-pedrao/ui/mago-tranquilo.webp"}"
-                            class="avatar-msg"
-                            alt="${ehCliente ? "Você" : "Pedrão Lanches"}"
-                        >
+                        ${avatar}
 
                         <div class="msg-chat ${ehCliente ? "msg-cliente" : "msg-admin"}">
                             <strong>${ehCliente ? "Você" : "Pedrão Lanches"}</strong>
@@ -3582,35 +3688,16 @@ window.abrirChamadoCliente = async function (chamadoId) {
                 `;
         });
 
-        if (chamado.status !== "finalizado") {
-          html += `
-                    <div class="suporte-compositor">
-                      <textarea id="resposta-chamado-cliente" aria-label="Mensagem" placeholder="Continuar conversa..."></textarea>
-                      <button type="button" aria-label="Enviar mensagem" onclick="enviarMensagemChamadoCliente()">➤</button>
-                    </div>
-                    <div class="acoes-chat-cliente"><button type="button" onclick="finalizarChamadoCliente('${chamadoId}')">Encerrar chat</button></div>
-                `;
-        } else {
-          html += `<p><strong>Este suporte foi finalizado.</strong></p>`;
-        }
-
-        const campoAtual = chat.querySelector("textarea");
-        const textoAtual = campoAtual ? campoAtual.value : rascunho;
-        chat.innerHTML =
-          `<button type="button" onclick="etapaSuporteCliente()">← Voltar</button>` + html;
-        const campoNovo = chat.querySelector("textarea");
-        if (campoNovo) campoNovo.value = textoAtual;
-
-        const modal = document.querySelector("#modal-mensagens .conteudo-carrinho");
-
-        if (modal) {
-          modal.scrollTop = modal.scrollHeight;
-        }
+        if (listaMensagens.innerHTML !== html) listaMensagens.innerHTML = html;
+        if (manterNoFim) listaMensagens.scrollTop = listaMensagens.scrollHeight;
+        primeiraAtualizacao = false;
       },
       () => {
-        if (consulta === consultaMensagensUI)
-          chat.innerHTML =
-            '<button onclick="etapaSuporteCliente()">← Voltar</button><p>Não foi possível atualizar a conversa. Confira sua conexão e abra novamente.</p>';
+        if (consulta === consultaMensagensUI) {
+          const status = chat.querySelector(".suporte-conexao-status-ui");
+          status.hidden = false;
+          status.innerHTML = `<p>Não foi possível atualizar a conversa. Seu texto foi mantido.</p><button type="button" onclick="abrirChamadoCliente('${chamadoId}')">Tentar novamente</button>`;
+        }
       },
     );
 };
@@ -3620,13 +3707,10 @@ function retomarMensagensClienteUI() {
   const modal = document.getElementById("modal-mensagens");
   if (!modal || modal.style.display !== "flex") return;
   if (abaMensagemAtual !== "suporte") abrirAbaMensagens(abaMensagemAtual);
-  else if (
-    document.getElementById("chat-chamado-cliente").style.display === "block" &&
-    chamadoClienteAbertoId
-  )
+  else if (etapaSuporteClienteUI === "chat" && chamadoClienteAbertoId)
     abrirChamadoCliente(chamadoClienteAbertoId);
-  else if (document.getElementById("lista-chamados-cliente").style.display === "block")
-    etapaSuporteCliente("lista");
+  else if (["lista", "categoria"].includes(etapaSuporteClienteUI))
+    etapaSuporteCliente(etapaSuporteClienteUI);
 }
 document.addEventListener("visibilitychange", retomarMensagensClienteUI);
 window.addEventListener("online", retomarMensagensClienteUI);
@@ -3651,39 +3735,47 @@ function fecharConversaChamadoCliente() {
 }
 
 async function enviarMensagemChamadoCliente() {
-  const texto = document.getElementById("resposta-chamado-cliente").value.trim();
-
+  const campo = document.getElementById("resposta-chamado-cliente");
+  const chamadoId = chamadoClienteAbertoId,
+    clienteId = clienteLogado?.telefone;
+  if (!campo || !chamadoId || !clienteId) return alert("Abra um suporte primeiro.");
+  const rascunho = campo.value,
+    texto = rascunho.trim();
   if (!texto) return alert("Digite uma mensagem.");
-  if (!chamadoClienteAbertoId) return alert("Abra um suporte primeiro.");
-
-  const chamadoRef = db
-    .collection("clientes")
-    .doc(clienteLogado.telefone)
-    .collection("chamados")
-    .doc(chamadoClienteAbertoId);
-
-  const chamadoDoc = await chamadoRef.get();
-  const chamado = chamadoDoc.data();
-
-  if (!chamado || chamado.status === "finalizado") {
-    alert("Este suporte já foi finalizado. Abra um novo suporte se precisar.");
-    listarChamadosCliente();
-    etapaSuporteCliente();
-    return;
+  const chave = clienteId + "/" + chamadoId;
+  if (enviosChamadoClienteUI.has(chave)) return;
+  enviosChamadoClienteUI.add(chave);
+  const botao = campo.closest(".suporte-compositor")?.querySelector("button");
+  if (botao) botao.disabled = true;
+  try {
+    const chamadoRef = db
+      .collection("clientes")
+      .doc(clienteId)
+      .collection("chamados")
+      .doc(chamadoId);
+    const chamado = (await lerComPrazoUI(chamadoRef.get())).data();
+    if (!chamado || chamado.status === "finalizado") {
+      alert("Este suporte já foi finalizado. Abra um novo suporte se precisar.");
+      if (chamadoClienteAbertoId === chamadoId) etapaSuporteCliente("lista");
+      return;
+    }
+    await chamadoRef
+      .collection("mensagens")
+      .add({ texto, remetente: "cliente", data: new Date().toISOString(), lida: false });
+    // O listener atualiza somente as mensagens. Mantém o compositor, o foco e o novo rascunho.
+    if (document.getElementById("resposta-chamado-cliente") === campo && campo.value === rascunho) {
+      campo.value = "";
+      if (document.activeElement === campo || document.activeElement === botao)
+        campo.focus({ preventScroll: true });
+    }
+    chamadoRef.update({ atualizadoEm: new Date().toISOString() }).catch(console.error);
+  } catch (erro) {
+    console.error("Não foi possível enviar a mensagem:", erro);
+    alert("Não foi possível enviar a mensagem. Seu texto foi mantido para tentar novamente.");
+  } finally {
+    enviosChamadoClienteUI.delete(chave);
+    if (botao) botao.disabled = false;
   }
-
-  await chamadoRef.collection("mensagens").add({
-    texto,
-    remetente: "cliente",
-    data: new Date().toISOString(),
-    lida: false,
-  });
-
-  await chamadoRef.update({
-    atualizadoEm: new Date().toISOString(),
-  });
-
-  abrirChamadoCliente(chamadoClienteAbertoId);
 }
 
 async function finalizarChamadoCliente(chamadoId) {
@@ -3705,14 +3797,7 @@ async function finalizarChamadoCliente(chamadoId) {
     });
 
   chamadoClienteAbertoId = null;
-  etapaSuporteCliente();
-
-  document.getElementById("chat-chamado-cliente").style.display = "none";
-
-  document.getElementById("form-novo-chamado").style.display = "none";
-  document.getElementById("chat-chamado-cliente").style.display = "none";
-
-  listarChamadosCliente();
+  etapaSuporteCliente(categoriaSuporteClienteUI ? "categoria" : "lista");
 }
 async function togglePedidosSuporteCliente() {
   const box = document.getElementById("box-pedidos-suporte");
@@ -3771,7 +3856,7 @@ async function atualizarStatusOnline() {
 
     telefone: clienteLogado?.telefone || "",
 
-    avatar: clienteLogado?.avatar || "images/avatar1.webp",
+    avatar: clienteLogado?.avatar || "images/avatares/sem-rank/maionese.webp",
 
     clienteId: clienteLogado?.telefone || "",
 
@@ -3874,6 +3959,7 @@ async function buscarContadorMensagensUI() {
   }
 }
 function limparTelaMensagensCliente() {
+  if (janelaSuporteClienteUI?.open) janelaSuporteClienteUI.close();
   chamadoClienteAbertoId = null;
 
   const lista = document.getElementById("lista-mensagens-cliente");
@@ -4050,61 +4136,12 @@ function abrirMolhosItem(index) {
   }
 
   let blocos = "";
+  molhosGratisTempUI = [];
 
   for (let i = 1; i <= qtdDireitos; i++) {
     const molhoSalvo = item.molhosGratis?.find((m) => Number(m.unidade) === i);
-    const tipoSalvo = molhoSalvo?.tipo || "semmolho";
-
-    blocos += `
-            <div class="bloco-molho-item">
-
-               <h4>
-    ${
-      String(item.categoria || "")
-        .toLowerCase()
-        .includes("combo")
-        ? `${i}º Lanche`
-        : `${item.nome} #${i}`
-    }
-</h4>
-
-            <div class="opcoes-tipo-molho">
-
-    <label class="radio-molho">
-        <input
-            type="radio"
-            name="tipo-molho-${i}"
-            value="semmolho"
-            ${tipoSalvo === "semmolho" ? "checked" : ""}
-        >
-        Sem molho
-    </label>
-
-    <label class="radio-molho">
-        <input
-            type="radio"
-            name="tipo-molho-${i}"
-            value="umdecada"
-            ${tipoSalvo === "umdecada" ? "checked" : ""}
-        >
-        1 de cada escolhido
-    </label>
-
-    <label class="radio-molho">
-        <input
-            type="radio"
-            name="tipo-molho-${i}"
-            value="doisiguais"
-            ${tipoSalvo === "doisiguais" ? "checked" : ""}
-        >
-        2 iguais
-    </label>
-
-</div>
-<div id="opcoes-molho-${i}" class="opcoes-molho-unidade"></div>
-
-</div>
-        `;
+    molhosGratisTempUI.push(normalizarMolhoGratisUI(molhoSalvo, i));
+    blocos += `<section id="bloco-molho-${i}" class="bloco-molho-item">${htmlBlocoMolhoUI(i)}</section>`;
   }
 
   conteudo.innerHTML = `
@@ -4151,14 +4188,10 @@ function abrirMolhosItem(index) {
     <button type="button" onclick="alterarMolhoPago('Barbecue', 1)">+</button>
 </div>
 </div>
-        <button onclick="salvarMolhosItem()">
-            Salvar molhos
-        </button>
+
     `;
 
   document.getElementById("modal-molhos").style.display = "flex";
-
-  configurarEventosMolhoPorUnidade(qtdDireitos);
 }
 function toggleAreaMolhosPagos() {
   const area = document.getElementById("area-molhos-pagos");
@@ -4167,53 +4200,14 @@ function toggleAreaMolhosPagos() {
   area.style.display =
     area.style.display === "none" || area.style.display === "" ? "block" : "none";
 }
-function salvarMolhosItem() {
+function salvarMolhosItem(fechar = true) {
   const item = carrinho[indiceMolhoAtual];
 
   if (!item) return alert("Item não encontrado.");
 
-  let qtd = Number(item.qtd) || 1;
-
-  const categoriaItem = String(item.categoria || "").toLowerCase();
-
-  if (categoriaItem.includes("combo")) {
-    qtd = Number(item.comboQtdLanches) || 1;
-  }
-  let molhosGratis = [];
-
-  for (let i = 1; i <= qtd; i++) {
-    const tipo = document.querySelector(`input[name="tipo-molho-${i}"]:checked`)?.value;
-
-    if (tipo === "semmolho") {
-      molhosGratis.push({
-        unidade: i,
-        tipo: "semmolho",
-        texto: "Sem molho",
-      });
-    } else if (tipo === "umdecada") {
-      const escolhidos = [];
-
-      document.querySelectorAll(`.molho-um-${i}:checked`).forEach((check) => {
-        escolhidos.push(check.value);
-      });
-
-      molhosGratis.push({
-        unidade: i,
-        tipo: "umdecada",
-        molhos: escolhidos,
-        texto: escolhidos.length ? escolhidos.join(" + ") : "Sem molho",
-      });
-    } else if (tipo === "doisiguais") {
-      const molho = document.querySelector(`input[name="molho-dois-${i}"]:checked`)?.value || "";
-
-      molhosGratis.push({
-        unidade: i,
-        tipo: "doisiguais",
-        molho,
-        texto: molho ? `2 ${molho}` : "Sem molho",
-      });
-    }
-  }
+  const molhosGratis = molhosGratisTempUI.map((molho, indice) =>
+    normalizarMolhoGratisUI(molho, indice + 1),
+  );
   const molhosPagos = [];
 
   Object.keys(molhosPagosTemp).forEach((nome) => {
@@ -4235,7 +4229,7 @@ function salvarMolhosItem() {
 
   item.molhosGratis = molhosGratis;
 
-  fecharModalMolhos();
+  if (fechar) fecharModalMolhos(false);
 
   exibirRevisao(
     dadosPedidoTemporario.itens,
@@ -4246,10 +4240,13 @@ function salvarMolhosItem() {
     dadosPedidoTemporario.mapa,
     dadosPedidoTemporario.km,
     dadosPedidoTemporario.foraDaArea,
+    dadosPedidoTemporario.areaUrbanaConfirmada,
   );
 }
 
-function fecharModalMolhos() {
+function fecharModalMolhos(aplicar = true) {
+  if (aplicar && carrinho[indiceMolhoAtual]) salvarMolhosItem(false);
+  if (janelaMolhoUnidadeUI?.open) janelaMolhoUnidadeUI.close();
   document.getElementById("modal-molhos").style.display = "none";
 }
 function alterarMolhoPago(nome, delta) {
@@ -4268,48 +4265,111 @@ function alterarMolhoPago(nome, delta) {
   }
 }
 
-function configurarEventosMolhoPorUnidade(qtd) {
-  for (let i = 1; i <= qtd; i++) {
-    document.querySelectorAll(`input[name="tipo-molho-${i}"]`).forEach((radio) => {
-      radio.addEventListener("change", () => {
-        renderizarOpcoesMolhoUnidade(i);
-      });
-    });
-
-    renderizarOpcoesMolhoUnidade(i);
+function normalizarMolhoGratisUI(escolha, unidade) {
+  const nomes = ["Maionese", "Ketchup", "Mostarda", "Barbecue"];
+  if (escolha?.tipo === "umdecada") {
+    const molhos = nomes.filter((nome) => escolha.molhos?.includes(nome));
+    if (molhos.length) return { unidade, tipo: "umdecada", molhos, texto: molhos.join(" + ") };
   }
+  if (escolha?.tipo === "doisiguais" && nomes.includes(escolha.molho))
+    return { unidade, tipo: "doisiguais", molho: escolha.molho, texto: `2 ${escolha.molho}` };
+  return { unidade, tipo: "semmolho", texto: "Sem molho" };
 }
-
-function renderizarOpcoesMolhoUnidade(i) {
+function htmlOpcaoMolhoUI(rotulo, selecionado, acao, nome = "") {
+  return `<button type="button" class="molho-opcao-ui" aria-pressed="${selecionado}" ${nome ? `data-molho="${nome}"` : ""} onclick="${acao}"><span class="molho-marca-ui" aria-hidden="true">${selecionado ? "✓" : ""}</span><span>${escaparOperacao(rotulo)}</span></button>`;
+}
+function htmlBlocoMolhoUI(i) {
   const item = carrinho[indiceMolhoAtual];
-  const molhoSalvo = item?.molhosGratis?.find((m) => Number(m.unidade) === i);
-
-  const tipo = document.querySelector(`input[name="tipo-molho-${i}"]:checked`)?.value;
-
-  const box = document.getElementById(`opcoes-molho-${i}`);
-  if (!box) return;
-
-  if (tipo === "semmolho") {
-    box.innerHTML = `<p>Sem molho neste item.</p>`;
-  } else if (tipo === "umdecada") {
-    const salvos = molhoSalvo?.molhos || [];
-
-    box.innerHTML = `
-            <label><input type="checkbox" class="molho-um-${i}" value="Maionese" ${salvos.includes("Maionese") ? "checked" : ""}> Maionese</label>
-            <label><input type="checkbox" class="molho-um-${i}" value="Ketchup" ${salvos.includes("Ketchup") ? "checked" : ""}> Ketchup</label>
-            <label><input type="checkbox" class="molho-um-${i}" value="Mostarda" ${salvos.includes("Mostarda") ? "checked" : ""}> Mostarda</label>
-            <label><input type="checkbox" class="molho-um-${i}" value="Barbecue" ${salvos.includes("Barbecue") ? "checked" : ""}> Barbecue</label>
-        `;
-  } else if (tipo === "doisiguais") {
-    const molho = molhoSalvo?.molho || "Maionese";
-
-    box.innerHTML = `
-            <label><input type="radio" name="molho-dois-${i}" value="Maionese" ${molho === "Maionese" ? "checked" : ""}> 2 Maionese</label>
-            <label><input type="radio" name="molho-dois-${i}" value="Ketchup" ${molho === "Ketchup" ? "checked" : ""}> 2 Ketchup</label>
-            <label><input type="radio" name="molho-dois-${i}" value="Mostarda" ${molho === "Mostarda" ? "checked" : ""}> 2 Mostarda</label>
-            <label><input type="radio" name="molho-dois-${i}" value="Barbecue" ${molho === "Barbecue" ? "checked" : ""}> 2 Barbecue</label>
-        `;
+  const escolha = molhosGratisTempUI[i - 1];
+  const comMolho = escolha.tipo !== "semmolho";
+  const nome = String(item.categoria || "")
+    .toLowerCase()
+    .includes("combo")
+    ? `${i}º lanche`
+    : `${item.nome} #${i}`;
+  return `<h4>${escaparOperacao(nome)}</h4><div class="molho-escolhas-ui" role="group" aria-label="Molho para ${escaparOperacao(nome)}">${htmlOpcaoMolhoUI("Sem molho", !comMolho, `definirSemMolhoUI(${i})`)}${htmlOpcaoMolhoUI("Com molho", comMolho, `abrirEscolhaMolhoUI(${i})`)}</div>${comMolho ? `<p class="molho-resumo-ui">${escaparOperacao(escolha.texto)}</p>` : ""}`;
+}
+function atualizarBlocoMolhoUI(i) {
+  const bloco = document.getElementById(`bloco-molho-${i}`);
+  if (bloco) bloco.innerHTML = htmlBlocoMolhoUI(i);
+}
+function definirSemMolhoUI(i) {
+  molhosGratisTempUI[i - 1] = normalizarMolhoGratisUI(null, i);
+  atualizarBlocoMolhoUI(i);
+}
+function abrirEscolhaMolhoUI(i) {
+  if (janelaMolhoUnidadeUI?.open) return;
+  const atual = molhosGratisTempUI[i - 1];
+  if (!atual) return;
+  unidadeMolhoTempUI = i;
+  escolhaMolhoTempUI = { ...atual, molhos: [...(atual.molhos || [])] };
+  const janela = document.createElement("dialog");
+  janela.className = "janela-molho-unidade-ui";
+  janela.setAttribute("aria-labelledby", "titulo-molho-unidade-ui");
+  janela.innerHTML =
+    '<div class="molhos-cabecalho-ui"><button type="button" class="ui-voltar">← Voltar</button><h3 id="titulo-molho-unidade-ui"></h3><button type="button" class="ui-x" aria-label="Fechar escolha de molhos">×</button></div><div class="molho-janela-conteudo-ui"></div>';
+  janelaMolhoUnidadeUI = janela;
+  janela.querySelector(".ui-voltar").onclick = () =>
+    etapaMolhoUnidadeUI === "molhos" ? renderizarJanelaMolhoUI("tipo") : janela.close();
+  janela.querySelector(".ui-x").onclick = () => janela.close();
+  janela.addEventListener(
+    "close",
+    () => {
+      janela.remove();
+      if (janelaMolhoUnidadeUI === janela) {
+        janelaMolhoUnidadeUI = null;
+        escolhaMolhoTempUI = null;
+        unidadeMolhoTempUI = null;
+      }
+    },
+    { once: true },
+  );
+  document.body.append(janela);
+  renderizarJanelaMolhoUI("tipo");
+  janela.showModal();
+}
+function renderizarJanelaMolhoUI(etapa) {
+  const janela = janelaMolhoUnidadeUI;
+  if (!janela || !escolhaMolhoTempUI) return;
+  etapaMolhoUnidadeUI = etapa;
+  janela.dataset.etapa = etapa;
+  janela.querySelector("h3").textContent =
+    etapa === "tipo" ? "Como quer os molhos?" : "Escolha os molhos";
+  const conteudo = janela.querySelector(".molho-janela-conteudo-ui");
+  if (etapa === "tipo") {
+    conteudo.innerHTML = `<div class="molho-escolhas-ui">${htmlOpcaoMolhoUI("1 de cada", escolhaMolhoTempUI.tipo === "umdecada", "selecionarTipoMolhoUI('umdecada')")}${htmlOpcaoMolhoUI("2 iguais", escolhaMolhoTempUI.tipo === "doisiguais", "selecionarTipoMolhoUI('doisiguais')")}</div>`;
+    return;
   }
+  const dois = escolhaMolhoTempUI.tipo === "doisiguais";
+  const valido =
+    normalizarMolhoGratisUI(escolhaMolhoTempUI, unidadeMolhoTempUI).tipo !== "semmolho";
+  conteudo.innerHTML = `<p>${dois ? "Escolha um molho para receber 2 unidades." : "Escolha os molhos: você recebe 1 unidade de cada escolhido."}</p><div class="molho-escolhas-ui">${["Maionese", "Ketchup", "Mostarda", "Barbecue"].map((nome) => htmlOpcaoMolhoUI(dois ? `2 ${nome}` : nome, dois ? escolhaMolhoTempUI.molho === nome : escolhaMolhoTempUI.molhos.includes(nome), `alternarMolhoGratisUI('${nome}')`, nome)).join("")}</div><button type="button" class="molho-confirmar-ui" onclick="confirmarMolhoUnidadeUI()" ${valido ? "" : "disabled"}>Usar estes molhos</button>`;
+}
+function selecionarTipoMolhoUI(tipo) {
+  if (!escolhaMolhoTempUI || !["umdecada", "doisiguais"].includes(tipo)) return;
+  escolhaMolhoTempUI.tipo = tipo;
+  renderizarJanelaMolhoUI("molhos");
+}
+function alternarMolhoGratisUI(nome) {
+  if (!escolhaMolhoTempUI || !["Maionese", "Ketchup", "Mostarda", "Barbecue"].includes(nome))
+    return;
+  if (escolhaMolhoTempUI.tipo === "doisiguais") escolhaMolhoTempUI.molho = nome;
+  else {
+    const molhos = escolhaMolhoTempUI.molhos;
+    escolhaMolhoTempUI.molhos = molhos.includes(nome)
+      ? molhos.filter((m) => m !== nome)
+      : [...molhos, nome];
+  }
+  renderizarJanelaMolhoUI("molhos");
+  janelaMolhoUnidadeUI.querySelector(`[data-molho="${nome}"]`)?.focus({ preventScroll: true });
+}
+function confirmarMolhoUnidadeUI() {
+  if (!escolhaMolhoTempUI) return;
+  const escolha = normalizarMolhoGratisUI(escolhaMolhoTempUI, unidadeMolhoTempUI);
+  if (escolha.tipo === "semmolho") return;
+  molhosGratisTempUI[unidadeMolhoTempUI - 1] = escolha;
+  atualizarBlocoMolhoUI(unidadeMolhoTempUI);
+  janelaMolhoUnidadeUI.close();
 }
 function calcularTotalMolhosPagos() {
   let total = 0;

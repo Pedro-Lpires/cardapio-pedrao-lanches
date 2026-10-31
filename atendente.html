@@ -1,38 +1,58 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
-    <script src="js/imagens-webp.js?v=20261025-2"></script>
+    <script src="js/imagens-webp.js?v=20261031-2"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Atendente</title>
+    <title>Funcionário — Pedrão Lanches</title>
+    <link rel="icon" type="image/webp" href="images/logo-trailer.webp" />
 
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/atendente.css?v=20261025-2" />
+    <link rel="stylesheet" href="css/paginas/atendente.css?v=20261031-1" />
   </head>
   <body>
-    <div class="login-atendente">
-      <h1>👨‍💼 Painel do Atendente</h1>
-
-      <input type="text" id="codigo-atendente" placeholder="Código do atendente" />
-
-      <button onclick="loginAtendente()">Entrar</button>
-    </div>
+    <main class="login-atendente funcionario-login-ui">
+      <h1>Pedrão Lanches</h1>
+      <p>Acesso do funcionário</p>
+      <form id="login-funcionario" onsubmit="event.preventDefault();loginAtendente()">
+        <label for="codigo-atendente">Código de funcionário</label>
+        <input
+          type="password"
+          id="codigo-atendente"
+          placeholder="Digite seu código"
+          autocomplete="current-password"
+          required
+        />
+        <button type="submit" id="entrar-funcionario">Entrar</button>
+      </form>
+      <p id="login-funcionario-status" role="status" aria-live="polite"></p>
+      <section id="destinos-funcionario" hidden aria-label="Escolha onde trabalhar">
+        <p id="boas-vindas-funcionario"></p>
+        <div class="funcionario-destinos-ui">
+          <button type="button" id="destino-chapa" onclick="abrirDestinoFuncionarioUI('chapa')">
+            Chapa<span>Cozinha e produção</span>
+          </button>
+          <button
+            type="button"
+            id="destino-atendimento"
+            onclick="abrirDestinoFuncionarioUI('atendimento')"
+          >
+            Atendimento<span>Painel do atendente</span>
+          </button>
+        </div>
+        <button type="button" class="funcionario-trocar-ui" onclick="trocarCodigoFuncionarioUI()">
+          Trocar código
+        </button>
+      </section>
+    </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <script src="js/ui-comum.js?v=20261025-2"></script>
-    <script src="js/script.js?v=20261025-2"></script>
-    <script src="js/atendente.js?v=20261025-2"></script>
-    <script src="js/pedido-atendente-ui.js?v=20261025-2"></script>
-    <script src="js/operacao.js?v=20261025-2"></script>
-
-    <script src="js/app-ui.js?v=20261025-2"></script>
-    <script src="js/raspadinhas-recuperacao.js?v=20261025-2"></script>
-    <script src="js/raspadinhas.js?v=20261025-2"></script>
-    <script src="js/fluxos-interface.js?v=20261025-2"></script>
-    <script src="js/janelas-fluxos.js?v=20261025-2"></script>
-    <script src="js/pagamento-ui.js?v=20261025-2"></script>
+    <script src="js/ui-comum.js?v=20261031-3"></script>
+    <script src="js/firebase-operacao.js"></script>
+    <script src="js/funcionario-acesso.js?v=20261029-4"></script>
+    <script src="js/funcionario-login.js?v=20261029-4"></script>
   </body>
 </html>

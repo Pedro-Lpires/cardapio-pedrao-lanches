@@ -57,13 +57,12 @@ function htmlAvatarClienteUI(cliente, classe = "", caminho, lazy = false) {
   return `<img src="${avatar.src}" alt="${avatar.nome}" decoding="async" loading="${lazy ? "lazy" : "eager"}" class="${classe} avatar-rank-ui" data-avatar-rank="${avatar.rank}" data-avatar-personagem="${avatar.id}">`;
 }
 
-function htmlOpcoesAvataresUI(cliente, caminho, modo = "perfil") {
+function htmlOpcoesAvataresUI(cliente, caminho) {
   const selecionado = identidadeAvatarClienteUI(caminho);
-  const funcao = modo === "auto" ? "selecionarAvatarAutoUI" : "selecionarAvatar";
   return personagensAvatarPedraoUI
     .map(
       ([id, nome]) =>
-        `<button type="button" class="avatar-opcao-ui" aria-label="Escolher ${nome}" aria-pressed="${id === selecionado}" onclick="${funcao}('${id}')">${htmlAvatarClienteUI(cliente, "", id, true)}<span>${nome}</span></button>`,
+        `<button type="button" class="avatar-opcao-ui" aria-label="Escolher ${nome}" aria-pressed="${id === selecionado}" onclick="selecionarAvatar('${id}')">${htmlAvatarClienteUI(cliente, "", id, true)}<span>${nome}</span></button>`,
     )
     .join("");
 }

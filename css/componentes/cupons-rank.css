@@ -1,0 +1,54 @@
+.cupons-ui .cupom-rank-config-ui {
+  min-width: 0;
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid #555;
+  border-radius: 12px;
+}
+.cupons-ui .cupom-rank-config-ui legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+.cupons-ui .cupom-rank-config-ui p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #ddd;
+}
+.cupons-ui .cupom-rank-config-ui select {
+  width: 100%;
+  margin: 8px 0 16px;
+}
+.cupons-ui .cupom-rank-check-ui {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 14px;
+  line-height: 1.4;
+}
+.cupons-ui .cupom-rank-check-ui input {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #ed0017;
+}
+.cupons-ui .cupom-rank-linha-ui {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+.cupons-ui .cupom-rank-linha-ui > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cupons-ui .cupom-rank-config-ui .cupom-rank-linha-ui input[type="number"] {
+  width: 88px;
+  min-width: 0;
+  margin: 0;
+}
+.cupons-ui .cupom-rank-config-ui [hidden] {
+  display: none !important;
+}

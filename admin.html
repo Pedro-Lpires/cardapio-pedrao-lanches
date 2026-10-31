@@ -1,16 +1,18 @@
 <!doctype html>
 <html lang="pt-br">
   <head>
-    <script src="js/imagens-webp.js?v=20261025-2"></script>
-    <script src="js/avatares-ui.js?v=20261026-2"></script>
+    <script src="js/imagens-webp.js?v=20261031-2"></script>
+    <script src="js/avatares-ui.js?v=20261027-1"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel Administrativo - Pedrão Lanches</title>
     <link rel="icon" href="images/logo-trailer.webp" />
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/admin.css?v=20261025-2" />
+    <link rel="stylesheet" href="css/paginas/admin.css?v=20261031-2" />
+    <link rel="stylesheet" href="css/componentes/cupons-rank.css?v=20261031-5" />
 
-    <script src="js/ui-comum.js?v=20261025-2"></script>
+    <script src="js/ui-comum.js?v=20261031-3"></script>
+    <script src="js/funcionario-acesso.js?v=20261029-4"></script>
   </head>
   <body class="admin-body">
     <!-- HEADER — cabeçalho da página -->
@@ -60,7 +62,7 @@
           <div id="campo-item-geral-check" style="display: none">
             <label>
               <input type="checkbox" id="cupom-item-geral" onchange="atualizarCamposCupomAdmin()" />
-              Aplicar em todos os lanches?
+              Aplicar em um grupo de produtos?
             </label>
           </div>
 
@@ -94,6 +96,7 @@
           <div id="campo-item-cupom" style="display: none">
             <div id="campo-item-geral-tipo" style="display: none">
               <select id="cupom-item-geral-tipo">
+                <option value="todos">Todos os itens</option>
                 <option value="geral">Todos os lanches</option>
 
                 <option value="artesanal">Todos artesanais</option>
@@ -165,17 +168,30 @@
         </section>
 
         <section class="admin-atendentes">
-          <h2>👨‍💼 Atendentes</h2>
+          <h2>Funcionários</h2>
 
-          <input type="text" id="atendente-nome" placeholder="Nome do atendente" />
+          <input type="text" id="atendente-nome" placeholder="Nome do funcionário" />
 
           <input type="text" id="atendente-codigo" placeholder="Código de acesso" />
 
-          <button type="button" onclick="salvarAtendenteAdmin()">Salvar atendente</button>
+          <label for="atendente-perfil">Acesso liberado</label>
+          <select id="atendente-perfil">
+            <option value="atendimento">Atendimento</option>
+            <option value="chapa">Chapa</option>
+            <option value="ambos">Ambos</option>
+          </select>
+          <button type="button" onclick="salvarAtendenteAdmin()">Salvar funcionário</button>
 
-          <button type="button" onclick="listarAtendentesAdmin()">Ver atendentes</button>
+          <button
+            type="button"
+            onclick="listarAtendentesAdmin(true)"
+            aria-controls="lista-atendentes-admin"
+            aria-expanded="false"
+          >
+            Ver funcionários
+          </button>
 
-          <div id="lista-atendentes-admin"></div>
+          <div id="lista-atendentes-admin" hidden></div>
         </section>
       </div>
       <section class="admin-adicionais">
@@ -352,18 +368,24 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <script src="js/produtos.js?v=20261025-2"></script>
-    <script src="js/admin.js?v=20261025-2"></script>
-    <script src="js/operacao.js?v=20261025-2"></script>
-    <script src="js/cupons-admin-ui.js?v=20261025-2"></script>
+    <script src="js/produtos.js?v=20261031-2"></script>
+    <script src="js/admin.js?v=20261031-5"></script>
+    <script src="js/cupons-rank.js?v=20261031-5"></script>
+    <script src="js/operacao.js?v=20261031-5"></script>
+    <script src="js/editor-pedido-ui.js?v=20261031-2"></script>
+    <script src="js/editor-pedido-personalizacao-ui.js?v=20261031-2"></script>
+    <script src="js/cupons-rank-admin-ui.js?v=20261031-5"></script>
+    <script src="js/cupons-admin-ui.js?v=20261031-5"></script>
     <script src="js/campanhas.js?v=20261025-2"></script>
-    <script src="js/app-ui.js?v=20261025-2"></script>
+    <script src="js/editor-cliente-admin-ui.js?v=20261031-2"></script>
+    <script src="js/app-ui.js?v=20261031-3"></script>
     <script src="js/raspadinhas-recuperacao.js?v=20261025-2"></script>
     <script src="js/raspadinhas.js?v=20261025-2"></script>
     <script src="js/catalogo-admin-ui.js?v=20261025-2"></script>
-    <script src="js/fluxos-interface.js?v=20261025-2"></script>
+    <script src="js/fluxos-interface.js?v=20261031-2"></script>
     <script src="js/janelas-fluxos.js?v=20261025-2"></script>
-    <script src="js/pagamento-ui.js?v=20261025-2"></script>
+    <script src="js/pagamento-ui.js?v=20261031-4"></script>
+    <script src="js/beneficios-pedido.js?v=20261031-2"></script>
   </body>
 </html>
 <!-- Cupom simples

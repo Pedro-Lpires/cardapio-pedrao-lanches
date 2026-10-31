@@ -31,6 +31,50 @@ body:has(#central-operacao.central-etapa-modal:not([hidden]))::before {
   top: -12px;
 }
 /* Entrada da central: título compacto, atualizar separado das categorias. */
+#central-operacao > .central-ferramentas-pedidos-ui {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 10px;
+  margin: 16px 0;
+}
+#central-operacao > .operacao-acoes.central-ferramentas-pedidos-ui > button {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  padding: 10px 8px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+#central-operacao #cancelar-pedidos-central-ui[aria-pressed="true"] {
+  background: #383838;
+  border-color: #aaa;
+}
+#central-operacao .registro-operacao {
+  position: relative;
+}
+#central-operacao .cancelar-pedido-x-ui {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  font-size: 23px;
+  line-height: 1;
+}
+#central-operacao .cancelar-pedido-x-ui[hidden] {
+  display: none;
+}
+#central-operacao.cancelando-pedidos-ui .registro-operacao:has([data-cancelar-pedido-ui]) > h3 {
+  padding-right: 44px;
+}
 #central-operacao > .operacao-acoes:has(> h2) {
   display: flex;
   flex-direction: column;
@@ -294,6 +338,45 @@ body:has(#central-operacao.central-etapa-modal:not([hidden]))::before {
 /* Respiro entre a escolha de pagamento e o primeiro item selecionável. */
 .operacao-acoes.pagamento-separado-modos {
   margin-bottom: 16px;
+}
+#area-fechamento-comanda .pagamento-separado-modos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+#area-fechamento-comanda .pagamento-separado-modos > button {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: normal;
+}
+#area-fechamento-comanda .pagamento-titulo-forma-ui {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 10px;
+  align-items: center;
+  margin: 20px 0;
+}
+#area-fechamento-comanda .pagamento-titulo-forma-ui > h4 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+#area-fechamento-comanda .pagamento-titulo-forma-ui > button {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 9px 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: normal;
+}
+#area-fechamento-comanda .pagamento-titulo-forma-ui > .pagamento-misto-resumo-ui {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 /* Entrada compacta para nova comanda e outros dados do atendimento. */
 dialog.ui-caixa.ui-form-entrada {

@@ -89,6 +89,18 @@ dialog.interface-janela.som-ativacao-janela-ui {
   padding: 0;
   box-sizing: border-box;
 }
+.som-escolha-janela-ui .alertas-chamados-ui > p {
+  margin: 6px 0 14px;
+  line-height: 1.5;
+}
+.som-escolha-janela-ui .toques-chamados-ui {
+  gap: 12px;
+  margin: 4px 0 14px;
+}
+.som-escolha-janela-ui .toque-chamado-ui span {
+  display: grid;
+  gap: 5px;
+}
 #config-som-chamados-atalho {
   margin: 12px 0 20px;
 }

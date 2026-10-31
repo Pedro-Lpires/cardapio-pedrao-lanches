@@ -1,9 +1,44 @@
 /* Fixture exclusivamente local: nunca carregar em uma página de produção. */
 (() => {
+  const AudioReal = window.AudioContext || window.webkitAudioContext;
+  let notasTeste = 0;
+  if (AudioReal)
+    window.AudioContext = class extends AudioReal {
+      createOscillator() {
+        const no = super.createOscillator(),
+          iniciar = no.start.bind(no);
+        no.start = (...args) => {
+          iniciar(...args);
+          window.parent.postMessage(
+            { tipo: "revisao-som", notas: ++notasTeste },
+            new URL(document.baseURI).origin,
+          );
+        };
+        return no;
+      }
+    };
   const modoMonitorFixture = document.currentScript.src.includes("modo=monitor");
   const parametrosFixture = new URL(document.currentScript.src).searchParams;
   const mesaFixture = parametrosFixture.get("mesa") || "2";
   const cenarioFixture = parametrosFixture.get("cenario");
+  if (["entrega-distante", "entrega-fora-area"].includes(cenarioFixture)) {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition(sucesso) {
+          // Ponto fictício, sem pedir a localização real do aparelho.
+          sucesso({
+            coords: {
+              latitude:
+                -15.553076945525193 -
+                (cenarioFixture === "entrega-fora-area" ? 22 : 12) / 111.19492664455873,
+              longitude: -56.05602240360688,
+            },
+          });
+        },
+      },
+    });
+  }
   const DataReal = Date;
   const horarioTeste = new DataReal();
   horarioTeste.setHours(20, 0, 0, 0);
@@ -22,6 +57,7 @@
     Object.entries({
       "config/admin": { senhaMestre: "teste1234", senhaFinanceiro: "teste1234" },
       "config/loja": { aberta: true },
+      "atendentes/teste": { nome: "Atendente Teste", codigo: "teste1234", ativo: true },
       "cuponsDesconto/COCA200": {
         codigo: "COCA200",
         nome: "Coca 2L acima de R$ 200",
@@ -141,9 +177,85 @@
       },
     }),
   );
+  if (cenarioFixture === "cupons-rank") {
+    for (const [codigo, acesso] of [
+      ["BKFP", "todos"],
+      ["PRATAEX", "exclusivo"],
+      ["PRATAMAIS", "crescente"],
+    ]) {
+      docs.set("cuponsDesconto/" + codigo, {
+        codigo,
+        nome: "Black Pedrão · " + codigo,
+        ativo: true,
+        uso: "diversos",
+        tipo: "item",
+        itemGeral: true,
+        itemGeralTipo: "todos",
+        itemGeralModo: "porcentagem",
+        itemGeralValor: 0,
+        rankRegra: {
+          acesso,
+          nivel: "Prata",
+          descontoPorRank: true,
+          percentuais: { Bronze: 5, Prata: 7, Ouro: 9, Diamante: 11, Imortal: 13 },
+        },
+      });
+    }
+  }
   if (cenarioFixture === "cda-inativo") {
     docs.get("clientes/" + cliente).fidelidadeAtiva = false;
     docs.get("clientes/" + cliente).nivelCliente = "Sem nível";
+  }
+  if (cenarioFixture === "atendimento-edicao") {
+    const local = {
+      ...clone(docs.get("pedidos/retirada1")),
+      tipo: "Local",
+      origem: "site_delivery",
+      nome: "Cliente sem mesa",
+      telefone: cliente,
+      clienteId: cliente,
+      numero: 3,
+    };
+    docs.set("pedidos/local-sem-mesa", local);
+    docs.set("pedidos/local-mesa-antiga", {
+      ...clone(local),
+      nome: "Já está na mesa 1",
+      mesa: 1,
+      numero: 4,
+    });
+    docs.set("pedidos/local-comanda-antiga", {
+      ...clone(local),
+      nome: "Já possui comanda",
+      comandaId: "comanda1",
+      numero: 5,
+    });
+    docs.set("pedidos/local-reverso", { ...clone(local), nome: "Vínculo antigo", numero: 6 });
+    docs.set("comandas/comanda-legada", {
+      status: "Fechada",
+      mesa: 2,
+      pedidoOrigemId: "local-reverso",
+      itens: [],
+      valorTotal: 0,
+    });
+    Object.assign(docs.get("pedidos/retirada1"), {
+      nome: "Rafa Teste",
+      telefone: cliente,
+      clienteId: cliente,
+      valorTotal: 50,
+      pagamento: "Pix",
+      pagamentoConfirmado: true,
+      pagamentoConfirmadoEm: agora - 60000,
+      itens: [
+        {
+          nome: "Lanche teste 1",
+          produtoId: "lanche1",
+          categoria: "lanches",
+          quantidade: 2,
+          preco: 25,
+          subtotal: 50,
+        },
+      ],
+    });
   }
   if (cenarioFixture === "loja-fechada") docs.get("config/loja").aberta = false;
   if (cenarioFixture === "beneficios") {
@@ -223,11 +335,42 @@
     ativo: true,
     ordem: 6,
   });
+  if (window.catalogoAtualFixture) {
+    Object.assign(docs.get("pedidos/entrega1"), {
+      endereco: "Rua de teste, 100\nBloco A, apartamento 03",
+      condominio: "Sim",
+      cnh: "Sim",
+      telefone: "65999999999",
+      localizacao: "https://www.google.com/maps?q=-15.7508,-56.1035",
+      observacao: "Embalar bebidas separadas dos lanches.",
+    });
+    const dec = (v) =>
+      v.mapValue
+        ? Object.fromEntries(Object.entries(v.mapValue.fields || {}).map(([k, x]) => [k, dec(x)]))
+        : v.arrayValue
+          ? (v.arrayValue.values || []).map(dec)
+          : (v.stringValue ??
+            v.booleanValue ??
+            (v.integerValue != null ? Number(v.integerValue) : (v.doubleValue ?? null)));
+    for (const k of [...docs.keys()])
+      if (k.startsWith("produtos/") || k.startsWith("adicionais/")) docs.delete(k);
+    for (const grupo of ["produtos", "adicionais"])
+      for (const d of window.catalogoAtualFixture[grupo])
+        docs.set(grupo + "/" + d.name.split("/").pop(), dec({ mapValue: { fields: d.fields } }));
+  }
   Object.assign(docs.get("pedidos/retirada1").itens[0], {
     molhosGratis: [{ unidade: 1, tipo: "doisiguais", texto: "2 Maionese" }],
     molhosPagos: [{ nome: "Barbecue", qtd: 2, preco: 2 }],
     totalMolhosPagos: 4,
   });
+  if (cenarioFixture === "atendimento-edicao") {
+    Object.assign(docs.get("pedidos/retirada1").itens[0], {
+      molhosGratis: [],
+      molhosPagos: [],
+      totalMolhosPagos: 0,
+    });
+    docs.get("clientes/" + cliente).codigoAtivacao = "1234";
+  }
   docs.set("pedidos/entrega-antiga", {
     tipo: "Entrega",
     nome: "Pedido antigo · não deve aparecer",
@@ -235,6 +378,8 @@
     valorTotal: 20,
     itens: [],
   });
+  if (["entrega-distante", "entrega-fora-area"].includes(cenarioFixture))
+    docs.get("pedidos/entrega1").distanciaKm = cenarioFixture === "entrega-fora-area" ? 22 : 12;
   docs.set("raspadinhas/TESTERASPA", {
     codigo: "TESTERASPA",
     clienteId: cliente,
@@ -613,7 +758,7 @@
     batch: () => {
       const writes = [];
       return {
-        set: (r, d) => writes.push(() => r.set(d)),
+        set: (r, d, opts) => writes.push(() => r.set(d, opts)),
         update: (r, d) => writes.push(() => r.update(d)),
         delete: (r) => writes.push(() => r.delete()),
         commit: async () => {
@@ -625,7 +770,7 @@
       const writes = [];
       const result = await fn({
         get: (r) => r.get(),
-        set: (r, d) => writes.push(() => r.set(d)),
+        set: (r, d, opts) => writes.push(() => r.set(d, opts)),
         update: (r, d) => writes.push(() => r.update(d)),
       });
       for (const w of writes) await w();
@@ -674,6 +819,46 @@
       doc("config/loja").update({ aberta: !docs.get("config/loja").aberta });
       return;
     }
+    if (evento.data?.tipo === "revisao-nova-leva-cozinha") {
+      doc("filaCozinha/nova-leva-" + ++contador).set({
+        origemColecao: "pedidos",
+        origemId: "retirada1",
+        tipo: "Retirada",
+        cliente: "Nova leva de teste",
+        status: "aguardando",
+        criadoEmMs: Date.now(),
+        itens: [{ nome: "Lanche novo para testar som", categoria: "lanches", quantidade: 1 }],
+      });
+      return;
+    }
+    if (
+      evento.data?.tipo === "revisao-pedido-site" &&
+      ["Entrega", "Retirada", "Local"].includes(evento.data.pedidoTipo)
+    ) {
+      const tipo = evento.data.pedidoTipo;
+      doc("pedidos/pedido-site-" + ++contador).set({
+        origem: "site_delivery",
+        tipo,
+        numero: 100 + contador,
+        nome: "Cliente do site · " + tipo,
+        telefone: "65999999999",
+        dataMs: Date.now(),
+        data: new Date().toISOString(),
+        valorTotal: 25,
+        pagamento: "Pix",
+        itens: [
+          {
+            produtoId: "lanche1",
+            nome: "Lanche teste 1",
+            categoria: "lanches",
+            quantidade: 1,
+            preco: 25,
+            subtotal: 25,
+          },
+        ],
+      });
+      return;
+    }
     if (
       evento.data?.tipo === "revisao-chamado-mesa" &&
       ["atendente", "conta"].includes(evento.data.chamadoTipo)
@@ -718,6 +903,9 @@
     now: () => ({ toMillis: () => agora }),
   };
   window.firebase = { initializeApp() {}, firestore };
+  if (cenarioFixture === "funcionario-chapa" || cenarioFixture === "funcionario-atendimento")
+    docs.get("atendentes/teste").perfil =
+      cenarioFixture === "funcionario-chapa" ? "chapa" : "atendimento";
   const memoria = new Map([
     ["atendenteId", "teste"],
     ["atendenteNome", "Atendente Teste"],

@@ -51,7 +51,10 @@ async function abrirPainelProduto(comandaId, produtoId) {
   if (!doc.exists) return;
 
   const produto = doc.data();
-  if (produto.ativo === false || produto.esgotado) {
+  if (
+    (produto.somenteAtendente ? !produto.disponivelAtendimento : produto.ativo === false) ||
+    produto.esgotado
+  ) {
     mostrarAvisoUI("Produto indisponível no momento.");
     return;
   }
@@ -186,7 +189,7 @@ async function abrirPainelProduto(comandaId, produtoId) {
 
 <textarea
     id="observacao-produto-config"
-    placeholder="Ex: sem tomate, sem cebola..."
+    placeholder="${/batata/i.test(produto.categoria || "") ? "Ex.: caprichada, embalar separada..." : /bebida/i.test(produto.categoria || "") ? "Ex.: mandar canudo, copo..." : "Ex.: sem tomate, sem cebola..."}"
     rows="3"
     style="
         width:100%;
@@ -347,7 +350,7 @@ async function carregarCategoriaProdutos(comandaId, categoria, manterAberta = fa
   snap.forEach((doc) => {
     const p = doc.data();
 
-    if (!p.ativo || p.esgotado) return;
+    if ((p.somenteAtendente ? !p.disponivelAtendimento : !p.ativo) || p.esgotado) return;
 
     if (p.categoria != categoria) return;
 
@@ -692,7 +695,10 @@ async function adicionarProdutoConfiguradoComanda(comandaId, produtoId) {
   }
 
   const produto = docProduto.data();
-  if (produto.ativo === false || produto.esgotado) {
+  if (
+    (produto.somenteAtendente ? !produto.disponivelAtendimento : produto.ativo === false) ||
+    produto.esgotado
+  ) {
     mostrarAvisoUI("Produto indisponível no momento.");
     return;
   }

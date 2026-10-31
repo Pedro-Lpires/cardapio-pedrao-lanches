@@ -1,0 +1,401 @@
+[
+  {
+    "id": "3VwHTUj4qUOfUFOkY7Vn",
+    "nome": "Combo 3 Caseiro",
+    "alteracoes": {
+      "imagem": "3baguncinha.webp"
+    }
+  },
+  {
+    "id": "4ZwdU6WsSBDd67tWEb9F",
+    "nome": "Hot Dog Prensado de Frango",
+    "alteracoes": {
+      "imagem": "prensado.webp"
+    }
+  },
+  {
+    "id": "6HVies68bc4yYxYbMxcP",
+    "nome": "X-Egg",
+    "alteracoes": {
+      "imagem": "xegg.webp"
+    }
+  },
+  {
+    "id": "6HhCH1omsZSl6lKXLLhg",
+    "nome": "Coca (Lata)",
+    "alteracoes": {
+      "imagem": "coca-lata.webp"
+    }
+  },
+  {
+    "id": "7yBGSbhcGAclNgAQxzLC",
+    "nome": "X-Frango Bacon Salada",
+    "alteracoes": {
+      "imagem": "frango-bacon-salada.webp"
+    }
+  },
+  {
+    "id": "8PlQp5aRBHBdqfj43XaP",
+    "nome": "X-Filé Bagunça",
+    "alteracoes": {
+      "imagem": "x-file-bg.webp"
+    }
+  },
+  {
+    "id": "8TuiVhrTN6dreSD2EE87",
+    "nome": "Coca (1L)",
+    "alteracoes": {
+      "imagem": "coca-1l-casco.webp"
+    }
+  },
+  {
+    "id": "Ary9y7mLwgzwy29gJL6K",
+    "nome": "Batata Média",
+    "alteracoes": {
+      "imagem": "batata-frita-media-cortada.webp"
+    }
+  },
+  {
+    "id": "BlP2fv9uW0qZ90XFAlre",
+    "nome": "Combo 3 X-Bagunça",
+    "alteracoes": {
+      "imagem": "3xbagunca.webp"
+    }
+  },
+  {
+    "id": "C8F87mfKljSkrZo2Wxlx",
+    "nome": "Paulistinha",
+    "alteracoes": {
+      "imagem": "paulistinha.webp"
+    }
+  },
+  {
+    "id": "CGKb65A2E1YBR59Zzsyc",
+    "nome": "Hot Dog simples",
+    "alteracoes": {
+      "imagem": "hot-dog.webp"
+    }
+  },
+  {
+    "id": "COGMcXTDEejqOGV5ZDGv",
+    "nome": "X-Bacon",
+    "alteracoes": {
+      "imagem": "x-bacon.webp"
+    }
+  },
+  {
+    "id": "DNtJ5mqUcZCqxrfAOHfO",
+    "nome": "Água sem gás",
+    "alteracoes": {
+      "imagem": "agua.mineral.webp"
+    }
+  },
+  {
+    "id": "DcdMJxzxV1pNwwapkBJK",
+    "nome": "Combo 3 Big Big",
+    "alteracoes": {
+      "imagem": "3big.webp"
+    }
+  },
+  {
+    "id": "Hk32cOeLtFcos6kwnP9o",
+    "nome": "Bauru",
+    "alteracoes": {
+      "imagem": "bauru.webp"
+    }
+  },
+  {
+    "id": "J82D1gRNrhJmtE0Ym146",
+    "nome": "X-Bacon Salada",
+    "alteracoes": {
+      "imagem": "bacon-salada.webp"
+    }
+  },
+  {
+    "id": "KjvVtBw6RcAQ7Et0qXEp",
+    "nome": "Hot Dog Prensado Bacon",
+    "alteracoes": {
+      "imagem": "prensado.webp"
+    }
+  },
+  {
+    "id": "LPmnXCG1Qe4rMrnwGDVx",
+    "nome": "Batata Grande",
+    "alteracoes": {
+      "imagem": "batata-frita-grande-cortada.webp"
+    }
+  },
+  {
+    "id": "NQctF0hGZBo1KsI5WkJr",
+    "nome": "Frango Salada",
+    "alteracoes": {
+      "imagem": "frango-salada.webp"
+    }
+  },
+  {
+    "id": "Po05YUmTJMJK1OY9eM4n",
+    "nome": "Baguncinha com Bacon",
+    "alteracoes": {
+      "imagem": "bg-com-bacon.webp"
+    }
+  },
+  {
+    "id": "PomZRnrRXcVuuxvWkdxR",
+    "nome": "Mignon Salada",
+    "alteracoes": {
+      "imagem": "xmignon-salada.webp"
+    }
+  },
+  {
+    "id": "PvZwTtckofj1EuO2vYSA",
+    "nome": "X-tudo",
+    "alteracoes": {
+      "imagem": "x-tudo.webp"
+    }
+  },
+  {
+    "id": "RxC6l3Nfkkm7JF3sGE97",
+    "nome": "Frango Bagunça",
+    "alteracoes": {
+      "imagem": "frango-bagunca.webp"
+    }
+  },
+  {
+    "id": "SQLbQeIiQEep7hmQQ2Mm",
+    "nome": "X-Calabresa",
+    "alteracoes": {
+      "imagem": "x-calabresa.webp"
+    }
+  },
+  {
+    "id": "VCGIwtdpTA0w0J5WBOsf",
+    "nome": "Combo 2 Industrial",
+    "alteracoes": {
+      "imagem": "2baguncinhaindustrial.webp"
+    }
+  },
+  {
+    "id": "WgHdktoaUeu0zrRqfvWQ",
+    "nome": "Guaraná Antarctica (1,5L)",
+    "alteracoes": {
+      "imagem": "guarana-antarctica-15l.webp"
+    }
+  },
+  {
+    "id": "X6SvIiVLiUAHPCOeyOrl",
+    "nome": "Burrito cuiabano",
+    "alteracoes": {
+      "imagem": "burrito.webp"
+    }
+  },
+  {
+    "id": "X8T4VUvjxpHLpXY8YuTq",
+    "nome": "X-Mignon",
+    "alteracoes": {
+      "imagem": "xmignon.webp"
+    }
+  },
+  {
+    "id": "XmoBdD8EqHdcRbjSDuCm",
+    "nome": "Combo 5 Artesanal",
+    "alteracoes": {
+      "imagem": "5baguncinha.webp"
+    }
+  },
+  {
+    "id": "YyarBDTCCzTlVuFfL7xQ",
+    "nome": "Coca (1,5L)",
+    "alteracoes": {
+      "imagem": "coca15l.webp"
+    }
+  },
+  {
+    "id": "bYZ1A3ObCIdldizpARCP",
+    "nome": "Big Big",
+    "alteracoes": {
+      "imagem": "big.webp"
+    }
+  },
+  {
+    "id": "bl9rQaDAaR1NTo4Jw20E",
+    "nome": "Combo 2 Artesanal",
+    "alteracoes": {
+      "imagem": "2baguncinhaartesanal.webp"
+    }
+  },
+  {
+    "id": "bnjPUfF7zmrFYzuH0C9S",
+    "nome": "Combo 2 Big Big",
+    "alteracoes": {
+      "imagem": "2big.webp"
+    }
+  },
+  {
+    "id": "dLDCEEg8zdGNlhi4snSX",
+    "nome": "X-Calabresa Salada",
+    "alteracoes": {
+      "imagem": "calabresa-salada.webp"
+    }
+  },
+  {
+    "id": "efgO4ayct4UEEimR8EXS",
+    "nome": "Hot Dog Prensado de Calabresa",
+    "alteracoes": {
+      "imagem": "prensado.webp"
+    }
+  },
+  {
+    "id": "gLpChO1aJa6q11ZUxwCI",
+    "nome": "Coca 2L",
+    "alteracoes": {
+      "imagem": "coca2l.webp"
+    }
+  },
+  {
+    "id": "ik7fqSGx5ECbmFOwXtFT",
+    "nome": "Fanta (1L)",
+    "alteracoes": {
+      "imagem": "fanta-1l.webp"
+    }
+  },
+  {
+    "id": "jKFWeHFY4DktCzJlCGPI",
+    "nome": "Paulistão",
+    "alteracoes": {
+      "imagem": "paulistao.webp"
+    }
+  },
+  {
+    "id": "jhj2mVXYRNjt8CNOq7s9",
+    "nome": "X-Bagunça",
+    "alteracoes": {
+      "imagem": "x-bg.webp"
+    }
+  },
+  {
+    "id": "kUDF2AEpg7hw47KTEWXI",
+    "nome": "Hot Dog especial",
+    "alteracoes": {
+      "imagem": "hot-dog.webp"
+    }
+  },
+  {
+    "id": "lHIUYiKJ02DAr2PzRMYB",
+    "nome": "Coca (Garrafinha)",
+    "alteracoes": {
+      "imagem": "coca-500ml.webp"
+    }
+  },
+  {
+    "id": "mSoKHAHltuXgAaYfTjlr",
+    "nome": "Combo 4 Industrial",
+    "alteracoes": {
+      "imagem": "4baguncinha.webp"
+    }
+  },
+  {
+    "id": "miandjyuQ9o3UWI0T8WN",
+    "nome": "Baguncinha de Frango",
+    "alteracoes": {
+      "imagem": "baguncinha-de-frango.webp"
+    }
+  },
+  {
+    "id": "oZB6tVh0aVubljJza74N",
+    "nome": "Guaraná Antarctica 2L",
+    "alteracoes": {
+      "imagem": "guarana-antarctica-2l.webp"
+    }
+  },
+  {
+    "id": "on9OUpS5YOUDXPUFri8a",
+    "nome": "X-Salada",
+    "alteracoes": {
+      "imagem": "xsalada.webp"
+    }
+  },
+  {
+    "id": "ov6acgMmtTCx2ouU7wIp",
+    "nome": "Baguncinha",
+    "alteracoes": {
+      "imagem": "bg.webp"
+    }
+  },
+  {
+    "id": "qbR51hHbK0fWdDqPuGZs",
+    "nome": "Combo 2 X-Tudo",
+    "alteracoes": {
+      "imagem": "2tudo.webp"
+    }
+  },
+  {
+    "id": "rO212Tcapy8aAKmHWPVg",
+    "nome": "Guaraná Antarctica (Lata)",
+    "alteracoes": {
+      "imagem": "guarana-lata.webp"
+    }
+  },
+  {
+    "id": "sREhhQ0E0bzwgp7vAqfU",
+    "nome": "Combo 2 X-Bagunça",
+    "alteracoes": {
+      "imagem": "2xbagunca.webp"
+    }
+  },
+  {
+    "id": "sVsIG2ThtxcZdZY8FdgT",
+    "nome": "Batata Pequena",
+    "alteracoes": {
+      "imagem": "batata-frita-pequena-cortada.webp"
+    }
+  },
+  {
+    "id": "srfixIKzka5udy9LO3MW",
+    "nome": "Americano Especial",
+    "alteracoes": {
+      "imagem": "americano-especial.webp"
+    }
+  },
+  {
+    "id": "tdvVqYkcdyHgYBgcouC8",
+    "nome": "X-Burguer",
+    "alteracoes": {
+      "imagem": "xburguer.webp"
+    }
+  },
+  {
+    "id": "upO9OHaKfkT2Twb5eVIh",
+    "nome": "Combo 3 X-Bacon",
+    "alteracoes": {
+      "imagem": "3xbacon.webp"
+    }
+  },
+  {
+    "id": "xPl8LAwMtTu5SHk6j1hD",
+    "nome": "Combo 2 Filé Bagunça",
+    "alteracoes": {
+      "imagem": "2filebagunca.webp"
+    }
+  },
+  {
+    "id": "xs2YRcSgFnNla68Y0ZzW",
+    "nome": "Água com gás ",
+    "alteracoes": {
+      "imagem": "agua.mineral.webp"
+    }
+  },
+  {
+    "id": "bebida-cerveja-brahma-lata",
+    "alteracoes": {
+      "ativo": false,
+      "disponivelAtendimento": true
+    }
+  },
+  {
+    "id": "bebida-cerveja-skol-lata",
+    "alteracoes": {
+      "ativo": false,
+      "disponivelAtendimento": true
+    }
+  }
+]

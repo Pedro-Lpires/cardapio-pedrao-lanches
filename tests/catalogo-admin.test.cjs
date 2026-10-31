@@ -23,6 +23,7 @@ const ctx = vm.createContext({
         return { docs: [...produtos].map(([id, p]) => ({ id, data: () => ({ ...p }) })) };
       },
       doc: (id) => ({
+        get: async () => ({ exists: produtos.has(id), data: () => ({ ...produtos.get(id) }) }),
         update: async (patch) => produtos.set(id, { ...produtos.get(id), ...patch }),
       }),
     }),

@@ -131,12 +131,8 @@ function cabecalhoEtapaUI(area) {
     nav.querySelector(".ui-x").onclick = () => abrirComandaVisual(comandaId);
     nav.querySelector(".ui-x").setAttribute("aria-label", "Fechar itens e voltar à comanda");
   }
-  if (area.id === "central-operacao" && (tipoCentralOperacao || idCentralOperacao)) {
-    const anterior = idCentralOperacao ? tipoCentralOperacao : null;
-    nav.querySelector(".ui-voltar").onclick = () => abrirCentralOperacao(anterior);
-    nav.querySelector(".ui-x").onclick = () => abrirCentralOperacao();
-    nav.querySelector(".ui-x").setAttribute("aria-label", "Fechar categoria");
-  }
+  // As listas e os detalhes da central também respeitam a pilha de origem:
+  // Entrega/Retirada voltam ao seu módulo; Produção volta às suas categorias.
   area.querySelectorAll("button").forEach((b) => {
     if (
       !b.closest(".ui-navegacao") &&
@@ -164,6 +160,8 @@ function instalarNavegacaoAtendenteUI() {
     continuarNovoPedidoEntrega: "area-entrega-atendente",
     abrirMontagemPedidoEntrega: "area-entrega-atendente",
     abrirRetiradaAtendente: "area-retirada-atendente",
+    abrirMudancaTipoRetirada: "area-retirada-atendente",
+    iniciarRetiradaParaEntrega: "area-retirada-atendente",
     criarNovoPedidoRetirada: "area-retirada-atendente",
     continuarNovoPedidoRetirada: "area-retirada-atendente",
     abrirMontagemPedidoRetirada: "area-retirada-atendente",
@@ -299,7 +297,13 @@ function instalarNavegacaoAtendenteUI() {
           nome === "abrirEntregaAtendente" ? "Ver pedidos de entrega" : "Ver pedidos de retirada";
         b.onclick = () =>
           abrirPedidosTipoUI(nome === "abrirEntregaAtendente" ? "Entrega" : "Retirada");
-        area.append(b);
+        const criar = area.querySelector('button[onclick*="criarNovoPedido"]');
+        if (criar) {
+          const acoes = document.createElement("div");
+          acoes.className = "pedido-lista-atalhos-ui";
+          criar.before(acoes);
+          acoes.append(criar, b);
+        } else area.append(b);
       }
       if (area.classList.contains("central-etapa-modal")) area.scrollTop = 0;
       else window.scrollTo(0, 0);
@@ -397,7 +401,10 @@ function organizarModulosAdminUI() {
         [/produtos/i, "Crie, edite, fotografe, pause ou exclua itens do cardápio."],
         [/adicionais/i, "Configure opções extras, preços e disponibilidade."],
         [/cupons/i, "Crie descontos e defina as condições de uso."],
-        [/atendentes/i, "Gerencie os funcionários e seus códigos de acesso."],
+        [
+          /atendentes|funcionários/i,
+          "Gerencie os funcionários, códigos e acessos à chapa e ao atendimento.",
+        ],
         [/fiscal/i, "Abra para consultar ou preparar os dados da emissão."],
         [/mensagens|suporte/i, "Consulte chamados e converse com os clientes."],
       ].find(([re]) => re.test(h.textContent));

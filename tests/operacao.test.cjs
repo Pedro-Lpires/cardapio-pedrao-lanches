@@ -171,7 +171,7 @@ async function localTests() {
   await testarPagamentos(db, "teste");
   console.log("PASS: 15 + 15, com e sem conta, histórico único e repetição idempotente");
   db = mockDb({
-    "comandas/desconto": { valorTotal: 325, status: "Aberta", itens: [], pagamentos: [] },
+    "comandas/desconto": { valorTotal: 315, status: "Aberta", itens: [], pagamentos: [] },
     "clientes/cliente": {
       totalGasto: 0,
       totalFidelidade: 0,
@@ -184,20 +184,20 @@ async function localTests() {
   context.db = db;
   const ref = db.collection("comandas").doc("desconto"),
     c = (await ref.get()).data();
-  const p = pagamento("beneficios", 325, {
+  const p = pagamento("beneficios", 315, {
     clienteId: "cliente",
     valorPago: 300,
     valor: 300,
     descontoCupom: 5,
-    descontoFidelidade: 20,
+    descontoFidelidade: 10,
     cupomId: "CUPOM",
   });
   await context.salvarPagamentoSeparadoAtomico(ref, c, p, patch(c, p), []);
   assert.equal((await ref.get()).data().valorPago, 300);
-  assert.equal((await ref.get()).data().valorQuitado, 325);
+  assert.equal((await ref.get()).data().valorQuitado, 315);
   assert.equal(db.docs.get("clientes/cliente").totalFidelidade, 300);
   assert.equal(db.docs.get("clientes/cliente").bonusDisponivel, 0);
-  console.log("PASS: cupom 5 + fidelidade 20, recebido 300, quitado 325");
+  console.log("PASS: cupom 5 + fidelidade 10, recebido 300, quitado 315");
   const outro = pagamento("duplicado", 15);
   await assert.rejects(
     () => context.salvarPagamentoSeparadoAtomico(ref, c, outro, patch(c, outro), []),

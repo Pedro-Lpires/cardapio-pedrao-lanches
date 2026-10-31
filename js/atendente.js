@@ -69,6 +69,9 @@ if (boxNome && nomeAtendente) {
 }
 
 function logoutAtendente() {
+  sessionStorage.removeItem("cozinhaAcessoPedrao");
+  localStorage.removeItem("cozinhaAcessoPedrao");
+  localStorage.removeItem("funcionarioPerfilPedrao");
   if (typeof encerrarSomChamadosAtendenteUI === "function") encerrarSomChamadosAtendenteUI();
   localStorage.removeItem("atendenteId");
 
@@ -271,27 +274,7 @@ async function abrirRetiradaAtendente() {
     </button>
 
 
-    <hr>
-
-
-    <h4>
-        Pedidos em Retirada
-    </h4>
-
-
-    <div
-        id="lista-pedidos-retirada-atendente"
-    >
-        ${htmlCarregandoUI("Carregando…")}
-    </div>
-
 `;
-
-  // =========================
-  // CARREGAR PEDIDOS
-  // =========================
-
-  await carregarPedidosRetiradaAtendente();
 }
 
 function obterJanelaAtualPedidosAtendente() {
@@ -339,6 +322,13 @@ function normalizarTextoCupomAtendente(texto) {
 }
 
 function calcularDescontoCupomAtendente(cupom, valorBase, itens) {
+  if (cupom.rankRegra) {
+    try {
+      return calcularCupomRankUI(cupom, { base: valorBase, itens });
+    } catch {
+      return { desconto: 0, itensElegiveis: 0 };
+    }
+  }
   const base = Number(valorBase || 0);
 
   const listaItens = itens || [];
@@ -386,7 +376,7 @@ function calcularDescontoCupomAtendente(cupom, valorBase, itens) {
       if (cupom.itemGeral === true) {
         const grupo = cupom.itemGeralTipo;
 
-        if (grupo === "geral") {
+        if (["geral", "todos"].includes(grupo)) {
           itemCombina = true;
         } else if (grupo === "industrial") {
           itemCombina = nomeItem.includes("industrial");
@@ -497,15 +487,26 @@ async function buscarCuponsElegiveisAtendente(valorBase, itens, clienteId = null
 
   const snap = await db.collection("cuponsDesconto").where("ativo", "==", true).get();
 
+  const temCupomRank = (snap.docs || []).some((doc) => doc.data().rankRegra);
+  const clienteDoc =
+    clienteId && temCupomRank ? await db.collection("clientes").doc(String(clienteId)).get() : null;
+  const clienteRank = clienteDoc?.exists ? clienteDoc.data() : null;
   const cupons = [];
 
   snap.forEach((doc) => {
-    const cupom = {
+    let cupom = {
       id: doc.id,
 
       ...doc.data(),
     };
 
+    if (cupom.rankRegra) {
+      try {
+        cupom = resolverCupomRankUI(cupom, clienteRank);
+      } catch {
+        return;
+      }
+    }
     if (cupom.clientesPermitidos && !cupom.clientesPermitidos.includes(String(clienteId || "")))
       return;
 
@@ -648,6 +649,7 @@ async function carregarPedidosRetiradaAtendente() {
 
   area.innerHTML = pedidos
     .map((pedido) => {
+      const recebido = pedido.pagamentoConfirmado === true || /^pago$/i.test(pedido.status || "");
       return `
 
                     <div
@@ -683,6 +685,9 @@ async function carregarPedidosRetiradaAtendente() {
                         Pagamento:
                         ${pedido.pagamento || "Não informado"}
 
+                        <p class="recebimento-status ${recebido ? "recebido" : ""}">${recebido ? "Pagamento recebido e confirmado" : "Pagamento ainda não confirmado"}</p>
+                        ${recebido ? "" : `<button type="button" onclick="confirmarPagamentoRetiradaAtendenteUI('${pedido.id}')">Confirmar pagamento recebido</button>`}
+
 
                         <br><br>
 
@@ -707,7 +712,7 @@ async function carregarPedidosRetiradaAtendente() {
         )
     "
 >
-    ✅ Retirado
+    Marcar como retirado
 </button>
 
                     </div>
@@ -948,25 +953,18 @@ async function confirmarRetiradaParaEntrega(pedidoId) {
   // ATUALIZAR
   // =========================
 
-  await refPedido.update({
-    tipo: "Entrega",
-
-    endereco,
-
-    taxaEntrega,
-
-    valorTotal: novoTotal,
-
-    // Histórico da alteração
-
-    tipoOriginal: pedido.tipoOriginal || "Retirada",
-
-    alteradoPorAtendente: true,
-
-    tipoAlteradoEm: new Date().toISOString(),
-
-    tipoAlteradoEmMs: Date.now(),
-  });
+  try {
+    await salvarEdicaoPedidoTransacaoUI(pedidoId, pedido, {
+      ...pedido,
+      nome: pedido.nome || pedido.cliente || "",
+      telefone: pedido.telefone || pedido.telefoneCliente || "",
+      tipo: "Entrega",
+      endereco,
+      taxaEntrega,
+    });
+  } catch (erro) {
+    return avisoOperacao(erro.message);
+  }
 
   alert("Pedido alterado para Entrega.");
 
@@ -976,98 +974,19 @@ async function confirmarRetiradaParaEntrega(pedidoId) {
 
   voltarPedidosRetirada();
 }
-function iniciarRetiradaParaConsumoLocal(pedidoId) {
-  abrirSelecaoMesaPedidoExistente(pedidoId);
+async function iniciarRetiradaParaConsumoLocal(pedidoId) {
+  try {
+    if (!(await converterRetiradaConsumoLocalUI(pedidoId))) return;
+    const area = document.getElementById("area-retirada-atendente");
+    if (area) area.style.display = "none";
+    await abrirRetiradaAtendente();
+    await abrirSelecaoMesaLocalSiteUI(pedidoId);
+  } catch (erro) {
+    avisoOperacao(erro.message);
+  }
 }
-
 async function abrirSelecaoMesaPedidoExistente(pedidoId) {
-  const area = document.getElementById("area-retirada-atendente");
-
-  if (!area) {
-    return;
-  }
-
-  const docPedido = await db.collection("pedidos").doc(pedidoId).get();
-
-  if (!docPedido.exists) {
-    alert("Pedido não encontrado.");
-
-    return;
-  }
-
-  const pedido = docPedido.data();
-
-  const snapMesas = await db.collection("mesas").orderBy("numero").get();
-
-  let htmlMesas = "";
-
-  snapMesas.forEach((doc) => {
-    const mesa = doc.data();
-
-    htmlMesas += `
-
-            <button
-                type="button"
-                onclick="
-                    selecionarMesaPedidoExistente(
-                        '${pedidoId}',
-                        '${doc.id}'
-                    )
-                "
-                style="
-                    margin:5px;
-                    background:
-                        ${mesa.ocupada ? "#ff8080" : "#90ee90"};
-                "
-            >
-                Mesa ${mesa.numero}
-            </button>
-
-        `;
-  });
-
-  area.innerHTML = `
-
-        <button
-    type="button"
-    onclick="
-        abrirMudancaTipoRetirada(
-            '${pedidoId}'
-        )
-    "
->
-    ⬅ Voltar
-</button>
-
-
-        <h3>
-            🍔 Consumo no Local
-        </h3>
-
-
-        <p>
-            <strong>
-                Pedido #${pedido.numero || "-"}
-            </strong>
-        </p>
-
-
-        <p>
-            ${pedido.nome || "Cliente"}
-        </p>
-
-
-        <hr>
-
-
-        <h4>
-            Escolha a mesa
-        </h4>
-
-
-        ${htmlMesas}
-
-    `;
+  return abrirSelecaoMesaLocalSiteUI(pedidoId);
 }
 async function selecionarMesaPedidoExistente(pedidoId, mesaId) {
   const area = document.getElementById("area-retirada-atendente");
@@ -1328,110 +1247,8 @@ async function prepararItensPedidoParaComanda(itensPedido, pedidoId, numeroPedid
   );
 }
 async function vincularPedidoComandaExistente(pedidoId, mesaId, comandaId) {
-  const confirmar = await confirmarOperacao("Adicionar este pedido à comanda escolhida?");
-
-  if (!confirmar) {
-    return;
-  }
-
-  const refPedido = db.collection("pedidos").doc(pedidoId);
-
-  const refComanda = db.collection("comandas").doc(comandaId);
-
-  const [docPedido, docComanda, docMesa] = await Promise.all([
-    refPedido.get(),
-
-    refComanda.get(),
-
-    db.collection("mesas").doc(mesaId).get(),
-  ]);
-
-  if (!docPedido.exists || !docComanda.exists || !docMesa.exists) {
-    alert("Não foi possível localizar pedido, comanda ou mesa.");
-
-    return;
-  }
-
-  const pedido = docPedido.data();
-
-  const comanda = docComanda.data();
-
-  const mesa = docMesa.data();
-
-  // =========================
-  // EVITAR DUPLICAÇÃO
-  // =========================
-
-  if (pedido.vinculadoComanda === true) {
-    alert("Este pedido já foi vinculado a uma comanda.");
-
-    return;
-  }
-
-  const itensPedido = await prepararItensPedidoParaComanda(
-    pedido.itens || [],
-
-    pedidoId,
-
-    pedido.numero || null,
-  );
-
-  const itens = [...(comanda.itens || []), ...itensPedido];
-
-  const novoTotal = itens.reduce((total, item) => {
-    return total + Number(item.subtotal || 0);
-  }, 0);
-
-  // =========================
-  // ATUALIZAR COMANDA
-  // =========================
-
-  await refComanda.update({
-    itens,
-
-    valorTotal: novoTotal,
-  });
-
-  // =========================
-  // MARCAR MESA OCUPADA
-  // =========================
-
-  await db.collection("mesas").doc(mesaId).update({
-    ocupada: true,
-  });
-
-  // =========================
-  // ATUALIZAR PEDIDO ORIGINAL
-  // =========================
-
-  await refPedido.update({
-    itens: itensPedido,
-
-    valorTotal: itensPedido.reduce((total, item) => total + Number(item.subtotal || 0), 0),
-
-    taxaEntrega: 0,
-    tipoOriginal: pedido.tipoOriginal || pedido.tipo || "Retirada",
-
-    tipo: "Consumo no Local",
-
-    vinculadoComanda: true,
-
-    comandaId,
-
-    mesa: mesa.numero,
-
-    alteradoPorAtendente: true,
-
-    tipoAlteradoEm: new Date().toISOString(),
-
-    tipoAlteradoEmMs: Date.now(),
-  });
-
-  alert("Pedido vinculado à comanda.");
-
-  await abrirComandaVinculadaPedido(mesaId, comandaId);
+  return concluirVinculoPedidoLocalUI(pedidoId, mesaId, comandaId);
 }
-
 async function abrirComandaVinculadaPedido(mesaId, comandaId) {
   // =========================
   // FECHAR RETIRADA
@@ -1464,123 +1281,7 @@ async function abrirComandaVinculadaPedido(mesaId, comandaId) {
   await abrirComandaVisual(comandaId);
 }
 async function vincularPedidoNovaComanda(pedidoId, mesaId) {
-  const refPedido = db.collection("pedidos").doc(pedidoId);
-
-  const [docPedido, mesaDoc] = await Promise.all([
-    refPedido.get(),
-
-    db.collection("mesas").doc(mesaId).get(),
-  ]);
-
-  if (!docPedido.exists || !mesaDoc.exists) {
-    alert("Pedido ou mesa não encontrado.");
-
-    return;
-  }
-
-  const pedido = docPedido.data();
-
-  const mesa = mesaDoc.data();
-
-  // =========================
-  // EVITAR DUPLICAÇÃO
-  // =========================
-
-  if (pedido.vinculadoComanda === true) {
-    alert("Este pedido já foi vinculado a uma comanda.");
-
-    return;
-  }
-
-  // =========================
-  // PREPARAR ITENS
-  // =========================
-
-  const itens = await prepararItensPedidoParaComanda(
-    pedido.itens || [],
-
-    pedidoId,
-
-    pedido.numero || null,
-  );
-
-  const valorTotal = itens.reduce((total, item) => {
-    return total + Number(item.subtotal || 0);
-  }, 0);
-
-  const atendenteId = localStorage.getItem("atendenteId");
-
-  const atendenteNome = localStorage.getItem("atendenteNome");
-
-  // =========================
-  // CRIAR NOVA COMANDA
-  // =========================
-
-  const novaComanda = await db.collection("comandas").add({
-    cliente: pedido.nome || "Cliente",
-
-    mesa: mesa.numero,
-
-    status: "Aberta",
-
-    atendenteId,
-
-    atendenteNome,
-
-    criadoEm: Date.now(),
-
-    itens,
-
-    valorTotal,
-
-    pedidoOrigemId: pedidoId,
-
-    pedidoOrigemNumero: pedido.numero || null,
-  });
-
-  // =========================
-  // MARCAR MESA OCUPADA
-  // =========================
-
-  await db.collection("mesas").doc(mesaId).update({
-    ocupada: true,
-  });
-
-  // =========================
-  // ATUALIZAR PEDIDO ORIGINAL
-  // =========================
-
-  await refPedido.update({
-    itens: itens,
-
-    valorTotal: valorTotal,
-
-    taxaEntrega: 0,
-
-    tipoOriginal: pedido.tipoOriginal || pedido.tipo || "Retirada",
-
-    tipo: "Consumo no Local",
-
-    vinculadoComanda: true,
-
-    comandaId: novaComanda.id,
-
-    mesa: mesa.numero,
-
-    alteradoPorAtendente: true,
-
-    tipoAlteradoEm: new Date().toISOString(),
-
-    tipoAlteradoEmMs: Date.now(),
-  });
-
-  alert("Nova comanda criada com o pedido.");
-
-  // =========================
-  // ABRIR NOVA COMANDA
-  // =========================
-
-  await abrirComandaVinculadaPedido(mesaId, novaComanda.id);
+  return concluirVinculoPedidoLocalUI(pedidoId, mesaId);
 }
 async function sincronizarPedidoOrigemDaComanda(comandaId, pedidoId) {
   if (!comandaId || !pedidoId) {
@@ -1642,33 +1343,11 @@ async function sincronizarPedidoOrigemDaComanda(comandaId, pedidoId) {
   });
 }
 
-async function marcarPedidoComoRetirado(pedidoId, numeroPedido) {
-  const confirmar = await confirmarOperacao(`Confirmar retirada do pedido #${numeroPedido}?`);
-
-  if (!confirmar) {
-    return;
-  }
-
-  try {
-    await db.collection("pedidos").doc(pedidoId).update({
-      retirado: true,
-
-      retiradoEm: new Date().toISOString(),
-
-      retiradoEmMs: Date.now(),
-    });
-
-    // =========================
-    // ATUALIZAR LISTA
-    // =========================
-
-    await carregarPedidosRetiradaAtendente();
-  } catch (erro) {
-    console.error("Erro ao marcar pedido como retirado:", erro);
-
-    alert("Não foi possível marcar o pedido como retirado.");
-  }
+async function marcarPedidoComoRetirado(pedidoId) {
+  await confirmarRecebimentoOperacao(pedidoId, true);
+  await carregarPedidosRetiradaAtendente();
 }
+
 function criarNovoPedidoRetirada() {
   const area = document.getElementById("area-retirada-atendente");
 
@@ -1820,6 +1499,8 @@ async function salvarPedidoRetiradaAtendente() {
 
   const valorTotal = subtotal;
 
+  if (!validarDivisaoPedidoAtendenteUI(pedidoRetiradaAtual, valorTotal)) return;
+
   // =========================
   // GERAR NÚMERO DO PEDIDO
   // =========================
@@ -1882,6 +1563,7 @@ async function salvarPedidoRetiradaAtendente() {
     tipo: "Retirada",
 
     pagamento: pagamento,
+    formas: pedidoRetiradaAtual.formas || [],
 
     origem: "atendente",
 
@@ -2163,6 +1845,8 @@ async function salvarPedidoEntregaAtendente() {
 
   const valorTotal = subtotal + taxaEntrega;
 
+  if (!validarDivisaoPedidoAtendenteUI(pedidoEntregaAtual, valorTotal)) return;
+
   // =========================
   // CONTADOR DE PEDIDOS
   // =========================
@@ -2228,6 +1912,7 @@ async function salvarPedidoEntregaAtendente() {
     tipo: "Entrega",
 
     pagamento: pagamento,
+    formas: pedidoEntregaAtual.formas || [],
 
     origem: "atendente",
 
@@ -3707,7 +3392,7 @@ function atualizarContadorChamadosMesa() {
     return;
   }
 
-  contador.style.display = "inline-block";
+  contador.style.display = "inline-flex";
 
   contador.textContent = total;
 }
@@ -4108,64 +3793,7 @@ async function abrirPedidosParaVincularNaMesa(mesaId) {
 
   const mesa = mesaDoc.data();
 
-  // =========================
-  // BUSCAR RETIRADAS
-  // =========================
-
-  const snap = await db.collection("pedidos").where("tipo", "==", "Retirada").get();
-
-  const janela = obterJanelaAtualPedidosAtendente();
-
-  const pedidos = [];
-
-  snap.forEach((doc) => {
-    const pedido = doc.data();
-
-    // Cancelado
-
-    if (pedido.cancelado === true) {
-      return;
-    }
-
-    // Já retirado
-
-    if (pedido.retirado === true) {
-      return;
-    }
-
-    // Já vinculado
-
-    if (pedido.vinculadoComanda === true) {
-      return;
-    }
-
-    // Finalizado
-
-    if (pedido.status === "Finalizado") {
-      return;
-    }
-
-    // =========================
-    // SOMENTE DIA OPERACIONAL
-    // 2H ATÉ 2H
-    // =========================
-
-    const dataPedido = Number(pedido.dataMs || 0);
-
-    if (dataPedido < janela.inicioMs || dataPedido >= janela.fimMs) {
-      return;
-    }
-
-    pedidos.push({
-      id: doc.id,
-
-      ...pedido,
-    });
-  });
-
-  // Mais novos primeiro
-
-  pedidos.sort((a, b) => Number(b.dataMs || 0) - Number(a.dataMs || 0));
+  const pedidos = await buscarPedidosLocalSemMesaUI();
 
   // =========================
   // MONTAR PEDIDOS
@@ -4177,7 +3805,7 @@ async function abrirPedidosParaVincularNaMesa(mesaId) {
     htmlPedidos = `
 
             <p>
-                Nenhum pedido de Retirada
+                Nenhum pedido de consumo no local
                 disponível para vincular.
             </p>
 
@@ -4263,7 +3891,7 @@ async function abrirPedidosParaVincularNaMesa(mesaId) {
 
 
         <p>
-            Escolha um pedido de Retirada.
+            Escolha um pedido de consumo no local.
         </p>
 
 
@@ -4467,7 +4095,9 @@ async function areaConsumoLocalRecarregar() {
       )
       .join("") +
     "</div>";
+  if (typeof montarAtalhoPedidosLocalSiteUI === "function") montarAtalhoPedidosLocalSiteUI(area);
 }
+
 async function adicionarItemComanda(comandaId) {
   alert("Próximo passo: Adicionar produtos");
 }
@@ -4810,7 +4440,7 @@ async function pesquisarProdutoAtendente(comandaId) {
 
   snap.forEach((doc) => {
     const p = doc.data();
-    if (p.ativo === false || p.esgotado) return;
+    if ((p.somenteAtendente ? !p.disponivelAtendimento : p.ativo === false) || p.esgotado) return;
 
     const nomeProduto = normalizarBuscaUI(p.nome);
     const encontrou = nomeProduto.includes(termo);
@@ -5348,7 +4978,7 @@ async function buscarCuponsGeraisElegiveisAtendente(valorBase) {
     // CUPOM SOBRE O PEDIDO
     // =========================
 
-    if (cupom.tipo !== "pedido") {
+    if (cupom.rankRegra || cupom.tipo !== "pedido") {
       return;
     }
 
@@ -6412,10 +6042,10 @@ async function confirmarPagamentoTudoJunto(comandaId, total) {
 
     // =========================
     // BÔNUS TOTAL GERADO
-    // R$20 A CADA R$300
+    // R$10 A CADA R$300
     // =========================
 
-    const bonusTotalQueDeveriaTer = Math.floor(novoTotalFidelidade / 300) * 20;
+    const bonusTotalQueDeveriaTer = bonusAcumuladoFidelidadeOperacao(cliente, novoTotalFidelidade);
 
     const bonusNovoGerado = bonusTotalQueDeveriaTer - bonusGeradoTotalAtual;
 
@@ -7302,20 +6932,20 @@ async function calcularFidelidadeClientePagamentoSeparado(clienteId, valorOrigin
 
   const proximaMeta = (Math.floor(totalFidelidade / 300) + 1) * 300;
 
-  const valorDepoisDoBonus = Math.max(valor - 20, 0);
+  const valorDepoisDoBonus = Math.max(valor - 10, 0);
 
-  const vaiGerarBonus = valor >= 20 && totalFidelidade + valorDepoisDoBonus >= proximaMeta;
+  const vaiGerarBonus = valor >= 10 && totalFidelidade + valorDepoisDoBonus >= proximaMeta;
 
   resultado.vaiGerarBonus = vaiGerarBonus;
 
   // =========================
-  // USAR R$ 20
+  // USAR R$ 10
   // =========================
 
-  if (valor >= 20 && (bonusDisponivel >= 20 || vaiGerarBonus)) {
-    resultado.descontoFidelidade = 20;
+  if (valor >= 10 && (bonusDisponivel >= 10 || vaiGerarBonus)) {
+    resultado.descontoFidelidade = 10;
 
-    resultado.valorFinal = Math.max(valor - 20, 0);
+    resultado.valorFinal = Math.max(valor - 10, 0);
   }
 
   return resultado;
@@ -8111,10 +7741,10 @@ async function atualizarFidelidadePagamentoSeparado(
 
   // =========================
   // CALCULAR BÔNUS GERADO
-  // R$ 20 A CADA R$ 300
+  // R$ 10 A CADA R$ 300
   // =========================
 
-  const bonusTotalQueDeveriaTer = Math.floor(novoTotalFidelidade / 300) * 20;
+  const bonusTotalQueDeveriaTer = bonusAcumuladoFidelidadeOperacao(cliente, novoTotalFidelidade);
 
   const bonusNovoGerado = bonusTotalQueDeveriaTer - bonusGeradoTotalAtual;
 

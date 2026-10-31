@@ -1,17 +1,31 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
-    <script src="js/imagens-webp.js?v=20261025-2"></script>
+    <script src="js/imagens-webp.js?v=20261031-2"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Chapeiro — Pedrão Lanches</title>
+    <link rel="icon" type="image/webp" href="images/logo-trailer.webp" />
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/cozinha.css?v=20261025-2" />
+    <link rel="stylesheet" href="css/paginas/cozinha.css?v=20261031-1" />
   </head>
   <body class="cozinha-body">
     <!-- HEADER — cabeçalho da página -->
     <header>
       <h1>Chapa Pedrão</h1>
+      <div class="cozinha-som-ui">
+        <button
+          type="button"
+          id="btn-som-chamados"
+          aria-pressed="false"
+          aria-label="Ativar som dos avisos"
+          title="Ativar som dos avisos"
+          onclick="alternarSomCozinhaUI()"
+        >
+          🔔
+        </button>
+        <p id="estado-som-chamados" role="status">Som desligado. Toque no sino para ativar.</p>
+      </div>
       <p id="quantidade-cozinha" aria-live="polite">Conectando…</p>
       <div class="operacao-acoes cozinha-controle">
         <a href="cozinha.html?modo=monitor" target="_blank" rel="noopener">Abrir modo monitor</a
@@ -45,13 +59,18 @@
     <main id="fila-cozinha" aria-live="polite"></main>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="js/ui-comum.js?v=20261025-2"></script>
+    <script src="js/ui-comum.js?v=20261031-3"></script>
+    <script src="js/funcionario-acesso.js?v=20261029-4"></script>
     <script src="js/firebase-operacao.js"></script>
-    <script src="js/operacao.js?v=20261025-2"></script>
-    <script src="js/app-ui.js?v=20261025-2"></script>
+    <script src="js/som-chamados.js?v=20261029-3"></script>
+    <script src="js/som-cozinha.js?v=20261029-3"></script>
+    <script src="js/cupons-rank.js?v=20261031-5"></script>
+    <script src="js/operacao.js?v=20261031-5"></script>
+    <script src="js/app-ui.js?v=20261031-3"></script>
     <script src="js/raspadinhas-recuperacao.js?v=20261025-2"></script>
     <script src="js/raspadinhas.js?v=20261025-2"></script>
-    <script src="js/fluxos-interface.js?v=20261025-2"></script>
+    <script src="js/fluxos-interface.js?v=20261031-2"></script>
     <script src="js/janelas-fluxos.js?v=20261025-2"></script>
+    <script src="js/beneficios-pedido.js?v=20261031-2"></script>
   </body>
 </html>

@@ -9,6 +9,8 @@
 }
 #aviso-loja-fechada-ui {
   margin: 16px auto;
+  width: calc(100% - 32px);
+  box-sizing: border-box;
   max-width: 640px;
   padding: 12px 16px;
   border: 1px solid #86414a;

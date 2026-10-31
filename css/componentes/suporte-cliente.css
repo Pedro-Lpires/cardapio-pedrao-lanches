@@ -1,0 +1,174 @@
+/* Janela do suporte: cabeçalho e compositor fora da rolagem das mensagens. */
+#modal-mensagens .topo-mensagens > .ui-x {
+  position: absolute;
+  top: 30px;
+  right: 10px;
+}
+
+dialog#janela-suporte-cliente-ui {
+  box-sizing: border-box;
+  position: fixed;
+  inset: auto;
+  top: calc(var(--suporte-top-ui, 0px) + var(--suporte-altura-ui, 100dvh) / 2);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(528px, calc(100vw - 24px));
+  max-width: 528px;
+  max-height: calc((var(--suporte-altura-ui, 100dvh) - 24px) * 0.88);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #484848;
+  border-radius: 16px;
+  background: #111;
+}
+dialog#janela-suporte-cliente-ui[open] {
+  display: flex;
+  flex-direction: column;
+}
+#janela-suporte-cliente-ui .interface-janela-topo {
+  position: relative;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 12px;
+  border-bottom: 1px solid #444;
+}
+#janela-suporte-cliente-ui .interface-janela-topo h3 {
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.3;
+}
+#janela-suporte-cliente-ui #box-enviar-suporte {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#janela-suporte-cliente-ui .suporte-categorias {
+  margin: 0;
+}
+#janela-suporte-cliente-ui .suporte-categorias[hidden] {
+  display: none;
+}
+#janela-suporte-cliente-ui #form-novo-chamado {
+  margin: 0;
+}
+dialog#janela-suporte-cliente-ui[data-etapa="chat"] {
+  height: min(600px, calc((var(--suporte-altura-ui, 100dvh) - 24px) * 0.88));
+}
+#janela-suporte-cliente-ui[data-etapa="chat"] #box-enviar-suporte {
+  display: flex !important;
+  padding: 0;
+  overflow: hidden;
+}
+#janela-suporte-cliente-ui #chat-chamado-cliente {
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+#janela-suporte-cliente-ui .suporte-conexao-status-ui {
+  flex: 0 0 auto;
+  padding: 0 14px;
+  color: #ffd999;
+}
+#janela-suporte-cliente-ui .suporte-mensagens-ui {
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 16px 14px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+#janela-suporte-cliente-ui .msg-chat {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#janela-suporte-cliente-ui .avatar-msg {
+  flex-shrink: 0;
+}
+#janela-suporte-cliente-ui .suporte-chat-rodape-ui {
+  flex: 0 0 auto;
+  padding: 12px;
+  border-top: 1px solid #444;
+  background: #171717;
+}
+#janela-suporte-cliente-ui .suporte-compositor {
+  margin: 0;
+}
+#janela-suporte-cliente-ui .acoes-chat-cliente {
+  margin-top: 10px;
+}
+@media (max-width: 380px) {
+  #janela-suporte-cliente-ui .interface-janela-topo {
+    gap: 8px;
+    padding: 10px;
+  }
+  #janela-suporte-cliente-ui .interface-janela-topo h3 {
+    font-size: 14px;
+  }
+}
+
+/* Atendimento administrativo: apenas o histórico tem rolagem. */
+dialog.suporte-admin-chat-ui[open] {
+  display: flex;
+  flex-direction: column;
+  height: min(640px, 86dvh);
+  max-height: 86dvh;
+  padding: 0;
+  overflow: hidden;
+}
+.suporte-admin-chat-ui .suporte-admin-cabecalho {
+  flex: none;
+}
+.suporte-admin-chat-ui .suporte-admin-conteudo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  padding: 0;
+}
+.suporte-admin-chat-ui .chat-admin-box {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+.suporte-admin-chat-ui .suporte-admin-resumo {
+  flex: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid #444;
+}
+.suporte-admin-mensagens-ui {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
+  overscroll-behavior: contain;
+}
+.suporte-admin-rodape-ui {
+  flex: none;
+  padding: 12px;
+  border-top: 1px solid #444;
+  background: #171717;
+}
+.suporte-admin-rodape-ui .suporte-admin-compositor {
+  margin: 0 0 10px;
+}
+.suporte-admin-mensagens-ui .linha-msg {
+  min-width: 0;
+}
+.suporte-admin-mensagens-ui .msg-chat {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
