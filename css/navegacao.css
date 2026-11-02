@@ -369,6 +369,33 @@ input[type="search"]::-webkit-search-cancel-button {
 /* main / section — conteúdo e componentes */
 .ui-acoes-pedido {
   margin: 14px 0 22px;
+  padding: 10px;
+  border: 1px solid #414141;
+  border-radius: 10px;
+  background: #181818;
+  gap: 8px;
+}
+.ui-acoes-pedido > button {
+  margin: 0;
+  min-height: 36px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.ui-acoes-pedido > .comanda-cancelar-topo-ui {
+  background: #46252a;
+  border-color: #91404a;
+}
+.ui-acoes-pedido:has(> .comanda-cancelar-topo-ui) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 430px;
+}
+.ui-acoes-pedido:has(> .comanda-cancelar-topo-ui) > button {
+  min-width: 0;
+  min-height: 42px;
+  padding: 6px;
+  font-size: 12px;
+  white-space: normal;
 }
 /* section — administração e atendimento */
 #area-fechamento-comanda .ui-x {

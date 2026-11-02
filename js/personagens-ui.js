@@ -10,6 +10,7 @@ const personagensPedraoUI = {
   ativar: { arte: "mago-comemorando", titulo: "Bora ativar seus benefícios?", festa: true },
   ativado: { arte: "mago-comemorando", titulo: "Aí sim, CDA ativado!", festa: true },
   acordo: { arte: "mago-desculpas", titulo: "O acordo precisa ser cumprido.", busto: true },
+  nivelReavaliado: { arte: "mago-pensando", titulo: "Seu rank foi reavaliado.", busto: true },
   nivel: { arte: "mago-novo-nivel", titulo: "Você subiu de rank!", busto: true, festa: true },
   pressa: { arte: "mago-intrigado", titulo: "Tá com pressa?" },
   solicitacao: { arte: "mago-brincalhao", titulo: "Um chamado de cada vez!", busto: true },
@@ -27,6 +28,7 @@ const personagensPedraoUI = {
   sucesso: { arte: "mago-joinha", titulo: "Tudo certo!", busto: true },
   vazio: { arte: "mago-pensando", titulo: "Bora escolher seu lanche?", busto: true },
   conferir: { arte: "mago-pensando", titulo: "Falta só um detalhe.", busto: true },
+  apagarPedido: { arte: "mago-pensando", titulo: "Apagar o pedido?", busto: true },
   falha: { arte: "mago-desculpas", titulo: "Opa, deu uma falha.", busto: true },
   localizacao: { arte: "mago-pensando", titulo: "Vamos calcular sua entrega?", busto: true },
   chamado: { arte: "mago-joinha", titulo: "Chamado enviado!", busto: true },
@@ -151,6 +153,7 @@ function htmlPersonagemRecompensaPedraoUI(tipo, mensagem = "", titulo = "") {
 let contaBeneficiosPedraoUI = "";
 let pararBeneficiosPedraoUI = null;
 function encerrarBeneficiosPedraoUI() {
+  if (typeof pararRelogioRankMensalUI === "function") pararRelogioRankMensalUI();
   pararBeneficiosPedraoUI?.();
   pararBeneficiosPedraoUI = null;
   contaBeneficiosPedraoUI = "";
@@ -170,10 +173,13 @@ function acompanharBeneficiosClientePedraoUI(cliente, aoAtualizar) {
     const salvo = localStorage.getItem(chave);
     if (salvo !== null && ordem(salvo) >= 0) maiorNivel = ordem(salvo);
   } catch {}
+  if (typeof acompanharViradaRankMensalUI === "function") acompanharViradaRankMensalUI(id);
   pararBeneficiosPedraoUI = ref.onSnapshot(
     (doc) => {
       if (contaBeneficiosPedraoUI !== id || !doc.exists) return;
       const atual = doc.data();
+      if (atual.rankMensal && typeof nivelFidelidadeOperacao === "function")
+        atual.nivelCliente = nivelFidelidadeOperacao(atual);
       if (
         atual.fidelidadeAtiva &&
         (!atual.nivelCliente || ["Sem nível", "Lenda"].includes(atual.nivelCliente)) &&
@@ -182,18 +188,29 @@ function acompanharBeneficiosClientePedraoUI(cliente, aoAtualizar) {
         garantirNivelFidelidadeOperacao(id).catch(console.error);
       const novo = ordem(atual.nivelCliente);
       if (!atual.fidelidadeAtiva && novo >= 0) maiorNivel = Math.max(maiorNivel, novo);
-      if (atual.fidelidadeAtiva && novo >= 0) {
+      if (
+        atual.fidelidadeAtiva &&
+        novo >= 0 &&
+        !(typeof sincronizarRankMensalClienteUI === "function" && !atual.rankMensal?.importadoEm)
+      ) {
         if (novo > maiorNivel && maiorNivel >= 1)
           alert(
             `Parabéns! Você chegou ao rank ${niveis[novo]}! Continue assim: vem mais benefício por aí!`,
             "nivel",
           );
-        maiorNivel = Math.max(maiorNivel, novo);
+        if (atual.rankMensal && novo < maiorNivel && maiorNivel >= 2)
+          alert(
+            `Seu rank agora é ${niveis[novo]}. As compras pagas não atingiram a meta do nível anterior. Continue comprando para subir novamente!`,
+            "nivelReavaliado",
+          );
+        maiorNivel = atual.rankMensal ? novo : Math.max(maiorNivel, novo);
         try {
           localStorage.setItem(chave, niveis[maiorNivel]);
         } catch {}
       }
       aoAtualizar?.({ ...atual, telefone: id });
+      if (typeof atualizarCartaoRankMensalPerfilUI === "function")
+        atualizarCartaoRankMensalPerfilUI(atual);
     },
     (erro) => {
       if (contaBeneficiosPedraoUI !== id) return;

@@ -133,7 +133,10 @@ async function buscarClienteAdmin() {
     return;
   }
 
-  const c = doc.data();
+  const c =
+    typeof sincronizarRankMensalClienteUI === "function"
+      ? (await sincronizarRankMensalClienteUI(telefoneFinal)) || doc.data()
+      : doc.data();
 
   box.innerHTML = `
         <div class="card-admin-cliente">
@@ -148,6 +151,7 @@ async function buscarClienteAdmin() {
                 <p><strong>Telefone:</strong> ${c.telefone || telefoneFinal}</p>
                 <p><strong>Fidelidade:</strong> ${c.fidelidadeAtiva ? "Ativa" : "Inativa"}</p>
                 <p><strong>Total geral gasto:</strong> R$ ${Number(c.totalGasto || 0).toFixed(2)}</p>
+                ${typeof htmlRankMensalUI === "function" ? htmlRankMensalUI(c) : ""}
                 <p><strong>Total fidelidade:</strong> R$ ${Number(c.totalFidelidade || 0).toFixed(2)}</p>
                 <p><strong>Bônus disponível:</strong> R$ ${Number(c.bonusDisponivel || 0).toFixed(2)}</p>
                 <p><strong>Bônus gerado total:</strong> R$ ${Number(c.bonusGeradoTotal || 0).toFixed(2)}</p>
@@ -180,8 +184,8 @@ async function buscarClienteAdmin() {
                 <label>Bônus disponível</label>
                 <input type="number" id="admin-bonus-disponivel" value="${Number(c.bonusDisponivel || 0)}">
 
-                <label>Nível do cliente</label>
-                <select id="admin-nivel-cliente">${["Sem nível", "Bronze", "Prata", "Ouro", "Diamante", "Imortal"].map((n) => `<option ${n === nivelFidelidadeOperacao(c) ? "selected" : ""}>${n}</option>`).join("")}</select>
+                <label>Rank mensal (automático)</label>
+                <select id="admin-nivel-cliente" ${c.rankMensal ? 'disabled aria-label="Rank mensal calculado pelas compras pagas"' : ""}>${["Sem nível", "Bronze", "Prata", "Ouro", "Diamante", "Imortal"].map((n) => `<option ${n === nivelFidelidadeOperacao(c) ? "selected" : ""}>${n}</option>`).join("")}</select>
 
                 <button type="button" onclick="salvarClienteAdmin('${telefoneFinal}')">Salvar alterações</button>
             </div>
@@ -945,6 +949,8 @@ async function aplicarCupomPedidoAdmin(idPedido, pedidoAntigo) {
   }
 
   if (cupom.rankRegra) {
+    if (pedido.clienteId && typeof sincronizarRankMensalClienteUI === "function")
+      await sincronizarRankMensalClienteUI(pedido.clienteId);
     const clienteDoc = pedido.clienteId
       ? await db.collection("clientes").doc(String(pedido.clienteId)).get()
       : null;

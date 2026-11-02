@@ -9,7 +9,7 @@
     <link rel="icon" type="image/webp" href="images/logo-trailer.webp" />
 
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/atendente.css?v=20261031-1" />
+    <link rel="stylesheet" href="css/paginas/atendente.css?v=20261102-7" />
   </head>
   <body>
     <main class="login-atendente funcionario-login-ui">
@@ -24,6 +24,10 @@
           autocomplete="current-password"
           required
         />
+        <label class="funcionario-lembrar-ui"
+          ><input type="checkbox" id="lembrar-funcionario" />Salvar acesso neste aparelho</label
+        >
+        <small>Use apenas no aparelho do funcionário. O código não será salvo.</small>
         <button type="submit" id="entrar-funcionario">Entrar</button>
       </form>
       <p id="login-funcionario-status" role="status" aria-live="polite"></p>
@@ -50,9 +54,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <script src="js/ui-comum.js?v=20261031-3"></script>
+    <script src="js/ui-comum.js?v=20261102-7"></script>
     <script src="js/firebase-operacao.js"></script>
     <script src="js/funcionario-acesso.js?v=20261029-4"></script>
-    <script src="js/funcionario-login.js?v=20261029-4"></script>
+    <script src="js/funcionario-login.js?v=20261102-3"></script>
   </body>
 </html>

@@ -1,11 +1,11 @@
 # Ranks e margem — proposta para discussão
 
-Nenhuma regra desta proposta foi ativada. A margem informada pelo proprietário é lucro líquido de 20% a 30%, já descontados todos os custos.
+Os créditos e descontos desta proposta não foram ativados. Em 01/11/2026, a avaliação mensal dos ranks foi implementada na versão local; veja [Rank mensal](RANK-MENSAL.md). A margem informada pelo proprietário é lucro líquido de 20% a 30%, já descontados todos os custos.
 
 ## O que existe hoje
 
 - Fidelidade: R$ 10 por R$ 300, aproximadamente 3,33% no longo prazo; o saldo de progresso continua entre compras. Itens, acréscimos e molhos contam, sem frete.
-- Os ranks atuais usam quantidade de compras ou gasto acumulado, sem período mensal.
+- A versão local passou a usar valores pagos por mês para o rank, com metas de R$ 400/700/1.200/1.600. A regra antiga por quantidade de compras ou gasto acumulado foi substituída.
 - Os descontos automáticos de 50% no frete e 10% nos itens descritos na conversa com a outra IA não fazem parte da progressão automática atual.
 
 ## Correções na análise recebida

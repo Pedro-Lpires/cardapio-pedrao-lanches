@@ -62,6 +62,15 @@ async function cancelarComandasMesasOperacao({
         doc: await t.get(db.collection(colecao).doc(id)),
       })),
     );
+    const salvarRank =
+      typeof prepararRankMensalUI === "function"
+        ? await prepararRankMensalUI(
+            t,
+            cancelar.flatMap((d) =>
+              lancamentosComandaRankMensalUI(d.id, { ...d.data(), status: "Cancelada" }),
+            ),
+          )
+        : () => {};
     const agora = Date.now();
     const alteracoes = cancelar.map((d) => ({
       ref: db.collection("comandas").doc(d.id),
@@ -109,6 +118,7 @@ async function cancelarComandasMesasOperacao({
         "Há muitos registros para limpar de uma vez. Cancele algumas comandas e tente novamente.",
       );
     for (const { ref, dados } of alteracoes) t.update(ref, dados);
+    salvarRank();
     return { comandas: cancelar.length, comPagamento: pagas.length, mesas: liberar.length };
   });
 }

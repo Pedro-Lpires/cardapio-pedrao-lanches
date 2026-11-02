@@ -98,6 +98,8 @@
     <label
       >Cenário<select id="cenario">
         <option value="normal">Normal</option>
+        <option value="beneficios-entrega">Benefícios · crédito fictício de entrega</option>
+        <option value="rank-mensal">Rank mensal · Prata com R$310 neste mês</option>
         <option value="cupons-rank">Cupons por rank · exemplos fictícios</option>
         <option value="funcionario-chapa">Funcionário · só Chapa</option>
         <option value="funcionario-atendimento">Funcionário · só Atendimento</option>
@@ -113,6 +115,10 @@
         <option value="entrega-fora-area">Entrega urbana · 22 km fictícios</option>
         <option value="comanda-mista">Comanda com itens diferentes</option>
         <option value="chapeiro-agrupado">Chapeiro · dez lanches + novo envio</option>
+        <option value="chapeiro-obs-grupo">
+          Chapeiro · nove lanches e observação de dois + batata
+        </option>
+        <option value="auto-pedido-enviado">Autoatendimento · retomar pedido enviado</option>
       </select></label
     >
     <button
@@ -147,6 +153,16 @@
     >
       Simular abrir / fechar loja
     </button>
+    <button id="recarregar-auto-teste" hidden onclick="frame.srcdoc=frame.srcdoc">
+      Recarregar atendimento de teste
+    </button>
+    <button
+      id="encerrar-auto-teste"
+      hidden
+      onclick="frame.contentWindow.postMessage({tipo:'revisao-encerrar-atendimento-auto'},location.origin)"
+    >
+      Encerrar atendimento de teste
+    </button>
     <iframe id="mobile" title="Prévia isolada"></iframe>
     <script>
       const frame = document.getElementById("mobile");
@@ -173,6 +189,9 @@
         document.getElementById("medidas-layout").textContent = evento.data.texto;
       });
       async function abrir() {
+        const retomadaAuto = document.getElementById("cenario").value === "auto-pedido-enviado";
+        document.getElementById("recarregar-auto-teste").hidden = !retomadaAuto;
+        document.getElementById("encerrar-auto-teste").hidden = !retomadaAuto;
         document.getElementById("diagnostico-som").textContent = "";
         document.getElementById("simular-cozinha").hidden = !document
           .getElementById("pagina")

@@ -51,6 +51,7 @@ async function salvarPedidoLojaAbertaUI(ref, pedido) {
   // a transação é refeita e não grava o pedido nem consome o cupom.
   await db.runTransaction(async (t) => {
     await conferirLojaNaTransacaoUI(t);
+    if ((await t.get(ref)).exists) return;
     const registrarUso = await prepararUsoCupomAtomicoOperacao(
       t,
       pedido.cupomDescontoCodigo,
@@ -58,8 +59,13 @@ async function salvarPedidoLojaAbertaUI(ref, pedido) {
       ref.path,
       typeof contextoCupomPedidoRankUI === "function" ? contextoCupomPedidoRankUI(pedido) : null,
     );
+    const beneficio =
+      typeof prepararBeneficioEntregaUI === "function"
+        ? await prepararBeneficioEntregaUI(t, pedido, "reservar")
+        : { patch: {}, salvar: () => {} };
     registrarUso();
-    t.set(ref, pedido);
+    beneficio.salvar();
+    t.set(ref, { ...pedido, ...beneficio.patch });
   });
 }
 

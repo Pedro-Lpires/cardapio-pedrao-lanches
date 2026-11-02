@@ -168,7 +168,6 @@ function atualizarObservacaoComboUI(auto = false) {
     : configuracaoTodosCombo
       ? [{ ...configuracaoTodosCombo, todos: true }]
       : Object.entries(configuracoesLanchesCombo).map(([n, c]) => ({ ...c, numero: Number(n) }));
-  const tem = configs.some((c) => c?.adicionais?.some((a) => Number(a.qtd) > 0));
   const resumo = document.querySelector(
     auto
       ? "#personalizacao-combo-auto .combo-selecao-ui"
@@ -179,10 +178,24 @@ function atualizarObservacaoComboUI(auto = false) {
     auto ? "observacao-combo-auto" : "observacao-produto-config",
   );
   if (!campo) return;
-  campo.hidden = tem;
+  campo.hidden = false;
   const titulo = campo.previousElementSibling;
-  if (titulo?.matches("h3")) titulo.hidden = tem;
-  if (tem) campo.value = "";
+  if (titulo?.matches("h3")) titulo.hidden = false;
+}
+function atualizarObservacaoIndividualComboUI(numero, valor, auto = false) {
+  const configs = auto ? configuracoesLanchesComboAuto : configuracoesLanchesCombo;
+  const config = configs[numero] || { adicionais: [], observacao: "" };
+  config.observacao = valor;
+  if (valor.trim() || config.adicionais.length) configs[numero] = config;
+  else delete configs[numero];
+  if (auto) {
+    atualizarStatusLancheComboAuto(numero);
+    atualizarPrecoComboAuto();
+  } else {
+    atualizarStatusLancheCombo(numero);
+    atualizarPrecoComboPersonalizado();
+  }
+  atualizarObservacaoComboUI(auto);
 }
 function organizarProdutoPainelUI() {
   const campo = document.getElementById("observacao-produto-config");
@@ -337,13 +350,6 @@ document.addEventListener("DOMContentLoaded", () => {
             ? salvarConfiguracaoTodosCombo
             : () => salvarConfiguracaoLancheCombo(args[0]);
         conteudo.querySelector('[onclick*="salvarConfiguracao"]')?.remove();
-        const limpar = document.createElement("button");
-        limpar.textContent = "Limpar";
-        limpar.onclick = () => {
-          conteudo.querySelectorAll('[id^="qtd-"]').forEach((el) => (el.textContent = "0"));
-          conteudo.querySelectorAll("textarea").forEach((el) => (el.value = ""));
-        };
-        conteudo.append(limpar);
         configurarAcrescimosImediatosUI(janela, salvar);
         janela.addEventListener(
           "close",
@@ -435,15 +441,6 @@ document.addEventListener("DOMContentLoaded", () => {
       conteudo.querySelector(".btn-fechar-modal-auto")?.remove();
       conteudo.querySelector(":scope > h3")?.remove();
       janela.classList.add("janela-combo-auto");
-      const limpar = document.createElement("button");
-      limpar.textContent = "Limpar";
-      limpar.onclick = () => {
-        conteudo.querySelectorAll('[id^="qtd-"]').forEach((el) => (el.textContent = "0"));
-        conteudo.querySelectorAll("textarea").forEach((el) => (el.value = ""));
-        if (args.length) sincronizarConfiguracaoLancheComboAuto(args[0]);
-        else sincronizarConfiguracaoTodosComboAuto();
-      };
-      conteudo.append(limpar);
       janela.addEventListener(
         "close",
         () => {

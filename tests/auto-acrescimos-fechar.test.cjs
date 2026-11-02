@@ -106,7 +106,9 @@ for (const individual of [false, true]) {
   janela.close();
   assert.equal(atual().adicionais[0].qtd, 2, "X conserva os acréscimos do combo");
   abrir();
-  limpar.onclick();
+  assert.equal(limpar, undefined, "A janela interna não repete o botão Limpar da lista");
+  if (individual) jctx.sincronizarConfiguracaoLancheComboAuto(2);
+  else jctx.sincronizarConfiguracaoTodosComboAuto();
   janela.close();
   assert.equal(atual(), individual ? undefined : null, "X conserva o Limpar");
 }

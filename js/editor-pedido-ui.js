@@ -21,7 +21,8 @@ function calcularEdicaoPedidoUI(pedido) {
       0,
       centavosOperacao(valorAntesDesconto) -
         centavosOperacao(pedido.descontoCupom) -
-        centavosOperacao(pedido.descontoFidelidade) +
+        centavosOperacao(pedido.descontoFidelidade) -
+        centavosOperacao(pedido.descontoCreditoEntrega) +
         centavosOperacao(pedido.ajusteArredondamento),
     ) / 100;
   return { subtotal, taxaEntrega, valorAntesDesconto, valorTotal };
@@ -37,6 +38,8 @@ function assinaturaEdicaoPedidoUI(p) {
     p.pagamento,
     p.descontoCupom,
     p.descontoFidelidade,
+    p.descontoCreditoEntrega,
+    p.creditoEntrega,
     p.editadoEm,
     p.recebimentosPedido,
     p.pagamentoConfirmado,
@@ -109,6 +112,11 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
             centavosOperacao(calcularEdicaoPedidoUI(atual).valorTotal)) /
             100,
       };
+    if (typeof limitarBeneficioEdicaoEntregaUI === "function")
+      rascunho = {
+        ...rascunho,
+        descontoCreditoEntrega: limitarBeneficioEdicaoEntregaUI(atual, rascunho),
+      };
     const totais = calcularEdicaoPedidoUI(rascunho);
     if (
       centavosOperacao(rascunho.descontoCupom) + centavosOperacao(rascunho.descontoFidelidade) >
@@ -137,6 +145,7 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
       ajusteArredondamento: Number(rascunho.ajusteArredondamento || 0),
       descontoCupom: Number(rascunho.descontoCupom || 0),
       descontoFidelidade: Number(rascunho.descontoFidelidade || 0),
+      descontoCreditoEntrega: Number(rascunho.descontoCreditoEntrega || 0),
       ...totais,
       recebimentosPedido,
       valorPago: recebido,
@@ -168,7 +177,26 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
       )
         throw Error("A divisão do pagamento deve somar o saldo que falta receber.");
       patch.formas = clonarEdicaoPedidoUI(formas);
-    } else if (rascunho.modoPagamentoEditor === "unico") patch.formas = [];
+      patch.beneficiosConferirPagamento = false;
+    } else if (rascunho.modoPagamentoEditor === "unico") {
+      patch.formas = [];
+      patch.beneficiosConferirPagamento = false;
+    }
+    const beneficio =
+      typeof prepararBeneficioEntregaUI === "function"
+        ? await prepararBeneficioEntregaUI(t, atual, "ajustar", patch.descontoCreditoEntrega)
+        : { patch: {}, salvar: () => {} };
+    Object.assign(patch, beneficio.patch);
+    const salvarRank =
+      typeof prepararRankMensalUI === "function"
+        ? await prepararRankMensalUI(t, [
+            {
+              clienteId: atual.clienteId,
+              chave: "pedidos_" + id,
+              eventos: eventosRankPedidoMensalUI({ ...atual, ...patch }),
+            },
+          ])
+        : () => {};
     if (clienteDoc?.exists) {
       const c = clienteDoc.data(),
         clientePatch = {};
@@ -213,6 +241,8 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
       };
     // O vínculo e os identificadores são preservados; a produção é conferida separadamente.
     t.update(ref, patch);
+    salvarRank();
+    beneficio.salvar();
     return { ...atual, ...patch };
   });
 }
@@ -251,7 +281,7 @@ async function abrirEditorPedidoUI(id, opcoes = {}) {
     const render = () => {
       const valores = calcularEdicaoPedidoUI(p),
         recebido = valorRecebidoPedidoOperacao(original);
-      box.innerHTML = `<form class="editor-form-ui"><section><h3>Cliente e atendimento</h3><div class="editor-grade-ui">${campoEditorUI("Nome", p.nome, "text", 'name="nome" required')}${campoEditorUI("Celular com DDD", p.telefone, "tel", 'name="telefone" maxlength="11" inputmode="numeric" pattern="[0-9]{11}"')}<label>Tipo<select name="tipo">${["Entrega", "Retirada", "Local"].map((v) => `<option ${v === p.tipo ? "selected" : ""}>${v}</option>`).join("")}</select></label><label>Pagamento<select name="pagamento">${[...new Set(["Dinheiro", "Pix", "Cartão", p.pagamento])].map((v) => `<option ${v === p.pagamento ? "selected" : ""}>${escaparOperacao(v)}</option>`).join("")}</select></label></div><label>Endereço<textarea name="endereco">${escaparOperacao(p.endereco || "")}</textarea></label><label>Observação do pedido<textarea name="observacao">${escaparOperacao(p.observacao || "")}</textarea></label></section><section><div class="editor-secao-ui"><h3>Itens</h3><button type="button" data-adicionar>Adicionar item</button></div><div class="editor-itens-ui">${p.itens.map((i, n) => `<article><strong>${escaparOperacao(i.quantidade ?? i.qtd ?? 1)} × ${escaparOperacao(i.nome)}</strong><p>${moedaOperacao(valorItemEdicaoUI(i) + Number(i.totalMolhosPagos || 0))}${i.tipo ? " · " + escaparOperacao(i.tipo) : ""}</p>${i.observacao || i.obs ? `<p>${escaparOperacao(i.observacao || i.obs)}</p>` : ""}<div class="editor-acoes-ui"><button type="button" data-item="${n}">Editar item</button><button type="button" data-remover="${n}">Remover</button></div></article>`).join("")}</div></section><section><h3>Valores</h3><div class="editor-grade-ui">${campoEditorUI("Taxa de entrega (R$)", valores.taxaEntrega, "number", 'name="taxaEntrega" min="0" step="0.01"')}${campoEditorUI("Desconto de cupom (R$)", p.descontoCupom || 0, "number", 'name="descontoCupom" min="0" step="0.01"')}${campoEditorUI("Vale fidelidade (R$)", p.descontoFidelidade || 0, "number", 'name="descontoFidelidade" min="0" step="0.01"')}</div><div class="editor-resumo-ui" aria-live="polite"></div></section><p role="status" class="editor-status-ui"></p><footer><button type="submit">Salvar alterações</button>${opcoes.modo === "admin" && typeof abrirClientePedidoAdminUI === "function" ? '<button type="button" data-cliente>Cliente e benefícios</button>' : ""}</footer></form>`;
+      box.innerHTML = `<form class="editor-form-ui"><section><h3>Cliente e atendimento</h3><div class="editor-grade-ui">${campoEditorUI("Nome", p.nome, "text", 'name="nome" required')}${campoEditorUI("Celular com DDD", p.telefone, "tel", 'name="telefone" maxlength="11" inputmode="numeric" pattern="[0-9]{11}"')}<label>Tipo<select name="tipo">${["Entrega", "Retirada", "Local"].map((v) => `<option ${v === p.tipo ? "selected" : ""}>${v}</option>`).join("")}</select></label><label>Pagamento<select name="pagamento">${[...new Set(["Dinheiro", "Pix", "Cartão", p.pagamento])].map((v) => `<option ${v === p.pagamento ? "selected" : ""}>${escaparOperacao(v)}</option>`).join("")}</select></label></div><label>Endereço<textarea name="endereco">${escaparOperacao(p.endereco || "")}</textarea></label><label>Observação do pedido<textarea name="observacao">${escaparOperacao(p.observacao || "")}</textarea></label></section><section><div class="editor-secao-ui"><h3>Itens</h3><div class="editor-acoes-ui"><button type="button" data-adicionar>Adicionar item</button><button type="button" data-adicionar-valor>Adicionar valor</button></div></div><div class="editor-itens-ui">${p.itens.map((i, n) => `<article><strong>${escaparOperacao(i.quantidade ?? i.qtd ?? 1)} × ${escaparOperacao(i.nome)}</strong><p>${moedaOperacao(valorItemEdicaoUI(i) + Number(i.totalMolhosPagos || 0))}${i.tipo ? " · " + escaparOperacao(i.tipo) : ""}</p>${i.observacao || i.obs ? `<p>${escaparOperacao(i.observacao || i.obs)}</p>` : ""}<div class="editor-acoes-ui"><button type="button" data-item="${n}">Editar item</button><button type="button" data-remover="${n}">Remover</button></div></article>`).join("")}</div></section><section><h3>Valores</h3><div class="editor-grade-ui">${campoEditorUI("Taxa de entrega (R$)", valores.taxaEntrega, "number", 'name="taxaEntrega" min="0" step="0.01"')}${campoEditorUI("Desconto de cupom (R$)", p.descontoCupom || 0, "number", 'name="descontoCupom" min="0" step="0.01"')}${campoEditorUI("Vale fidelidade (R$)", p.descontoFidelidade || 0, "number", 'name="descontoFidelidade" min="0" step="0.01"')}</div><div class="editor-resumo-ui" aria-live="polite"></div></section><p role="status" class="editor-status-ui"></p><footer><button type="submit">Salvar alterações</button>${opcoes.modo === "admin" && typeof abrirClientePedidoAdminUI === "function" ? '<button type="button" data-cliente>Cliente e benefícios</button>' : ""}</footer></form>`;
       const f = box.querySelector("form");
       const dadosEntrega = document.createElement("div");
       dadosEntrega.className = "editor-grade-ui";
@@ -374,11 +404,13 @@ async function abrirEditorPedidoUI(id, opcoes = {}) {
           atualizarCamposTipo();
         });
       const resumo = () => {
+        if (typeof limitarBeneficioEdicaoEntregaUI === "function")
+          p.descontoCreditoEntrega = limitarBeneficioEdicaoEntregaUI(original, p);
         const t = calcularEdicaoPedidoUI(p),
           saldo = Math.max(0, t.valorTotal - recebido),
           devolver = Math.max(0, recebido - t.valorTotal);
         box.querySelector(".editor-resumo-ui").innerHTML =
-          `<p>Total do pedido <strong>${moedaOperacao(t.valorTotal)}</strong></p><p>Já recebido <strong>${moedaOperacao(recebido)}</strong></p><p>Falta receber <strong>${moedaOperacao(saldo)}</strong></p>${devolver > 0 ? `<p class="editor-alerta-ui">Conferir devolução de ${moedaOperacao(devolver)} ao cliente. Salvar não registra estorno.</p>` : ""}<small>Ao alterar itens, confira a produção no pedido antes de enviar à cozinha.</small>`;
+          `${Number(p.descontoCreditoEntrega) > 0 ? `<p>Benefícios no frete: -${moedaOperacao(p.descontoCreditoEntrega)}</p>` : ""}<p>Total do pedido <strong>${moedaOperacao(t.valorTotal)}</strong></p><p>Já recebido <strong>${moedaOperacao(recebido)}</strong></p><p>Falta receber <strong>${moedaOperacao(saldo)}</strong></p>${devolver > 0 ? `<p class="editor-alerta-ui">Conferir devolução de ${moedaOperacao(devolver)} ao cliente. Salvar não registra estorno.</p>` : ""}<small>Ao alterar itens, confira a produção no pedido antes de enviar à cozinha.</small>`;
       };
       f.oninput = (e) => {
         const el = e.target;
@@ -388,9 +420,23 @@ async function abrirEditorPedidoUI(id, opcoes = {}) {
       };
       f.onchange = f.oninput;
       box.querySelector("[data-adicionar]").onclick = () => abrirCatalogoEdicaoUI(p, render);
-      box
-        .querySelectorAll("[data-item]")
-        .forEach((b) => (b.onclick = () => abrirItemEdicaoUI(p, Number(b.dataset.item), render)));
+      box.querySelector("[data-adicionar-valor]").onclick = () =>
+        abrirAcrescimoPedidoUI((item) => {
+          p.itens.push(item);
+          render();
+        });
+      box.querySelectorAll("[data-item]").forEach(
+        (b) =>
+          (b.onclick = () => {
+            const n = Number(b.dataset.item);
+            if (p.itens[n].ajustePedido)
+              abrirAcrescimoPedidoUI((item) => {
+                p.itens[n] = item;
+                render();
+              }, p.itens[n]);
+            else abrirItemEdicaoUI(p, n, render);
+          }),
+      );
       box.querySelectorAll("[data-remover]").forEach(
         (b) =>
           (b.onclick = () => {
@@ -647,7 +693,7 @@ async function abrirItemEdicaoUI(p, indice, aoMudar, novo = null) {
       const quantidade = Number(campo("quantidade").value);
       const grupos = [...box.querySelectorAll("[data-grupo]")].map((el, n) => ({
         ...extras[n],
-        observacao: el.querySelector("[data-obs]")?.value || "",
+        observacao: (el.observacaoExternaUI || el.querySelector("[data-obs]"))?.value || "",
         adicionais: [...el.querySelectorAll("[data-extra]")]
           .filter((x) => Number(x.value) > 0)
           .map((x) => ({

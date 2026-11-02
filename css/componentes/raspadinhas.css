@@ -1672,7 +1672,78 @@ button[aria-busy="true"]::before {
 .combo-observacao-ui {
   display: grid;
   gap: 8px;
-  margin-top: 16px;
+  margin: 0 0 20px;
+  padding: 12px;
+  border: 1px solid #505050;
+  border-radius: 10px;
+  background: #262626;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.combo-observacao-ui > textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 10px;
+  resize: vertical;
+}
+.combo-acrescimos-titulo-ui {
+  margin: 0 0 12px !important;
+  font-size: 15px;
+  line-height: 1.4;
+}
+/* Textos digitados sem espaços não podem definir a largura dos cards. */
+:is(
+  .combo-selecao-ui,
+  .combo-selecao-ui > div,
+  .resumo-combo-auto,
+  .lanche-combo-auto,
+  .lanche-combo-config,
+  .produto-bloco-ui,
+  [data-site-resumo],
+  [id^="status-lanche-combo"],
+  .comanda-itens-lista,
+  .comanda-item-linha,
+  .comanda-item-detalhes,
+  .producao-item,
+  .producao-combo,
+  .producao-obs,
+  .registro-operacao,
+  .cozinha-pedido
+) {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+}
+:is(
+  #area-comanda-atendente,
+  #area-mesa-atendente,
+  #area-entrega-atendente,
+  #area-retirada-atendente,
+  #modal-combo-auto .modal-conteudo
+) {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+dialog.interface-janela,
+dialog.ui-caixa {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.interface-janela :is(.combo-selecao-ui, .resumo-combo-auto, [id^="status-lanche-combo"]) {
+  display: block;
+  margin: 8px 0 14px;
+}
+.interface-janela .combo-observacao-ui {
+  margin-bottom: 20px;
 }
 .cozinha-acoes {
   display: flex;
@@ -2089,6 +2160,18 @@ dialog.destino-pedido-ui > h2 {
   display: grid;
   gap: 10px;
 }
+dialog.pagamento-secundario-ui > .pagamento-confirmar-misto-ui {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 20px 16px 16px !important;
+  min-height: 44px;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: #ed0017;
+  color: #fff;
+  font-weight: 700;
+  transform: none;
+}
 .pagamento-secundario-ui label.pagamento-misto-campo-ui {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(110px, 52%);
@@ -2099,7 +2182,10 @@ dialog.destino-pedido-ui > h2 {
 }
 .pagamento-misto-valor-ui {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
+  min-width: 0;
+  white-space: nowrap;
   gap: 6px;
   padding-left: 10px;
   color: #bbb;
@@ -2108,7 +2194,8 @@ dialog.destino-pedido-ui > h2 {
   border-radius: 8px;
 }
 .pagamento-secundario-ui .pagamento-misto-valor-ui input[type="number"] {
-  width: 100%;
+  flex: 1;
+  width: 0;
   min-width: 0;
   height: 40px;
   padding: 8px;

@@ -69,6 +69,7 @@ if (boxNome && nomeAtendente) {
 }
 
 function logoutAtendente() {
+  localStorage.removeItem("funcionarioSalvoPedrao");
   sessionStorage.removeItem("cozinhaAcessoPedrao");
   localStorage.removeItem("cozinhaAcessoPedrao");
   localStorage.removeItem("funcionarioPerfilPedrao");
@@ -488,6 +489,8 @@ async function buscarCuponsElegiveisAtendente(valorBase, itens, clienteId = null
   const snap = await db.collection("cuponsDesconto").where("ativo", "==", true).get();
 
   const temCupomRank = (snap.docs || []).some((doc) => doc.data().rankRegra);
+  if (temCupomRank && clienteId && typeof sincronizarRankMensalClienteUI === "function")
+    await sincronizarRankMensalClienteUI(clienteId);
   const clienteDoc =
     clienteId && temCupomRank ? await db.collection("clientes").doc(String(clienteId)).get() : null;
   const clienteRank = clienteDoc?.exists ? clienteDoc.data() : null;
@@ -1581,13 +1584,18 @@ async function salvarPedidoRetiradaAtendente() {
   try {
     if (pedido.tipo === "Entrega")
       pedido.numeroEntregaDia = await reservarNumeroEntregaOperacao(db);
-    const docRef = await db.collection("pedidos").add(pedido);
+    const docRef =
+      typeof criarPedidoAtendenteBeneficiosUI === "function"
+        ? await criarPedidoAtendenteBeneficiosUI(pedido)
+        : await db.collection("pedidos").add(pedido);
 
     await docRef.update({
       id: docRef.id,
     });
 
-    alert(`Pedido #${numeroPedido} criado com sucesso.`);
+    alert(
+      `Pedido #${numeroPedido} criado com sucesso.${pedido.beneficiosConferirPagamento ? " Benefício aplicado: confira a divisão em Editar antes de receber." : ""}`,
+    );
 
     // =========================
     // LIMPAR ESTADOS
@@ -1930,13 +1938,18 @@ async function salvarPedidoEntregaAtendente() {
   try {
     if (pedido.tipo === "Entrega")
       pedido.numeroEntregaDia = await reservarNumeroEntregaOperacao(db);
-    const docRef = await db.collection("pedidos").add(pedido);
+    const docRef =
+      typeof criarPedidoAtendenteBeneficiosUI === "function"
+        ? await criarPedidoAtendenteBeneficiosUI(pedido)
+        : await db.collection("pedidos").add(pedido);
 
     await docRef.update({
       id: docRef.id,
     });
 
-    alert(`Pedido #${numeroPedido} criado com sucesso.`);
+    alert(
+      `Pedido #${numeroPedido} criado com sucesso.${pedido.beneficiosConferirPagamento ? " Benefício aplicado: confira a divisão em Editar antes de receber." : ""}`,
+    );
 
     // =========================
     // LIMPAR PEDIDO TEMPORÁRIO
@@ -4207,6 +4220,7 @@ async function abrirComandaVisual(comandaId) {
         </p>
 
         <div class="comanda-acoes-itens">
+
 <button
            onclick="
     abrirBuscaProdutos(
@@ -4237,15 +4251,7 @@ async function abrirComandaVisual(comandaId) {
     ✏️ Editar Item
 </button>
 
-<button
-    onclick="
-        cancelarComandaAtendente(
-            '${comandaId}'
-        )
-    "
->
-    ❌ Cancelar Comanda
-</button>
+<button type="button" onclick="abrirAcrescimoComandaUI('${comandaId}')">Adicionar valor</button>
 
 <button
     onclick="
@@ -4616,6 +4622,12 @@ async function editarItemComanda(comandaId, index) {
     return;
   }
 
+  if (item.ajustePedido) {
+    return abrirAcrescimoPedidoUI(async (novo) => {
+      await substituirValorComandaTransacaoUI(comandaId, index, item, novo);
+      await abrirComandaVisual(comandaId);
+    }, item);
+  }
   // =========================
   // COMBO
   // =========================
@@ -5221,6 +5233,10 @@ async function abrirPagamentoTudoJunto(comandaId, preservarCupom = false) {
   if (!docComanda.exists) return;
 
   const comanda = docComanda.data();
+  if ((comanda.pagamentos || []).some((p) => p.id && p.valorQuitado != null)) {
+    await abrirPagamentoSaldoJuntoUI(comandaId, comanda);
+    return;
+  }
 
   // =========================
   // VALOR ORIGINAL
@@ -5781,6 +5797,7 @@ function atualizarResumoPagamentoMisto(total) {
 
   if (!resumo) return;
 
+  resumo.dataset.total = String(total);
   resumo.innerHTML = htmlResumoPagamentoMistoUI(informado, restante);
 }
 async function confirmarPagamentoTudoJunto(comandaId, total) {
@@ -5873,6 +5890,10 @@ async function confirmarPagamentoTudoJunto(comandaId, total) {
   if (!docComanda.exists) return;
 
   const comanda = docComanda.data();
+  if ((comanda.pagamentos || []).some((p) => p.id && p.valorQuitado != null)) {
+    await abrirPagamentoSeparado(comandaId);
+    return;
+  }
 
   if (comanda.status !== "Aberta") {
     alert("Esta comanda já foi finalizada.");
@@ -6454,7 +6475,7 @@ async function abrirPagamentoSeparado(comandaId) {
 
 
         <h3>
-            Pagamento separado
+            ${modoPagamentoSeparado === "saldo" ? "Tudo junto · saldo restante" : "Pagamento separado"}
         </h3>
 
 
@@ -7425,7 +7446,7 @@ function abrirFormaPagamentoSeparado(comandaId, total) {
 
 
         <h3>
-            Pagamento separado
+            ${modoPagamentoSeparado === "saldo" ? "Tudo junto · saldo restante" : "Pagamento separado"}
         </h3>
 
 ${htmlCliente}
@@ -7695,6 +7716,7 @@ function atualizarResumoMistoSeparado(total) {
 
   if (!resumo) return;
 
+  resumo.dataset.total = String(total);
   resumo.innerHTML = htmlResumoPagamentoMistoUI(informado, restante);
 }
 async function atualizarFidelidadePagamentoSeparado(

@@ -15,6 +15,7 @@ const contexto = vm.createContext({
   htmlCarregandoUI: () => "Carregando mesa",
   lerComPrazoUI: (promessa) => promessa,
   recuperarSessaoAutoatendimento: async () => null,
+  recuperarContaSalvaAutoUI: async () => null,
   mostrarIdentificacaoAutoatendimento: () => identificacoes++,
   mostrarMesaBloqueadaAutoatendimento: () => bloqueios++,
   mesaAutoatendimentoId: null,

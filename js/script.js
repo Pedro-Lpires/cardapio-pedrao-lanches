@@ -508,7 +508,7 @@ function renderizarCarrinho() {
                   obsTexto
                     ? `
                         <small class="obs-item">
-                            📝 Obs: ${obsTexto}
+                            📝 ${/combo/i.test(item.categoria || item.nome || "") ? "Obs. geral" : "Obs"}: ${obsTexto}
                         </small>
                     `
                     : ""
@@ -552,7 +552,12 @@ function removerItem(id) {
   renderizarCarrinho();
 }
 async function limparCarrinho() {
-  if (await confirmarOperacao("Deseja realmente apagar todo o pedido e recomeçar?")) {
+  if (
+    await confirmarAvisoPersonagemUI(
+      "Deseja realmente apagar todo o pedido e recomeçar?",
+      "apagarPedido",
+    )
+  ) {
     carrinho = [];
     const revisao = document.getElementById("revisao-pedido");
     if (revisao) revisao.style.display = "none";
@@ -813,7 +818,7 @@ function exibirRevisao(
     }
 
     if (item.obs) {
-      texto += `<br><small>📝 Obs: ${item.obs}</small>`;
+      texto += `<br><small>📝 ${/combo/i.test(item.categoria || item.nome || "") ? "Obs. geral" : "Obs"}: ${item.obs}</small>`;
     }
     if (item.molhosGratis && item.molhosGratis.length > 0) {
       const molhosTexto = item.molhosGratis.map((m) => `#${m.unidade}: ${m.texto}`).join("<br>");
@@ -876,6 +881,16 @@ function exibirRevisao(
   let total = subtotal + taxa + totalMolhosPagos;
 
   const totalAntesDesconto = subtotal + totalMolhosPagos;
+  const descontoProdutosCupom = Math.max(
+    0,
+    descontoCupom -
+      (typeof pedidoBeneficiosRevisaoUI === "function"
+        ? pedidoBeneficiosRevisaoUI().descontoCupomTaxa
+        : cupomDescontoAplicado?.tipo === "taxa"
+          ? descontoCupom
+          : 0),
+  );
+  const produtosAposCupom = Math.max(0, totalAntesDesconto - descontoProdutosCupom);
 
   let bonusAtual = Number(clienteLogado?.bonusDisponivel || 0);
   let totalGastoAtual = Number(clienteLogado?.totalFidelidade || 0);
@@ -885,13 +900,13 @@ function exibirRevisao(
   const vaiGerarBonusNestePedido =
     clienteLogado &&
     clienteLogado.fidelidadeAtiva &&
-    totalAntesDesconto >= 10 &&
+    produtosAposCupom >= 10 &&
     totalGastoAtual + totalAntesDesconto >= proximaMeta;
 
   if (
     clienteLogado &&
     clienteLogado.fidelidadeAtiva &&
-    totalAntesDesconto >= 10 &&
+    produtosAposCupom >= 10 &&
     (bonusAtual >= 10 || vaiGerarBonusNestePedido)
   ) {
     descontoFidelidade = 10;
@@ -905,7 +920,7 @@ function exibirRevisao(
   const box = document.getElementById("detalhe-valores");
 
   let bonusEl = document.getElementById("linha-bonus");
-  if (clienteLogado && clienteLogado.fidelidadeAtiva) {
+  if (clienteLogado?.fidelidadeAtiva && Number(clienteLogado.bonusDisponivel || 0) > 0) {
     if (!bonusEl) {
       bonusEl = document.createElement("p");
       bonusEl.id = "linha-bonus";
@@ -969,15 +984,11 @@ function exibirRevisao(
   let cupomEl = document.getElementById("linha-desconto-cupom");
 
   if (descontoCupom > 0) {
-    const totalBaseCupom = total;
-
+    descontoCupom = Math.min(descontoCupom, total);
     total -= descontoCupom;
     if (total < 0) total = 0;
 
-    total = arredondarPagamento(total);
-
-    descontoCupom = totalBaseCupom - total;
-    if (descontoCupom < 0) descontoCupom = 0;
+    // Preserva o percentual exato do cupom; arredonda somente o total final.
 
     if (!cupomEl) {
       cupomEl = document.createElement("p");
@@ -991,6 +1002,8 @@ function exibirRevisao(
   } else {
     if (cupomEl) cupomEl.remove();
   }
+  if (typeof aplicarBeneficiosRevisaoDeliveryUI === "function")
+    total = Math.max(0, total - aplicarBeneficiosRevisaoDeliveryUI());
   total = arredondarPagamento(total);
   let textoTotal = `R$ ${total.toFixed(2)}`;
 
@@ -1063,6 +1076,16 @@ function entregaAtiva() {
 
 async function confirmarEEnviar() {
   if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
+  if (typeof conferirBeneficiosAntesEnvioUI === "function") {
+    try {
+      if (!(await conferirBeneficiosAntesEnvioUI())) return;
+    } catch {
+      return mostrarAvisoUI(
+        "Não foi possível conferir seus benefícios. Tente novamente antes de enviar.",
+        "conferir",
+      );
+    }
+  }
   const nomeCliente = document.getElementById("nome-cliente").value;
   const telefoneCliente = document.getElementById("telefone-cliente").value;
   if (!nomeCliente) {
@@ -1142,7 +1165,9 @@ async function confirmarEEnviar() {
 
   if (totalFinal < 0) totalFinal = 0;
 
-  totalFinal = arredondarPagamento(totalFinal);
+  const creditoEntrega =
+    typeof descontoCreditoEntregaUI === "number" ? descontoCreditoEntregaUI : 0;
+  totalFinal = arredondarPagamento(Math.max(0, totalFinal - creditoEntrega));
 
   const pedidoFirebase = {
     origem: "site_delivery",
@@ -1159,6 +1184,18 @@ async function confirmarEEnviar() {
     cupomDescontoCodigo: cupomDescontoAplicado ? cupomDescontoAplicado.codigo : "",
     cupomDescontoNome: cupomDescontoAplicado ? cupomDescontoAplicado.nome : "",
     descontoCupom: descontoCupom || 0,
+    descontoCreditoEntrega: creditoEntrega,
+    ...(creditoEntrega > 0 ? { creditoEntregaMes: competenciaRankMensalUI() } : {}),
+    descontoCupomTaxa:
+      cupomDescontoAplicado?.tipo === "taxa"
+        ? descontoCupom || 0
+        : ["pedido", "descontoGeral"].includes(cupomDescontoAplicado?.tipo) &&
+            cupomDescontoAplicado?.modo === "porcentagem"
+          ? Math.min(
+              descontoCupom || 0,
+              (Number(d.taxa || 0) * Number(cupomDescontoAplicado.valor || 0)) / 100,
+            )
+          : 0,
     codigoCliente: clienteLogado ? clienteLogado.codigoAtivacao || "" : "",
     taxaEntrega: Number(d.taxa) || 0,
     distanciaKm: d.tipo === "Entrega" ? Number(d.km) || 0 : 0,
@@ -1199,6 +1236,7 @@ async function confirmarEEnviar() {
     pagamento,
     descontoCupom,
     descontoFidelidade,
+    descontoCreditoEntrega: creditoEntrega,
     trocoPara: precisaTroco ? valorTroco : null,
   });
   const url = `https://wa.me/5565992386045?text=${encodeURIComponent(textoWhatsAppSemEmojisUI(msg))}`;
@@ -1802,6 +1840,7 @@ async function abrirPedidosCliente() {
       descontoCupom: Number(pedido.descontoCupomTotal ?? pedido.descontoCupom ?? 0),
 
       descontoFidelidade: Number(pedido.descontoFidelidade || 0),
+      descontoCreditoEntrega: Number(pedido.descontoCreditoEntrega || 0),
     });
   });
 
@@ -1872,7 +1911,9 @@ async function abrirPedidosCliente() {
       .join("<br>");
 
     const descontoTotal =
-      Number(registro.descontoCupom || 0) + Number(registro.descontoFidelidade || 0);
+      Number(registro.descontoCupom || 0) +
+      Number(registro.descontoFidelidade || 0) +
+      Number(registro.descontoCreditoEntrega || 0);
 
     // =========================
     // CONSUMO LOCAL
@@ -2020,7 +2061,6 @@ async function abrirBonusCliente() {
   const bonusDisponivel = Number(dados.bonusDisponivel) || 0;
 
   const progresso = totalFidelidade % 300;
-  const falta = 300 - progresso;
 
   if (!fidelidadeAtiva) {
     document.getElementById("area-perfil").innerHTML = `
@@ -2033,21 +2073,7 @@ async function abrirBonusCliente() {
 
   document.getElementById("area-perfil").innerHTML = `
     <h3>🎁 Bônus Fidelidade</h3>
-    <p>Bônus disponível: <strong>R$ ${bonusDisponivel.toFixed(2)}</strong></p>
-    <p>Faltam R$ ${falta.toFixed(2)} para gerar mais R$10 de bônus.</p>
-
-    <div style="background:#222;border-radius:10px;overflow:hidden;margin-top:10px;">
-        <div style="
-            width:${(progresso / 300) * 100}%;
-            background:#2ecc71;
-            padding:10px;
-            text-align:center;
-            color:#fff;
-            font-weight:bold;
-        ">
-            R$ ${progresso.toFixed(0)} / R$ 300
-        </div>
-    </div>
+    ${htmlProgressoBonusClienteUI(bonusDisponivel, progresso)}
 `;
 }
 async function abrirEnderecosCliente() {
@@ -2548,6 +2574,8 @@ async function aplicarCupomDesconto() {
   let cupomResolvido = cupom;
   if (cupom.rankRegra) {
     try {
+      if (clienteLogado?.telefone && typeof sincronizarRankMensalClienteUI === "function")
+        await sincronizarRankMensalClienteUI(clienteLogado.telefone);
       const clienteDoc = clienteLogado?.telefone
         ? await db.collection("clientes").doc(String(clienteLogado.telefone)).get()
         : null;
@@ -3066,6 +3094,8 @@ function atualizarTelaClienteLogado() {
         clienteLogado.fidelidadeAtiva !== atual.fidelidadeAtiva;
       clienteLogado = { ...clienteLogado, ...atual };
       if (mudou) atualizarTelaClienteLogado();
+      if (typeof atualizarCartaoRankMensalPerfilUI === "function")
+        atualizarCartaoRankMensalPerfilUI(clienteLogado);
     });
 
   abrirPerfilModo("logado");
@@ -3098,6 +3128,8 @@ function atualizarTelaClienteLogado() {
   const nivelEl = document.getElementById("perfil-dado-nivel");
 
   const linhaNivel = nivelEl.parentElement;
+  if (typeof atualizarCartaoRankMensalPerfilUI === "function")
+    atualizarCartaoRankMensalPerfilUI(clienteLogado);
 
   const boxCda = document.getElementById("ativar-cda-box");
 

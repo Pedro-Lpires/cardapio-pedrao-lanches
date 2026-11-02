@@ -186,6 +186,10 @@ async function iniciarAutoatendimento() {
 
   const sessaoRecuperada = await recuperarSessaoAutoatendimento();
 
+  if (sessaoRecuperada?.sessaoEncerrada) {
+    mostrarAtendimentoEncerradoAutoUI();
+    return;
+  }
   if (sessaoRecuperada) {
     sessaoAutoatendimentoAtual = sessaoRecuperada;
 
@@ -225,168 +229,18 @@ async function iniciarAutoatendimento() {
   }
 
   // =========================
-  // MESA LIVRE
-  // PEDIR NOME
+  // MESA LIVRE: RECUPERAR A CONTA LEMBRADA OU PEDIR NOME
   // =========================
 
+  const clienteSalvo = await recuperarContaSalvaAutoUI();
+  if (clienteSalvo) {
+    await criarSessaoAutoatendimento(clienteSalvo);
+    return;
+  }
   mostrarIdentificacaoAutoatendimento();
 }
 async function recuperarSessaoAutoatendimento() {
-  const sessaoId = localStorage.getItem(CHAVE_SESSAO_AUTOATENDIMENTO);
-
-  if (!sessaoId) {
-    return null;
-  }
-
-  try {
-    const docSessao = await db.collection("sessoesMesa").doc(sessaoId).get();
-
-    // =========================
-    // NÃO EXISTE MAIS
-    // =========================
-
-    if (!docSessao.exists) {
-      localStorage.removeItem(CHAVE_SESSAO_AUTOATENDIMENTO);
-
-      return null;
-    }
-
-    const sessao = docSessao.data();
-
-    // =========================
-    // SESSÃO ENCERRADA
-    // =========================
-
-    if (sessao.status !== "ativa") {
-      localStorage.removeItem(CHAVE_SESSAO_AUTOATENDIMENTO);
-
-      return null;
-    }
-
-    // =========================
-    // SESSÃO É DE OUTRA MESA
-    // =========================
-
-    if (sessao.mesaId !== mesaAutoatendimentoId) {
-      return null;
-    }
-    // =====================================================
-    // SE JÁ ENVIOU PEDIDO,
-    // A COMANDA PRECISA CONTINUAR ABERTA
-    // =====================================================
-
-    if (sessao.pedidoEnviado === true) {
-      const comandaId = sessao.comandaId;
-
-      // =========================
-      // NÃO TEM COMANDA VINCULADA
-      // =========================
-
-      if (!comandaId) {
-        await docSessao.ref.update({
-          status: "encerrada",
-
-          motivoEncerramento: "comanda_inexistente",
-
-          encerradaEm: new Date().toISOString(),
-
-          encerradaEmMs: Date.now(),
-        });
-
-        localStorage.removeItem(CHAVE_SESSAO_AUTOATENDIMENTO);
-
-        return null;
-      }
-
-      // =========================
-      // VERIFICAR COMANDA
-      // =========================
-
-      const docComanda = await db.collection("comandas").doc(comandaId).get();
-
-      // =========================
-      // COMANDA FOI EXCLUÍDA
-      // =========================
-
-      if (!docComanda.exists) {
-        await docSessao.ref.update({
-          status: "encerrada",
-
-          motivoEncerramento: "comanda_excluida",
-
-          encerradaEm: new Date().toISOString(),
-
-          encerradaEmMs: Date.now(),
-        });
-
-        localStorage.removeItem(CHAVE_SESSAO_AUTOATENDIMENTO);
-
-        return null;
-      }
-
-      const comanda = docComanda.data();
-
-      // =========================
-      // COMANDA NÃO ESTÁ MAIS ABERTA
-      // =========================
-
-      if (comanda.status !== "Aberta") {
-        await docSessao.ref.update({
-          status: "encerrada",
-
-          motivoEncerramento: "comanda_finalizada",
-
-          encerradaEm: new Date().toISOString(),
-
-          encerradaEmMs: Date.now(),
-        });
-
-        localStorage.removeItem(CHAVE_SESSAO_AUTOATENDIMENTO);
-
-        return null;
-      }
-    }
-
-    // =========================
-    // VALIDAR DIA OPERACIONAL
-    // =========================
-
-    const janela = obterJanelaDiaOperacional();
-
-    const criadoEmMs = Number(sessao.criadoEmMs || 0);
-
-    if (criadoEmMs < janela.inicioMs || criadoEmMs >= janela.fimMs) {
-      // Sessão velha.
-
-      await docSessao.ref.update({
-        status: "encerrada",
-
-        motivoEncerramento: "fim_dia_operacional",
-
-        encerradaEm: new Date().toISOString(),
-
-        encerradaEmMs: Date.now(),
-      });
-
-      localStorage.removeItem(CHAVE_SESSAO_AUTOATENDIMENTO);
-
-      return null;
-    }
-
-    // =========================
-    // SESSÃO VÁLIDA
-    // =========================
-
-    return {
-      id: docSessao.id,
-
-      ...sessao,
-    };
-  } catch (erro) {
-    console.error("Erro ao recuperar sessão:", erro);
-
-    return null;
-  }
+  return recuperarSessaoDaMesaAutoUI();
 }
 function mostrarIdentificacaoAutoatendimento() {
   const area = document.getElementById("area-autoatendimento");
@@ -439,10 +293,10 @@ function mostrarIdentificacaoAutoatendimento() {
 
     `;
 }
-async function criarSessaoAutoatendimento() {
+async function criarSessaoAutoatendimento(clienteSalvo = null) {
   const inputNome = document.getElementById("nome-autoatendimento");
 
-  const nome = inputNome?.value.trim() || "";
+  const nome = String(clienteSalvo?.nome || inputNome?.value || "").trim();
 
   if (!nome) {
     alert("Digite seu nome.");
@@ -491,7 +345,7 @@ async function criarSessaoAutoatendimento() {
   try {
     const agora = new Date();
 
-    const sessaoRef = await db.collection("sessoesMesa").add({
+    const dadosSessao = {
       mesaId: mesaAutoatendimentoId,
 
       mesaNumero: Number(mesaAtualizada.numero),
@@ -509,13 +363,19 @@ async function criarSessaoAutoatendimento() {
       comandaId: null,
 
       // =========================
-      // LOGIN
-      // DEPOIS VINCULAMOS
+      // CONTA SALVA OPCIONAL, SEM REUTILIZAR COMANDAS ANTERIORES
       // =========================
 
-      clienteId: null,
+      clienteId: clienteSalvo?.telefone || null,
 
-      clienteLogado: false,
+      clienteLogado: Boolean(clienteSalvo),
+      ...(clienteSalvo
+        ? {
+            clienteNome: nome,
+            clienteAvatar: clienteSalvo.avatar || "images/avatares/sem-rank/maionese.webp",
+            nomeTemporario: "",
+          }
+        : {}),
 
       // =========================
       // DATAS
@@ -528,36 +388,25 @@ async function criarSessaoAutoatendimento() {
       atualizadoEm: agora.toISOString(),
 
       atualizadoEmMs: agora.getTime(),
-    });
+    };
+    const sessaoRef = await db.collection("sessoesMesa").add(dadosSessao);
 
     // =========================
     // GUARDAR SOMENTE O ID
     // NO CELULAR
     // =========================
 
-    localStorage.setItem(
-      CHAVE_SESSAO_AUTOATENDIMENTO,
-
-      sessaoRef.id,
-    );
+    salvarIdentificacaoSessaoAutoUI(sessaoRef.id);
 
     sessaoAutoatendimentoAtual = {
       id: sessaoRef.id,
 
-      mesaId: mesaAutoatendimentoId,
-
-      mesaNumero: mesaAtualizada.numero,
-
-      nome,
-
-      status: "ativa",
-
-      pedidoEnviado: false,
-
-      comandaId: null,
+      ...dadosSessao,
     };
 
     await mostrarSessaoAutoatendimento();
+    if (clienteSalvo && typeof acompanharBeneficiosClientePedraoUI === "function")
+      acompanharBeneficiosClientePedraoUI(clienteSalvo, atualizarAvataresContaAutoUI);
   } catch (erro) {
     console.error("Erro ao criar sessão:", erro);
 
@@ -1301,7 +1150,7 @@ function montarPersonalizacaoComboAuto() {
             ></div>
 
 
-            <p>Os acréscimos e a observação serão aplicados em cada lanche.</p>
+            <p>Os acréscimos serão aplicados em cada lanche.</p>
 <div class="acoes-todos-combo-auto"><button type="button" onclick="abrirConfiguracaoTodosComboAuto()">Escolher</button>
 
 
@@ -1673,7 +1522,6 @@ function abrirConfiguracaoTodosComboAuto() {
                 `;
   });
 
-  html += `<label class="combo-observacao-ui">Observação<textarea id="obs-todos-combo-auto" oninput="sincronizarConfiguracaoTodosComboAuto()" placeholder="Ex.: sem cebola">${configuracaoTodosComboAuto?.observacao ?? ""}</textarea></label>`;
   area.innerHTML = html;
 }
 
@@ -1849,6 +1697,7 @@ function abrirConfiguracaoLancheComboAuto(numeroLanche) {
 
     `;
 
+  html += `<label class="combo-observacao-ui">Obs. deste lanche<textarea id="obs-lanche-combo-auto-${numeroLanche}" placeholder="Ex.: sem tomate" oninput="sincronizarConfiguracaoLancheComboAuto(${numeroLanche})">${escaparOperacao(configuracaoAtual.observacao || "")}</textarea></label><h4 class="combo-acrescimos-titulo-ui">Acréscimos deste lanche</h4>`;
   adicionaisAutoatendimento.forEach((adicional) => {
     const salvo = configuracaoAtual.adicionais.find((item) => item.id === adicional.id);
 
@@ -1913,16 +1762,6 @@ function abrirConfiguracaoLancheComboAuto(numeroLanche) {
 
             `;
   });
-
-  html += `
-
-        <textarea
-            id="obs-lanche-combo-auto-${numeroLanche}"
-            placeholder="Ex: sem tomate..."
-            oninput="sincronizarConfiguracaoLancheComboAuto(${numeroLanche})"
-        >${configuracaoAtual.observacao || ""}</textarea>
-
-    `;
 
   area.innerHTML = html;
 }
@@ -1997,6 +1836,8 @@ function atualizarStatusLancheComboAuto(numeroLanche) {
   }
 
   const config = configuracoesLanchesComboAuto[numeroLanche];
+  const campo = document.getElementById(`obs-lanche-combo-auto-${numeroLanche}`);
+  if (campo) campo.value = config?.observacao || "";
 
   if (!config) {
     area.innerHTML = "Padrão";
@@ -2491,7 +2332,7 @@ function abrirResumoPedidoAuto() {
       .join("<br>");
     const detalhesCombo = montarDetalhesComboResumoAuto(item);
 
-    html += `<article class="resumo-auto-item"><div class="resumo-auto-item-topo"><strong>${Number(item.quantidade || 1)} ${escaparOperacao(item.nome)}</strong><strong class="resumo-auto-preco">${moedaOperacao(item.subtotal || 0)}</strong></div>${item.tipo ? '<p class="resumo-auto-tipo">' + escaparOperacao(item.tipo) + "</p>" : ""}${adicionaisTexto ? '<div class="resumo-auto-extras">' + adicionaisTexto + "</div>" : ""}${detalhesCombo}${item.observacao ? "<p>Obs.: " + escaparOperacao(item.observacao) + "</p>" : ""}<div class="resumo-auto-acoes"><button type="button" onclick="editarItemCarrinhoAuto(${index})">Editar</button><button type="button" onclick="removerItemCarrinhoAuto(${index})">Remover</button></div></article>`;
+    html += `<article class="resumo-auto-item"><div class="resumo-auto-item-topo"><strong>${Number(item.quantidade || 1)} ${escaparOperacao(item.nome)}</strong><strong class="resumo-auto-preco">${moedaOperacao(item.subtotal || 0)}</strong></div>${item.tipo ? '<p class="resumo-auto-tipo">' + escaparOperacao(item.tipo) + "</p>" : ""}${adicionaisTexto ? '<div class="resumo-auto-extras">' + adicionaisTexto + "</div>" : ""}${detalhesCombo}${item.observacao ? "<p>" + (item.categoria === "combos" ? "Obs. geral: " : "Obs.: ") + escaparOperacao(item.observacao) + "</p>" : ""}<div class="resumo-auto-acoes"><button type="button" onclick="editarItemCarrinhoAuto(${index})">Editar</button><button type="button" onclick="removerItemCarrinhoAuto(${index})">Remover</button></div></article>`;
   });
 
   lista.innerHTML = html;
@@ -3367,7 +3208,11 @@ async function abrirContaAutoatendimento() {
       return;
     }
 
-    const cliente = clienteDoc.data();
+    const cliente =
+      typeof sincronizarRankMensalClienteUI === "function"
+        ? (await sincronizarRankMensalClienteUI(sessaoAutoatendimentoAtual.clienteId)) ||
+          clienteDoc.data()
+        : clienteDoc.data();
 
     if (typeof acompanharBeneficiosClientePedraoUI === "function")
       acompanharBeneficiosClientePedraoUI(
@@ -3603,7 +3448,8 @@ async function abrirContaAutoatendimento() {
                 <h3>
                     ${cliente.nome || "Cliente"}
                 </h3>
-                <p>Nível: <span class="nivel-cliente-ui" data-nivel="${nivelFidelidadeOperacao(cliente).toLowerCase()}">${nivelFidelidadeOperacao(cliente)}</span></p>
+                <div class="rank-mensal-holder-ui"></div>
+                <p>Rank: <button type="button" class="nivel-cliente-ui rank-mensal-abrir-ui" data-nivel="${nivelFidelidadeOperacao(cliente).toLowerCase()}" onclick="abrirRankMensalPerfilUI()" aria-haspopup="dialog">${nivelFidelidadeOperacao(cliente)}</button></p>
 
             </div>
 
@@ -3627,6 +3473,11 @@ async function abrirContaAutoatendimento() {
             </button>
 
         `;
+    if (typeof atualizarCartaoRankMensalPerfilUI === "function")
+      atualizarCartaoRankMensalPerfilUI({
+        ...cliente,
+        telefone: sessaoAutoatendimentoAtual.clienteId,
+      });
   } catch (erro) {
     console.error("Erro ao abrir conta:", erro);
 
@@ -4103,88 +3954,17 @@ function atualizarIconeLoginAuto() {
 
 function mostrarPosPedidoAutoatendimento() {
   const area = document.getElementById("area-autoatendimento");
-
-  if (!area) {
-    return;
-  }
-  const nomeCliente =
-    sessaoAutoatendimentoAtual?.clienteNome || sessaoAutoatendimentoAtual?.nome || "Cliente";
-
-  area.innerHTML = `
-
-        <div
-            class="auto-pos-pedido"
-        >
-
-            <h2>
-                🍔 PEDRÃO LANCHES
-            </h2>
-
-
-            <h3>
-                Mesa ${sessaoAutoatendimentoAtual.mesaNumero}
-            </h3>
-
-
-           <p>
-   <p>
-    Olá,
-    <strong
-        id="nome-sessao-auto"
-    >
-        ${nomeCliente}
-    </strong>
-    👋
-</p>
-
-
-            <div
-                class="auto-pedido-enviado"
-            >
-
-                ${typeof imagemPersonagemPedraoUI === "function" ? `<img class="auto-personagem-pedido-ui" src="${imagemPersonagemPedraoUI("pedido")}" alt="" width="132" height="132" decoding="async">` : ""}
-                <h2>
-                    ✅ Pedido enviado!
-                </h2>
-
-
-                <p>
-                    Seu pedido foi enviado
-                    para preparo.
-                </p>
-
-            </div>
-
-
-            <div
-                class="auto-acoes-pos-pedido"
-            >
-
-                <button
-                    type="button"
-                    onclick="
-                        chamarAtendenteAuto()
-                    "
-                >
-                    🔔 Chamar atendente
-                </button>
-
-
-                <button
-                    type="button"
-                    onclick="
-                        pedirContaAuto()
-                    "
-                >
-                    💰 Pedir a conta
-                </button>
-
-            </div>
-
-        </div>
-        
-
-    `;
+  if (!area || !sessaoAutoatendimentoAtual) return;
+  area.innerHTML = `<section class="auto-pos-pedido">
+    <div class="auto-pos-pedido-topo"><h2>🍔 PEDRÃO LANCHES</h2><p>Mesa ${Number(sessaoAutoatendimentoAtual.mesaNumero)}</p></div>
+    <div class="auto-pedido-enviado">
+      ${typeof imagemPersonagemPedraoUI === "function" ? `<img class="auto-personagem-pedido-ui" src="${imagemPersonagemPedraoUI("pedido")}" alt="" width="132" height="132" decoding="async">` : ""}
+      <div><h2>✅ Pedido enviado!</h2><p>Seu pedido foi enviado para preparo.</p></div>
+    </div>
+    <div class="auto-acoes-pos-pedido"><button type="button" onclick="chamarAtendenteAuto()">🔔 Chamar atendente</button><button type="button" onclick="pedirContaAuto()">💰 Pedir a conta</button></div>
+  </section>`;
+  acompanharSessaoEnviadaAutoUI();
+  window.scrollTo(0, 0);
 }
 
 async function criarChamadoAutoatendimento(tipo) {
@@ -4193,6 +3973,8 @@ async function criarChamadoAutoatendimento(tipo) {
 
     return false;
   }
+
+  if (!(await validarAcaoSessaoEnviadaAutoUI())) return false;
 
   try {
     // =========================

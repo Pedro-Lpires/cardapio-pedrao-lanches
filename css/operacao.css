@@ -149,6 +149,8 @@ input:focus-visible {
 .producao-item {
   padding: 12px 0;
   border-bottom: 1px solid var(--operacao-borda);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .producao-item strong {
   font-size: 1.15em;
@@ -164,6 +166,8 @@ input:focus-visible {
   margin: 10px 0 0 16px;
   border-left: 2px solid #888;
   padding-left: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 /* dialog / div — modais e carrinho */
 dialog {

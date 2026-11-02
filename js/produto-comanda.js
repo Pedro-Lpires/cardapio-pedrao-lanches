@@ -1299,29 +1299,14 @@ async function abrirConfiguracaoLancheCombo(numeroLanche) {
         ✕
     </button>
 
-    <h3>
-        Lanche ${numeroLanche}
-    </h3>
-
+    <label class="combo-observacao-ui">Obs. deste lanche<textarea id="observacao-lanche-combo-${numeroLanche}" placeholder="Ex.: sem tomate">${escaparOperacao(configuracaoAtual.observacao || "")}</textarea></label>
+    <h4 class="combo-acrescimos-titulo-ui">Acréscimos deste lanche</h4>
     ${htmlAdicionais}
 
     <br>
     <hr>
 
-<h4>
-    Observação
-</h4>
 
-<textarea
-    id="observacao-lanche-combo-${numeroLanche}"
-    placeholder="Ex: sem tomate, sem salada..."
-    rows="3"
-    style="
-        width:100%;
-        box-sizing:border-box;
-        margin-bottom:15px;
-    "
->${configuracaoAtual.observacao || ""}</textarea>
     
 
     <button
@@ -1382,8 +1367,6 @@ async function abrirConfiguracaoTodosCombo() {
         `;
   });
 
-  const observacaoAtual = configuracaoTodosCombo?.observacao || "";
-
   modal.innerHTML = `
 
     <button
@@ -1412,20 +1395,7 @@ async function abrirConfiguracaoTodosCombo() {
     ${htmlAdicionais}
     <hr>
 
-<h4>
-    Observação
-</h4>
 
-<textarea
-    id="observacao-todos-combo"
-    placeholder="Ex: sem tomate, sem salada..."
-    rows="3"
-    style="
-        width:100%;
-        box-sizing:border-box;
-        margin-bottom:15px;
-    "
->${observacaoAtual}</textarea>
 
     <br>
 
@@ -1529,6 +1499,8 @@ function atualizarStatusLancheCombo(numeroLanche) {
   if (!status) return;
 
   const configuracao = configuracoesLanchesCombo[numeroLanche];
+  const campo = document.getElementById(`observacao-lanche-combo-${numeroLanche}`);
+  if (campo) campo.value = configuracao?.observacao || "";
 
   if (!configuracao || ((configuracao.adicionais || []).length === 0 && !configuracao.observacao)) {
     status.innerHTML = "— Padrão";
@@ -1610,7 +1582,7 @@ function salvarConfiguracaoTodosCombo() {
       qtd: quantidade,
     });
   });
-  const observacao = document.getElementById("observacao-todos-combo")?.value.trim() || "";
+  const observacao = configuracaoTodosCombo?.observacao || "";
 
   configuracaoTodosCombo = adicionais.length || observacao ? { adicionais, observacao } : null;
 

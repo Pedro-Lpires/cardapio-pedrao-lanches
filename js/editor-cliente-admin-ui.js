@@ -26,7 +26,7 @@ async function salvarCadastroClientePedidoAdminUI(id, original, entrada) {
   dados.fidelidadeAtiva = entrada.fidelidadeAtiva === true || entrada.fidelidadeAtiva === "sim";
   dados.codigoAtivacao = String(entrada.codigoAtivacao || "").trim();
   if (original.fidelidadeAtiva && !dados.fidelidadeAtiva) dados.codigoAtivacao = "";
-  dados.nivelCliente = nivelFidelidadeOperacao(dados);
+  dados.nivelCliente = nivelFidelidadeOperacao({ ...original, ...dados });
   for (const k of ["totalGasto", "totalFidelidade", "bonusDisponivel"]) {
     dados[k] = Number(dados[k]);
     if (!Number.isFinite(dados[k]) || dados[k] < 0)
@@ -108,8 +108,11 @@ async function abrirClientePedidoAdminUI(pedidoId, pedido) {
       doc = await ref.get();
     if (!d.open) return;
     if (!doc.exists) throw Error("Não existe uma conta cadastrada para o celular deste pedido.");
-    let original = doc.data();
-    box.innerHTML = `<p><strong>${escaparOperacao(original.nome || "")}</strong><br>Celular da conta: ${escaparOperacao(id)}</p><div class="editor-acoes-ui"><button type="button" data-aba="cadastro">Cadastro e fidelidade</button><button type="button" data-aba="cupons">Cupons</button><button type="button" data-aba="raspadinhas">Raspadinhas</button></div><div data-painel></div>`;
+    let original =
+      typeof sincronizarRankMensalClienteUI === "function"
+        ? (await sincronizarRankMensalClienteUI(id)) || doc.data()
+        : doc.data();
+    box.innerHTML = `<p><strong>${escaparOperacao(original.nome || "")}</strong><br>Celular da conta: ${escaparOperacao(id)}</p><div class="editor-acoes-ui"><button type="button" data-aba="cadastro">Cadastro e fidelidade</button><button type="button" data-aba="cupons">Cupons</button><button type="button" data-aba="raspadinhas">Raspadinhas</button></div><div data-painel></div>${typeof htmlRankMensalUI === "function" ? htmlRankMensalUI(original) : ""}`;
     const painel = box.querySelector("[data-painel]");
     const executar = async (b, tarefa) => {
       b.disabled = true;
@@ -123,7 +126,7 @@ async function abrirClientePedidoAdminUI(pedidoId, pedido) {
     };
     const cadastro = () => {
       const token = controle.iniciar();
-      painel.innerHTML = `<form><div class="editor-grade-ui">${campoEditorUI("Nome usado no site", original.nome, "text", 'name="nome" required')}${campoEditorUI("Nome completo", original.nomeReal || "", "text", 'name="nomeReal"')}${campoEditorUI("CDA (4 números)", original.codigoAtivacao || "", "text", 'name="codigoAtivacao" maxlength="4" pattern="[0-9]{4}" inputmode="numeric"')}<label>Fidelidade<select name="fidelidadeAtiva"><option value="nao">Inativa</option><option value="sim" ${original.fidelidadeAtiva ? "selected" : ""}>Ativa</option></select></label><label>Nível<select name="nivelCliente">${["Sem nível", "Bronze", "Prata", "Ouro", "Diamante", "Imortal"].map((n) => `<option ${n === nivelFidelidadeOperacao(original) ? "selected" : ""}>${n}</option>`).join("")}</select></label>${campoEditorUI("Total gasto (R$)", original.totalGasto || 0, "number", 'name="totalGasto" min="0" step="0.01"')}${campoEditorUI("Acumulado fidelidade (R$)", original.totalFidelidade || 0, "number", 'name="totalFidelidade" min="0" step="0.01"')}${campoEditorUI("Bônus disponível (R$)", original.bonusDisponivel || 0, "number", 'name="bonusDisponivel" min="0" step="0.01"')}</div><p>O telefone identifica esta conta. O contato usado apenas neste pedido pode ser corrigido na edição do pedido.</p><p role="status"></p><footer><button type="submit">Salvar cliente</button></footer></form>`;
+      painel.innerHTML = `<form><div class="editor-grade-ui">${campoEditorUI("Nome usado no site", original.nome, "text", 'name="nome" required')}${campoEditorUI("Nome completo", original.nomeReal || "", "text", 'name="nomeReal"')}${campoEditorUI("CDA (4 números)", original.codigoAtivacao || "", "text", 'name="codigoAtivacao" maxlength="4" pattern="[0-9]{4}" inputmode="numeric"')}<label>Fidelidade<select name="fidelidadeAtiva"><option value="nao">Inativa</option><option value="sim" ${original.fidelidadeAtiva ? "selected" : ""}>Ativa</option></select></label><label>Rank mensal (automático)<select name="nivelCliente" ${original.rankMensal ? "disabled" : ""}>${["Sem nível", "Bronze", "Prata", "Ouro", "Diamante", "Imortal"].map((n) => `<option ${n === nivelFidelidadeOperacao(original) ? "selected" : ""}>${n}</option>`).join("")}</select></label>${campoEditorUI("Total gasto (R$)", original.totalGasto || 0, "number", 'name="totalGasto" min="0" step="0.01"')}${campoEditorUI("Acumulado fidelidade (R$)", original.totalFidelidade || 0, "number", 'name="totalFidelidade" min="0" step="0.01"')}${campoEditorUI("Bônus disponível (R$)", original.bonusDisponivel || 0, "number", 'name="bonusDisponivel" min="0" step="0.01"')}</div><p>O telefone identifica esta conta. O contato usado apenas neste pedido pode ser corrigido na edição do pedido.</p><p role="status"></p><footer><button type="submit">Salvar cliente</button></footer></form>`;
       const f = painel.querySelector("form"),
         status = f.querySelector("[role=status]");
       const nota = document.createElement("p");

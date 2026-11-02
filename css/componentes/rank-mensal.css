@@ -1,0 +1,249 @@
+.rank-mensal-ui {
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.rank-mensal-ui p {
+  margin: 0 0 16px;
+  line-height: 1.55;
+}
+.rank-mensal-ui p:last-child {
+  margin-bottom: 0;
+}
+.rank-mensal-meta-ui {
+  font-size: 17px;
+}
+.rank-mensal-pendente-ui {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #ddd;
+}
+button.rank-mensal-abrir-ui {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  width: auto;
+  min-height: 36px;
+  padding: 4px 6px;
+  margin: -4px 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline dotted #ffffff80;
+  text-underline-offset: 5px;
+  transform: none;
+}
+button.rank-mensal-abrir-ui:hover {
+  background: #ffffff0c;
+  transform: none;
+}
+button.rank-mensal-abrir-ui:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+button.rank-mensal-abrir-ui:disabled {
+  text-decoration: none;
+  cursor: default;
+}
+dialog.rank-mensal-janela-ui {
+  box-sizing: border-box;
+  width: min(390px, calc(100% - 40px));
+  max-height: 85dvh;
+  padding: 20px;
+  margin: auto;
+  border: 1px solid #666;
+  border-top: 3px solid #ed0017;
+  border-radius: 18px;
+  background: #1c1c1c;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  overflow: auto;
+}
+dialog.rank-mensal-janela-ui::backdrop {
+  background: #000b;
+}
+dialog.rank-mensal-janela-ui.ui-caixa {
+  padding-top: 20px !important;
+}
+.rank-mensal-janela-ui .rank-mensal-topo-ui {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.rank-mensal-janela-ui h3 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 19px;
+  line-height: 1.3;
+}
+.rank-mensal-janela-ui .rank-mensal-x-ui {
+  position: static;
+  top: auto;
+  right: auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #ed0017;
+  color: #fff;
+  font-size: 24px;
+  transform: none;
+}
+.rank-mensal-janela-ui .rank-mensal-entendi-ui {
+  width: 100%;
+  margin: 20px 0 0;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 10px;
+  background: #ed0017;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  transform: none;
+}
+.rank-mensal-janela-ui button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.rank-mensal-janela-ui .rank-mensal-beneficios-ui {
+  display: inline-block;
+  width: auto;
+  margin: 18px 0 0;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #ff4859;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  transform: none;
+}
+.rank-mensal-beneficios-ui:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+.beneficios-rank-janela-ui .rank-mensal-topo-ui {
+  gap: 10px;
+}
+.beneficios-rank-janela-ui h3 {
+  flex: 1;
+  font-size: 16px;
+}
+.rank-mensal-janela-ui .rank-mensal-voltar-ui {
+  margin: 0;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: #ed0017;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  transform: none;
+}
+.rank-mensal-janela-ui .rank-mensal-beneficios-ui + .rank-mensal-entendi-ui {
+  margin-top: 10px;
+}
+dialog.beneficios-rank-janela-ui .saldo-beneficios-ui {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.beneficios-saldo-lista-ui {
+  display: grid;
+  gap: 0;
+  margin: 18px 0;
+}
+.beneficios-saldo-lista-ui > div {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #ffffff25;
+}
+.beneficios-saldo-lista-ui dt {
+  color: #ddd;
+}
+.beneficios-saldo-lista-ui dd {
+  margin: 0;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.bonus-cliente-ui:not(:has(.bonus-saldo-ui)) .bonus-progresso-ui {
+  padding-top: 0;
+  border-top: 0;
+}
+.bonus-cliente-ui {
+  padding-top: 4px;
+}
+.bonus-cliente-ui .bonus-saldo-ui {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 0 0 20px;
+  line-height: 1.4;
+}
+.bonus-cliente-ui .bonus-saldo-ui strong {
+  font-size: 21px;
+  color: #59df93;
+  white-space: nowrap;
+}
+.bonus-progresso-ui {
+  padding-top: 16px;
+  border-top: 1px solid #ffffff25;
+}
+.bonus-cliente-ui .bonus-progresso-ui p {
+  margin: 0;
+  line-height: 1.5;
+}
+.bonus-progresso-ui > p:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+.bonus-progresso-ui progress {
+  display: block;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  padding: 0;
+  margin: 12px 0;
+  border: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #363636;
+  accent-color: #2ecc71;
+}
+.bonus-progresso-ui progress::-webkit-progress-bar {
+  background: #363636;
+  border-radius: 8px;
+}
+.bonus-progresso-ui progress::-webkit-progress-value {
+  background: #2ecc71;
+  border-radius: 8px;
+}
+.bonus-progresso-ui progress::-moz-progress-bar {
+  background: #2ecc71;
+  border-radius: 8px;
+}
+.bonus-cliente-ui .bonus-falta-ui {
+  font-size: 14px;
+  color: #ddd;
+}

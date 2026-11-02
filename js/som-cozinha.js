@@ -22,7 +22,7 @@ function processarSomFilaCozinhaUI(registros, jornada) {
 }
 async function alternarSomCozinhaUI() {
   if (somChamadosAtendenteUI.iniciando) return;
-  if (somChamadosAtendenteUI.ligado && somChamadosAtendenteUI.contexto?.state === "running") {
+  if (somChamadosAtendenteUI.ligado) {
     encerrarSomChamadosAtendenteUI();
   } else {
     await ativarSomChamadosAtendenteUI();

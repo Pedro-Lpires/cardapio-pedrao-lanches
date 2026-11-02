@@ -400,7 +400,7 @@ body:has(#autoatendimento-app)
   right: 8px;
 }
 #modal-login-auto .modal-conteudo {
-  padding: 54px 16px 16px !important;
+  padding: 68px 16px 20px !important;
   max-width: 390px;
 }
 #modal-login-auto h2 {
@@ -449,6 +449,18 @@ body:has(#autoatendimento-app)
   align-items: center;
   gap: 8px;
   margin: 12px 0 8px;
+}
+#modal-login-auto label.auto-lembrar {
+  min-height: 44px;
+  margin: 16px 0 20px;
+  padding: 8px 0;
+  line-height: 1.4;
+}
+#modal-login-auto .auto-lembrar input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  margin: 0;
 }
 #modal-login-auto #auto-confirmar-conta {
   width: 100%;

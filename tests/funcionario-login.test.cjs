@@ -97,6 +97,22 @@ vm.runInContext(fonte.slice(fonte.indexOf("let restaurandoAcessoMonitorCozinhaUI
       perfil === "ambos" ? /Onde você vai trabalhar/ : /Vamos começar/,
     );
   }
+  campo("lembrar-funcionario").checked = true;
+  campo("codigo-atendente").value = "1234";
+  await ctx.loginAtendente();
+  assert.equal(local.get("funcionarioSalvoPedrao"), "func-1");
+  await ctx.restaurarFuncionarioSalvoUI();
+  assert.equal(campo("destinos-funcionario").hidden, false);
+  docs = [];
+  await ctx.restaurarFuncionarioSalvoUI();
+  assert.equal(
+    local.get("funcionarioSalvoPedrao"),
+    undefined,
+    "acesso removido não volta pelo aparelho salvo",
+  );
+  docs = [{ id: "func-1", data: () => ({ nome: "Pedro", ativo: true, perfil: "ambos" }) }];
+  campo("codigo-atendente").value = "1234";
+  await ctx.loginAtendente();
   const antes = consultas;
   ctx.abrirDestinoFuncionarioUI("chapa");
   assert.equal(ctx.location.href, "cozinha.html");

@@ -25,13 +25,13 @@ for (const auto of [false, true]) {
   if (auto) ctx.configuracaoTodosComboAuto = { adicionais: [{ qtd: 1 }] };
   else ctx.configuracoesLanchesCombo = { 2: { adicionais: [{ qtd: 1 }] } };
   ctx.atualizarObservacaoComboUI(auto);
-  assert.equal(campo.hidden, true);
-  assert.equal(campo.value, "");
+  assert.equal(campo.hidden, false);
+  assert.equal(campo.value, "Sem tomate");
   ctx.configuracaoTodosComboAuto = null;
   ctx.configuracoesLanchesCombo = {};
   ctx.atualizarObservacaoComboUI(auto);
   assert.equal(campo.hidden, false);
 }
 console.log(
-  "PASS: observação geral aparece sem acréscimos, cede lugar à personalizada e retorna ao limpar nos dois fluxos.",
+  "PASS: observação geral permanece no card e conserva o texto com e sem acréscimos nos dois fluxos.",
 );

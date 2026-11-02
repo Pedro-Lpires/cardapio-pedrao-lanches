@@ -81,6 +81,28 @@ assert(
     .startsWith("*PEDRÃO LANCHES - CONSUMO NO LOCAL*\n"),
 );
 assert.equal(ctx.textoWhatsAppSemEmojisUI("� teste 🍔"), "teste");
+ctx.URL = URL;
+const operacao = fs.readFileSync("js/operacao.js", "utf8");
+vm.runInContext(
+  operacao.slice(
+    operacao.indexOf("function linkLocalizacaoMotoboyUI("),
+    operacao.indexOf("async function compartilharMotoboyOperacao("),
+  ),
+  ctx,
+);
+msg = ctx.montarMensagemPedidoWhatsUI({
+  ...base,
+  mapa: "https://www.google.com/maps?q=-15.7508,-56.1035",
+});
+const destino = msg.match(/Localização: (\S+)/)[1];
+assert.equal(new URL(destino).pathname, "/localizacao.html");
+assert.equal(new URL(destino).searchParams.get("p"), "-15.7508,-56.1035");
+assert(!msg.includes("www.google.com/maps"));
+assert.equal(
+  ctx.linkLocalizacaoMotoboyUI(destino, ""),
+  destino,
+  "Reabrir o link da loja conserva o GPS",
+);
 console.log(
   "PASS: WhatsApp compacto, valor integrado, combos Todos, batatas separadas e avisos de distância sem repetição.",
 );

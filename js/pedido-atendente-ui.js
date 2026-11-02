@@ -46,7 +46,7 @@ function montarPedidoAtendenteUI(contexto) {
           (item, index) => `
       <article class="pedido-caixa-ui">
         ${itensHtmlOperacao([item], true)}
-        ${molhosAtendenteOperacao([item])}
+        ${molhosAtendenteOperacao([item], false)}
         <div class="pedido-item-acoes-ui">
           ${["lanches", "combos", "batatas"].includes(item.categoria) ? `<button type="button" onclick="abrirMolhosPedido${sufixo}(${index})">Molhos</button>` : ""}
           <button type="button" onclick="editarItemPedido${sufixo}(${index})">Editar</button>

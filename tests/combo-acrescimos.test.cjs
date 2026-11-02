@@ -8,6 +8,7 @@ const campos = {};
 const campo = (id) => (campos[id] ??= { textContent: "0", value: "", style: {}, innerHTML: "" });
 const opcao = { dataset: { id: "carne", nome: "Hambúrguer", preco: "8" } };
 const ctx = vm.createContext({
+  escaparOperacao: (texto) => String(texto),
   configuracaoTodosComboAuto: null,
   configuracoesLanchesComboAuto: {},
   adicionaisAutoatendimento: [{ id: "carne", nome: "Hambúrguer", preco: 8 }],

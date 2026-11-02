@@ -5,6 +5,38 @@
  */
 "use strict";
 
+// Vale também para campos monetários criados depois que a página já abriu.
+document.addEventListener("focusin", (evento) => {
+  const campo = evento.target;
+  if (
+    !campo?.matches?.('input[type="number"],input[inputmode="decimal"]') ||
+    campo.readOnly ||
+    campo.disabled
+  )
+    return;
+  if (/^0+(?:[.,]0+)?$/.test(campo.value.trim())) {
+    campo.dataset.zeroAoFocar = campo.value;
+    campo.value = "";
+  }
+});
+document.addEventListener("focusout", (evento) => {
+  const campo = evento.target;
+  if (campo?.dataset?.zeroAoFocar == null) return;
+  if (!campo.value.trim()) {
+    campo.value = campo.dataset.zeroAoFocar;
+    campo.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  delete campo.dataset.zeroAoFocar;
+});
+
+function htmlProgressoBonusClienteUI(disponivel, progresso) {
+  const moeda = (v) =>
+    Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const acumulado = Math.max(0, Math.round(Number(progresso || 0) * 100)) % 30000;
+  const falta = (30000 - acumulado) / 100;
+  return `<section class="bonus-cliente-ui" aria-label="Seu bônus">${Number(disponivel) > 0 ? `<p class="bonus-saldo-ui"><span>Bônus disponível</span><strong>${moeda(disponivel)}</strong></p>` : ""}<div class="bonus-progresso-ui"><p>Seu próximo bônus <strong>R$ 10,00</strong></p><progress max="30000" value="${acumulado}" aria-label="Progresso para o próximo bônus" aria-valuetext="${moeda(acumulado / 100)} acumulados; faltam ${moeda(falta)}"></progress><p class="bonus-falta-ui">Faltam <strong>${moeda(falta)}</strong> em compras.</p></div></section>`;
+}
+
 function textoWhatsAppSemEmojisUI(texto) {
   return String(texto ?? "")
     .replace(/\uFFFD/g, "")
@@ -59,7 +91,11 @@ function montarMensagemPedidoWhatsUI(p) {
             .map((a) => `${a.qtd} ${a.nome}`)
             .join(" + "),
       );
-    if (i.obs || i.observacao) linhas.push("Obs.: " + (i.obs || i.observacao));
+    if (i.obs || i.observacao)
+      linhas.push(
+        (/combo/i.test(i.categoria || i.nome || "") ? "Obs. geral: " : "Obs.: ") +
+          (i.obs || i.observacao),
+      );
     const gratis = i.molhosGratis || [];
     const unidade = /batata/i.test(i.categoria || i.nome) ? "batata" : "lanche";
     gratis.forEach((m, n) =>
@@ -79,12 +115,18 @@ function montarMensagemPedidoWhatsUI(p) {
   if (p.descontoCupom > 0) linhas.push("Desconto de cupom: -" + moeda(p.descontoCupom));
   if (p.descontoFidelidade > 0) linhas.push("Fidelidade: -" + moeda(p.descontoFidelidade));
   if (p.tipo === "Entrega") linhas.push("Taxa de entrega: " + moeda(p.taxa));
+  if (p.descontoCreditoEntrega > 0)
+    linhas.push("Benefícios - crédito de entrega: -" + moeda(p.descontoCreditoEntrega));
   linhas.push("*Total: " + moeda(p.total) + "*", "Pagamento: " + (p.pagamento || ""));
   if (p.trocoPara) linhas.push("Troco para: " + moeda(p.trocoPara));
   if (p.tipo === "Entrega") {
     linhas.push("");
     if (p.endereco) linhas.push("Endereço: " + p.endereco);
-    if (p.mapa) linhas.push("Localização: " + p.mapa);
+    const localizacao =
+      typeof linkLocalizacaoMotoboyUI === "function"
+        ? linkLocalizacaoMotoboyUI(p.mapa, p.endereco)
+        : p.mapa;
+    if (localizacao) linhas.push("Localização: " + localizacao);
     if (p.condominio === "Sim") linhas.push("Condomínio: Sim · CNH: " + (p.cnh || "Não"));
     linhas.push("Acessível: " + (p.acessivel === false ? "Não" : "Sim"));
     if (Number(p.km) > 15)
@@ -113,6 +155,17 @@ let focoAntesAvisoUI = null;
 function mostrarAvisoUI(mensagem, personagem) {
   filaAvisosUI.push({ mensagem: String(mensagem ?? ""), personagem });
   exibirProximoAvisoUI();
+}
+function confirmarAvisoPersonagemUI(mensagem, personagem) {
+  return new Promise((resolver) => {
+    filaAvisosUI.push({
+      mensagem: String(mensagem ?? ""),
+      personagem,
+      confirmacao: true,
+      resolver,
+    });
+    exibirProximoAvisoUI();
+  });
 }
 function mostrarBoasVindasUI(nome, novoPerfil = false) {
   filaAvisosUI.push({
@@ -164,6 +217,10 @@ function exibirProximoAvisoUI() {
     <button type="button" class="aviso-ui-entendi">Entendi</button>
   `;
   dialogo.querySelector("p").textContent = aviso.mensagem;
+  if (aviso.confirmacao) {
+    dialogo.setAttribute("aria-label", "Confirmar operação");
+    dialogo.querySelector(".aviso-ui-entendi").textContent = "Confirmar";
+  }
   if (aviso.informativo) {
     dialogo.classList.add("aviso-ui-boas-vindas");
     dialogo.querySelector(".aviso-ui-icone").hidden = true;

@@ -26,6 +26,14 @@ function validarRegraCupomRankUI(regra) {
 function resolverCupomRankUI(cupom, cliente) {
   if (!cupom.rankRegra) return cupom;
   const regra = validarRegraCupomRankUI(cupom.rankRegra);
+  if (
+    cliente?.fidelidadeAtiva &&
+    typeof nivelRankMensalUI === "function" &&
+    !cliente.rankMensal?.importadoEm
+  )
+    throw Error(
+      "Entre na sua conta e aguarde a conferência das compras para usar cupons por rank.",
+    );
   if (!cliente) throw Error("Entre na sua conta para usar este cupom por rank.");
   if (cliente.fidelidadeAtiva !== true)
     throw Error("Este cupom exige um rank ativo. Ative sua fidelidade para participar.");

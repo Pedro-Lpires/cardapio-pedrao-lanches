@@ -14,7 +14,11 @@ const personagensAvatarPedraoUI = [
 
 function rankAvatarClienteUI(cliente = {}) {
   if (!cliente.fidelidadeAtiva) return "sem-rank";
-  const nivel = String(cliente.nivelCliente || "Bronze").toLowerCase();
+  const nivel = String(
+    cliente.rankMensal && typeof nivelRankMensalUI === "function"
+      ? nivelRankMensalUI(cliente)
+      : cliente.nivelCliente || "Bronze",
+  ).toLowerCase();
   if (nivel === "lenda") return "imortal";
   return ["bronze", "prata", "ouro", "diamante", "imortal"].includes(nivel) ? nivel : "bronze";
 }

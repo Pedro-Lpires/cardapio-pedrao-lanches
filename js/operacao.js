@@ -35,6 +35,8 @@ function baseFidelidadePedidoOperacao(pedido) {
 }
 function nivelFidelidadeOperacao(cliente, ativa = cliente?.fidelidadeAtiva) {
   if (!ativa) return "Sem nível";
+  if (typeof nivelRankMensalUI === "function")
+    return nivelRankMensalUI({ ...cliente, fidelidadeAtiva: true });
   if (cliente?.nivelCliente === "Lenda") return "Imortal";
   return ["Bronze", "Prata", "Ouro", "Diamante", "Imortal"].includes(cliente?.nivelCliente)
     ? cliente.nivelCliente
@@ -142,6 +144,30 @@ function saldoComandaPagamento(comanda) {
     0,
   );
   return Math.max(0, centavosOperacao(comanda.valorTotal) - quitado) / 100;
+}
+async function abrirPagamentoSaldoJuntoUI(id, comanda) {
+  const saldo = saldoComandaPagamento(comanda);
+  if (saldo <= 0) return avisoOperacao("Esta comanda já está quitada.");
+  modoPagamentoSeparado = "saldo";
+  selecaoPagamentoSeparado = [];
+  itensPagamentoSeparadoAtual = [
+    {
+      nome: "Saldo restante da comanda",
+      quantidade: 1,
+      qtd: 1,
+      precoUnitario: saldo,
+      subtotal: saldo,
+      tipo: "pagamento_por_valor",
+    },
+  ];
+  cupomPagamentoSeparadoAtual = null;
+  cuponsPagamentoSeparadoAtuais = [];
+  await abrirBeneficiosPagamentoSeparado(
+    id,
+    saldo,
+    comanda.clienteId || null,
+    comanda.cliente || null,
+  );
 }
 async function abrirPagamentoSeparadoPorValor(id) {
   const doc = await db.collection("comandas").doc(id).get();
@@ -262,12 +288,17 @@ async function salvarPedidoComCupomOperacao(ref, pedido) {
       ref.path,
       typeof contextoCupomPedidoRankUI === "function" ? contextoCupomPedidoRankUI(pedido) : null,
     );
-    t.set(ref, pedido);
+    const beneficio =
+      typeof prepararBeneficioEntregaUI === "function"
+        ? await prepararBeneficioEntregaUI(t, pedido, "reservar")
+        : { patch: {}, salvar: () => {} };
+    t.set(ref, { ...pedido, ...beneficio.patch });
     registrarUso();
+    beneficio.salvar();
   });
 }
 function lotePagamentoCupomOperacao(codigo, clienteId, comandaRef) {
-  if (!codigo) return db.batch();
+  if (!codigo && typeof prepararRankMensalUI !== "function") return db.batch();
   const escritas = [];
   const lote = {
     set: (r, d) => escritas.push(["set", r, d]),
@@ -293,9 +324,17 @@ function lotePagamentoCupomOperacao(codigo, clienteId, comandaRef) {
           desconto: Number(patchCupom.descontoCupom || 0),
         },
       );
+      const salvarRank =
+        typeof prepararRankMensalUI === "function"
+          ? await prepararRankMensalUI(
+              t,
+              lancamentosComandaRankMensalUI(comandaRef.id, { ...atual.data(), ...patchCupom }),
+            )
+          : () => {};
       for (const [modo, ref, dados] of escritas)
         t[modo](ref, ...(modo === "delete" ? [] : [dados]));
       registrarUso();
+      salvarRank();
     });
   return lote;
 }
@@ -374,6 +413,13 @@ async function salvarPagamentoSeparadoAtomico(ref, anterior, pagamento, atualiza
           throw Error("Um dos itens já foi pago. Reabra a seleção.");
       }
     }
+    const salvarRank =
+      typeof prepararRankMensalUI === "function"
+        ? await prepararRankMensalUI(
+            t,
+            lancamentosComandaRankMensalUI(ref.id, { ...atual.data(), ...atualizacao }),
+          )
+        : () => {};
     if (cliente?.exists) {
       const c = cliente.data();
       const valorPago = Number(pagamento.valorPago);
@@ -395,6 +441,7 @@ async function salvarPagamentoSeparadoAtomico(ref, anterior, pagamento, atualiza
         throw Error("A fidelidade deste cliente não está ativa.");
       t.update(clienteRef, patch);
     } else if (clienteRef) throw Error("O cadastro do cliente não está disponível.");
+    salvarRank();
     const lista = atualizacao.pagamentos;
     const valorPago = lista.reduce((n, p) => n + centavosOperacao(p.valorPago ?? p.valor), 0) / 100;
     const valorQuitado =
@@ -668,6 +715,7 @@ function itensChapeiroOperacao(itens) {
   const bebida = (nome) =>
     /refrigerante|refri|coca|guaran[aá]|bebida|suco|[aá]gua|cerveja/i.test(nome || "");
   return (itens || []).flatMap((item) => {
+    if (item.ajustePedido || item.categoria === "ajuste") return [];
     if (
       /bebida/i.test(item.categoria || "") ||
       (!/combo/i.test(item.categoria || item.nome || "") && bebida(item.nome))
@@ -695,9 +743,11 @@ function itensChapeiroOperacao(itens) {
           desc: "",
           bebida: "",
           bebidas: [],
-          lanchesCombo: n === 0 ? item.lanchesCombo || item.lanchesPersonalizados || [] : [],
-          adicionais: n === 0 ? item.adicionais || [] : [],
-          observacao: n === 0 ? item.observacao || "" : "",
+          lanchesCombo: lanche ? item.lanchesCombo || item.lanchesPersonalizados || [] : [],
+          lanchesPersonalizados: [],
+          adicionais: lanche ? item.adicionais || [] : [],
+          observacao: lanche ? item.observacao || "" : "",
+          obs: lanche ? item.obs || "" : "",
         };
       });
   });
@@ -709,7 +759,8 @@ function detalhesItemOperacao(item) {
   for (const ad of item.adicionais || [])
     html += `<p>+ ${escaparOperacao(ad.qtd || ad.quantidade || 1)} ${escaparOperacao(ad.nome)}</p>`;
   const obs = item.observacao || item.obs;
-  if (obs) html += `<p class="producao-obs">Obs.: ${escaparOperacao(obs)}</p>`;
+  if (obs)
+    html += `<p class="producao-obs">${/combo/i.test(item.categoria || item.nome || "") ? "Obs. geral:" : "Obs.:"} ${escaparOperacao(obs)}</p>`;
   html += detalhesLanchesComboOperacao(item);
   return html;
 }
@@ -803,16 +854,119 @@ function agruparPreparoChapeiroOperacao(itens) {
   }));
 }
 function itensHtmlChapeiroOperacao(itens) {
-  return agruparPreparoChapeiroOperacao(itens)
-    .map((grupo) => {
-      const detalhes = grupo.personalizacoes
-        .map(
-          (config) =>
-            `<div class="producao-combo preparo-personalizacao"><strong>${grupo.quantidade === 1 ? "" : config.quantidade + " "}${grupo.categoria === "batatas" ? (config.quantidade === 1 ? "porção com:" : "porções com:") : config.quantidade === 1 ? "lanche com:" : "lanches com:"}</strong>${config.adicionais.map((ad) => `<p>+ ${ad.qtd} ${escaparOperacao(ad.nome)}</p>`).join("")}${config.observacao ? `<p class="producao-obs">Obs.: ${escaparOperacao(config.observacao)}</p>` : ""}</div>`,
+  const normalizar = (v) =>
+    String(v || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+  const chave = (g) => normalizar(g.nome) + "|" + normalizar(g.tipo);
+  const totais = new Map(
+    agruparPreparoChapeiroOperacao(itens).map((g) => [chave(g), g.quantidade]),
+  );
+  const detalhes = (grupo, total = grupo.quantidade) =>
+    grupo.personalizacoes
+      .map(
+        (config) =>
+          '<div class="producao-combo preparo-personalizacao"><strong>' +
+          (config.quantidade === total && total > 1
+            ? "Todos com:"
+            : (grupo.quantidade === 1 ? "" : config.quantidade + " ") +
+              (grupo.categoria === "batatas"
+                ? config.quantidade === 1
+                  ? "porção com:"
+                  : "porções com:"
+                : config.quantidade === 1
+                  ? "lanche com:"
+                  : "lanches com:")) +
+          "</strong>" +
+          config.adicionais
+            .map((ad) => "<p>+ " + ad.qtd + " " + escaparOperacao(ad.nome) + "</p>")
+            .join("") +
+          (config.observacao
+            ? '<p class="producao-obs">Obs.: ' + escaparOperacao(config.observacao) + "</p>"
+            : "") +
+          "</div>",
+      )
+      .join("");
+  const recados = new Map();
+  const preparo = (itens || []).map((item) => {
+    const configs = item.lanchesCombo || item.lanchesPersonalizados || [];
+    const compartilhada =
+      item.modoPersonalizacaoCombo === "todos" &&
+      configs.length &&
+      configs.every(
+        (c) => (c.observacao || c.obs || "") === (configs[0].observacao || configs[0].obs || ""),
+      )
+        ? configs[0].observacao || configs[0].obs
+        : "";
+    const obs = item.observacao || item.obs || compartilhada;
+    if (!/combo/i.test(item.categoria || item.nome || "") || !obs) return item;
+    const componentes = componentesComboOperacao(item);
+    const lanches = componentes.filter((c) => c.categoria === "lanches");
+    if (!lanches.length) return item;
+    const limpo = {
+      ...item,
+      observacao: "",
+      obs: "",
+      comboComponentes: lanches,
+      lanchesCombo: configs.map((c) =>
+        (c.observacao || c.obs) === obs ? { ...c, observacao: "", obs: "" } : c,
+      ),
+      lanchesPersonalizados: [],
+    };
+    const grupos = agruparPreparoChapeiroOperacao([limpo]);
+    const primeiro = grupos[0];
+    const acompanhamentos = componentes.filter(
+      (c) => c.categoria !== "lanches" && c.categoria !== "bebidas",
+    );
+    const multiplicador = Number(item.quantidade ?? item.qtd ?? 1);
+    const html =
+      '<div class="producao-combo preparo-personalizacao preparo-obs-combo">' +
+      grupos
+        .map((g) =>
+          g.personalizacoes.length
+            ? detalhes(g, totais.get(chave(g)))
+            : g.quantidade === totais.get(chave(g))
+              ? ""
+              : "<strong>" +
+                g.quantidade +
+                (g.quantidade === 1 ? " lanche" : " lanches") +
+                "</strong>",
         )
-        .join("");
-      return `<article class="producao-item preparo-agrupado"><strong>${grupo.quantidade} ${escaparOperacao(grupo.nome)}</strong>${grupo.tipo ? `<p>Tipo: ${escaparOperacao(grupo.tipo)}</p>` : ""}${detalhes}</article>`;
-    })
+        .join("") +
+      acompanhamentos
+        .map(
+          (c) =>
+            "<p><strong>" +
+            multiplicador * c.quantidade +
+            " " +
+            escaparOperacao(c.nome) +
+            "</strong></p>",
+        )
+        .join("") +
+      '<p class="producao-obs">Obs. geral: ' +
+      escaparOperacao(obs) +
+      "</p></div>";
+    const id = chave(primeiro);
+    recados.set(id, (recados.get(id) || "") + html);
+    // Mantém o total dos lanches agrupado; o preparo deste grupo aparece no bloco acima.
+    return { ...limpo, adicionais: [], lanchesCombo: [], lanchesPersonalizados: [] };
+  });
+  return agruparPreparoChapeiroOperacao(preparo)
+    .map(
+      (grupo) =>
+        '<article class="producao-item preparo-agrupado"><strong>' +
+        grupo.quantidade +
+        " " +
+        escaparOperacao(grupo.nome) +
+        "</strong>" +
+        (grupo.tipo ? "<p>Tipo: " + escaparOperacao(grupo.tipo) + "</p>" : "") +
+        detalhes(grupo) +
+        (recados.get(chave(grupo)) || "") +
+        "</article>",
+    )
     .join("");
 }
 function bebidasOperacao(itens) {
@@ -905,6 +1059,8 @@ function gerarImpressaoOperacao(tipo, dados) {
   const totalConferencia = dados.mesa ? recebido + falta : Number(dados.valorTotal || 0);
   let html = `<header><h1>Pedrão Lanches</h1><h2>${escaparOperacao(titulo)}</h2><p>${escaparOperacao(nome)}</p></header>`;
   if (tipo === "motoboy") {
+    if (Number(dados.descontoCreditoEntrega) > 0)
+      html += `<p>Taxa integral do motoboy: ${moedaOperacao(dados.taxaEntrega)} · parte da loja: ${moedaOperacao(dados.descontoCreditoEntrega)}</p>`;
     html += `<h3>Entrega</h3><p>Telefone: ${escaparOperacao(dados.telefone || dados.telefoneCliente || "")}</p><p>Endereço: ${escaparOperacao(dados.endereco || dados.enderecoEscrito || "Não informado")}</p><p>Condomínio: ${escaparOperacao(dados.condominio || "Não informado")}</p>`;
     if (dados.condominio === "Sim" || dados.condominio === true)
       html += `<p>CNH: ${escaparOperacao(dados.cnh || "Não informado")}</p>`;
@@ -914,7 +1070,7 @@ function gerarImpressaoOperacao(tipo, dados) {
     if (tipo !== "cozinha" && dados.observacao)
       html += `<p>Observação: ${escaparOperacao(dados.observacao)}</p>`;
     if (tipo === "geral")
-      html += `<hr>${/entrega/i.test(dados.tipo || "") && Number(dados.taxaEntrega) > 0 ? `<p>Taxa de entrega: ${moedaOperacao(dados.taxaEntrega)}</p>` : ""}<p>Descontos: ${moedaOperacao(Number(dados.descontoCupom || 0) + Number(dados.descontoFidelidade || 0))}</p><h2>Total: ${moedaOperacao(totalConferencia)}</h2><p>Recebido: ${moedaOperacao(recebido)}</p><p>Falta receber: ${moedaOperacao(falta)}</p><p>Pagamento: ${escaparOperacao(textoPagamentoOperacao(dados))}</p><p>Recibo de conferência — não é documento fiscal.</p>`;
+      html += `<hr>${/entrega/i.test(dados.tipo || "") && Number(dados.taxaEntrega) > 0 ? `<p>Taxa de entrega: ${moedaOperacao(dados.taxaEntrega)}</p>` : ""}<p>Descontos: ${moedaOperacao(Number(dados.descontoCupom || 0) + Number(dados.descontoFidelidade || 0) + Number(dados.descontoCreditoEntrega || 0))}</p><h2>Total: ${moedaOperacao(totalConferencia)}</h2><p>Recebido: ${moedaOperacao(recebido)}</p><p>Falta receber: ${moedaOperacao(falta)}</p><p>Pagamento: ${escaparOperacao(textoPagamentoOperacao(dados))}</p><p>Recibo de conferência — não é documento fiscal.</p>`;
   }
   return html;
 }
@@ -925,7 +1081,7 @@ function abrirImpressaoOperacao(html) {
     return false;
   }
   janela.document.write(
-    `<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Pedrão — impressão</title><style>body{font:14px Arial;color:#000;max-width:76mm;margin:8px auto}h1{font-size:20px}h2{font-size:18px}header{text-align:center}.producao-item{border-bottom:1px dashed #888;padding:10px 0}.producao-item span{float:right}p{margin:5px 0;overflow-wrap:anywhere}.producao-combo{padding-left:12px}button{padding:12px}@page{margin:4mm}@media print{button{display:none}}</style></head><body><button onclick="window.print()">Imprimir / salvar PDF</button>${html}</body></html>`,
+    `<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pedrão — impressão</title><style>body{font:14px Arial;color:#000;max-width:76mm;margin:8px auto}h1{font-size:20px}h2{font-size:18px}header{text-align:center}.producao-item{border-bottom:1px dashed #888;padding:10px 0}.producao-item span{float:right}p{margin:5px 0;overflow-wrap:anywhere}.producao-combo{padding-left:12px}article,section,div,strong{min-width:0;max-width:100%;box-sizing:border-box;overflow-wrap:anywhere}button{padding:12px}@page{margin:4mm}@media screen{body{box-sizing:border-box;max-width:600px;margin:0 auto;padding:16px;font-size:17px;line-height:1.5}button{display:block;width:100%;margin-bottom:20px;font-size:16px}h1{font-size:24px}h2{font-size:22px}}@media print{body{max-width:76mm;padding:0;margin:8px auto;font-size:14px}button{display:none}}</style></head><body><button onclick="window.print()">Imprimir / salvar PDF</button>${html}</body></html>`,
   );
   janela.document.close();
   janela.focus();
@@ -1281,7 +1437,7 @@ async function carregarCentralOperacao() {
             : valorRecebidoPedidoOperacao(r) > 0
               ? `Falta receber ${moedaOperacao(saldoPedidoOperacao(r))}`
               : "Pagamento ainda não confirmado";
-          return `<article class="registro-operacao">${!idCentralOperacao && r.colecao === "pedidos" && !r.mesa && !r.comandaId && !r.vinculadoComanda ? `<button class="cancelar-pedido-x-ui" type="button" data-cancelar-pedido-ui hidden aria-label="Cancelar pedido de ${escaparOperacao(r.nome || r.cliente || "cliente")}" onclick="cancelarPedidoPerfilUI('${escaparOperacao(r.id)}')">×</button>` : ""}<h3>${escaparOperacao(titulo)} — ${escaparOperacao(r.nome || r.cliente || "")}</h3><div class="pedido-lista-valor-ui"><p>${escaparOperacao(r.tipo || "Consumo no local")} · ${moedaOperacao(r.valorTotal)}</p>${!idCentralOperacao && r.colecao === "pedidos" && /^(Entrega|Retirada)$/i.test(r.tipo || "") && typeof abrirEditorPedidoUI === "function" ? `<button type="button" onclick="editarPedidoOperacao('${escaparOperacao(r.id)}')">Editar</button>` : ""}</div>${avisoDistanciaEntregaOperacao(r)}<p class="recebimento-status ${recebido ? "recebido" : ""}">${status}${r.pagamento ? " · " + escaparOperacao(r.pagamento) : ""}</p>${Number(r.valorADevolver || 0) > 0 ? `<p class="recebimento-status">Valor a devolver: ${moedaOperacao(r.valorADevolver)}</p>` : ""}${!idCentralOperacao ? acoesResumoPedidoOperacao(r, recebido) : `${itensHtmlOperacao(r.itens || [])}${r.observacao ? `<section class="molhos-atendente"><h4>Observação do pedido</h4><p>${escaparOperacao(r.observacao).replaceAll("\n", "<br>")}</p></section>` : ""}${acoes}<div class="registro-acoes-secundarias-ui"><button onclick="solicitarDocumentoClienteOperacao(${args})">Dados para nota fiscal</button></div>`}</article>`;
+          return `<article class="registro-operacao">${!idCentralOperacao && r.colecao === "pedidos" && !r.mesa && !r.comandaId && !r.vinculadoComanda ? `<button class="cancelar-pedido-x-ui" type="button" data-cancelar-pedido-ui hidden aria-label="Cancelar pedido de ${escaparOperacao(r.nome || r.cliente || "cliente")}" onclick="cancelarPedidoPerfilUI('${escaparOperacao(r.id)}')">×</button>` : ""}<h3>${escaparOperacao(titulo)} — ${escaparOperacao(r.nome || r.cliente || "")}</h3><div class="pedido-lista-valor-ui"><p>${escaparOperacao(r.tipo || "Consumo no local")} · ${moedaOperacao(r.valorTotal)}</p>${!idCentralOperacao && r.colecao === "pedidos" && /^(Entrega|Retirada)$/i.test(r.tipo || "") && typeof abrirEditorPedidoUI === "function" ? `<button type="button" onclick="editarPedidoOperacao('${escaparOperacao(r.id)}')">Editar</button>` : ""}</div>${Number(r.descontoCreditoEntrega) > 0 ? `<p class="beneficio-pedido-ui">Benefícios: ${moedaOperacao(r.descontoCreditoEntrega)} no frete · taxa integral do motoboy: ${moedaOperacao(r.taxaEntrega)}</p>` : ""}${avisoDistanciaEntregaOperacao(r)}<p class="recebimento-status ${recebido ? "recebido" : ""}">${status}${r.pagamento ? " · " + escaparOperacao(r.pagamento) : ""}</p>${Number(r.valorADevolver || 0) > 0 ? `<p class="recebimento-status">Valor a devolver: ${moedaOperacao(r.valorADevolver)}</p>` : ""}${!idCentralOperacao ? acoesResumoPedidoOperacao(r, recebido) : `${itensHtmlOperacao(r.itens || [])}${r.observacao ? `<section class="molhos-atendente"><h4>Observação do pedido</h4><p>${escaparOperacao(r.observacao).replaceAll("\n", "<br>")}</p></section>` : ""}${acoes}<div class="registro-acoes-secundarias-ui"><button onclick="solicitarDocumentoClienteOperacao(${args})">Dados para nota fiscal</button></div>`}</article>`;
         })
         .join("") || "<p>Nenhum pedido pendente neste período.</p>";
     if (idCentralOperacao && lista.length) {
@@ -1343,7 +1499,7 @@ function editarPedidoOperacao(id) {
     aoSalvar: carregarCentralOperacao,
   });
 }
-function molhosAtendenteOperacao(itens) {
+function molhosAtendenteOperacao(itens, mostrarNome = true) {
   return itens
     .map((item) => {
       const gratis = item.molhosGratis || [],
@@ -1362,7 +1518,7 @@ function molhosAtendenteOperacao(itens) {
             `<li>${escaparOperacao(m.qtd || m.quantidade)} ${escaparOperacao(m.nome)}${m.preco != null ? " · " + moedaOperacao(Number(m.preco) * Number(m.qtd || m.quantidade)) : ""}</li>`,
         )
         .join("");
-      return `<section class="molhos-atendente"><h4>Molhos · ${escaparOperacao(item.nome)}</h4>${linhasGratis ? `<p>Grátis</p><ul>${linhasGratis}</ul>` : ""}${linhasPagos ? `<p>Pagos</p><ul>${linhasPagos}</ul>` : ""}</section>`;
+      return `<section class="molhos-atendente">${mostrarNome ? `<h4>Molhos · ${escaparOperacao(item.nome)}</h4>` : ""}${linhasGratis ? `${mostrarNome ? "<p>Grátis</p>" : "<h4>Molhos grátis</h4>"}<ul>${linhasGratis}</ul>` : ""}${linhasPagos ? `${mostrarNome ? "<p>Pagos</p>" : "<h4>Molhos pagos</h4>"}<ul>${linhasPagos}</ul>` : ""}</section>`;
     })
     .join("");
 }
@@ -1460,6 +1616,8 @@ async function registrarRecebimentoPedidoOperacao(id, retirar, conferido) {
     )
       throw Error("Este pedido não está disponível para recebimento. Confira a comanda vinculada.");
     if (retirar && p.tipo !== "Retirada") throw Error("Este pedido não é de retirada.");
+    if (p.beneficiosConferirPagamento)
+      throw Error("Confira a divisão do pagamento em Editar antes de confirmar o recebimento.");
     if (
       conferido &&
       (centavosOperacao(p.valorTotal) !== centavosOperacao(conferido.valorTotal) ||
@@ -1524,8 +1682,24 @@ async function registrarRecebimentoPedidoOperacao(id, retirar, conferido) {
         retiradoEmMs: agora,
         retiradoEm: new Date(agora).toISOString(),
       });
-    t.update(ref, patch);
-    return patch;
+    const salvarRank =
+      typeof prepararRankMensalUI === "function"
+        ? await prepararRankMensalUI(t, [
+            {
+              clienteId: p.clienteId,
+              chave: "pedidos_" + id,
+              eventos: eventosRankPedidoMensalUI({ ...p, ...patch }),
+            },
+          ])
+        : () => {};
+    const beneficio =
+      typeof prepararBeneficioEntregaUI === "function"
+        ? await prepararBeneficioEntregaUI(t, p, "confirmar")
+        : { patch: {}, salvar: () => {} };
+    t.update(ref, { ...patch, ...beneficio.patch });
+    salvarRank();
+    beneficio.salvar();
+    return { ...patch, ...beneficio.patch };
   });
 }
 async function confirmarRecebimentoOperacao(id, retirar = false) {
@@ -1534,6 +1708,12 @@ async function confirmarRecebimentoOperacao(id, retirar = false) {
     if (!doc.exists) throw Error("Pedido não encontrado.");
     const p = doc.data(),
       saldo = saldoPedidoOperacao(p);
+    if (p.beneficiosConferirPagamento) {
+      avisoOperacao(
+        "O benefício alterou o total deste pedido. Abra Editar e confira os valores das formas de pagamento antes de receber.",
+      );
+      return false;
+    }
     retirar = retirar || p.tipo === "Retirada";
     const texto = retirar
       ? `Confirmar retirada do pedido #${p.numero || "-"}? ${saldo > 0 ? "Ao confirmar, você declara que recebeu " + moedaOperacao(saldo) + "." : "O pagamento já está confirmado."}`
@@ -1895,6 +2075,7 @@ function linkLocalizacaoMotoboyUI(local, endereco) {
   try {
     const url = new URL(local);
     const consulta =
+      url.searchParams.get("p") ||
       url.searchParams.get("q") ||
       url.searchParams.get("ll") ||
       url.searchParams.get("query") ||
@@ -1928,7 +2109,7 @@ async function compartilharMotoboyOperacao(colecao, id) {
       .trim();
   const local = r.localizacao || r.mapa || "";
   const localizacao = linkLocalizacaoMotoboyUI(local, r.endereco);
-  const texto = `Pedrão Lanches\nEntrega ${r.numeroEntregaDia || ""}\nCliente: ${linha(r.nome || r.cliente)}\nTelefone: ${r.telefone || ""}\nEndereço: ${linha(r.endereco) || "Não informado"}\nCondomínio: ${r.condominio || "Não informado"} | CNH: ${r.cnh || "Não informado"}\nTotal: ${moedaOperacao(r.valorTotal)}\nPagamento: ${textoPagamentoOperacao(r)}\nBebidas: ${
+  const texto = `Pedrão Lanches\nEntrega ${r.numeroEntregaDia || ""}\nCliente: ${linha(r.nome || r.cliente)}\nTelefone: ${r.telefone || ""}\nEndereço: ${linha(r.endereco) || "Não informado"}\nCondomínio: ${r.condominio || "Não informado"} | CNH: ${r.cnh || "Não informado"}\nTotal: ${moedaOperacao(r.valorTotal)}\nPagamento: ${textoPagamentoOperacao(r)}${Number(r.descontoCreditoEntrega) > 0 ? `\nTaxa integral do motoboy: ${moedaOperacao(r.taxaEntrega)} | parte da loja: ${moedaOperacao(r.descontoCreditoEntrega)}` : ""}\nBebidas: ${
     bebidasOperacao(r.itens)
       .map((i) => `${i.quantidade} ${linha(i.nome)}`)
       .join("; ") || "Nenhuma"

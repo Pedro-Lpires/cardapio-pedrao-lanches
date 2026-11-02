@@ -299,22 +299,65 @@
 
 .auto-pos-pedido {
   max-width: 480px;
-
-  margin: 40px auto;
-
-  padding: 20px;
-
+  margin: clamp(8px, calc(50dvh - 215px), 200px) auto 12px;
+  padding: 12px 16px;
   text-align: center;
+}
+.auto-pos-pedido-topo > h2 {
+  margin: 0;
+  font-size: clamp(19px, 5.8vw, 24px);
+}
+.auto-pos-pedido-topo > p {
+  margin: 8px 0 0;
+  font-weight: 700;
 }
 
 .auto-pedido-enviado {
-  margin: 30px 0;
-
-  padding: 20px;
-
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 14px 0;
+  padding: 12px;
+  text-align: center;
   border: 1px solid #444;
 
   border-radius: 10px;
+}
+.auto-pedido-enviado h2 {
+  margin: 0 0 6px;
+  padding: 0;
+  border: 0;
+  font-size: clamp(17px, 5.7vw, 22px);
+  white-space: nowrap;
+}
+.auto-pedido-enviado p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.auto-pos-pedido .auto-pedido-enviado .auto-personagem-pedido-ui {
+  width: 132px;
+  height: 132px;
+  margin: 0 auto 10px;
+}
+@media (max-height: 500px) {
+  .auto-pos-pedido {
+    margin-top: 8px;
+  }
+  .auto-pos-pedido .auto-pedido-enviado .auto-personagem-pedido-ui {
+    width: 112px;
+    height: 112px;
+  }
+  .auto-pedido-enviado p {
+    font-size: 13px;
+  }
+}
+.auto-atendimento-encerrado-ui {
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 20px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .auto-acoes-pos-pedido {
@@ -328,9 +371,10 @@
 .auto-acoes-pos-pedido button {
   width: 100%;
 
-  min-height: 55px;
-
-  font-size: 17px;
+  min-height: 46px;
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 16px;
 }
 /* section — perfil e acesso */
 .btn-login-auto {

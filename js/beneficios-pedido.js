@@ -1,13 +1,8 @@
 /* Crédito/estorno do perfil por pedido. Cada operação é atômica e idempotente. */
 function nivelComprasPedidoUI(c) {
   if (!c.fidelidadeAtiva) return "Sem nível";
-  const n = Number(c.pedidosTotal || 0),
-    v = Number(c.gastoTotal || 0);
-  if (n >= 60 || v >= 4000) return "Imortal";
-  if (n >= 30 || v >= 1500) return "Diamante";
-  if (n >= 15 || v >= 700) return "Ouro";
-  if (n >= 5 || v >= 300) return "Prata";
-  return "Bronze";
+  // Compras enviadas não promovem mais por quantidade ou gasto vitalício.
+  return nivelFidelidadeOperacao(c);
 }
 async function registrarBeneficiosPedidoOperacao(id) {
   const ref = db.collection("pedidos").doc(id);
@@ -78,6 +73,14 @@ async function cancelarPedidoPerfilTransacaoUI(id) {
     const filas = await Promise.all(
       fila.docs.map((d) => t.get(db.collection("filaCozinha").doc(d.id))),
     );
+    const salvarRank =
+      typeof prepararRankMensalUI === "function"
+        ? await prepararRankMensalUI(t, [{ clienteId, chave: "pedidos_" + id, eventos: [] }])
+        : () => {};
+    const beneficio =
+      typeof prepararBeneficioEntregaUI === "function"
+        ? await prepararBeneficioEntregaUI(t, p, "cancelar")
+        : { patch: {}, salvar: () => {} };
     const estorno = { base: 0, bonus: 0, bonusDevolvido: 0 };
     if (cd?.exists) {
       const c = cd.data(),
@@ -128,11 +131,14 @@ async function cancelarPedidoPerfilTransacaoUI(id) {
           canceladoEm: Date.now(),
         });
     t.update(ref, {
+      ...beneficio.patch,
       cancelado: true,
       status: "Cancelado",
       canceladoEm: Date.now(),
       estornoPerfil: estorno,
     });
+    salvarRank();
+    beneficio.salvar();
     return true;
   });
 }

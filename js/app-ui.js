@@ -21,7 +21,7 @@ function atualizarPublicoCampanhaUI() {
 }
 function acoesRegistroUI(colecao, id, entrega = false) {
   const a = `'${colecao}','${escaparOperacao(id)}'`;
-  return `<div class="operacao-acoes ui-acoes-pedido"><button onclick="abrirDestinoPedidoUI('cozinha',${a})">Cozinha</button>${entrega ? `<button onclick="abrirDestinoPedidoUI('motoboy',${a})">Motoboy</button>` : ""}<button title="Imprimir conferência" aria-label="Imprimir conferência" onclick="imprimirRegistroOperacao(${a},'geral')">Imprimir</button></div>`;
+  return `<div class="operacao-acoes ui-acoes-pedido"><button onclick="abrirDestinoPedidoUI('cozinha',${a})">Cozinha</button>${entrega ? `<button onclick="abrirDestinoPedidoUI('motoboy',${a})">Motoboy</button>` : ""}<button title="Imprimir conferência" aria-label="Imprimir conferência" onclick="imprimirRegistroOperacao(${a},'geral')">Imprimir</button>${colecao === "comandas" ? `<button class="comanda-cancelar-topo-ui" onclick="cancelarComandaAtendente('${escaparOperacao(id)}')">Cancelar comanda</button>` : ""}</div>`;
 }
 const telasAtendenteUI = [
   "area-consumo-local",
@@ -395,6 +395,7 @@ function organizarModulosAdminUI() {
           "Consulte os pedidos e imprima para cozinha, entregador ou conferência.",
         ],
         [/online/i, "Veja as contas que estão usando o sistema."],
+        [/^benefícios$/i, "Configure créditos por rank, consulte saldos e confira os usos."],
         [/fidelidade/i, "Consulte contas, histórico, códigos e benefícios."],
         [/campanhas/i, "Escolha o público e envie avisos ou cupons às contas."],
         [/raspadinhas/i, "Configure campanhas, emita e acompanhe prêmios."],

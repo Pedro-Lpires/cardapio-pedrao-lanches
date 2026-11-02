@@ -1,0 +1,198 @@
+.beneficios-ui {
+  min-width: 0;
+}
+.suporte-admin-conteudo.beneficios-ui {
+  padding: 20px;
+}
+.beneficios-ui p {
+  margin: 0;
+}
+.beneficios-ui [role="status"]:empty {
+  display: none;
+}
+.beneficios-ui [role="status"] {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.beneficios-ui [data-estado="sucesso"],
+.beneficios-ui [data-estado="erro"] {
+  padding: 12px 14px;
+  border: 1px solid #4bd28a;
+  border-radius: 10px;
+  background: #153c28;
+  color: #eafff1;
+  font-weight: 700;
+}
+.beneficios-ui [data-estado="erro"] {
+  border-color: #ff8585;
+  background: #441c1c;
+  color: #ffe5e5;
+}
+.beneficios-ui button.beneficios-salvo-ui {
+  background: #19623d;
+  border-color: #4bd28a;
+}
+.beneficios-ui form {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0 0;
+}
+.suporte-admin-conteudo.beneficios-ui label {
+  display: grid;
+  gap: 8px;
+  line-height: 1.4;
+  margin: 0;
+}
+.suporte-admin-tela .suporte-admin-conteudo.beneficios-ui input:not([type="checkbox"]),
+.suporte-admin-tela .suporte-admin-conteudo.beneficios-ui textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  background: #222;
+  color: #fff;
+  border: 1px solid #666;
+  border-radius: 9px;
+  font: inherit;
+}
+.suporte-admin-conteudo.beneficios-ui .beneficios-check-ui {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.beneficios-ui input[type="checkbox"] {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  accent-color: #ed0017;
+}
+.beneficios-grade-ui {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr));
+  gap: 16px;
+}
+.beneficios-ui p,
+.beneficios-ui small {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.beneficios-ui fieldset {
+  min-width: 0;
+  border: 1px solid #555;
+  padding: 16px;
+  margin: 0;
+  border-radius: 10px;
+}
+.beneficios-ranks-ui {
+  display: grid;
+  gap: 12px;
+}
+.suporte-admin-conteudo.beneficios-ui .beneficios-rank-linha-ui {
+  grid-template-columns: minmax(0, 1fr) minmax(75px, 105px);
+  align-items: center;
+  gap: 12px;
+}
+.beneficios-regras-ui {
+  display: grid;
+  gap: 20px;
+}
+.beneficios-ui small {
+  color: #c9c9c9;
+  font-size: 13px;
+}
+.beneficios-status-ui {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #666;
+  border-radius: 12px;
+  background: #242424;
+}
+.beneficios-status-ui > div {
+  display: grid;
+  gap: 6px;
+}
+.beneficios-status-ui [data-situacao] {
+  color: #ddd;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.beneficios-status-ui button {
+  justify-self: start;
+}
+.beneficios-status-ui p {
+  font-size: 13px;
+  color: #ddd;
+}
+.beneficios-ajuda-ui {
+  margin-top: 20px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 16px;
+}
+.beneficios-ajuda-ui summary {
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1.5;
+}
+.beneficios-ajuda-ui p {
+  margin-top: 12px;
+  font-size: 14px;
+}
+.suporte-admin-conteudo.beneficios-ui .beneficios-check-ui {
+  align-items: flex-start;
+}
+.beneficios-check-ui input[type="checkbox"] {
+  margin-top: 2px;
+}
+.beneficios-ui form > button {
+  justify-self: stretch;
+}
+@media (max-width: 380px) {
+  .suporte-admin-conteudo.beneficios-ui {
+    padding: 16px;
+  }
+  .beneficios-ui fieldset {
+    padding: 14px 12px;
+  }
+}
+.beneficios-ui legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+.beneficios-ui article {
+  padding: 14px;
+  border: 1px solid #555;
+  border-radius: 10px;
+  margin: 14px 0;
+}
+.beneficios-menu-ui {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.beneficios-menu-ui button {
+  margin: 0;
+}
+.saldo-beneficios-ui {
+  border: 1px solid #555;
+  border-radius: 10px;
+  padding: 14px;
+  margin: 16px 0;
+  text-align: left;
+}
+.saldo-beneficios-ui h4 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+.saldo-beneficios-ui p,
+.saldo-beneficios-ui small {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+#linha-beneficios-entrega-ui {
+  color: #64e58a;
+  font-weight: 700;
+  line-height: 1.5;
+}

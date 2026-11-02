@@ -40,6 +40,35 @@
 }
 #modal-carrinho #lista-carrinho > .item-carrinho {
   flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px;
+  align-items: center;
+  gap: 10px;
+}
+#modal-carrinho .info-item-carrinho {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+#modal-carrinho .combo-resumo-ui {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+#modal-carrinho .acoes-item {
+  display: grid;
+  grid-template-columns: repeat(2, 40px);
+  gap: 8px;
+  width: 88px;
+  min-width: 88px;
+}
+#modal-carrinho .acoes-item > button {
+  width: 40px;
+  min-width: 0;
+  height: 42px;
+  margin: 0;
+  padding: 4px;
 }
 #modal-carrinho .acoes-carrinho {
   /* Limpar/Finalizar ficam fora da região rolável dos itens. */

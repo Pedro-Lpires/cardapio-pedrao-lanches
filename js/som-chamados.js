@@ -50,6 +50,7 @@ function lerToqueChamadosUI() {
 const somChamadosAtendenteUI = {
   contexto: null,
   ligado: false,
+  pendente: null,
   iniciando: false,
   recebeuSnapshot: false,
   vistos: new Set(),
@@ -69,10 +70,10 @@ function atualizarControleSomChamadosUI() {
   const ativo =
     somChamadosAtendenteUI.ligado && somChamadosAtendenteUI.contexto?.state === "running";
   if (botao) {
-    const rotulo = ativo ? "Silenciar avisos" : "Ativar som dos avisos";
+    const rotulo = somChamadosAtendenteUI.ligado ? "Silenciar avisos" : "Ativar som dos avisos";
     botao.setAttribute("aria-label", rotulo);
     botao.setAttribute("title", rotulo);
-    botao.setAttribute("aria-pressed", String(ativo));
+    botao.setAttribute("aria-pressed", String(somChamadosAtendenteUI.ligado));
     botao.disabled = somChamadosAtendenteUI.iniciando;
   }
   document.querySelectorAll?.("[data-ouvir-toque]").forEach((b) => {
@@ -90,7 +91,7 @@ function atualizarControleSomChamadosUI() {
                 ? "Som ligado para novas levas de itens na chapa."
                 : "Som ligado para chamados das mesas e novos pedidos de entrega e retirada."
               : somChamadosAtendenteUI.ligado
-                ? "O navegador pausou o áudio. Toque no sino para reativar."
+                ? "Som ativado. O navegador pausou o áudio; toque no painel para retomá-lo."
                 : document.getElementById("confirmar-som-chamados")
                   ? ""
                   : "Som desligado. Clique no sino do título para ativar.");
@@ -104,6 +105,10 @@ function tocarSomChamadoAtendenteUI(
   const estado = somChamadosAtendenteUI;
   const contexto = estado.contexto;
   if ((!estado.ligado && !previa) || contexto?.state !== "running") {
+    if (estado.ligado && !previa) {
+      estado.pendente = tipo;
+      retomarSomSalvoChamadosUI();
+    }
     atualizarControleSomChamadosUI();
     return false;
   }
@@ -168,7 +173,19 @@ async function prepararContextoSomChamadosUI() {
     estado.fim = 0;
     estado.contexto.onstatechange = atualizarControleSomChamadosUI;
   }
-  if (estado.contexto.state !== "running") await estado.contexto.resume();
+  if (estado.contexto.state !== "running") {
+    let timer;
+    try {
+      await Promise.race([
+        estado.contexto.resume(),
+        new Promise((_, rejeitar) => {
+          timer = setTimeout(() => rejeitar(Error("Toque no painel para retomar o áudio.")), 2500);
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
   if (estado.contexto.state !== "running")
     throw Error("O navegador pausou o som. Clique no sino novamente.");
 }
@@ -182,6 +199,7 @@ async function ativarSomChamadosAtendenteUI(testar = true) {
   try {
     await prepararContextoSomChamadosUI();
     estado.ligado = true;
+    salvarPreferenciaSomChamadosUI(true);
     if (testar) {
       interromperToqueChamadosUI();
       tocarSomChamadoAtendenteUI();
@@ -202,6 +220,8 @@ function alternarSomChamadosAtendenteUI() {
   if (somChamadosAtendenteUI.iniciando) return;
   const silenciar = () => {
     somChamadosAtendenteUI.ligado = false;
+    somChamadosAtendenteUI.pendente = null;
+    salvarPreferenciaSomChamadosUI(false);
     interromperToqueChamadosUI();
     somChamadosAtendenteUI.contexto?.close().catch(console.error);
     somChamadosAtendenteUI.contexto = null;
@@ -209,7 +229,7 @@ function alternarSomChamadosAtendenteUI() {
     somChamadosAtendenteUI.erro = "";
     atualizarControleSomChamadosUI();
   };
-  if (somChamadosAtendenteUI.ligado && somChamadosAtendenteUI.contexto?.state === "running") {
+  if (somChamadosAtendenteUI.ligado) {
     silenciar();
     return;
   }
@@ -223,7 +243,7 @@ function abrirAtivacaoSomChamadosUI() {
   painel.className = "som-ativacao-conteudo-ui";
   painel.hidden = true;
   painel.innerHTML = `<p class="som-ativacao-pergunta-ui">Ativar o som neste painel?</p>
-    <p>O Sim libera o áudio nesta sessão e toca um teste.</p>
+    <p>O Sim ativa o som, salva sua escolha neste aparelho e toca um teste.</p>
     <p class="som-ativacao-limite-ui">No celular, usar outro app ou apagar a tela pode pausar os avisos. Durante o atendimento, mantenha o painel aberto e a tela ligada.</p>
     <p id="estado-som-chamados" role="status"></p>
     <div class="som-ativacao-acoes-ui"><button type="button" class="som-nao-ui">Não, agora não</button><button type="button" class="som-sim-ui">Sim, ativar</button></div>`;
@@ -298,9 +318,11 @@ function avisarSomPedidosSiteUI(pedidos) {
   tocarSomChamadoAtendenteUI("atendente");
 }
 
-function encerrarSomChamadosAtendenteUI() {
+function encerrarSomChamadosAtendenteUI(apagarPreferencia = true) {
+  if (apagarPreferencia) salvarPreferenciaSomChamadosUI(false);
   const estado = somChamadosAtendenteUI;
   estado.ligado = false;
+  estado.pendente = null;
   interromperToqueChamadosUI();
   if (estado.contexto && estado.contexto.state !== "closed")
     estado.contexto.close().catch(console.error);
@@ -385,4 +407,60 @@ function montarConfiguracaoSomChamadosUI(area) {
   if (titulo) titulo.after(atalho);
   else area.prepend(atalho);
 }
-window.addEventListener("pagehide", encerrarSomChamadosAtendenteUI);
+function chavePreferenciaSomChamadosUI() {
+  return document.getElementById("fila-cozinha")
+    ? "pedrao-som-chapa-ativo"
+    : "pedrao-som-atendimento-ativo";
+}
+function salvarPreferenciaSomChamadosUI(ativo) {
+  try {
+    localStorage.setItem(chavePreferenciaSomChamadosUI(), ativo ? "sim" : "nao");
+  } catch {}
+}
+function somSalvoChamadosUI() {
+  try {
+    return localStorage.getItem(chavePreferenciaSomChamadosUI()) === "sim";
+  } catch {
+    return false;
+  }
+}
+async function retomarSomSalvoChamadosUI() {
+  const estado = somChamadosAtendenteUI;
+  if (!estado.ligado || estado.iniciando) return;
+  estado.iniciando = true;
+  try {
+    await prepararContextoSomChamadosUI();
+    estado.erro = "";
+    const pendente = estado.pendente;
+    estado.pendente = null;
+    if (pendente) tocarSomChamadoAtendenteUI(pendente);
+  } catch {
+    estado.erro = "Som ativado. O navegador pausou o áudio; toque no painel para retomá-lo.";
+  } finally {
+    estado.iniciando = false;
+    atualizarControleSomChamadosUI();
+  }
+}
+function restaurarPreferenciaSomChamadosUI() {
+  if (!somSalvoChamadosUI()) return;
+  somChamadosAtendenteUI.ligado = true;
+  return retomarSomSalvoChamadosUI();
+}
+document.addEventListener("DOMContentLoaded", restaurarPreferenciaSomChamadosUI);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) restaurarPreferenciaSomChamadosUI();
+});
+document.addEventListener("pointerdown", retomarSomPorGestoUI);
+document.addEventListener("keydown", retomarSomPorGestoUI);
+window.addEventListener("pageshow", restaurarPreferenciaSomChamadosUI);
+window.addEventListener("pagehide", () => encerrarSomChamadosAtendenteUI(false));
+
+function retomarSomPorGestoUI() {
+  const e = somChamadosAtendenteUI;
+  if (!e.ligado || e.contexto?.state === "running") return;
+  if (e.iniciando && e.contexto) {
+    e.contexto.resume().catch(() => {});
+    return;
+  }
+  retomarSomSalvoChamadosUI();
+}

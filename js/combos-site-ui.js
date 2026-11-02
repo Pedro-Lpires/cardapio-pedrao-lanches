@@ -12,14 +12,11 @@ function extrasComboSiteUI() {
 }
 function atualizarComboSiteUI() {
   const obs = document.getElementById("obs-produto");
-  const tem =
-    extrasComboSiteUI() > 0 ||
-    comboSiteUI.lanches.some((c) => Object.values(c.adicionais).some((a) => a.qtd > 0));
-  obs.hidden = tem;
-  if (tem) obs.value = "";
+  obs.hidden = false;
   document.querySelectorAll("[data-site-resumo]").forEach((el) => {
     const n = Number(el.dataset.siteResumo);
-    const configs = n === -2 ? comboSiteUI.lanches : [comboSiteUI.lanches[n < 0 ? 0 : n]];
+    const todos = n === -2 && comboSiteUI.modo === "todos";
+    const configs = n === -2 && !todos ? comboSiteUI.lanches : [comboSiteUI.lanches[n < 0 ? 0 : n]];
     el.innerHTML = configs
       .map((c, i) => {
         const linhas = Object.values(c.adicionais)
@@ -28,7 +25,11 @@ function atualizarComboSiteUI() {
         if (c.observacao) linhas.push("Obs.: " + escaparOperacao(c.observacao));
         return linhas.length
           ? "<div>" +
-              (n === -2 ? "<strong>Lanche " + (i + 1) + "</strong><br>" : "") +
+              (n === -2
+                ? todos
+                  ? "<strong>Todos com:</strong><br>"
+                  : "<strong>Lanche " + (i + 1) + "</strong><br>"
+                : "") +
               linhas.join("<br>") +
               "</div>"
           : "";
@@ -66,7 +67,7 @@ async function escolherModoComboSiteUI(modo) {
   if (modo === "todos") {
     const area = document.createElement("div");
     area.innerHTML =
-      '<p>Os acréscimos e a observação serão aplicados em cada lanche.</p><div data-site-resumo="-1"></div><div class="cliente-acoes-ui"><button onclick="abrirExtrasComboSiteUI(-1)">Escolher</button><button onclick="limparExtrasComboSiteUI(-1)">Limpar</button></div>';
+      '<p>Os acréscimos serão aplicados em cada lanche.</p><div data-site-resumo="-1"></div><div class="cliente-acoes-ui"><button onclick="abrirExtrasComboSiteUI(-1)">Escolher</button><button onclick="limparExtrasComboSiteUI(-1)">Limpar</button></div>';
     document.body.append(area);
     const janela = abrirJanelaElementoUI(area, "Todos os lanches");
     configurarVoltaTipoComboSiteUI(janela);
@@ -104,11 +105,23 @@ function abrirExtrasComboSiteUI(n) {
       (produtoAtual.modoAdicional !== "selecionar" ||
         produtoAtual.adicionaisPermitidos?.includes(a.id)),
   );
-  const descricao = document.createElement("p");
-  descricao.textContent =
-    n < 0
-      ? "Os acréscimos e a observação serão aplicados em cada lanche."
-      : `Escolha os acréscimos e a observação do lanche ${n + 1}.`;
+  const descricao = document.createElement("h4");
+  descricao.className = "combo-acrescimos-titulo-ui";
+  descricao.textContent = n < 0 ? "Acréscimos em todos os lanches" : "Acréscimos deste lanche";
+  if (n >= 0) {
+    const label = document.createElement("label");
+    label.className = "combo-observacao-ui";
+    label.textContent = "Obs. deste lanche";
+    const obs = document.createElement("textarea");
+    obs.value = config.observacao || "";
+    obs.placeholder = "Ex.: sem tomate";
+    obs.oninput = () => {
+      config.observacao = obs.value;
+      atualizarComboSiteUI();
+    };
+    label.append(obs);
+    area.append(label);
+  }
   area.append(descricao);
   permitidos.forEach((a) => {
     const row = document.createElement("div");
@@ -139,27 +152,6 @@ function abrirExtrasComboSiteUI(n) {
     );
     area.append(row);
   });
-  const label = document.createElement("label");
-  label.className = "combo-observacao-ui";
-  label.textContent = "Observação";
-  const obs = document.createElement("textarea");
-  obs.value = config.observacao;
-  obs.placeholder = "Ex.: sem cebola";
-  obs.oninput = () => {
-    (n < 0 ? comboSiteUI.lanches : [config]).forEach((c) => (c.observacao = obs.value));
-  };
-  label.append(obs);
-  area.append(label);
-  const limpar = document.createElement("button");
-  limpar.textContent = "Limpar";
-  limpar.onclick = () => {
-    limparExtrasComboSiteUI(n);
-    area
-      .querySelectorAll(".controle-adicional-combo-auto span")
-      .forEach((s) => (s.textContent = "0"));
-    obs.value = "";
-  };
-  area.append(limpar);
   document.body.append(area);
   const janela = abrirJanelaElementoUI(area, n < 0 ? "Todos os lanches" : `Lanche ${n + 1}`);
   configurarAcrescimosImediatosUI(janela, () => {
@@ -239,11 +231,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function resumoComboTextoSiteUI(item) {
-  return (item.lanchesCombo || [])
+  const grupos = item.lanchesCombo || [];
+  const texto = (c) =>
+    JSON.stringify({ adicionais: c.adicionais || [], observacao: c.observacao || "" });
+  const todos = grupos.length > 1 && grupos.every((c) => texto(c) === texto(grupos[0]));
+  return (todos ? grupos.slice(0, 1) : grupos)
     .map((c, n) => {
       const partes = (c.adicionais || []).map((a) => `${a.qtd} ${a.nome}`);
       if (c.observacao) partes.push(`Obs.: ${c.observacao}`);
-      return partes.length ? `Lanche ${n + 1}: ${partes.join("; ")}` : "";
+      return partes.length
+        ? `${todos ? "Todos com" : "Lanche " + (n + 1)}: ${partes.join("; ")}`
+        : "";
     })
     .filter(Boolean)
     .join("\n");

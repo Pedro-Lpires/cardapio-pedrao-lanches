@@ -152,9 +152,10 @@ function prepararComboItemEditorUI(box, pai) {
               );
               x.value = origem?.value || "0";
             });
-            if (g.querySelector("[data-obs]"))
-              g.querySelector("[data-obs]").value =
-                primeiro.querySelector("[data-obs]")?.value || "";
+            const obs = g.observacaoExternaUI || g.querySelector("[data-obs]");
+            if (obs)
+              obs.value =
+                (primeiro.observacaoExternaUI || primeiro.querySelector("[data-obs]"))?.value || "";
           });
           primeiro.dispatchEvent(new Event("input", { bubbles: true }));
         },

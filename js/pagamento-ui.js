@@ -22,6 +22,18 @@ function organizarCamposPagamentoMistoUI(area) {
   area.replaceChildren(grade, resumo);
   area.classList.add("pagamento-misto-conteudo-ui");
   resumo.setAttribute("aria-live", "polite");
+  campos.forEach((campo) => {
+    campo.inputMode = "decimal";
+    campo.addEventListener?.("focus", () => {
+      if (Number(campo.value) === 0) campo.value = "";
+    });
+    campo.addEventListener?.("blur", () => {
+      if (!campo.value.trim()) {
+        campo.value = "0";
+        campo.oninput?.();
+      }
+    });
+  });
   campos[0].oninput?.();
 }
 function alternarCuponsPagamentoUI() {
@@ -108,6 +120,27 @@ function abrirPagamentoMistoJanelaUI(id) {
       anteriores[0]?.[0].oninput?.();
     },
   );
+  const confirmar = document.createElement("button");
+  confirmar.type = "button";
+  confirmar.className = "pagamento-confirmar-misto-ui";
+  confirmar.textContent = "Confirmar divisão";
+  confirmar.onclick = () => {
+    const campos = [...area.querySelectorAll("input")];
+    const informado = campos.reduce((s, c) => s + centavosOperacao(c.value), 0);
+    const esperado = Number(area.querySelector('[id^="resumo-"]')?.dataset.total);
+    if (
+      campos.some((c) => !Number.isFinite(Number(c.value)) || Number(c.value) < 0) ||
+      !Number.isFinite(esperado) ||
+      informado !== centavosOperacao(esperado)
+    ) {
+      mostrarAvisoUI(
+        "A divisão deve somar exatamente " + moedaOperacao(esperado) + ". Confira os valores.",
+      );
+      return;
+    }
+    janela.querySelector(".ui-voltar").onclick();
+  };
+  janela.append(confirmar);
 }
 function organizarFechamentoUI() {
   const area = document.getElementById("area-fechamento-comanda");

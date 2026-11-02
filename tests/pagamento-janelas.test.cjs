@@ -1,6 +1,7 @@
 const fs = require("node:fs"),
   vm = require("node:vm"),
   assert = require("node:assert/strict");
+let confirmarBotao;
 let aplicar,
   cancelar,
   resumo = null,
@@ -29,12 +30,20 @@ const ctx = vm.createContext({
     }),
     addEventListener() {},
   },
-  abrirJanelaElementoUI: () => ({ classList: { add() {} } }),
+  abrirJanelaElementoUI: () => ({
+    classList: { add() {} },
+    append(b) {
+      confirmarBotao = b;
+    },
+    querySelector: () => ({ onclick: () => aplicar() }),
+  }),
   configurarRascunhoAcrescimosUI: (j, a, c) => {
     aplicar = a;
     cancelar = c;
   },
+  centavosOperacao: (n) => Math.round(Number(n || 0) * 100),
   moedaOperacao: (n) => "R$ " + n,
+  mostrarAvisoUI: () => {},
 });
 vm.runInContext(fs.readFileSync("js/pagamento-ui.js", "utf8"), ctx);
 ctx.organizarCamposPagamentoMistoUI = () => {};

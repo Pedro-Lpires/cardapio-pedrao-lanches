@@ -72,6 +72,8 @@ class AudioMock {
 }
 const ctx = vm.createContext({
   console,
+  setTimeout,
+  clearTimeout,
   Set,
   Map,
   document: {
@@ -133,7 +135,11 @@ const conta = { id: "b", tipo: "conta", mesaNumero: 6, criadoEmMs: 30 };
   assert.equal(elementos["btn-som-chamados"].innerHTML, "<svg>sino</svg>");
   contextos[0].state = "suspended";
   contextos[0].onstatechange();
-  assert.equal(elementos["btn-som-chamados"]["aria-pressed"], "false");
+  assert.equal(
+    elementos["btn-som-chamados"]["aria-pressed"],
+    "true",
+    "ativação não é perdida quando o navegador pausa",
+  );
   assert.match(elementos["estado-som-chamados"].textContent, /pausou/);
   assert.equal(contextos[0].state, "suspended", "Pausa do navegador não é contornada");
   contextos[0].state = "running";
@@ -169,6 +175,16 @@ const conta = { id: "b", tipo: "conta", mesaNumero: 6, criadoEmMs: 30 };
   eventos.pagehide();
   assert.equal(contextos[1].state, "closed");
   assert.equal(ctx.document.title, "Painel Atendente");
+  assert.equal(
+    preferencias.get("pedrao-som-atendimento-ativo"),
+    "sim",
+    "pagehide preserva a escolha do som",
+  );
+  await ctx.restaurarPreferenciaSomChamadosUI();
+  assert.equal(estado().ligado, true);
+  assert.equal(estado().contexto.state, "running", "retoma ao voltar sem pedir nova confirmação");
+  ctx.encerrarSomChamadosAtendenteUI();
+  assert.equal(preferencias.get("pedrao-som-atendimento-ativo"), "nao");
   bloquear = true;
   await ctx.ativarSomChamadosAtendenteUI();
   assert.match(elementos["estado-som-chamados"].textContent, /bloqueado/);

@@ -21,7 +21,7 @@
   const parametrosFixture = new URL(document.currentScript.src).searchParams;
   const mesaFixture = parametrosFixture.get("mesa") || "2";
   const cenarioFixture = parametrosFixture.get("cenario");
-  if (["entrega-distante", "entrega-fora-area"].includes(cenarioFixture)) {
+  if (["entrega-distante", "entrega-fora-area", "beneficios-entrega"].includes(cenarioFixture)) {
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
       value: {
@@ -31,7 +31,12 @@
             coords: {
               latitude:
                 -15.553076945525193 -
-                (cenarioFixture === "entrega-fora-area" ? 22 : 12) / 111.19492664455873,
+                (cenarioFixture === "entrega-fora-area"
+                  ? 22
+                  : cenarioFixture === "beneficios-entrega"
+                    ? 3
+                    : 12) /
+                  111.19492664455873,
               longitude: -56.05602240360688,
             },
           });
@@ -636,6 +641,26 @@
         itens: clone(lote),
       });
   }
+  if (cenarioFixture === "chapeiro-obs-grupo") {
+    const combo = (qtd, obs = "", batata = false) => ({
+      nome: `Combo ${qtd} Caseiro`,
+      categoria: "combos",
+      quantidade: 1,
+      tipo: "Artesanal",
+      obs,
+      comboComponentes: [
+        { nome: "Baguncinha", categoria: "lanches", quantidade: qtd },
+        ...(batata ? [{ nome: "Batata Média", categoria: "batatas", quantidade: 1 }] : []),
+      ],
+    });
+    docs.delete("filaCozinha/retirada-fila");
+    Object.assign(docs.get("filaCozinha/entrega-fila"), {
+      tipo: "Local",
+      mesa: 6,
+      cliente: "Cliente de exemplo",
+      itens: [combo(2, "Sem tomate e batata sequinha", true), combo(5), combo(2)],
+    });
+  }
   docs.set("filaCozinha/antigo-fila", {
     origemColecao: "pedidos",
     origemId: "entrega-antiga",
@@ -647,6 +672,54 @@
   });
   docs.get("comandas/comanda1").criadoEm = agora;
   docs.get("comandas/comanda1").itens.forEach((item) => (item.precoUnitario = item.preco));
+  if (["rank-mensal", "beneficios-entrega"].includes(cenarioFixture)) {
+    for (const [chave] of docs)
+      if (/^(pedidos|comandas|historicoPagamentosClientes)\//.test(chave)) docs.delete(chave);
+    const anterior = new DataReal(
+      horarioTeste.getFullYear(),
+      horarioTeste.getMonth() - 1,
+      15,
+      20,
+    ).getTime();
+    for (const [id, valor, data] of [
+      ["rank-anterior", 500, anterior],
+      ["rank-atual", 310, agora],
+    ]) {
+      docs.set("pedidos/" + id, {
+        clienteId: cliente,
+        nome: "Rafa Teste",
+        telefone: cliente,
+        tipo: "Retirada",
+        numero: id,
+        itens: [{ nome: "Compras do mês", preco: valor, quantidade: 1 }],
+        valorTotal: valor,
+        taxaEntrega: 0,
+        pagamento: "Pix",
+        pagamentoConfirmado: true,
+        pagamentoConfirmadoEm: data,
+        valorPago: valor,
+        dataMs: data,
+      });
+    }
+    docs.get("clientes/" + cliente).nivelCliente = "Prata";
+    docs.get("clientes/" + cliente).totalFidelidade = 58;
+    docs.get("clientes/" + cliente).bonusDisponivel = 0;
+  }
+  if (cenarioFixture === "beneficios-entrega") {
+    docs.set("config/beneficios", {
+      creditoEntrega: {
+        ativo: true,
+        valores: { Bronze: 0, Prata: 5, Ouro: 10, Diamante: 15, Imortal: 20 },
+        limitePorPedido: 4,
+        pedidoMinimo: 0,
+        acumularCupom: true,
+        acumularFidelidade: true,
+      },
+    });
+    const abrirOriginal = window.open.bind(window);
+    window.open = (url, ...args) =>
+      /whatsapp|wa\.me/.test(String(url)) ? null : abrirOriginal(url, ...args);
+  }
   const Params = window.URLSearchParams;
   window.URLSearchParams = class extends Params {
     constructor(valor) {
@@ -781,6 +854,13 @@
   window.addEventListener("message", (evento) => {
     if (evento.source !== window.parent || evento.origin !== new URL(document.baseURI).origin)
       return;
+    if (
+      evento.data?.tipo === "revisao-encerrar-atendimento-auto" &&
+      cenarioFixture === "auto-pedido-enviado"
+    ) {
+      doc("comandas/comanda-auto-teste").update({ status: "Fechada" });
+      doc("mesas/mesa" + mesaFixture).update({ ocupada: false });
+    }
     if (evento.data?.tipo === "revisao-medir-layout") {
       const largura = document.documentElement.clientWidth;
       const total = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
@@ -917,6 +997,35 @@
     setItem: (k, v) => memoria.set(k, String(v)),
     removeItem: (k) => memoria.delete(k),
   };
+  if (cenarioFixture === "auto-pedido-enviado") {
+    const idMesa = "mesa" + mesaFixture;
+    docs.set("mesas/" + idMesa, { numero: Number(mesaFixture), ocupada: true });
+    docs.set("sessoesMesa/sessao-auto-teste", {
+      mesaId: idMesa,
+      mesaNumero: Number(mesaFixture),
+      nome: "Cliente Teste",
+      status: "ativa",
+      pedidoEnviado: true,
+      comandaId: "comanda-auto-teste",
+      criadoEmMs: agora,
+    });
+    docs.set("sessoesMesa/outra-mesa", {
+      mesaId: "mesa-outra",
+      status: "ativa",
+      pedidoEnviado: true,
+    });
+    docs.set("comandas/comanda-auto-teste", {
+      mesa: Number(mesaFixture),
+      mesaId: idMesa,
+      status: "Aberta",
+      sessaoAutoatendimentoId: "sessao-auto-teste",
+      cliente: "Cliente Teste",
+      valorTotal: 25,
+      itens: [],
+    });
+    memoria.set("sessaoAutoatendimentoId:" + idMesa, "sessao-auto-teste");
+    memoria.set("sessaoAutoatendimentoId", "outra-mesa");
+  }
   Object.defineProperty(window, "localStorage", { value: storage });
   Object.defineProperty(window, "sessionStorage", { value: storage });
 })();

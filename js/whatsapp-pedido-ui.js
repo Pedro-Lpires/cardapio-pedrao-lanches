@@ -21,7 +21,7 @@ function abrirMensagemWhatsPedidoUI(texto) {
   const janela = janelaEditorUI("Pedido salvo"),
     box = janela.querySelector(".editor-corpo-ui");
   box.innerHTML =
-    '<p>Seu pedido foi salvo e abrimos o WhatsApp para você enviar a mensagem.</p><p>Se o WhatsApp ficar carregando, copie o pedido e abra a conversa sem o texto.</p><div class="editor-acoes-ui"><button type="button" data-copiar>Copiar pedido</button><a class="botao-padrao" target="_blank" rel="noopener" data-abrir>Abrir conversa</a></div><p role="status"></p><details><summary>Ver mensagem</summary><textarea readonly aria-label="Mensagem do pedido"></textarea></details>';
+    '<p>Seu pedido foi salvo. Confira e envie a mensagem no WhatsApp que abrimos.</p><details class="whatsapp-ajuda-ui"><summary>O WhatsApp não abriu ou ficou carregando?</summary><p>Copie o pedido, abra a conversa pelo botão abaixo e cole a mensagem. Isso não cria outro pedido.</p></details><div class="editor-acoes-ui"><button type="button" data-copiar>Copiar pedido</button><a class="botao-padrao" target="_blank" rel="noopener" data-abrir>Abrir conversa</a></div><p role="status"></p><details><summary>Ver mensagem</summary><textarea readonly aria-label="Mensagem do pedido"></textarea></details>';
   box.querySelector("textarea").value = mensagem;
   box.querySelector("[data-abrir]").href = urlWhatsAppPedidoUI();
   box.querySelector("[data-copiar]").onclick = async () => {
@@ -30,7 +30,7 @@ function abrirMensagemWhatsPedidoUI(texto) {
       box.querySelector("[role=status]").textContent =
         "Pedido copiado. Cole na conversa do WhatsApp.";
     } catch {
-      box.querySelector("details").open = true;
+      box.querySelector("textarea").closest("details").open = true;
       box.querySelector("textarea").select();
       box.querySelector("[role=status]").textContent = "Selecione e copie o texto abaixo.";
     }
