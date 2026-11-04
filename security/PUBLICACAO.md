@@ -15,6 +15,12 @@ em produção por esta implementação. Não compartilhar chaves, senhas ou toke
    domínio `cardapio-pedrao-lanches.vercel.app` autorizado. Conferir as variáveis
    Production pelos nomes em `.env.example`, sem exibir os valores privados.
 
+O projeto fixa Node 24 em `package.json`. Na Vercel, configure também
+`NODE_OPTIONS=--experimental-require-module`: a hospedagem desativa por padrão
+essa interoperabilidade, usada pela dependência de autenticação `jwks-rsa/jose`.
+Sem a opção, o carregamento retorna `ERR_REQUIRE_ESM`, mesmo no Node 24.
+Referência: [configuração oficial da Vercel](https://vercel.com/docs/functions/runtimes/node-js/advanced-node-configuration#experimental-node.js-require-of-es-module).
+
 ## Corte e conferência
 
 1. No Firestore, substituir **o conjunto inteiro** das regras pelo conteúdo de
