@@ -19,6 +19,31 @@ dialog.recuperacao-admin-ui {
   line-height: 1.45;
   margin-block: 16px;
 }
+dialog.recuperacao-admin-ui .editor-corpo-ui > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 12px 0 0;
+  padding: 11px 14px;
+  border: 1px solid #555;
+  border-radius: 10px;
+  background: #303030;
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+dialog.recuperacao-admin-ui .editor-corpo-ui > button[data-preparar-testes] {
+  background: #ed0017;
+  border-color: #ed0017;
+}
 .recuperacao-admin-ui .recuperacao-acoes {
   display: flex;
   flex-wrap: wrap;
