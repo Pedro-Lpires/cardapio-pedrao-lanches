@@ -2,6 +2,14 @@
 let observadoresSessaoAutoUI = [];
 
 async function recuperarContaSalvaAutoUI() {
+  if (typeof acessoClienteSenhaUI !== "undefined") {
+    try {
+      if (await window.acessoClienteSenhaUI.ativo())
+        return await window.acessoClienteSenhaUI.restaurar();
+    } catch {
+      return null;
+    }
+  }
   let salvo;
   try {
     const texto = window.localStorage.getItem("clientePedrao");
@@ -77,6 +85,13 @@ function pararAcompanhamentoSessaoAutoUI() {
   parar.forEach((fn) => fn());
 }
 function mostrarAtendimentoEncerradoAutoUI() {
+  if (typeof mesaProtegidaUI !== "undefined")
+    mesaProtegidaUI.apagar(mesaAutoatendimentoAtual?.numero);
+  if (typeof appVisitaMesaProtegidaUI !== "undefined" && appVisitaMesaProtegidaUI)
+    appVisitaMesaProtegidaUI
+      .auth()
+      .signOut()
+      .catch(() => {});
   pararAcompanhamentoSessaoAutoUI();
   const id = sessaoAutoatendimentoAtual?.id;
   if (id) apagarIdentificacaoSessaoAutoUI(id);
@@ -94,6 +109,10 @@ function mostrarAtendimentoEncerradoAutoUI() {
       '<section class="auto-atendimento-encerrado-ui"><h2>Atendimento encerrado</h2><p>Esta comanda foi encerrada. Para começar um novo atendimento, escaneie o QR Code da mesa novamente.</p></section>';
 }
 async function recuperarSessaoDaMesaAutoUI() {
+  if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo())) {
+    const r = await mesaProtegidaUI.retomar(mesaAutoatendimentoAtual.numero);
+    return r.sessaoEncerrada ? { sessaoEncerrada: true } : r.sessao;
+  }
   const id = lerIdentificacaoSessaoAutoUI();
   if (!id) return null;
   const doc = await db.collection("sessoesMesa").doc(id).get();
@@ -149,7 +168,9 @@ function acompanharSessaoEnviadaAutoUI() {
     ],
     ["mesas", sessao.mesaId || mesaAutoatendimentoId, (d) => d.ocupada === true],
   ]) {
-    const ref = db.collection(colecao).doc(id);
+    const ref = (typeof bancoVisitaMesaUI === "function" ? bancoVisitaMesaUI() : db)
+      .collection(colecao)
+      .doc(id);
     if (typeof ref.onSnapshot !== "function") continue;
     observadoresSessaoAutoUI.push(
       ref.onSnapshot(
@@ -157,7 +178,15 @@ function acompanharSessaoEnviadaAutoUI() {
           if (sessaoAutoatendimentoAtual?.id !== sessao.id) return;
           if (!doc.exists || !valido(doc.data())) mostrarAtendimentoEncerradoAutoUI();
         },
-        (erro) => console.error("Não foi possível acompanhar o atendimento:", erro),
+        (erro) => {
+          if (
+            typeof mesaProtegidaUI !== "undefined" &&
+            sessao.sessaoProtegida === 1 &&
+            String(erro.code || "").includes("permission-denied")
+          )
+            mostrarAtendimentoEncerradoAutoUI();
+          else console.error("Não foi possível acompanhar o atendimento:", erro);
+        },
       ),
     );
   }

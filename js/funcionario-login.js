@@ -17,6 +17,16 @@ async function loginAtendente() {
   campo.disabled = true;
   status.textContent = "Conferindo código…";
   try {
+    if (typeof acessoEquipeDisponivelUI === "function" && (await acessoEquipeDisponivelUI())) {
+      const lembrar = document.getElementById("lembrar-funcionario")?.checked === true;
+      funcionarioValidadoUI = await entrarEquipeProtegidaUI(codigo, lembrar);
+      if (lembrar) localStorage.setItem("funcionarioSalvoPedrao", funcionarioValidadoUI.id);
+      else localStorage.removeItem("funcionarioSalvoPedrao");
+      campo.value = "";
+      status.textContent = "";
+      mostrarDestinosFuncionarioUI();
+      return;
+    }
     const snap = await db
       .collection("atendentes")
       .where("codigo", "==", codigo)
@@ -38,7 +48,10 @@ async function loginAtendente() {
     else localStorage.removeItem("funcionarioSalvoPedrao");
     mostrarDestinosFuncionarioUI();
   } catch (erro) {
-    status.textContent = "Não foi possível conferir o código. Tente novamente.";
+    status.textContent =
+      typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI()
+        ? erro.message
+        : "Não foi possível conferir o código. Tente novamente.";
   } finally {
     validandoFuncionarioUI = false;
     botao.disabled = false;
@@ -56,7 +69,7 @@ function abrirDestinoFuncionarioUI(destino) {
   registrarAcessoFuncionarioUI(funcionarioValidadoUI.id, funcionarioValidadoUI);
   location.href = destino === "chapa" ? "cozinha.html" : "painel-atendente.html";
 }
-function trocarCodigoFuncionarioUI() {
+async function trocarCodigoFuncionarioUI() {
   funcionarioValidadoUI = null;
   localStorage.removeItem("funcionarioSalvoPedrao");
   localStorage.removeItem("atendenteId");
@@ -68,6 +81,7 @@ function trocarCodigoFuncionarioUI() {
   document.getElementById("login-funcionario").hidden = false;
   document.getElementById("login-funcionario-status").textContent = "";
   document.getElementById("codigo-atendente").focus();
+  if (typeof sairEquipeProtegidaUI === "function") await sairEquipeProtegidaUI();
 }
 
 function mostrarDestinosFuncionarioUI() {
@@ -89,10 +103,17 @@ function mostrarDestinosFuncionarioUI() {
 }
 async function restaurarFuncionarioSalvoUI() {
   const id = localStorage.getItem("funcionarioSalvoPedrao");
-  if (!id) return;
   const status = document.getElementById("login-funcionario-status");
-  status.textContent = "Conferindo acesso salvo…";
   try {
+    if (typeof acessoEquipeDisponivelUI === "function" && (await acessoEquipeDisponivelUI())) {
+      funcionarioValidadoUI = await restaurarEquipeProtegidaUI();
+      if (!funcionarioValidadoUI) return;
+      status.textContent = "";
+      mostrarDestinosFuncionarioUI();
+      return;
+    }
+    if (!id) return;
+    status.textContent = "Conferindo acesso salvo…";
     const doc = await db.collection("atendentes").doc(id).get();
     if (!doc.exists || doc.data().ativo !== true || perfilFuncionarioUI(doc.data()) === "nenhum") {
       localStorage.removeItem("funcionarioSalvoPedrao");

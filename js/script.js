@@ -14,7 +14,10 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db =
+  typeof dbEquipeProtegidaUI === "function" && location.pathname.endsWith("/painel-atendente.html")
+    ? dbEquipeProtegidaUI()
+    : firebase.firestore();
 
 let lojaAberta = null;
 
@@ -470,10 +473,10 @@ function renderizarCarrinho() {
   carrinho.forEach((item, index) => {
     const adicionaisTexto =
       item.adicionais && item.adicionais.length > 0
-        ? item.adicionais.map((a) => `${a.qtd} ${a.nome}`).join(" + ")
+        ? item.adicionais.map((a) => `${Number(a.qtd) || 0} ${escaparOperacao(a.nome)}`).join(" + ")
         : "";
 
-    const obsTexto = item.obs || "";
+    const obsTexto = escaparOperacao(item.obs || "");
 
     const temAdicional = item.adicionais && item.adicionais.length > 0;
 
@@ -486,7 +489,7 @@ function renderizarCarrinho() {
             <div class="info-item-carrinho">
 
                 <strong class="nome-item">
-                    ${item.qtd} ${item.nome}
+                    ${Number(item.qtd) || 1} ${escaparOperacao(item.nome)}
                 </strong>
 
                 <span class="valor-item-carrinho">
@@ -805,23 +808,27 @@ function exibirRevisao(
 
     let texto = `
         <strong>
-            ${item.qtd} ${item.nome}
+            ${Number(item.qtd) || 1} ${escaparOperacao(item.nome)}
             ${!temAdicional ? `(R$ ${Number(item.preco || 0).toFixed(2)})` : ""}
         </strong>
     `;
 
     if (temAdicional) {
-      const adicionaisTexto = item.adicionais.map((a) => `${a.qtd} ${a.nome}`).join(" + ");
+      const adicionaisTexto = item.adicionais
+        .map((a) => `${Number(a.qtd) || 0} ${escaparOperacao(a.nome)}`)
+        .join(" + ");
 
       texto += `<br><small>➕ Acréscimos: ${adicionaisTexto}</small>`;
       texto += `<br><strong>Valor com acréscimos: R$ ${Number(item.preco || 0).toFixed(2)}</strong>`;
     }
 
     if (item.obs) {
-      texto += `<br><small>📝 ${/combo/i.test(item.categoria || item.nome || "") ? "Obs. geral" : "Obs"}: ${item.obs}</small>`;
+      texto += `<br><small>📝 ${/combo/i.test(item.categoria || item.nome || "") ? "Obs. geral" : "Obs"}: ${escaparOperacao(item.obs)}</small>`;
     }
     if (item.molhosGratis && item.molhosGratis.length > 0) {
-      const molhosTexto = item.molhosGratis.map((m) => `#${m.unidade}: ${m.texto}`).join("<br>");
+      const molhosTexto = item.molhosGratis
+        .map((m) => `#${Number(m.unidade) || 1}: ${escaparOperacao(m.texto)}`)
+        .join("<br>");
 
       texto += `
         <br>
@@ -831,7 +838,9 @@ function exibirRevisao(
     `;
     }
     if (item.molhosPagos && item.molhosPagos.length > 0) {
-      const pagosTexto = item.molhosPagos.map((m) => `${m.qtd} ${m.nome}`).join("<br>");
+      const pagosTexto = item.molhosPagos
+        .map((m) => `${Number(m.qtd) || 0} ${escaparOperacao(m.nome)}`)
+        .join("<br>");
 
       texto += `
         <br>
@@ -846,7 +855,7 @@ function exibirRevisao(
       categoriaItem.includes("combo") ||
       categoriaItem.includes("batata");
 
-    if (podeTerMolho) {
+    if (podeTerMolho && tipo !== "Local") {
       texto += `
         <br>
         <button type="button" class="botao-molhos-item"
@@ -898,12 +907,16 @@ function exibirRevisao(
   const proximaMeta = (Math.floor(totalGastoAtual / 300) + 1) * 300;
 
   const vaiGerarBonusNestePedido =
+    !(typeof checkoutProtegidoUI !== "undefined" && checkoutProtegidoUI.habilitado) &&
     clienteLogado &&
     clienteLogado.fidelidadeAtiva &&
     produtosAposCupom >= 10 &&
     totalGastoAtual + totalAntesDesconto >= proximaMeta;
 
   if (
+    tipo !== "Local" &&
+    (!(typeof checkoutProtegidoUI !== "undefined" && checkoutProtegidoUI.habilitado) ||
+      !!clienteLogado?.authUid) &&
     clienteLogado &&
     clienteLogado.fidelidadeAtiva &&
     produtosAposCupom >= 10 &&
@@ -1075,6 +1088,16 @@ function entregaAtiva() {
 }
 
 async function confirmarEEnviar() {
+  if (typeof checkoutProtegidoUI !== "undefined") {
+    try {
+      if (await checkoutProtegidoUI.ativo()) {
+        const anterior = await checkoutProtegidoUI.recuperar();
+        if (anterior.pedido) return finalizarPedidoCheckoutProtegidoUI(anterior.pedido);
+      }
+    } catch (e) {
+      return mostrarAvisoUI(e.message, "conferir");
+    }
+  }
   if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   if (typeof conferirBeneficiosAntesEnvioUI === "function") {
     try {
@@ -1175,6 +1198,7 @@ async function confirmarEEnviar() {
     telefone: telefoneFinalCliente,
     telefoneLimpo: telefoneLimpo,
     clienteId: clienteLogado ? clienteLogado.telefone : null,
+    clienteAuthUid: clienteLogado?.authUid || null,
 
     itens: itensProcessados,
     valorTotal: totalFinal,
@@ -1215,6 +1239,8 @@ async function confirmarEEnviar() {
 
   const numeroPedido = await salvarPedidoFirebase(pedidoFirebase);
   if (numeroPedido === null) return;
+  if (pedidoFirebase.checkoutProtegido === 1)
+    return finalizarPedidoCheckoutProtegidoUI(pedidoFirebase);
   if (clienteLogado) {
     const atualizado = await registrarBeneficiosPedidoOperacao(pedidoFirebase.id);
     if (atualizado) Object.assign(clienteLogado, atualizado);
@@ -1267,6 +1293,11 @@ async function salvarPedidoFirebase(pedido) {
     if (!pedido) {
       console.error("Pedido vazio. Não salvou no Firebase.");
       return null;
+    }
+    if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo())) {
+      const salvo = await checkoutProtegidoUI.salvar(pedido);
+      Object.assign(pedido, salvo.pedido);
+      return pedido.numero;
     }
 
     const contadorRef = await prepararContadorPedidoOperacao(db);
@@ -1643,6 +1674,14 @@ async function ativarCodigoClienteLogado() {
   if (botao?.disabled) return;
   if (botao) botao.disabled = true;
   try {
+    if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo())) {
+      const resultado = await checkoutProtegidoUI.ativar(codigo);
+      clienteLogado = (await checkoutProtegidoUI.perfil()).cliente;
+      campo.value = "";
+      atualizarTelaClienteLogado();
+      if (resultado.ativado) mostrarAtivacaoCdaPedraoUI();
+      return;
+    }
     const ref = db.collection("clientes").doc(clienteLogado.telefone);
     const dados = await db.runTransaction(async (transacao) => {
       const doc = await transacao.get(ref);
@@ -1669,6 +1708,7 @@ async function ativarCodigoClienteLogado() {
     atualizarTelaClienteLogado();
     if (dados.ativou) mostrarAtivacaoCdaPedraoUI();
   } catch (erro) {
+    if (erro.status === 400 || erro.status === 409) return alert(erro.message, "codigo");
     if (String(erro.code || "").includes("resource-exhausted")) {
       alert(
         "A ativação está temporariamente indisponível. Tente mais tarde ou fale conosco pelo WhatsApp. Seu código ainda não foi verificado.",
@@ -1697,6 +1737,14 @@ function limparTelefonePerfil() {
 }
 
 async function buscarCliente() {
+  if (typeof acessoClienteSenhaUI !== "undefined") {
+    try {
+      if (await window.acessoClienteSenhaUI.ativo()) return entrarClienteSenhaDeliveryUI();
+    } catch (erro) {
+      alert(erro.message);
+      return;
+    }
+  }
   const nome = document.getElementById("perfil-nome").value.trim();
   const telefone = limparTelefonePerfil();
   const salvarLogin = document.getElementById("check-salvar-login")?.checked || false;
@@ -1795,9 +1843,17 @@ async function abrirPedidosCliente() {
   // =========================
 
   const [snapPedidos, snapLocal] = await Promise.all([
-    lerComPrazoUI(db.collection("pedidos").where("clienteId", "==", telefone).get()),
     lerComPrazoUI(
-      db.collection("historicoPagamentosClientes").where("clienteId", "==", telefone).get(),
+      (typeof consultaHistoricoClienteSenhaUI === "function"
+        ? consultaHistoricoClienteSenhaUI("pedidos", clienteLogado)
+        : db.collection("pedidos").where("clienteId", "==", telefone)
+      ).get(),
+    ),
+    lerComPrazoUI(
+      (typeof consultaHistoricoClienteSenhaUI === "function"
+        ? consultaHistoricoClienteSenhaUI("historicoPagamentosClientes", clienteLogado)
+        : db.collection("historicoPagamentosClientes").where("clienteId", "==", telefone)
+      ).get(),
     ),
   ]);
   if (area.dataset.abaPerfil !== abaPedido) return;
@@ -2091,8 +2147,8 @@ async function abrirEnderecosCliente() {
   enderecos.forEach((e, i) => {
     html += `
         <div class="endereco-box">
-            <strong>${e.nome}</strong><br>
-            ${e.enderecoCompleto || `${e.rua}, ${e.numero} - ${e.bairro}`}<br>
+            <strong>${escaparOperacao(e.nome)}</strong><br>
+            ${escaparOperacao(e.enderecoCompleto || `${e.rua}, ${e.numero} - ${e.bairro}`)}<br>
             ${e.complemento && !String(e.enderecoCompleto || "").includes(e.complemento) ? escaparOperacao(e.complemento) : ""}
 
             <div class="acoes-endereco">
@@ -2238,7 +2294,7 @@ async function carregarEnderecosNaRevisao(tipo) {
   enderecos.forEach((e, index) => {
     select.innerHTML += `
             <option value="${index}">
-                ${e.nome} - ${e.rua}, ${e.numero} - ${e.bairro}
+                ${escaparOperacao(e.nome)} - ${escaparOperacao(e.rua)}, ${escaparOperacao(e.numero)} - ${escaparOperacao(e.bairro)}
             </option>
         `;
   });
@@ -2528,6 +2584,27 @@ async function aplicarCupomDesconto() {
     return;
   }
 
+  if (typeof checkoutProtegidoUI !== "undefined") {
+    try {
+      if (await checkoutProtegidoUI.ativo()) {
+        const versao = carrinhoVersao;
+        const resultado = await checkoutProtegidoUI.conferir(
+          pedidoAtualCheckoutProtegidoUI(codigo),
+        );
+        if (versao !== carrinhoVersao)
+          throw Error("O carrinho mudou. Confira os itens e aplique o cupom novamente.");
+        cupomDescontoAplicado = resultado.cupom;
+        aplicarCotacaoCheckoutProtegidoUI(resultado.pedido);
+        retorno.innerText = "Cupom aplicado com sucesso!";
+        return;
+      }
+    } catch (e) {
+      removerCupomDescontoCliente("");
+      retorno.innerText = e.message;
+      return;
+    }
+  }
+
   const doc = await db.collection("cuponsDesconto").doc(codigo).get();
 
   if (!doc.exists) {
@@ -2787,14 +2864,8 @@ async function aplicarCupomDesconto() {
   );
 }
 function arredondarPagamento(valor) {
-  const inteiro = Math.floor(valor);
-  const centavos = valor - inteiro;
-
-  if (centavos < 0.3) {
-    return inteiro;
-  }
-
-  return inteiro + 1;
+  const centavos = Math.round(Math.max(0, Number(valor) || 0) * 100);
+  return Math.floor((centavos + 70) / 100);
 }
 async function ajustarFidelidadeAposEditarPedido(pedidoAntigo, pedidoNovo) {
   if (!pedidoNovo.clienteId || !pedidoNovo.fidelidadeAtivaNoPedido) return;
@@ -2922,6 +2993,10 @@ async function salvarPerfilCliente() {
   }
 
   const telefoneAntigo = clienteLogado.telefone;
+  if (clienteLogado.authUid && telefone !== telefoneAntigo)
+    return alert(
+      "Para trocar o celular da conta, fale com a loja. Seu acesso e seu histórico precisam continuar vinculados ao número correto.",
+    );
 
   const dadosAtualizados = {
     ...clienteLogado,
@@ -2959,13 +3034,14 @@ async function salvarPerfilCliente() {
   alert("Perfil atualizado!");
 }
 
-function logoutCliente() {
+async function logoutCliente() {
   if (typeof encerrarContadorClienteUI === "function") encerrarContadorClienteUI();
   if (onlineSessionId) {
     db.collection("usuariosOnline").doc(onlineSessionId).delete();
   }
 
   if (typeof encerrarBeneficiosPedraoUI === "function") encerrarBeneficiosPedraoUI();
+  if (typeof acessoClienteSenhaUI !== "undefined") await window.acessoClienteSenhaUI.sair();
   clienteLogado = null;
   localStorage.removeItem("clientePedrao");
 
@@ -2985,6 +3061,17 @@ function logoutCliente() {
 }
 window.addEventListener("load", async () => {
   if (!document.getElementById("perfil-form")) return;
+  if (typeof acessoClienteSenhaUI !== "undefined") {
+    try {
+      if (await window.acessoClienteSenhaUI.ativo()) {
+        const cliente = await window.acessoClienteSenhaUI.restaurar();
+        if (cliente) await aplicarClienteSenhaUI(cliente);
+        return;
+      }
+    } catch {
+      return;
+    }
+  }
 
   const clienteSalvo = localStorage.getItem("clientePedrao");
 
@@ -3086,6 +3173,8 @@ function abrirPerfilModo(modo) {
 
 function atualizarTelaClienteLogado() {
   if (!clienteLogado) return;
+  if (typeof atualizarAvisoSenhaClienteUI === "function")
+    atualizarAvisoSenhaClienteUI(clienteLogado);
   if (typeof acompanharBeneficiosClientePedraoUI === "function")
     acompanharBeneficiosClientePedraoUI(clienteLogado, (atual) => {
       if (!clienteLogado || clienteLogado.telefone !== atual.telefone) return;
@@ -3574,6 +3663,24 @@ async function criarChamadoSuporte() {
 
   if (!categoria) return alert("Escolha o tipo do suporte.");
   if (!texto) return alert("Digite sua mensagem.");
+  if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo())) {
+    try {
+      if (possuiPedido && !selecionado) return alert("Escolha o pedido do histórico.");
+      const resultado = await checkoutProtegidoUI.suporte({
+        categoria,
+        texto,
+        referenciaPedido: possuiPedido ? selecionado : "",
+      });
+      document.getElementById("categoria-chamado").value = "";
+      document.getElementById("mensagem-novo-chamado").value = "";
+      document.getElementById("form-novo-chamado").style.display = "none";
+      categoriaSuporteClienteUI = categoria;
+      abrirChamadoCliente(resultado.id);
+    } catch (e) {
+      mostrarAvisoUI(e.message, "conferir");
+    }
+    return;
+  }
   if (possuiPedido) {
     if (!["pedidos", "historicoPagamentosClientes"].includes(colecaoPedido) || !pedidoId)
       return alert("Escolha o pedido do histórico.");
@@ -3791,16 +3898,21 @@ async function enviarMensagemChamadoCliente() {
       if (chamadoClienteAbertoId === chamadoId) etapaSuporteCliente("lista");
       return;
     }
-    await chamadoRef
-      .collection("mensagens")
-      .add({ texto, remetente: "cliente", data: new Date().toISOString(), lida: false });
+    const protegido =
+      typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo());
+    if (protegido) await checkoutProtegidoUI.responderSuporte({ chamadoId, texto });
+    else
+      await chamadoRef
+        .collection("mensagens")
+        .add({ texto, remetente: "cliente", data: new Date().toISOString(), lida: false });
     // O listener atualiza somente as mensagens. Mantém o compositor, o foco e o novo rascunho.
     if (document.getElementById("resposta-chamado-cliente") === campo && campo.value === rascunho) {
       campo.value = "";
       if (document.activeElement === campo || document.activeElement === botao)
         campo.focus({ preventScroll: true });
     }
-    chamadoRef.update({ atualizadoEm: new Date().toISOString() }).catch(console.error);
+    if (!protegido)
+      chamadoRef.update({ atualizadoEm: new Date().toISOString() }).catch(console.error);
   } catch (erro) {
     console.error("Não foi possível enviar a mensagem:", erro);
     alert("Não foi possível enviar a mensagem. Seu texto foi mantido para tentar novamente.");
@@ -3816,17 +3928,20 @@ async function finalizarChamadoCliente(chamadoId) {
   )
     return;
 
-  await db
-    .collection("clientes")
-    .doc(clienteLogado.telefone)
-    .collection("chamados")
-    .doc(chamadoId)
-    .update({
-      status: "finalizado",
-      finalizadoPor: "cliente",
-      finalizadoEm: new Date().toISOString(),
-      atualizadoEm: new Date().toISOString(),
-    });
+  if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo()))
+    await checkoutProtegidoUI.encerrarSuporte(chamadoId);
+  else
+    await db
+      .collection("clientes")
+      .doc(clienteLogado.telefone)
+      .collection("chamados")
+      .doc(chamadoId)
+      .update({
+        status: "finalizado",
+        finalizadoPor: "cliente",
+        finalizadoEm: new Date().toISOString(),
+        atualizadoEm: new Date().toISOString(),
+      });
 
   chamadoClienteAbertoId = null;
   etapaSuporteCliente(categoriaSuporteClienteUI ? "categoria" : "lista");
@@ -3846,10 +3961,11 @@ async function togglePedidosSuporteCliente() {
     const pedidos = [];
     await Promise.all(
       ["pedidos", "historicoPagamentosClientes"].map(async (colecao) => {
-        const snap = await db
-          .collection(colecao)
-          .where("clienteId", "==", clienteLogado.telefone)
-          .get();
+        const consulta =
+          typeof consultaHistoricoClienteSenhaUI === "function"
+            ? consultaHistoricoClienteSenhaUI(colecao, clienteLogado)
+            : db.collection(colecao).where("clienteId", "==", clienteLogado.telefone);
+        const snap = await consulta.get();
         snap.forEach((doc) => {
           if (doc.data().status !== "cancelado")
             pedidos.push({ ...doc.data(), id: doc.id, colecao });
@@ -3881,7 +3997,15 @@ async function togglePedidosSuporteCliente() {
 }
 async function atualizarStatusOnline() {
   if (document.hidden) return;
+  let authUid;
+  if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo())) {
+    authUid = firebase.auth().currentUser?.uid;
+    if (!authUid) return;
+    if (!onlineSessionId.startsWith("cliente_" + authUid + "_"))
+      onlineSessionId = "cliente_" + authUid + "_" + Date.now().toString(36);
+  }
   const dadosOnline = {
+    ...(authUid ? { authUid } : {}),
     sessionId: onlineSessionId,
 
     nome: clienteLogado?.nome || "Sem cadastro",
@@ -4008,6 +4132,14 @@ function limparTelaMensagensCliente() {
   if (form) form.style.display = "none";
 }
 async function criarPerfilCliente() {
+  if (typeof acessoClienteSenhaUI !== "undefined") {
+    try {
+      if (await window.acessoClienteSenhaUI.ativo()) return cadastrarClienteSenhaDeliveryUI();
+    } catch (erro) {
+      alert(erro.message);
+      return;
+    }
+  }
   const nome = document.getElementById("perfil-nome").value.trim();
   const telefone = limparTelefonePerfil();
   const salvarLogin = document.getElementById("check-salvar-login")?.checked || false;

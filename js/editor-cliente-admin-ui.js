@@ -114,6 +114,14 @@ async function abrirClientePedidoAdminUI(pedidoId, pedido) {
         : doc.data();
     box.innerHTML = `<p><strong>${escaparOperacao(original.nome || "")}</strong><br>Celular da conta: ${escaparOperacao(id)}</p><div class="editor-acoes-ui"><button type="button" data-aba="cadastro">Cadastro e fidelidade</button><button type="button" data-aba="cupons">Cupons</button><button type="button" data-aba="raspadinhas">Raspadinhas</button></div><div data-painel></div>${typeof htmlRankMensalUI === "function" ? htmlRankMensalUI(original) : ""}`;
     const painel = box.querySelector("[data-painel]");
+    if (typeof abrirRecuperacaoClienteAdminUI === "function") {
+      const recuperar = document.createElement("button");
+      recuperar.type = "button";
+      recuperar.textContent = "Redefinir acesso";
+      recuperar.onclick = () =>
+        abrirRecuperacaoClienteAdminUI({ nome: original.nome, telefone: id });
+      box.querySelector(".editor-acoes-ui").append(recuperar);
+    }
     const executar = async (b, tarefa) => {
       b.disabled = true;
       try {

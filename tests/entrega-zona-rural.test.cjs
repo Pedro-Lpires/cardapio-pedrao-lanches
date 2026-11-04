@@ -152,6 +152,10 @@ async function exemplosWhatsApp() {
   return mensagens;
 }
 async function testar() {
+  const arredondar = contexto().ctx.arredondarPagamento;
+  assert.equal(arredondar(99.29), 99);
+  assert.equal(arredondar(99.3), 100);
+  assert.equal(arredondar(99.31), 100);
   const t = contexto(),
     taxa = t.ctx.calcularTaxaEntregaSiteUI;
   const quarta = new Date(2026, 9, 28, 20),

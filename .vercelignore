@@ -1,0 +1,21 @@
+# Páginas e funções são publicadas; ferramentas e documentação ficam no repositório.
+.git/
+.codex/
+.agents/
+.claude/
+node_modules/
+tests/
+scripts/
+security/
+firebase.emulador.json
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+*.md
+**/*.md
+!fonts/**/LICENSE.md
+npm-debug.log*
+.prettierrc.json
+.npmrc
+.env*
+*.secret.json

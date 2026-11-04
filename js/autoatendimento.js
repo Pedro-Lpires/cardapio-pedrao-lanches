@@ -140,6 +140,9 @@ async function iniciarAutoatendimento() {
   // BUSCAR MESA
   // =========================
 
+  if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo()))
+    return iniciarMesaProtegidaUI(numeroMesa);
+
   const snapMesa = await lerComPrazoUI(
     db.collection("mesas").where("numero", "==", numeroMesa).limit(1).get(),
   );
@@ -294,6 +297,12 @@ function mostrarIdentificacaoAutoatendimento() {
     `;
 }
 async function criarSessaoAutoatendimento(clienteSalvo = null) {
+  if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo()))
+    return criarSessaoMesaProtegidaUI(
+      String(
+        clienteSalvo?.nome || document.getElementById("nome-autoatendimento")?.value || "",
+      ).trim(),
+    );
   const inputNome = document.getElementById("nome-autoatendimento");
 
   const nome = String(clienteSalvo?.nome || inputNome?.value || "").trim();
@@ -367,6 +376,7 @@ async function criarSessaoAutoatendimento(clienteSalvo = null) {
       // =========================
 
       clienteId: clienteSalvo?.telefone || null,
+      clienteAuthUid: clienteSalvo?.authUid || null,
 
       clienteLogado: Boolean(clienteSalvo),
       ...(clienteSalvo
@@ -2603,6 +2613,8 @@ function fecharResumoPedidoAuto() {
   }
 }
 async function confirmarEnvioPedidoAuto() {
+  if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo()))
+    return enviarMesaProtegidaUI();
   // =========================
   // VALIDAÇÕES
   // =========================
@@ -2810,6 +2822,7 @@ async function confirmarEnvioPedidoAuto() {
           // =========================
 
           clienteId: sessao.clienteId || null,
+          clienteAuthUid: sessao.clienteAuthUid || null,
 
           clienteLogado: sessao.clienteLogado === true,
 
@@ -2870,6 +2883,7 @@ async function confirmarEnvioPedidoAuto() {
           telefoneLimpo: "",
 
           clienteId: sessao.clienteId || null,
+          clienteAuthUid: sessao.clienteAuthUid || null,
 
           // =========================
           // LOCAL
@@ -3109,6 +3123,23 @@ function voltarAoTopoCardapio() {
   });
 }
 async function abrirLoginAutoatendimento() {
+  if (typeof acessoClienteSenhaUI !== "undefined") {
+    try {
+      if (await window.acessoClienteSenhaUI.ativo()) {
+        const cliente = await window.acessoClienteSenhaUI.restaurar();
+        if (cliente) {
+          await aplicarClienteSenhaUI(cliente);
+          await abrirContaAutoatendimento();
+          return;
+        }
+        document.getElementById("modal-login-auto").style.display = "flex";
+        return;
+      }
+    } catch (erro) {
+      alert(erro.message);
+      return;
+    }
+  }
   // =========================
   // JÁ ESTÁ LOGADO
   // =========================
@@ -3175,6 +3206,20 @@ async function abrirLoginAutoatendimento() {
 async function abrirContaAutoatendimento() {
   if (!sessaoAutoatendimentoAtual?.clienteId) {
     return;
+  }
+  if (typeof acessoClienteSenhaUI !== "undefined") {
+    try {
+      if (await window.acessoClienteSenhaUI.ativo()) {
+        const cliente = await window.acessoClienteSenhaUI.restaurar();
+        if (!cliente || cliente.telefone !== sessaoAutoatendimentoAtual.clienteId) {
+          document.getElementById("modal-login-auto").style.display = "flex";
+          return;
+        }
+      }
+    } catch (erro) {
+      alert(erro.message);
+      return;
+    }
   }
 
   const modal = document.getElementById("modal-conta-auto");
@@ -3473,6 +3518,11 @@ async function abrirContaAutoatendimento() {
             </button>
 
         `;
+    if (typeof atualizarAvisoSenhaClienteUI === "function")
+      atualizarAvisoSenhaClienteUI(
+        { ...cliente, telefone: sessaoAutoatendimentoAtual.clienteId },
+        area,
+      );
     if (typeof atualizarCartaoRankMensalPerfilUI === "function")
       atualizarCartaoRankMensalPerfilUI({
         ...cliente,
@@ -3494,6 +3544,10 @@ async function abrirContaAutoatendimento() {
 async function buscarCuponsClienteAuto(clienteId) {
   if (!clienteId) return [];
   try {
+    if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo())) {
+      const dados = await checkoutProtegidoUI.cupons();
+      return dados.cupons;
+    }
     const clienteRef = db.collection("clientes").doc(String(clienteId));
     const [vinculos, mensagens] = await Promise.all([
       clienteRef.collection("cupons").get(),
@@ -3547,6 +3601,18 @@ async function buscarCuponsClienteAuto(clienteId) {
   }
 }
 async function sairContaAutoatendimento() {
+  if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo())) {
+    if (!sessaoAutoatendimentoAtual) return;
+    try {
+      await vincularClienteMesaProtegidaUI(true);
+      await acessoClienteSenhaUI.sair();
+      if (typeof encerrarBeneficiosPedraoUI === "function") encerrarBeneficiosPedraoUI();
+      fecharContaAutoatendimento();
+    } catch (e) {
+      mostrarAvisoUI(e.message, "conferir");
+    }
+    return;
+  }
   if (!sessaoAutoatendimentoAtual) {
     return;
   }
@@ -3556,6 +3622,7 @@ async function sairContaAutoatendimento() {
   // =========================
 
   if (sessaoAutoatendimentoAtual.pedidoEnviado === true) {
+    if (typeof acessoClienteSenhaUI !== "undefined") await window.acessoClienteSenhaUI.sair();
     localStorage.removeItem("clientePedrao");
 
     alert(
@@ -3585,6 +3652,7 @@ async function sairContaAutoatendimento() {
       nome: nomeTemporario,
 
       clienteId: null,
+      clienteAuthUid: null,
 
       clienteLogado: false,
 
@@ -3617,6 +3685,7 @@ async function sairContaAutoatendimento() {
     // =========================
 
     localStorage.removeItem("clientePedrao");
+    if (typeof acessoClienteSenhaUI !== "undefined") await window.acessoClienteSenhaUI.sair();
 
     // =========================
     // NOME NO TOPO
@@ -3656,13 +3725,51 @@ document.addEventListener("input", (event) => {
     event.target.value = event.target.value.replace(/\D/g, "").slice(0, 11);
   }
 });
-async function entrarClienteAutoatendimento() {
+async function entrarClienteAutoatendimento(clienteAutenticado = null) {
   if (!sessaoAutoatendimentoAtual) {
     alert("Sessão da mesa não encontrada.");
 
     return;
   }
+  if (typeof acessoClienteSenhaUI !== "undefined") {
+    try {
+      if (await window.acessoClienteSenhaUI.ativo()) {
+        // Um argumento do navegador nunca é aceito como prova de identidade.
+        if (clienteAutenticado) clienteAutenticado = await window.acessoClienteSenhaUI.restaurar();
+        else
+          clienteAutenticado = await window.acessoClienteSenhaUI.entrar({
+            nome: document.getElementById("login-auto-nome")?.value.trim() || "",
+            telefone:
+              document.getElementById("login-auto-telefone")?.value.replace(/\D/g, "") || "",
+            codigo: document.getElementById("login-auto-codigo")?.value.trim() || "",
+            senha: document.getElementById("login-auto-senha-protegida")?.value || "",
+            lembrar: document.getElementById("login-auto-salvar")?.checked === true,
+          });
+        if (!clienteAutenticado) throw Error("Entre novamente na sua conta.");
+        if (clienteAutenticado.precisaCriarSenha === true) {
+          await aplicarClienteSenhaUI(clienteAutenticado);
+          return;
+        }
+        document.getElementById("login-auto-nome").value = clienteAutenticado.nome;
+        document.getElementById("login-auto-telefone").value = clienteAutenticado.telefone;
+      }
+    } catch (erro) {
+      alert(erro.message);
+      return;
+    } finally {
+      const senha = document.getElementById("login-auto-senha-protegida");
+      if (senha) senha.value = "";
+    }
+  }
 
+  if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo())) {
+    try {
+      await vincularClienteMesaProtegidaUI();
+    } catch (e) {
+      mostrarAvisoUI(e.message, "conferir");
+    }
+    return;
+  }
   const nome = document.getElementById("login-auto-nome")?.value.trim() || "";
 
   const telefone =
@@ -3754,26 +3861,30 @@ async function entrarClienteAutoatendimento() {
     // ATUALIZAR SESSÃO
     // =====================================================
 
-    await db.collection("sessoesMesa").doc(sessaoAutoatendimentoAtual.id).update({
-      // Nome que passa a valer
-      nome: nomeConta,
+    await db
+      .collection("sessoesMesa")
+      .doc(sessaoAutoatendimentoAtual.id)
+      .update({
+        // Nome que passa a valer
+        nome: nomeConta,
 
-      // Nome digitado ao entrar
-      // fica só como histórico.
-      nomeTemporario: nomeTemporario,
+        // Nome digitado ao entrar
+        // fica só como histórico.
+        nomeTemporario: nomeTemporario,
 
-      clienteId: telefone,
+        clienteId: telefone,
+        clienteAuthUid: clienteAutenticado?.authUid || null,
 
-      clienteLogado: true,
+        clienteLogado: true,
 
-      clienteNome: nomeConta,
+        clienteNome: nomeConta,
 
-      clienteAvatar: avatarConta,
+        clienteAvatar: avatarConta,
 
-      atualizadoEm: new Date().toISOString(),
+        atualizadoEm: new Date().toISOString(),
 
-      atualizadoEmMs: Date.now(),
-    });
+        atualizadoEmMs: Date.now(),
+      });
 
     // =====================================================
     // SE JÁ EXISTE COMANDA,
@@ -3781,17 +3892,21 @@ async function entrarClienteAutoatendimento() {
     // =====================================================
 
     if (sessaoAutoatendimentoAtual.comandaId) {
-      await db.collection("comandas").doc(sessaoAutoatendimentoAtual.comandaId).update({
-        // IMPORTANTE:
-        // troca "gf" por "Pedro"
-        cliente: nomeConta,
+      await db
+        .collection("comandas")
+        .doc(sessaoAutoatendimentoAtual.comandaId)
+        .update({
+          // IMPORTANTE:
+          // troca "gf" por "Pedro"
+          cliente: nomeConta,
 
-        clienteId: telefone,
+          clienteId: telefone,
+          clienteAuthUid: clienteAutenticado?.authUid || null,
 
-        clienteLogado: true,
+          clienteLogado: true,
 
-        clienteNomeCadastro: nomeConta,
-      });
+          clienteNomeCadastro: nomeConta,
+        });
     }
 
     // =====================================================
@@ -3807,6 +3922,7 @@ async function entrarClienteAutoatendimento() {
           nome: nomeConta,
 
           clienteId: telefone,
+          clienteAuthUid: clienteAutenticado?.authUid || null,
 
           telefone: cliente.telefone || telefone,
 
@@ -3827,6 +3943,7 @@ async function entrarClienteAutoatendimento() {
     sessaoAutoatendimentoAtual.nomeTemporario = nomeTemporario;
 
     sessaoAutoatendimentoAtual.clienteId = telefone;
+    sessaoAutoatendimentoAtual.clienteAuthUid = clienteAutenticado?.authUid || null;
 
     sessaoAutoatendimentoAtual.clienteLogado = true;
 
@@ -3968,6 +4085,8 @@ function mostrarPosPedidoAutoatendimento() {
 }
 
 async function criarChamadoAutoatendimento(tipo) {
+  if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo()))
+    return solicitarMesaProtegidaUI(tipo);
   if (!sessaoAutoatendimentoAtual) {
     alert("Sessão não encontrada.");
 
@@ -4165,6 +4284,11 @@ function obterJanelaChamadosAutoatendimento() {
 }
 
 async function chamarAtendenteMesaBloqueada() {
+  if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo())) {
+    if (await solicitarMesaProtegidaUI("atendente", true))
+      mostrarAvisoUI("Atendente chamado! Aguarde um momento.", "conferir");
+    return;
+  }
   try {
     // =========================
     // EVITAR CHAMADO DUPLICADO

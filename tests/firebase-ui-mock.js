@@ -983,15 +983,96 @@
     now: () => ({ toMillis: () => agora }),
   };
   window.firebase = { initializeApp() {}, firestore };
+  if (cenarioFixture === "seguranca-protegida") {
+    const perfil = docs.get("clientes/" + cliente);
+    Object.assign(perfil, {
+      nome: "Cliente Teste",
+      authUid: "cliente",
+      fidelidadeAtiva: false,
+      nivelCliente: "Sem nível",
+      bonusDisponivel: 0,
+      rankMensal: { importadoEm: 1, meses: {} },
+      avatar: "images/avatares/sem-rank/maionese.webp",
+      historicoLegadoVerificado: false,
+    });
+    docs.set("config/beneficios", {});
+    const apps = [],
+      auths = new Map();
+    function app(nome = "[DEFAULT]") {
+      if (apps.some((a) => a.name === nome)) return apps.find((a) => a.name === nome);
+      const auth = {
+        currentUser:
+          nome === "[DEFAULT]" ? { uid: "cliente", getIdToken: async () => "cliente" } : null,
+        setPersistence: async () => {},
+        signOut: async () => {
+          auth.currentUser = null;
+        },
+        onAuthStateChanged(fn) {
+          queueMicrotask(() => fn(auth.currentUser));
+          return () => {};
+        },
+        async signInWithCustomToken(token) {
+          auth.currentUser = { uid: token.replace(/^visita:/, ""), getIdToken: async () => token };
+        },
+      };
+      auths.set(nome, auth);
+      const a = { name: nome, auth: () => auth, firestore: () => db };
+      apps.push(a);
+      return a;
+    }
+    window.firebase = {
+      initializeApp: (_, n) => app(n),
+      apps,
+      auth: () => app().auth(),
+      firestore,
+    };
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (url, opcoes) => {
+      if (!/^\/api\/(pedido-publico|mesa-publica|acesso-cliente)$/.test(String(url)))
+        return originalFetch(url, opcoes);
+      const r = await originalFetch(
+        "/tests/api-seguranca/" + String(url).split("/").at(-1),
+        opcoes,
+      );
+      const d = await r.clone().json();
+      if (d.cliente) {
+        docs.set("clientes/" + cliente, d.cliente);
+      }
+      if (d.mesa) docs.set("mesas/" + d.mesa.id, d.mesa);
+      if (d.sessao) {
+        docs.set("sessoesMesa/" + d.sessao.id, d.sessao);
+        if (d.sessao.pedidoEnviado) {
+          docs.set("mesas/" + d.sessao.mesaId, { numero: d.sessao.mesaNumero, ocupada: true });
+          docs.set("comandas/" + d.sessao.comandaId, {
+            status: "Aberta",
+            sessaoAutoatendimentoId: d.sessao.id,
+          });
+        }
+      }
+      if (d.pedido?.id) docs.set("pedidos/" + d.pedido.id, d.pedido);
+      if (opcoes?.body)
+        window.parent.postMessage(
+          { tipo: "revisao-api-protegida", acao: JSON.parse(opcoes.body).acao, sucesso: r.ok },
+          new URL(document.baseURI).origin,
+        );
+      avisar();
+      return r;
+    };
+    window.open = () => null; // WhatsApp nunca sai desta prévia.
+  }
   if (cenarioFixture === "funcionario-chapa" || cenarioFixture === "funcionario-atendimento")
     docs.get("atendentes/teste").perfil =
       cenarioFixture === "funcionario-chapa" ? "chapa" : "atendimento";
-  const memoria = new Map([
-    ["atendenteId", "teste"],
-    ["atendenteNome", "Atendente Teste"],
-    ["clientePedrao", JSON.stringify({ telefone: cliente, nome: "Rafa Teste" })],
-    ["cozinhaAcessoPedrao", "teste"],
-  ]);
+  const memoria =
+    cenarioFixture === "seguranca-protegida" && window.parent.storageSegurancaFixture
+      ? window.parent.storageSegurancaFixture
+      : new Map([
+          ["atendenteId", "teste"],
+          ["atendenteNome", "Atendente Teste"],
+          ["clientePedrao", JSON.stringify({ telefone: cliente, nome: "Rafa Teste" })],
+          ["cozinhaAcessoPedrao", "teste"],
+        ]);
+  if (cenarioFixture === "seguranca-protegida") window.parent.storageSegurancaFixture = memoria;
   const storage = {
     getItem: (k) => memoria.get(k) || null,
     setItem: (k, v) => memoria.set(k, String(v)),

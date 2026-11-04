@@ -5,6 +5,7 @@
     <script src="js/avatares-ui.js?v=20261101-1"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
     <title>Painel Administrativo - Pedrão Lanches</title>
     <link rel="icon" href="images/logo-trailer.webp" />
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
@@ -15,12 +16,21 @@
     <script src="js/funcionario-acesso.js?v=20261029-4"></script>
     <link rel="stylesheet" href="css/componentes/rank-mensal.css?v=20261102-7" />
     <link rel="stylesheet" href="css/componentes/beneficios.css?v=20261102-7" />
+    <link rel="stylesheet" href="css/componentes/recuperacao-admin.css?v=20261103-1" />
+    <link rel="stylesheet" href="css/componentes/acesso-equipe.css?v=20261103-1" />
   </head>
   <body class="admin-body">
     <!-- HEADER — cabeçalho da página -->
     <header class="admin-header">
       <h1>Administração Pedrão Lanches</h1>
       <p class="subtitulo">Pedidos, atendimento e cardápio</p>
+      <button
+        type="button"
+        class="admin-protegido-ui"
+        onclick="abrirAcessoAdministrativoProtegidoUI()"
+      >
+        Acesso de recuperação
+      </button>
     </header>
 
     <!-- MAIN — conteúdo principal -->
@@ -378,9 +388,11 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="js/acesso-equipe-ui.js?v=20261103-1"></script>
 
     <script src="js/produtos.js?v=20261031-2"></script>
-    <script src="js/admin.js?v=20261101-2"></script>
+    <script src="js/admin.js?v=20261103-1"></script>
     <script src="js/beneficios-entrega.js?v=20261102-3"></script>
     <script src="js/rank-mensal.js?v=20261102-3"></script>
     <script src="js/cupons-rank.js?v=20261101-1"></script>
@@ -391,7 +403,8 @@
     <script src="js/cupons-rank-admin-ui.js?v=20261031-5"></script>
     <script src="js/cupons-admin-ui.js?v=20261031-5"></script>
     <script src="js/campanhas.js?v=20261025-2"></script>
-    <script src="js/editor-cliente-admin-ui.js?v=20261101-1"></script>
+    <script src="js/editor-cliente-admin-ui.js?v=20261103-1"></script>
+    <script src="js/recuperacao-admin-ui.js?v=20261103-1"></script>
     <script src="js/app-ui.js?v=20261102-4"></script>
     <script src="js/raspadinhas-recuperacao.js?v=20261025-2"></script>
     <script src="js/raspadinhas.js?v=20261025-2"></script>

@@ -13,9 +13,14 @@ function configurarBeneficiosEntregaUI(dados = {}) {
     acumularFidelidade: c.acumularFidelidade !== false,
   };
 }
-function saldoBeneficiosEntregaUI(cliente, config, agora = Date.now()) {
-  const mes = competenciaRankMensalUI(agora),
-    nivel = nivelFidelidadeOperacao(cliente);
+function saldoBeneficiosEntregaUI(cliente, config, agora = Date.now(), regras = null) {
+  const calcular = regras || {
+    competencia: competenciaRankMensalUI,
+    nivel: nivelFidelidadeOperacao,
+    centavos: centavosOperacao,
+  };
+  const mes = calcular.competencia(agora),
+    nivel = calcular.nivel(cliente);
   const conta = cliente?.beneficiosEntrega || {},
     m = conta.meses?.[mes] || {};
   const elegivel =
@@ -24,7 +29,7 @@ function saldoBeneficiosEntregaUI(cliente, config, agora = Date.now()) {
     !!cliente.rankMensal?.importadoEm &&
     conta.bloqueado !== true;
   const limite = elegivel
-    ? Math.max(0, centavosOperacao(config.valores[nivel]) + Number(m.ajuste || 0))
+    ? Math.max(0, calcular.centavos(config.valores[nivel]) + Number(m.ajuste || 0))
     : 0;
   const reservado = Math.max(0, Number(m.reservado || 0)),
     utilizado = Math.max(0, Number(m.utilizado || 0));
@@ -38,8 +43,15 @@ function saldoBeneficiosEntregaUI(cliente, config, agora = Date.now()) {
     bloqueado: !!conta.bloqueado,
   };
 }
-function calcularBeneficioEntregaUI(cliente, config, pedido, agora = Date.now()) {
-  const saldo = saldoBeneficiosEntregaUI(cliente, config, agora);
+function calcularBeneficioEntregaUI(cliente, config, pedido, agora = Date.now(), regras = null) {
+  const calcular = regras || {
+    competencia: competenciaRankMensalUI,
+    nivel: nivelFidelidadeOperacao,
+    centavos: centavosOperacao,
+    base: baseFidelidadePedidoOperacao,
+    moeda: moedaOperacao,
+  };
+  const saldo = saldoBeneficiosEntregaUI(cliente, config, agora, calcular);
   let motivo = "",
     centavos = 0;
   if (!config.ativo) motivo = "";
@@ -53,18 +65,18 @@ function calcularBeneficioEntregaUI(cliente, config, pedido, agora = Date.now())
   else if (!config.acumularFidelidade && Number(pedido.descontoFidelidade) > 0)
     motivo = "Este benefício não acumula com o desconto de fidelidade deste pedido.";
   else {
-    const itens = centavosOperacao(baseFidelidadePedidoOperacao(pedido));
+    const itens = calcular.centavos(calcular.base(pedido));
     const descontoItens =
       Math.max(
         0,
-        centavosOperacao(pedido.descontoCupom) - centavosOperacao(pedido.descontoCupomTaxa),
-      ) + centavosOperacao(pedido.descontoFidelidade);
+        calcular.centavos(pedido.descontoCupom) - calcular.centavos(pedido.descontoCupomTaxa),
+      ) + calcular.centavos(pedido.descontoFidelidade);
     const frete = Math.max(
       0,
-      centavosOperacao(pedido.taxaEntrega) - centavosOperacao(pedido.descontoCupomTaxa),
+      calcular.centavos(pedido.taxaEntrega) - calcular.centavos(pedido.descontoCupomTaxa),
     );
-    if (Math.max(0, itens - descontoItens) < centavosOperacao(config.pedidoMinimo))
-      motivo = `Compra mínima em produtos após descontos: ${moedaOperacao(config.pedidoMinimo)}.`;
+    if (Math.max(0, itens - descontoItens) < calcular.centavos(config.pedidoMinimo))
+      motivo = `Compra mínima em produtos após descontos: ${calcular.moeda(config.pedidoMinimo)}.`;
     else if (saldo.disponivel <= 0) motivo = "Sem crédito de entrega disponível neste mês.";
     else
       centavos = Math.min(
@@ -73,11 +85,11 @@ function calcularBeneficioEntregaUI(cliente, config, pedido, agora = Date.now())
         Math.max(
           0,
           itens +
-            centavosOperacao(pedido.taxaEntrega) -
-            centavosOperacao(pedido.descontoCupom) -
-            centavosOperacao(pedido.descontoFidelidade),
+            calcular.centavos(pedido.taxaEntrega) -
+            calcular.centavos(pedido.descontoCupom) -
+            calcular.centavos(pedido.descontoFidelidade),
         ),
-        config.limitePorPedido > 0 ? centavosOperacao(config.limitePorPedido) : frete,
+        config.limitePorPedido > 0 ? calcular.centavos(config.limitePorPedido) : frete,
       );
   }
   return { ...saldo, centavos, motivo };
@@ -305,11 +317,20 @@ function acompanharConfigBeneficiosUI() {
     (e) => console.error("Não foi possível acompanhar os benefícios.", e),
   );
 }
-document.addEventListener("DOMContentLoaded", acompanharConfigBeneficiosUI);
-window.addEventListener("pagehide", () => {
-  pararConfigBeneficiosUI?.();
-  pararConfigBeneficiosUI = null;
-});
-window.addEventListener("pageshow", (e) => {
-  if (e.persisted) acompanharConfigBeneficiosUI();
-});
+if (typeof document !== "undefined" && typeof window !== "undefined") {
+  document.addEventListener("DOMContentLoaded", acompanharConfigBeneficiosUI);
+  window.addEventListener("pagehide", () => {
+    pararConfigBeneficiosUI?.();
+    pararConfigBeneficiosUI = null;
+  });
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) acompanharConfigBeneficiosUI();
+  });
+}
+if (typeof module !== "undefined" && module.exports)
+  module.exports = {
+    configurarBeneficiosEntregaUI,
+    saldoBeneficiosEntregaUI,
+    calcularBeneficioEntregaUI,
+    alterarSaldoBeneficioEntregaUI,
+  };

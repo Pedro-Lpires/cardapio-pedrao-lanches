@@ -1,0 +1,83 @@
+.acesso-equipe-bloqueado body > :not(#acesso-equipe-protegida):not(script) {
+  visibility: hidden;
+}
+.acesso-equipe-janela-ui {
+  box-sizing: border-box;
+  width: min(390px, calc(100vw - 36px));
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  padding: 24px;
+  color: #fff;
+  background: #191919;
+  border: 1px solid #666;
+  border-top: 3px solid #e90016;
+  border-radius: 18px;
+  font-family: Arial, sans-serif;
+}
+.acesso-equipe-janela-ui::backdrop {
+  background: #000b;
+}
+.acesso-equipe-janela-ui h1 {
+  font-size: 23px;
+  margin: 0 0 10px;
+}
+.acesso-equipe-janela-ui h2 {
+  font-size: 17px;
+  margin: 0 0 24px;
+}
+.acesso-equipe-janela-ui form,
+.acesso-equipe-janela-ui label {
+  display: grid;
+  gap: 10px;
+}
+.acesso-equipe-janela-ui form {
+  gap: 20px;
+}
+.acesso-equipe-janela-ui input:not([type="checkbox"]) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #666;
+  border-radius: 9px;
+  background: #252525;
+  color: #fff;
+  padding: 12px;
+  font: inherit;
+}
+.acesso-equipe-janela-ui .acesso-equipe-lembrar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.acesso-equipe-lembrar input {
+  width: auto;
+  margin: 0;
+  flex: 0 0 auto;
+}
+.acesso-equipe-janela-ui button,
+.acesso-equipe-janela-ui > a:not(.acesso-equipe-voltar) {
+  display: inline-block;
+  padding: 12px 18px;
+  background: #e90016;
+  border: 1px solid #ff3545;
+  border-radius: 10px;
+  color: #fff;
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+}
+.acesso-equipe-janela-ui [role="status"] {
+  line-height: 1.5;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.acesso-equipe-voltar {
+  color: #ff6070;
+  font-size: 14px;
+  text-decoration: underline;
+}
+.acesso-equipe-verificando body > :not(script) {
+  visibility: hidden;
+}

@@ -16,7 +16,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db = typeof dbEquipeProtegidaUI === "function" ? dbEquipeProtegidaUI() : firebase.firestore();
 
 let pararPedidosAdmin = null;
 let chaveConsultaPedidosAdmin = "";
@@ -141,37 +141,37 @@ async function buscarClienteAdmin() {
   box.innerHTML = `
         <div class="card-admin-cliente">
             <div class="topo-cliente-admin">
-                <h3>${c.nomeReal || c.nome || "Cliente sem nome"}</h3>
+                <h3>${escaparOperacao(c.nomeReal || c.nome || "Cliente sem nome")}</h3>
                 <button type="button" onclick="ativarEdicaoClienteAdmin()">Editar</button>
             </div>
 
             <div class="dados-cliente-admin">
-                <p><strong>Nome usado no site:</strong> ${c.nome || "-"}</p>
-                <p><strong>Nome real:</strong> ${c.nomeReal || "-"}</p>
-                <p><strong>Telefone:</strong> ${c.telefone || telefoneFinal}</p>
+                <p><strong>Nome usado no site:</strong> ${escaparOperacao(c.nome || "-")}</p>
+                <p><strong>Nome real:</strong> ${escaparOperacao(c.nomeReal || "-")}</p>
+                <p><strong>Telefone:</strong> ${escaparOperacao(c.telefone || telefoneFinal)}</p>
                 <p><strong>Fidelidade:</strong> ${c.fidelidadeAtiva ? "Ativa" : "Inativa"}</p>
                 <p><strong>Total geral gasto:</strong> R$ ${Number(c.totalGasto || 0).toFixed(2)}</p>
                 ${typeof htmlRankMensalUI === "function" ? htmlRankMensalUI(c) : ""}
                 <p><strong>Total fidelidade:</strong> R$ ${Number(c.totalFidelidade || 0).toFixed(2)}</p>
                 <p><strong>Bônus disponível:</strong> R$ ${Number(c.bonusDisponivel || 0).toFixed(2)}</p>
                 <p><strong>Bônus gerado total:</strong> R$ ${Number(c.bonusGeradoTotal || 0).toFixed(2)}</p>
-                <p><strong>Código:</strong> ${c.codigoAtivacao || "Sem código"}</p>
+                <p><strong>Código:</strong> ${escaparOperacao(c.codigoAtivacao || "Sem código")}</p>
                 <p><strong>Ativado em:</strong> ${c.ativadoEm ? new Date(c.ativadoEm).toLocaleString("pt-BR") : "Não ativado"}</p>
             </div>
 
             <div id="form-edicao-cliente-admin" style="display:none;">
                 <label>Nome usado no site</label>
-                <input type="text" id="admin-nome-cliente" value="${c.nome || ""}">
+                <input type="text" id="admin-nome-cliente" value="${escaparOperacao(c.nome || "")}">
 
                 <label>Nome real</label>
-                <input type="text" id="admin-nome-real-cliente" value="${c.nomeReal || ""}">
+                <input type="text" id="admin-nome-real-cliente" value="${escaparOperacao(c.nomeReal || "")}">
 
                 <label>Telefone</label>
-                <input type="text" id="admin-telefone-editar" value="${c.telefone || telefoneFinal}">
+                <input type="text" id="admin-telefone-editar" value="${escaparOperacao(c.telefone || telefoneFinal)}">
 
                 <label>Código de ativação</label>
                 <div class="linha-codigo-admin">
-                    <input type="text" id="admin-codigo-cliente" value="${c.codigoAtivacao || ""}">
+                    <input type="text" id="admin-codigo-cliente" value="${escaparOperacao(c.codigoAtivacao || "")}">
                     <button type="button" onclick="gerarCodigoCliente()">Gerar código</button>
                 </div>
 
@@ -201,6 +201,14 @@ async function buscarClienteAdmin() {
             <div id="pedidos-cliente-admin" style="display:none;"></div>
         </div>
     `;
+  if (typeof abrirRecuperacaoClienteAdminUI === "function") {
+    const recuperar = document.createElement("button");
+    recuperar.type = "button";
+    recuperar.textContent = "Redefinir acesso";
+    recuperar.onclick = () =>
+      abrirRecuperacaoClienteAdminUI({ nome: c.nome, telefone: telefoneFinal });
+    box.querySelector(".card-admin-cliente").append(recuperar);
+  }
 }
 
 async function salvarClienteAdmin(telefoneAntigo) {
@@ -368,7 +376,7 @@ function listarPedidosAdmin(periodo = "hoje") {
         <br>
 
         <small>
-            ${pedido.nome || "-"}
+            ${escaparOperacao(pedido.nome || "-")}
         </small>
 
     </div>
@@ -383,11 +391,11 @@ function listarPedidosAdmin(periodo = "hoje") {
 
 <div class="pedido-info-admin">
 
-    ${pedido.tipo || "-"}
+    ${escaparOperacao(pedido.tipo || "-")}
 
     •
 
-    ${pedido.pagamento || "-"}
+    ${escaparOperacao(pedido.pagamento || "-")}
 
 </div>
 
@@ -413,11 +421,11 @@ function listarPedidosAdmin(periodo = "hoje") {
         ${pedido.clienteId ? `<span class="tag-login">Login</span>` : `<span class="tag-sem-login">Sem login</span>`}
         ${pedidoContaFidelidade(pedido) ? `<span class="tag-fidelidade">Fidelidade</span>` : ""}
 
-        <p><b>Cliente:</b> ${pedido.nome || "-"}</p>
-        <p><b>Telefone:</b> ${pedido.telefone || "-"}</p>
-        <p><b>Tipo:</b> ${pedido.tipo === "Local" ? "Consumir no local" : pedido.tipo || "-"}</p>
-        <p><b>Pagamento:</b> ${pedido.pagamento || "-"}</p>
-        <p><b>Código cliente:</b> ${pedido.codigoCliente || "-"}</p>
+        <p><b>Cliente:</b> ${escaparOperacao(pedido.nome || "-")}</p>
+        <p><b>Telefone:</b> ${escaparOperacao(pedido.telefone || "-")}</p>
+        <p><b>Tipo:</b> ${escaparOperacao(pedido.tipo === "Local" ? "Consumir no local" : pedido.tipo || "-")}</p>
+        <p><b>Pagamento:</b> ${escaparOperacao(pedido.pagamento || "-")}</p>
+        <p><b>Código cliente:</b> ${escaparOperacao(pedido.codigoCliente || "-")}</p>
 
         <p><b>Total pago:</b> R$ ${Number(pedido.valorTotal || 0).toFixed(2)}</p>
 
@@ -431,7 +439,7 @@ function listarPedidosAdmin(periodo = "hoje") {
 
         <p><b>Desconto fidelidade:</b> R$ ${Number(pedido.descontoFidelidade || 0).toFixed(2)}</p>
 
-        <p><b>Cupom desconto:</b> ${pedido.cupomDescontoCodigo || "-"} | R$ ${Number(pedido.descontoCupom || 0).toFixed(2)}</p>
+        <p><b>Cupom desconto:</b> ${escaparOperacao(pedido.cupomDescontoCodigo || "-")} | R$ ${Number(pedido.descontoCupom || 0).toFixed(2)}</p>
 
         <p>${itens}</p>
 
@@ -459,10 +467,12 @@ function listarPedidosAdmin(periodo = "hoje") {
 }
 
 function formatarItemPedidoAdmin(i) {
-  let texto = `<strong>${i.quantidade || 1} ${i.nome}</strong>`;
+  let texto = `<strong>${Number(i.quantidade || 1)} ${escaparOperacao(i.nome)}</strong>`;
 
   if (i.adicionais && i.adicionais.length > 0) {
-    const adicionais = i.adicionais.map((a) => `• ${a.qtd} ${a.nome}`).join("<br>");
+    const adicionais = i.adicionais
+      .map((a) => `• ${Number(a.qtd)} ${escaparOperacao(a.nome)}`)
+      .join("<br>");
 
     texto += `<br>➕ <b>Acréscimos:</b><br>${adicionais}`;
 
@@ -474,19 +484,21 @@ function formatarItemPedidoAdmin(i) {
   }
 
   if (i.observacao) {
-    texto += `<br>📝 <b>Obs:</b> ${i.observacao}`;
+    texto += `<br>📝 <b>Obs:</b> ${escaparOperacao(i.observacao)}`;
   }
 
   if (i.molhosGratis && i.molhosGratis.length > 0) {
     const molhosGratis = i.molhosGratis
-      .map((m) => `• ${m.unidade}º Lanche: ${m.texto}`)
+      .map((m) => `• ${Number(m.unidade)}º Lanche: ${escaparOperacao(m.texto)}`)
       .join("<br>");
 
     texto += `<br>🍶 <b>Molhos grátis:</b><br>${molhosGratis}`;
   }
 
   if (i.molhosPagos && i.molhosPagos.length > 0) {
-    const molhosPagos = i.molhosPagos.map((m) => `• ${m.qtd} ${m.nome}`).join("<br>");
+    const molhosPagos = i.molhosPagos
+      .map((m) => `• ${Number(m.qtd)} ${escaparOperacao(m.nome)}`)
+      .join("<br>");
 
     texto += `<br>💰 <b>Molhos pagos:</b><br>${molhosPagos}`;
 
@@ -1125,8 +1137,8 @@ async function listarMensagensAdmin() {
 
       html += `
                 <div class="card-mensagem-admin">
-                    <strong>${cliente.nome || "Cliente"}</strong>
-                    <p><b>Telefone:</b> ${cliente.telefone || clienteDoc.id}</p>
+                    <strong>${escaparOperacao(cliente.nome || "Cliente")}</strong>
+                    <p><b>Telefone:</b> ${escaparOperacao(cliente.telefone || clienteDoc.id)}</p>
                     <p><b>Tipo:</b> ${m.tipo}</p>
                     <p>${m.texto}</p>
                    <small>
@@ -1223,8 +1235,8 @@ async function listarChamadosAdmin(status = "aberto", categoriaFiltro = "todos")
     html += `
             <div class="card-chamado-admin">
                 <strong>Suporte #${c.numeroChamado}</strong>
-                <p><b>Cliente:</b> ${c.clienteNome || c.cliente.nome || "-"}</p>
-                <p><b>Telefone:</b> ${c.clienteTelefone || c.cliente.telefone || c.clienteId}</p>
+                <p><b>Cliente:</b> ${escaparOperacao(c.clienteNome || c.cliente.nome || "-")}</p>
+                <p><b>Telefone:</b> ${escaparOperacao(c.clienteTelefone || c.cliente.telefone || c.clienteId)}</p>
                 <p><b>Tipo:</b> ${categoria}</p>
                 <p><b>Status:</b> ${c.status}</p>
                  <button type="button" onclick="abrirChamadoAdmin('${c.clienteId}', '${c.id}')">
@@ -1452,9 +1464,9 @@ async function verPerfilClienteAdmin(clienteId, chamadoId) {
 
             ${typeof htmlAvatarClienteUI === "function" ? htmlAvatarClienteUI(c, "avatar-admin-cliente") : `<img src="${c.avatar || "images/avatares/sem-rank/maionese.webp"}" class="avatar-admin-cliente">`}
 
-            <p><b>Nome:</b> ${c.nome || "-"}</p>
-            <p><b>Telefone:</b> ${c.telefone || clienteId}</p>
-            <p><b>Código de ativação:</b> ${c.codigoAtivacao || "Sem código"}</p>
+            <p><b>Nome:</b> ${escaparOperacao(c.nome || "-")}</p>
+            <p><b>Telefone:</b> ${escaparOperacao(c.telefone || clienteId)}</p>
+            <p><b>Código de ativação:</b> ${escaparOperacao(c.codigoAtivacao || "Sem código")}</p>
             <p><b>Fidelidade:</b> ${c.fidelidadeAtiva ? "Ativa" : "Inativa"}</p>
             <p><b>Nível:</b> ${nivelCliente}</p>
             <p><b>Total geral gasto:</b> R$ ${Number(c.totalGasto || 0).toFixed(2)}</p>
@@ -2777,6 +2789,12 @@ async function excluirFuncionarioAdminUI(id) {
 let adminAvancadoLiberado = false;
 
 async function liberarAreaAvancadaAdmin() {
+  if (typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI()) {
+    if (perfilEquipeProtegidaUI?.admin !== true) return;
+    const area = document.getElementById("area-admin-avancada");
+    area.style.display = area.style.display === "none" ? "block" : "none";
+    return;
+  }
   if (adminAvancadoLiberado) {
     const area = document.getElementById("area-admin-avancada");
 
@@ -2810,5 +2828,9 @@ async function liberarAreaAvancadaAdmin() {
   document.getElementById("area-admin-avancada").style.display = "block";
 }
 function abrirFinanceiroAdmin() {
+  if (typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI()) {
+    location.href = "financeiro.html";
+    return;
+  }
   window.open("financeiro.html", "_blank");
 }

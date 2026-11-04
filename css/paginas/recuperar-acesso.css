@@ -1,0 +1,75 @@
+@import url("404.css?v=20261103-1");
+.recuperar-main h1 {
+  margin-top: 28px;
+  color: #fff;
+}
+.recuperar-main p {
+  font-size: 17px;
+  line-height: 1.45;
+}
+.recuperar-main form {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.recuperar-main label {
+  font-size: 16px;
+  font-weight: 650;
+}
+.recuperar-main input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 12px;
+  border: 1px solid #686868;
+  border-radius: 8px;
+  background: #282828;
+  color: #fff;
+  font: inherit;
+}
+.recuperar-main input:focus-visible {
+  outline: 2px solid #ed0017;
+  outline-offset: 2px;
+}
+.recuperar-main button {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  background: #ed0017;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+.recuperar-main button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.recuperar-main button:focus-visible {
+  outline: 3px solid #ffd700;
+  outline-offset: 3px;
+}
+.recuperar-main .recuperar-ajuda {
+  font-size: 14px;
+  color: #bcbcbc;
+  margin: 0 0 8px;
+}
+.recuperar-main > .recuperar-ajuda {
+  margin-top: 20px;
+}
+.recuperar-main [role="status"] {
+  padding: 12px;
+  background: #282828;
+  border-left: 3px solid #ed0017;
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+.recuperar-main [data-sucesso="sim"] {
+  border-color: #2ecc71;
+}
+[hidden] {
+  display: none !important;
+}

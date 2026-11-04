@@ -1,0 +1,149 @@
+.cliente-aviso-senha-ui {
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid #484848;
+  border-left: 3px solid #ed0017;
+  border-radius: 12px;
+  background: #252525;
+  overflow-wrap: anywhere;
+}
+.cliente-aviso-remetente-ui {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+}
+.cliente-aviso-remetente-ui img {
+  flex: 0 0 36px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+.cliente-aviso-senha-ui h3 {
+  margin: 14px 0 8px;
+  font-size: 18px;
+}
+.cliente-aviso-senha-ui p {
+  margin: 0 0 14px;
+  line-height: 1.45;
+}
+.cliente-aviso-senha-ui button {
+  padding: 10px 14px;
+  font: inherit;
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: #ed0017;
+  color: #fff;
+  cursor: pointer;
+}
+dialog.cliente-criar-senha-ui {
+  width: min(420px, calc(100% - 28px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  margin: auto;
+  border: 1px solid #555;
+  border-top: 3px solid #ed0017;
+  border-radius: 16px;
+  background: #1c1c1c;
+  color: white;
+  overflow-y: auto;
+}
+.cliente-criar-senha-ui::backdrop {
+  background: rgb(0 0 0 / 78%);
+}
+.cliente-criar-senha-ui header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #191919;
+  border-bottom: 1px solid #444;
+  height: auto;
+}
+.cliente-criar-senha-ui h2 {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  font-size: 18px;
+  border: 0;
+}
+.cliente-criar-senha-ui header button {
+  flex: 0 0 auto;
+  margin: 0;
+  width: auto;
+  padding: 8px 10px;
+  min-height: 38px;
+}
+.cliente-criar-senha-ui form {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+.cliente-criar-senha-ui form p {
+  margin: 0 0 8px;
+  line-height: 1.45;
+}
+.cliente-criar-senha-ui input[type="password"],
+.cliente-campos-senha-ui input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #666;
+  border-radius: 8px;
+  font: inherit;
+  background: #292929;
+  color: #fff;
+  margin: 0;
+}
+.cliente-criar-senha-ui button {
+  border: 0;
+  border-radius: 8px;
+  background: #ed0017;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+.cliente-criar-senha-ui button[type="submit"] {
+  padding: 12px;
+  margin-top: 6px;
+}
+.cliente-criar-senha-ui button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.cliente-criar-senha-ui small {
+  color: #ccc;
+  margin-bottom: 10px;
+}
+.cliente-criar-senha-ui .cliente-lembrar-senha-ui {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+.cliente-campos-senha-ui {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+}
+.cliente-campos-senha-ui [data-confirmar-senha] {
+  display: grid;
+  gap: 8px;
+}
+.cliente-campos-senha-ui a {
+  color: #ff5363;
+  text-decoration: underline;
+  font-size: 14px;
+}
+.cliente-campos-senha-ui [hidden] {
+  display: none !important;
+}
+.cliente-criar-senha-ui :focus-visible,
+.cliente-campos-senha-ui :focus-visible {
+  outline: 2px solid #ffd700;
+  outline-offset: 3px;
+}

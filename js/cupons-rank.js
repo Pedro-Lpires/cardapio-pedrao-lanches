@@ -23,12 +23,12 @@ function validarRegraCupomRankUI(regra) {
   return regra;
 }
 
-function resolverCupomRankUI(cupom, cliente) {
+function resolverCupomRankUI(cupom, cliente, calcularNivel = null) {
   if (!cupom.rankRegra) return cupom;
   const regra = validarRegraCupomRankUI(cupom.rankRegra);
   if (
     cliente?.fidelidadeAtiva &&
-    typeof nivelRankMensalUI === "function" &&
+    (calcularNivel || typeof nivelRankMensalUI === "function") &&
     !cliente.rankMensal?.importadoEm
   )
     throw Error(
@@ -37,7 +37,7 @@ function resolverCupomRankUI(cupom, cliente) {
   if (!cliente) throw Error("Entre na sua conta para usar este cupom por rank.");
   if (cliente.fidelidadeAtiva !== true)
     throw Error("Este cupom exige um rank ativo. Ative sua fidelidade para participar.");
-  const nivel = nivelFidelidadeOperacao(cliente, true);
+  const nivel = calcularNivel ? calcularNivel(cliente) : nivelFidelidadeOperacao(cliente, true);
   if (!niveisPermitidosCupomRankUI(regra).includes(nivel)) {
     const acesso =
       regra.acesso === "exclusivo"
@@ -192,3 +192,10 @@ async function verificarRankCupomTransacaoUI(t, cupom, clienteId, contexto) {
   if (Math.round(calculado * 100) !== Math.round(Number(contexto.desconto || 0) * 100))
     throw Error("O rank ou a regra do cupom mudou. Reaplique o cupom antes de continuar.");
 }
+if (typeof module !== "undefined" && module.exports)
+  module.exports = {
+    resolverCupomRankUI,
+    calcularCupomRankUI,
+    niveisPermitidosCupomRankUI,
+    validarRegraCupomRankUI,
+  };

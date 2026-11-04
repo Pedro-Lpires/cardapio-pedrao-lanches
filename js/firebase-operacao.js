@@ -12,4 +12,4 @@ firebase.initializeApp({
   messagingSenderId: "642954187872",
   appId: "1:642954187872:web:38efbecf53357e57b0df05",
 });
-const db = firebase.firestore();
+const db = typeof dbEquipeProtegidaUI === "function" ? dbEquipeProtegidaUI() : firebase.firestore();

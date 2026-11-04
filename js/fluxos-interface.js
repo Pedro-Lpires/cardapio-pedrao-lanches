@@ -199,6 +199,11 @@ async function enviarConsumoLocalUI() {
     return avisoOperacao("Confira os itens novamente antes de enviar.");
   enviandoConsumoLocalUI = true;
   try {
+    if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo())) {
+      const anterior = await checkoutProtegidoUI.recuperar();
+      if (anterior.pedido) return finalizarPedidoCheckoutProtegidoUI(anterior.pedido);
+      if (!(await conferirBeneficiosAntesEnvioUI())) return;
+    }
     const { pedido, mensagem } = montarConsumoLocalUI(
       carrinho,
       nome,
@@ -210,6 +215,7 @@ async function enviarConsumoLocalUI() {
       if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
       return avisoOperacao("Não foi possível salvar. Tente novamente.");
     }
+    if (pedido.checkoutProtegido === 1) return finalizarPedidoCheckoutProtegidoUI(pedido);
     if (typeof abrirMensagemWhatsPedidoUI === "function") abrirMensagemWhatsPedidoUI(mensagem);
     else
       window.open(
@@ -439,6 +445,13 @@ async function entrarContaAutoUI() {
   status.textContent = "";
   botao.disabled = true;
   try {
+    if (
+      typeof acessoClienteSenhaUI !== "undefined" &&
+      (await window.acessoClienteSenhaUI.ativo())
+    ) {
+      await entrarClienteAutoatendimento();
+      return;
+    }
     const nome = document.getElementById("login-auto-nome").value.trim();
     const telefone = document.getElementById("login-auto-telefone").value.replace(/\D/g, "");
     if (codigo && !(nome && telefone.length === 11)) {
@@ -475,6 +488,27 @@ async function criarContaAutoUI() {
     return;
   }
   try {
+    if (
+      typeof acessoClienteSenhaUI !== "undefined" &&
+      (await window.acessoClienteSenhaUI.ativo())
+    ) {
+      const senha = document.getElementById("login-auto-senha-protegida");
+      const confirmar = document.getElementById("login-auto-senha-confirmacao");
+      try {
+        const cliente = await window.acessoClienteSenhaUI.criarSenha({
+          nome,
+          telefone,
+          senha: senha?.value || "",
+          confirmacao: confirmar?.value || "",
+          lembrar: document.getElementById("login-auto-salvar")?.checked === true,
+        });
+        await aplicarClienteSenhaUI(cliente);
+      } finally {
+        if (senha) senha.value = "";
+        if (confirmar) confirmar.value = "";
+      }
+      return;
+    }
     const ref = db.collection("clientes").doc(telefone);
     await db.runTransaction(async (t) => {
       if ((await t.get(ref)).exists) throw Error("Este celular já tem conta. Escolha Login.");

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; object-src 'none'"
+    />
+    <title>Recuperar acesso | Pedrão Lanches</title>
+    <link rel="icon" type="image/webp" href="/images/logo-trailer.webp" />
+    <link rel="stylesheet" href="/css/paginas/recuperar-acesso.css?v=20261103-1" />
+    <script src="/js/recuperar-acesso.js?v=20261103-1" defer></script>
+  </head>
+  <body>
+    <main class="pagina-nao-encontrada recuperar-main">
+      <a class="marca-pedrao" href="/">
+        <img src="/images/logo-trailer.webp" width="48" height="48" alt="" />
+        <span>Pedrão Lanches</span>
+      </a>
+      <h1 id="recuperar-titulo">Recuperar acesso</h1>
+      <p id="recuperar-status" role="status" aria-live="polite">Conferindo seu link…</p>
+      <form id="form-recuperar" method="post" action="/api/recuperacao-acesso" hidden>
+        <p>Escolha uma nova senha. Seu histórico e seus benefícios continuam na mesma conta.</p>
+        <label for="recuperar-senha">Nova senha</label>
+        <input
+          id="recuperar-senha"
+          name="senha"
+          type="password"
+          autocomplete="new-password"
+          minlength="8"
+          maxlength="128"
+          aria-describedby="recuperar-ajuda"
+          required
+        />
+        <p id="recuperar-ajuda" class="recuperar-ajuda">
+          Use pelo menos 8 caracteres. Pode ser uma frase fácil de lembrar.
+        </p>
+        <label for="recuperar-confirmacao">Repita a nova senha</label>
+        <input
+          id="recuperar-confirmacao"
+          name="confirmacao"
+          type="password"
+          autocomplete="new-password"
+          minlength="8"
+          maxlength="128"
+          required
+        />
+        <button type="submit">Salvar nova senha</button>
+      </form>
+      <nav class="acoes-404" aria-label="Ajuda com o acesso">
+        <a id="recuperar-voltar" href="/" hidden>Voltar ao site</a>
+        <a
+          id="recuperar-whatsapp"
+          href="https://wa.me/5565992386045?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20para%20recuperar%20meu%20acesso%20ao%20Pedr%C3%A3o."
+          target="_blank"
+          rel="noopener noreferrer"
+          >Pedir ajuda pelo WhatsApp</a
+        >
+      </nav>
+      <p class="recuperar-ajuda">
+        O link vale por 30 minutos a partir da emissão e só pode ser usado uma vez.
+      </p>
+    </main>
+  </body>
+</html>

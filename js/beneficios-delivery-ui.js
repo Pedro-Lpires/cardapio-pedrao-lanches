@@ -48,7 +48,13 @@ async function carregarBeneficiosDeliveryUI(forcar = false) {
   estado.promessa = (async () => {
     const config = await lerBeneficiosEntregaUI();
     let cliente = clienteLogado;
-    if (config.ativo && id) cliente = await sincronizarRankMensalClienteUI(id);
+    if (
+      id &&
+      (config.ativo ||
+        (typeof checkoutProtegidoUI !== "undefined" && checkoutProtegidoUI.habilitado))
+    ) {
+      cliente = cliente?.precisaCriarSenha ? null : await sincronizarRankMensalClienteUI(id);
+    }
     if (estadoBeneficiosDeliveryUI !== estado) return estadoBeneficiosDeliveryUI;
     estado.config = config;
     estado.cliente = cliente;
@@ -91,7 +97,14 @@ function aplicarBeneficiosRevisaoDeliveryUI() {
       });
     return 0;
   }
-  const cliente = estado.id && clienteLogado?.rankMensal ? clienteLogado : estado.cliente;
+  const cliente =
+    typeof checkoutProtegidoUI !== "undefined" &&
+    checkoutProtegidoUI.habilitado &&
+    !clienteLogado?.authUid
+      ? null
+      : estado.id && clienteLogado?.rankMensal
+        ? clienteLogado
+        : estado.cliente;
   const b = calcularBeneficioEntregaUI(cliente, estado.config, pedidoBeneficiosRevisaoUI());
   descontoCreditoEntregaUI = b.centavos / 100;
   linha.hidden = !estado.config.ativo || dadosPedidoTemporario.tipo !== "Entrega";
@@ -103,6 +116,46 @@ function aplicarBeneficiosRevisaoDeliveryUI() {
 }
 async function conferirBeneficiosAntesEnvioUI() {
   if (!dadosPedidoTemporario?.tipo) return true;
+  if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo())) {
+    const versao = carrinhoVersao;
+    await carregarBeneficiosDeliveryUI(true);
+    let resultado;
+    try {
+      resultado = await checkoutProtegidoUI.conferir(pedidoAtualCheckoutProtegidoUI());
+    } catch (e) {
+      refazerBeneficiosRevisaoUI();
+      throw e;
+    }
+    if (versao !== carrinhoVersao) throw Error("O carrinho mudou. Confira os itens novamente.");
+    const p = resultado.pedido,
+      d = dadosPedidoTemporario;
+    const esperado = arredondarPagamento(
+      Math.max(
+        0,
+        Number(d.subtotal || 0) +
+          Number(d.taxa || 0) +
+          calcularTotalMolhosPagos() -
+          descontoCupom -
+          descontoFidelidade -
+          descontoCreditoEntregaUI,
+      ),
+    );
+    const mudou =
+      centavosOperacao(p.valorTotal) !== centavosOperacao(esperado) ||
+      centavosOperacao(p.taxaEntrega) !== centavosOperacao(d.taxa) ||
+      centavosOperacao(p.descontoCupom) !== centavosOperacao(descontoCupom) ||
+      centavosOperacao(p.descontoCreditoEntrega) !== centavosOperacao(descontoCreditoEntregaUI) ||
+      p.itens.some((i, n) => centavosOperacao(i.preco) !== centavosOperacao(carrinho[n]?.preco));
+    if (mudou) {
+      aplicarCotacaoCheckoutProtegidoUI(p);
+      mostrarAvisoUI(
+        "Os valores foram atualizados pela loja. Confira a revisão antes de enviar.",
+        "conferir",
+      );
+      return false;
+    }
+    return true;
+  }
   const anterior = centavosOperacao(descontoCreditoEntregaUI),
     estado = await carregarBeneficiosDeliveryUI(true);
   const b = calcularBeneficioEntregaUI(estado.cliente, estado.config, pedidoBeneficiosRevisaoUI());

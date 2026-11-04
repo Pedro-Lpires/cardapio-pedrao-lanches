@@ -23,6 +23,10 @@ async function verificarSenhaFinanceiro(senha, config) {
   return !!senha && senha === String(config.senhaFinanceiro || config.senhaMestre || "");
 }
 async function entrarFinanceiro() {
+  if (typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI()) {
+    if (perfilEquipeProtegidaUI?.admin === true) await liberarFinanceiroProtegidoUI();
+    return;
+  }
   const status = document.getElementById("financeiro-erro");
   try {
     const doc = await db.collection("config").doc("admin").get();
@@ -46,6 +50,8 @@ async function entrarFinanceiro() {
   }
 }
 async function trocarSenhaFinanceiro() {
+  if (typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI())
+    return avisoOperacao("O financeiro usa o acesso do proprietário no Firebase Authentication.");
   if (!financeiroLiberado) return;
   const atual = await solicitarEntradaOperacao("Senha atual do financeiro:", "password");
   if (!atual) return;
@@ -72,6 +78,15 @@ async function trocarSenhaFinanceiro() {
   } catch (e) {
     avisoOperacao("Não foi possível trocar a senha: " + e.message);
   }
+}
+async function liberarFinanceiroProtegidoUI() {
+  financeiroLiberado = true;
+  document.getElementById("financeiro-login").hidden = true;
+  document.getElementById("financeiro-conteudo").hidden = false;
+  document.getElementById("dia-financeiro").value = diaCuiabaFinanceiro(
+    new Date(Date.now() - 2 * 60 * 60 * 1000),
+  );
+  await carregarFinanceiro();
 }
 function diaCuiabaFinanceiro(data) {
   const partes = new Intl.DateTimeFormat("en-CA", {

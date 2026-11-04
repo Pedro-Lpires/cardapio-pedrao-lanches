@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Arte de compartilhamento — Pedrão Lanches</title>
+    <style>
+      @font-face {
+        font-family: "Source Sans 3";
+        src: url("../fonts/source-sans-3/SourceSans3VF-Upright.woff2") format("woff2");
+        font-weight: 200 900;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: #121212;
+        color: #fff;
+        font-family: "Source Sans 3", Arial, sans-serif;
+      }
+      main {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+        padding: 58px 64px;
+        border-top: 16px solid #ed0017;
+        border-bottom: 16px solid #ed0017;
+        background: #181818;
+      }
+      .logo {
+        width: 240px;
+        height: 240px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        border: 2px solid #454545;
+      }
+      section {
+        flex: 1;
+        min-width: 0;
+      }
+      h1 {
+        margin: 0 0 24px;
+        font-size: 80px;
+        font-weight: 850;
+        line-height: 0.98;
+        letter-spacing: -2px;
+      }
+      p {
+        margin: 0 0 18px;
+        font-size: 32px;
+        line-height: 1.25;
+      }
+      .assinatura {
+        margin: 0;
+        font-size: 26px;
+        color: #ffd700;
+      }
+      .chamada {
+        display: inline-block;
+        margin-top: 28px;
+        padding: 12px 24px;
+        border-radius: 10px;
+        background: #ed0017;
+        color: #fff;
+        font-size: 26px;
+        font-weight: 750;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img class="logo" src="../images/logo-trailer.webp" alt="Pedrão Lanches" />
+      <section>
+        <h1>Pedrão Lanches</h1>
+        <p>Lanches, combos,<br />batatas e bebidas.</p>
+        <p class="assinatura">O melhor da cidade desde 2014</p>
+        <span class="chamada">Confira nosso cardápio</span>
+      </section>
+    </main>
+  </body>
+</html>

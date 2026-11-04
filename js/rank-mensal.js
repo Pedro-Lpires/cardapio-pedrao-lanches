@@ -38,7 +38,9 @@ function eventoRankMensalUI(data, centavos) {
     return null;
   return { mes: competenciaRankMensalUI(data), centavos };
 }
-function eventosRankPedidoMensalUI(pedido) {
+function eventosRankPedidoMensalUI(pedido, regras = null) {
+  const cents = regras?.centavos || centavosOperacao;
+  const recebimentos = regras?.recebimentos || recebimentosPedidoOperacao;
   if (
     pedido.cancelado ||
     /cancelad/i.test(pedido.status || "") ||
@@ -49,47 +51,39 @@ function eventosRankPedidoMensalUI(pedido) {
   )
     return [];
   let descontoFrete = Math.min(
-    centavosOperacao(pedido.taxaEntrega),
-    Math.max(
-      0,
-      centavosOperacao(pedido.descontoCupomTaxa) + centavosOperacao(pedido.descontoCreditoEntrega),
-    ),
+    cents(pedido.taxaEntrega),
+    Math.max(0, cents(pedido.descontoCupomTaxa) + cents(pedido.descontoCreditoEntrega)),
   );
-  const fretePago = Math.max(0, centavosOperacao(pedido.taxaEntrega) - descontoFrete);
-  let limite = Math.max(0, centavosOperacao(pedido.valorTotal) - fretePago);
-  return recebimentosPedidoOperacao(pedido)
+  const fretePago = Math.max(0, cents(pedido.taxaEntrega) - descontoFrete);
+  let limite = Math.max(0, cents(pedido.valorTotal) - fretePago);
+  return recebimentos(pedido)
     .map((r) => {
-      const descontoNestaTaxa = Math.min(descontoFrete, centavosOperacao(r.taxaEntrega));
+      const descontoNestaTaxa = Math.min(descontoFrete, cents(r.taxaEntrega));
       descontoFrete -= descontoNestaTaxa;
       const valor = Math.min(
         limite,
-        Math.max(
-          0,
-          centavosOperacao(r.valor) -
-            Math.max(0, centavosOperacao(r.taxaEntrega) - descontoNestaTaxa),
-        ),
+        Math.max(0, cents(r.valor) - Math.max(0, cents(r.taxaEntrega) - descontoNestaTaxa)),
       );
       limite -= valor;
       return eventoRankMensalUI(r.pagoEm, valor);
     })
     .filter((e) => e && e.centavos > 0);
 }
-function eventosRankComandaMensalUI(comanda, clienteId) {
+function eventosRankComandaMensalUI(comanda, clienteId, regras = null) {
+  const cents = regras?.centavos || centavosOperacao;
   if (comanda.cancelado || /cancelad/i.test(comanda.status || "")) return [];
   const partes = (comanda.pagamentos || []).filter((p) => p.id && p.valorQuitado != null);
   if (partes.length)
     return partes
       .filter((p) => String(p.clienteId || "") === String(clienteId))
-      .map((p) =>
-        eventoRankMensalUI(p.pagoEm, Math.max(0, centavosOperacao(p.valorPago ?? p.valor))),
-      )
+      .map((p) => eventoRankMensalUI(p.pagoEm, Math.max(0, cents(p.valorPago ?? p.valor))))
       .filter(Boolean);
   if (comanda.status !== "Fechada" || String(comanda.clienteId || "") !== String(clienteId))
     return [];
   return [
     eventoRankMensalUI(
       comanda.fechadoEm || comanda.pagoEm,
-      Math.max(0, centavosOperacao(comanda.valorPago ?? comanda.valorFinal ?? comanda.valorTotal)),
+      Math.max(0, cents(comanda.valorPago ?? comanda.valorFinal ?? comanda.valorTotal)),
     ),
   ].filter(Boolean);
 }
@@ -154,6 +148,12 @@ function lancamentosComandaRankMensalUI(id, comanda) {
 const sincronizacoesRankMensalUI = new Map();
 async function sincronizarRankMensalClienteUI(id, forcar = false) {
   if (!id) return null;
+  if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo())) {
+    const { cliente } = await checkoutProtegidoUI.perfil();
+    if (String(cliente.telefone) !== String(id))
+      throw Error("A conta mudou durante a conferência do rank.");
+    return cliente;
+  }
   if (sincronizacoesRankMensalUI.has(id)) return sincronizacoesRankMensalUI.get(id);
   const tarefa = (async () => {
     const ref = db.collection("clientes").doc(String(id)),
@@ -351,3 +351,12 @@ function acompanharViradaRankMensalUI(id) {
     document.removeEventListener("visibilitychange", retomar);
   };
 }
+if (typeof module !== "undefined" && module.exports)
+  module.exports = {
+    competenciaRankMensalUI,
+    nivelRankMensalUI,
+    nivelValorRankMensalUI,
+    anteriorRankMensalUI,
+    eventosRankPedidoMensalUI,
+    eventosRankComandaMensalUI,
+  };

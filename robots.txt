@@ -1,0 +1,12 @@
+# Os painéis têm noindex no HTML e no cabeçalho HTTP. Não bloquear a leitura
+# dessas páginas aqui: o rastreador precisa enxergar a instrução noindex.
+User-agent: *
+Allow: /
+Disallow: /tests/
+Disallow: /scripts/
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /.codex/
+Disallow: /.agents/
+
+Sitemap: https://cardapio-pedrao-lanches.vercel.app/sitemap.xml

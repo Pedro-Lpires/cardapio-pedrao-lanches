@@ -1,0 +1,57 @@
+dialog.recuperacao-admin-ui {
+  max-width: 480px;
+}
+.recuperacao-admin-ui form {
+  display: grid;
+  gap: 12px;
+}
+.recuperacao-admin-ui label {
+  display: grid;
+  gap: 8px;
+}
+.recuperacao-admin-ui input {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+.recuperacao-admin-ui [role="status"] {
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+  margin-block: 16px;
+}
+.recuperacao-admin-ui .recuperacao-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.recuperacao-admin-ui .recuperacao-acoes a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #ed0017;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 650;
+}
+.recuperacao-admin-ui .recuperacao-conta {
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.recuperacao-admin-ui .recuperacao-conta p {
+  margin: 4px 0;
+}
+.recuperacao-admin-ui .recuperacao-link {
+  font-size: 14px;
+}
+.admin-header .admin-protegido-ui {
+  margin-top: 12px;
+  padding: 8px 12px;
+  min-height: 38px;
+  font-size: 14px;
+}

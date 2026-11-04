@@ -1,2 +1,8 @@
 node_modules/
 npm-debug.log*
+.env*
+!.env.example
+*.secret.json
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*

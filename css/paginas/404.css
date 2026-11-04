@@ -1,0 +1,134 @@
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("../../fonts/source-sans-3/SourceSans3VF-Upright.woff2") format("woff2");
+  font-weight: 200 900;
+  font-display: swap;
+}
+:root {
+  color-scheme: dark;
+  font-family: "Source Sans 3", Arial, sans-serif;
+  background: #121212;
+  color: #fff;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 24px 16px;
+  display: grid;
+  place-items: center;
+}
+.pagina-nao-encontrada {
+  width: min(100%, 420px);
+  padding: 24px;
+  border: 1px solid #414141;
+  border-top: 3px solid #ed0017;
+  border-radius: 20px;
+  background: #1f1f1f;
+}
+.marca-pedrao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  font-size: 21px;
+  font-weight: 750;
+  text-decoration: none;
+}
+.marca-pedrao img {
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+.retrato-mago {
+  width: 200px;
+  height: 160px;
+  margin: 24px auto 0;
+  overflow: hidden;
+}
+.mago-pensando {
+  display: block;
+  width: 200px;
+  height: 300px;
+}
+.fala-do-mago {
+  position: relative;
+  padding: 20px;
+  border: 2px solid #101010;
+  border-radius: 20px;
+  background: #fff;
+  color: #222;
+}
+.fala-do-mago::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 10px);
+  top: -12px;
+  width: 20px;
+  height: 20px;
+  border-top: 2px solid #101010;
+  border-left: 2px solid #101010;
+  background: #fff;
+  transform: rotate(45deg);
+}
+h1 {
+  position: relative;
+  margin: 0 0 10px;
+  font-size: clamp(23px, 6vw, 28px);
+  line-height: 1.15;
+  color: #ce0014;
+}
+.fala-do-mago p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.45;
+}
+.acoes-404 {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+.acoes-404 a {
+  padding: 12px 16px;
+  min-height: 46px;
+  border: 1px solid #666;
+  border-radius: 10px;
+  background: #282828;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+}
+.acoes-404 .acao-principal {
+  border-color: #ed0017;
+  background: #ed0017;
+}
+a:focus-visible {
+  outline: 3px solid #ffd700;
+  outline-offset: 4px;
+}
+.acoes-404 a:hover {
+  filter: brightness(1.15);
+}
+.codigo-404 {
+  margin: 18px 0 0;
+  color: #bcbcbc;
+  font-size: 13px;
+  text-align: center;
+}
+@media (max-height: 620px) {
+  body {
+    padding-block: 12px;
+  }
+  .pagina-nao-encontrada {
+    padding: 20px;
+  }
+  .retrato-mago {
+    height: 124px;
+    margin-top: 16px;
+  }
+}

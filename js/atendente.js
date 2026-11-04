@@ -33,6 +33,18 @@ let areaDestinoComandaAtual = null;
 
 async function loginAtendente() {
   const codigo = document.getElementById("codigo-atendente").value.trim();
+  if (typeof acessoEquipeDisponivelUI === "function" && (await acessoEquipeDisponivelUI())) {
+    try {
+      const perfil = await entrarEquipeProtegidaUI(codigo, false);
+      if (!["atendimento", "ambos"].includes(perfil.perfil))
+        return avisoOperacao("Este código libera apenas a Chapa.");
+      registrarAcessoFuncionarioUI(perfil.id, perfil);
+      location.href = "painel-atendente.html";
+    } catch (erro) {
+      avisoOperacao(erro.message);
+    }
+    return;
+  }
 
   if (!codigo) {
     alert("Digite o código.");
@@ -68,7 +80,7 @@ if (boxNome && nomeAtendente) {
   boxNome.innerText = `Bem-vindo, ${nomeAtendente}`;
 }
 
-function logoutAtendente() {
+async function logoutAtendente() {
   localStorage.removeItem("funcionarioSalvoPedrao");
   sessionStorage.removeItem("cozinhaAcessoPedrao");
   localStorage.removeItem("cozinhaAcessoPedrao");
@@ -77,6 +89,7 @@ function logoutAtendente() {
   localStorage.removeItem("atendenteId");
 
   localStorage.removeItem("atendenteNome");
+  if (typeof sairEquipeProtegidaUI === "function") await sairEquipeProtegidaUI();
 
   location.href = "atendente.html";
 }

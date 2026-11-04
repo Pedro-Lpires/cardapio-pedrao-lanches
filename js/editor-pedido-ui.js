@@ -103,6 +103,8 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
         ? db.collection("clientes").doc(atual.clienteId)
         : null;
     const clienteDoc = clienteRef ? await t.get(clienteRef) : null;
+    if (atual.checkoutProtegido === 1 && rascunho.tipo === "Local")
+      rascunho = { ...rascunho, descontoFidelidade: 0 };
     if (rascunho.ajusteArredondamento == null)
       rascunho = {
         ...rascunho,
@@ -197,7 +199,11 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
             },
           ])
         : () => {};
-    if (clienteDoc?.exists) {
+    const fidelidade =
+      typeof prepararFidelidadeCheckoutUI === "function"
+        ? await prepararFidelidadeCheckoutUI(t, atual, { ...atual, ...patch })
+        : { patch: {}, salvar: () => {} };
+    if (clienteDoc?.exists && atual.checkoutProtegido !== 1) {
       const c = clienteDoc.data(),
         clientePatch = {};
       if (atual.origem === "site_delivery")
@@ -233,16 +239,18 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
       }
       if (Object.keys(clientePatch).length) t.update(clienteRef, clientePatch);
     }
-    if (atual.beneficiosPerfil)
+    if (atual.beneficiosPerfil && atual.checkoutProtegido !== 1)
       patch.beneficiosPerfil = {
         ...atual.beneficiosPerfil,
         gastoTotal: patch.valorTotal,
         bonusUsado: patch.descontoFidelidade,
       };
+    Object.assign(patch, fidelidade.patch);
     // O vínculo e os identificadores são preservados; a produção é conferida separadamente.
     t.update(ref, patch);
     salvarRank();
     beneficio.salvar();
+    fidelidade.salvar();
     return { ...atual, ...patch };
   });
 }

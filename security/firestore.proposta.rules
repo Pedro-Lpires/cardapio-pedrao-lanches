@@ -1,0 +1,206 @@
+// PROPOSTA EM HOMOLOGACAO. Nao publicar antes de migrar checkout/equipe/mesa.
+// O emulador usa somente o projeto demo-pedrao-seguranca, sem credenciais reais.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function autenticado() { return request.auth != null; }
+    function proprietario() {
+      return autenticado() && request.auth.token.get('admin', false) == true;
+    }
+    function funcionario(perfil) {
+      let valor = autenticado() ? request.auth.token.get('funcionarioId', '') : '';
+      let id = valor is string && valor.size() > 0 ? valor : '_sem-funcionario';
+      let caminho = /databases/$(database)/documents/atendentes/$(id);
+      return id != '_sem-funcionario' && exists(caminho)
+        && get(caminho).data.get('ativo', false) == true
+        && (get(caminho).data.get('perfil', null) == null || get(caminho).data.perfil in [perfil, 'ambos']);
+    }
+    function atendimento() { return proprietario() || funcionario('atendimento'); }
+    function chapa() { return proprietario() || funcionario('chapa'); }
+    function sessaoClienteVigente() {
+      let caminho = /databases/$(database)/documents/authRecuperacoes/$(request.auth.uid);
+      return !exists(caminho) || get(caminho).data.get('revogadoAntesEm', 0) == 0
+        || request.auth.token.get('auth_time', 0) * 1000 > get(caminho).data.revogadoAntesEm;
+    }
+    function cliente(id) {
+      return autenticado() && request.auth.token.get('acessoCliente', false) == true
+        && sessaoClienteVigente()
+        && request.auth.token.get('clienteId', '') == id
+        && exists(/databases/$(database)/documents/clientes/$(id))
+        && get(/databases/$(database)/documents/clientes/$(id)).data.get('authUid', '') == request.auth.uid;
+    }
+    function registroDoCliente(dados) {
+      let id = autenticado() ? request.auth.token.get('clienteId', '') : '';
+      return id is string && id.size() == 11 && cliente(id)
+        && (dados.get('clienteAuthUid', '') == request.auth.uid
+          || (request.auth.token.get('historicoLegadoVerificado', false) == true
+            && dados.get('clienteId', '') == id));
+    }
+    function visita(id) {
+      return autenticado() && request.auth.token.get('visitaMesa', false) == true
+        && request.auth.token.get('sessaoMesaId', '') == id
+        && exists(/databases/$(database)/documents/sessoesMesa/$(id))
+        && get(/databases/$(database)/documents/sessoesMesa/$(id)).data.get('visitaAuthUid', '') == request.auth.uid
+        && get(/databases/$(database)/documents/sessoesMesa/$(id)).data.status == 'ativa'
+        && get(/databases/$(database)/documents/sessoesMesa/$(id)).data.pedidoEnviado == true
+        && comandaDaVisitaAberta(get(/databases/$(database)/documents/sessoesMesa/$(id)).data.get('comandaId', ''), id);
+    }
+    function comandaDaVisitaAberta(comandaId, sessaoId) {
+      return comandaId is string && comandaId.size() > 0
+        && exists(/databases/$(database)/documents/comandas/$(comandaId))
+        && get(/databases/$(database)/documents/comandas/$(comandaId)).data.status == 'Aberta'
+        && get(/databases/$(database)/documents/comandas/$(comandaId)).data.get('sessaoAutoatendimentoId', '') == sessaoId;
+    }
+    function visitaDaComanda(dados) {
+      return autenticado() && visita(dados.get('sessaoAutoatendimentoId', ''));
+    }
+    function texto(v, limite) { return v is string && v.size() <= limite; }
+    function nomeValido(v) {
+      return texto(v, 100) && v.matches("^[\\p{L}\\p{M}\\p{N} .'-]{2,100}$");
+    }
+    function avatarValido(v) {
+      return texto(v, 120) && v.matches('^images/avatares/(sem-rank|bronze|prata|ouro|diamante|imortal)/[a-z0-9-]+[.]webp$');
+    }
+    function vinculoInalterado() {
+      return request.resource.data.get('authUid', null) == resource.data.get('authUid', null)
+        && request.resource.data.get('acessoSenhaCriadoEm', null) == resource.data.get('acessoSenhaCriadoEm', null);
+    }
+    function edicaoPessoal(id) {
+      return cliente(id)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome', 'avatar', 'enderecos'])
+        && nomeValido(request.resource.data.nome)
+        && avatarValido(request.resource.data.avatar)
+        && request.resource.data.get('enderecos', []) is list
+        && request.resource.data.get('enderecos', []).size() <= 10;
+    }
+    function privado(colecao) {
+      return colecao in ['authRecuperacoes', 'authClientesTeste', 'authTentativasCliente', 'authTentativasEquipe', 'authTentativasPedido', 'authVisitasMesa', 'authTentativasMesa'];
+    }
+
+    // Configuracao de identidade, limite e recuperacao nunca e acessivel pelo browser.
+    match /{colecao}/{id}/{resto=**} {
+      allow read, write: if !privado(colecao) && colecao != 'clientes' && proprietario();
+    }
+    match /produtos/{id} { allow read: if true; }
+    match /adicionais/{id} { allow read: if true; }
+    match /config/{id} {
+      allow read: if id in ['loja', 'beneficios'] || (id == 'producaoTela' && (chapa() || atendimento()));
+      allow read, create, update: if atendimento() && id.matches('^contador(Pedidos|Entregas)(_.+)?$');
+      allow update: if id == 'producaoTela' && chapa()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['limpaAntes', 'limpoPor'])
+        && request.resource.data.limpaAntes is int && request.resource.data.limpaAntes >= 0
+        && texto(request.resource.data.limpoPor, 100);
+      allow create: if id == 'producaoTela' && chapa()
+        && request.resource.data.keys().hasOnly(['limpaAntes', 'limpoPor'])
+        && request.resource.data.limpaAntes is int && request.resource.data.limpaAntes >= 0
+        && texto(request.resource.data.limpoPor, 100);
+    }
+    match /atendentes/{id} {
+      allow get: if autenticado() && request.auth.token.get('funcionarioId', '') == id
+        && resource.data.get('ativo', false) == true;
+    }
+    match /clientes/{id} {
+      allow read: if atendimento() || cliente(id);
+      allow create: if atendimento()
+        && request.resource.data.get('authUid', null) == null
+        && request.resource.data.get('acessoSenhaCriadoEm', null) == null;
+      allow update: if vinculoInalterado() && (atendimento() || edicaoPessoal(id));
+      allow delete: if proprietario();
+      match /{colecao}/{doc}/{resto=**} {
+        allow read, write: if proprietario();
+      }
+      match /cupons/{codigo} {
+        allow read: if atendimento() || cliente(id);
+        allow write: if atendimento();
+      }
+      match /mensagens/{mensagem} {
+        allow read: if cliente(id);
+        allow create: if cliente(id)
+          && request.resource.data.keys().hasOnly(['tipo', 'texto', 'remetente', 'data', 'lida'])
+          && request.resource.data.tipo == 'suporte' && request.resource.data.remetente == 'cliente'
+          && texto(request.resource.data.texto, 4000) && texto(request.resource.data.data, 40)
+          && request.resource.data.lida == false;
+        allow update: if cliente(id) && resource.data.remetente == 'admin'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lida'])
+          && request.resource.data.lida == true;
+      }
+      match /chamados/{chamado} {
+        allow read: if cliente(id);
+        // Criacao/alteracao do chamado deve conferir o pedido associado no servidor.
+        match /mensagens/{mensagem} {
+          allow read: if cliente(id);
+          allow create: if cliente(id)
+            && exists(/databases/$(database)/documents/clientes/$(id)/chamados/$(chamado))
+            && get(/databases/$(database)/documents/clientes/$(id)/chamados/$(chamado)).data.status != 'finalizado'
+            && request.resource.data.keys().hasOnly(['texto', 'remetente', 'data', 'lida'])
+            && request.resource.data.remetente == 'cliente'
+            && texto(request.resource.data.texto, 4000) && texto(request.resource.data.data, 40)
+            && request.resource.data.lida == false;
+          allow update: if cliente(id) && resource.data.remetente == 'admin'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lida'])
+            && request.resource.data.lida == true;
+        }
+      }
+    }
+    match /pedidos/{id} {
+      allow read: if atendimento() || registroDoCliente(resource.data);
+      allow write: if atendimento();
+    }
+    match /comandas/{id} {
+      allow read: if atendimento() || visitaDaComanda(resource.data);
+      allow write: if atendimento();
+    }
+    match /historicoPagamentosClientes/{id} {
+      allow read: if atendimento() || registroDoCliente(resource.data);
+      allow write: if atendimento();
+    }
+    match /mesas/{id} {
+      allow read, write: if atendimento();
+      allow get: if autenticado() && request.auth.token.get('visitaMesa', false) == true
+        && request.auth.token.get('mesaId', '') == id
+        && visita(request.auth.token.get('sessaoMesaId', ''));
+    }
+    match /sessoesMesa/{id} {
+      allow read: if atendimento() || visita(id);
+      allow write: if atendimento();
+    }
+    match /chamadosMesa/{id} { allow read, write: if atendimento(); }
+    match /rankMovimentos/{id} {
+      allow read: if atendimento() || registroDoCliente(resource.data);
+      allow write: if atendimento();
+    }
+    match /cuponsDesconto/{id} { allow read, write: if atendimento(); }
+    match /raspadinhas/{id} {
+      allow read: if atendimento() || (autenticado() && cliente(resource.data.clienteId));
+      allow write: if atendimento();
+      allow update: if autenticado() && cliente(resource.data.clienteId)
+        && resource.data.status == 'disponivel'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reveladaEm'])
+        && resource.data.get('reveladaEm', null) == null
+        && request.resource.data.reveladaEm is int && request.resource.data.reveladaEm >= 0;
+    }
+    match /codigosRaspadinhas/{id} { allow read, write: if atendimento(); }
+    match /concessoesRaspadinhas/{id} { allow read, write: if atendimento(); }
+    match /resgatesRaspadinhas/{id} { allow read, write: if atendimento(); }
+    match /campanhasRaspadinhas/{id} { allow read: if atendimento(); }
+    match /filaCozinha/{id} {
+      allow read: if atendimento() || chapa();
+      allow create, delete: if atendimento();
+      allow update: if atendimento() || (chapa()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'concluidoEm', 'retiradoEm'])
+        && resource.data.status in ['aguardando', 'pronto', 'retirado']
+        && request.resource.data.status in ['aguardando', 'pronto', 'retirado']
+        && (request.resource.data.get('concluidoEm', null) == null || request.resource.data.concluidoEm is int)
+        && request.resource.data.get('retiradoEm', 0) is int);
+    }
+    match /usuariosOnline/{id} {
+      allow create: if autenticado() && request.resource.data.get('authUid', '') == request.auth.uid
+        && request.resource.data.get('sessionId', '') == id;
+      allow update: if autenticado() && resource.data.get('authUid', '') == request.auth.uid
+        && request.resource.data.get('authUid', '') == request.auth.uid
+        && request.resource.data.get('sessionId', '') == id;
+      allow delete: if autenticado() && resource.data.get('authUid', '') == request.auth.uid;
+    }
+    // Qualquer caminho nao autorizado acima permanece negado.
+  }
+}

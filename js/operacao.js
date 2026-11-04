@@ -460,6 +460,7 @@ async function salvarPagamentoSeparadoAtomico(ref, anterior, pagamento, atualiza
     if (clienteRef)
       t.set(historicoRef, {
         clienteId: pagamento.clienteId,
+        clienteAuthUid: cliente?.exists ? cliente.data().authUid || null : null,
         clienteNome: pagamento.clienteNome || "",
         comandaId: ref.id,
         pedidoId: anterior.pedidoOrigemId || null,
@@ -1696,10 +1697,15 @@ async function registrarRecebimentoPedidoOperacao(id, retirar, conferido) {
       typeof prepararBeneficioEntregaUI === "function"
         ? await prepararBeneficioEntregaUI(t, p, "confirmar")
         : { patch: {}, salvar: () => {} };
-    t.update(ref, { ...patch, ...beneficio.patch });
+    const fidelidade =
+      typeof prepararFidelidadeCheckoutUI === "function"
+        ? await prepararFidelidadeCheckoutUI(t, p, { ...p, ...patch })
+        : { patch: {}, salvar: () => {} };
+    t.update(ref, { ...patch, ...beneficio.patch, ...fidelidade.patch });
     salvarRank();
     beneficio.salvar();
-    return { ...patch, ...beneficio.patch };
+    fidelidade.salvar();
+    return { ...patch, ...beneficio.patch, ...fidelidade.patch };
   });
 }
 async function confirmarRecebimentoOperacao(id, retirar = false) {
@@ -2160,9 +2166,12 @@ function renderizarFilaCozinhaOperacao() {
   const gestao = document.getElementById("gestao-fila-cozinha");
   const lista = document.getElementById("fila-cozinha") || gestao;
   if (!lista) return;
-  const esperandoOrigens = filaOperacao.some(
-    (r) => origensCozinhaOperacao.get(r.origemColecao + "/" + r.origemId)?.carregando,
-  );
+  const protegida = typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI();
+  const esperandoOrigens =
+    !protegida &&
+    filaOperacao.some(
+      (r) => origensCozinhaOperacao.get(r.origemColecao + "/" + r.origemId)?.carregando,
+    );
   const possuiOrigemCarregada = filaOperacao.some(
     (r) => origensCozinhaOperacao.get(r.origemColecao + "/" + r.origemId)?.dados,
   );
@@ -2177,13 +2186,16 @@ function renderizarFilaCozinhaOperacao() {
       const origem = origensCozinhaOperacao.get(r.origemColecao + "/" + r.origemId);
       return (
         Number(r.criadoEmMs) >= inicioProducaoOperacao() &&
-        origem?.dados &&
-        !origem.dados.cancelado &&
-        !/cancelad/i.test(origem.dados.status || "")
+        (protegida ||
+          (origem?.dados &&
+            !origem.dados.cancelado &&
+            !/cancelad/i.test(origem.dados.status || "")))
       );
     })
     .map((r) => {
-      const origem = origensCozinhaOperacao.get(r.origemColecao + "/" + r.origemId).dados;
+      const origem = protegida
+        ? {}
+        : origensCozinhaOperacao.get(r.origemColecao + "/" + r.origemId).dados;
       return { ...r, tipo: r.tipo || origem.tipo || "", mesa: r.mesa || origem.mesa || "" };
     })
     .filter((r) => itensChapeiroOperacao(r.itens).length > 0)
@@ -2205,6 +2217,11 @@ function renderizarFilaCozinhaOperacao() {
     '<p class="cozinha-vazia">Tudo em dia. Aguardando novos pedidos confirmados.</p>';
 }
 function sincronizarOrigensCozinhaOperacao() {
+  if (typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI()) {
+    for (const origem of origensCozinhaOperacao.values()) origem.parar();
+    origensCozinhaOperacao.clear();
+    return; // O snapshot da fila já contém o preparo; não expõe pagamentos nem endereços à chapa.
+  }
   const chaves = new Set(filaOperacao.map((r) => r.origemColecao + "/" + r.origemId));
   for (const [chave, origem] of origensCozinhaOperacao) {
     if (!chaves.has(chave)) {
@@ -2307,6 +2324,13 @@ function iniciarCozinhaOperacao() {
   if (!lista || pararFilaCozinhaOperacao) return;
   const modo = new URLSearchParams(location.search).get("modo");
   document.body.classList.toggle("cozinha-monitor", modo === "monitor");
+  if (typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI()) {
+    if (!perfilEquipeProtegidaUI || !["chapa", "ambos"].includes(perfilEquipeProtegidaUI.perfil))
+      return;
+    observarCorteProducaoOperacao();
+    assinarFilaDiaCozinhaOperacao();
+    return;
+  }
   if (!sessionStorage.getItem("cozinhaAcessoPedrao")) {
     const acesso = localStorage.getItem("cozinhaAcessoPedrao");
     if (acesso) {
@@ -2343,6 +2367,14 @@ async function entrarCozinhaOperacao() {
   const codigo = document.getElementById("codigo-cozinha").value.trim();
   if (!codigo) return;
   try {
+    if (typeof acessoEquipeDisponivelUI === "function" && (await acessoEquipeDisponivelUI())) {
+      const perfil = await entrarEquipeProtegidaUI(codigo, false);
+      if (!["chapa", "ambos"].includes(perfil.perfil))
+        throw Error("Este código libera apenas Atendimento.");
+      registrarAcessoFuncionarioUI(perfil.id, perfil);
+      location.reload();
+      return;
+    }
     const snap = await db
       .collection("atendentes")
       .where("codigo", "==", codigo)
