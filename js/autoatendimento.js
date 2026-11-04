@@ -140,8 +140,13 @@ async function iniciarAutoatendimento() {
   // BUSCAR MESA
   // =========================
 
-  if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo()))
-    return iniciarMesaProtegidaUI(numeroMesa);
+  if (typeof mesaProtegidaUI !== "undefined") {
+    if (await mesaProtegidaUI.ativo()) return iniciarMesaProtegidaUI(numeroMesa);
+    if (typeof ambienteLocalSemServidorUI === "function" && ambienteLocalSemServidorUI()) {
+      mostrarAmbienteLocalUI(area, "autoatendimento.html");
+      return;
+    }
+  }
 
   const snapMesa = await lerComPrazoUI(
     db.collection("mesas").where("numero", "==", numeroMesa).limit(1).get(),
@@ -4379,6 +4384,6 @@ async function chamarAtendenteMesaBloqueada() {
 document.addEventListener("DOMContentLoaded", () => {
   iniciarAutoatendimento().catch(() => {
     document.getElementById("area-autoatendimento").innerHTML =
-      '<p>Não foi possível abrir sua mesa. Confira sua conexão.</p><button onclick="location.reload()">Tentar novamente</button>';
+      '<section class="ambiente-local-ui"><h2>Não foi possível abrir sua mesa</h2><p>Confira sua conexão e tente novamente.</p><button onclick="location.reload()">Tentar novamente</button></section>';
   });
 });

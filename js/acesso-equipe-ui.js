@@ -179,7 +179,11 @@ async function iniciarAcessoPaginaEquipeUI() {
     return;
   const proprietario = ["admin.html", "financeiro.html"].includes(pagina);
   try {
-    if (!(await acessoEquipeDisponivelUI())) return;
+    if (!(await acessoEquipeDisponivelUI())) {
+      if (typeof ambienteLocalSemServidorUI === "function" && ambienteLocalSemServidorUI())
+        abrirAmbienteLocalEquipeUI();
+      return;
+    }
     const perfil = await restaurarEquipeProtegidaUI();
     const destino = pagina === "cozinha.html" ? "chapa" : "atendimento";
     if (

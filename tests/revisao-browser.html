@@ -243,6 +243,12 @@
       }
       document.getElementById("pagina").onchange = abrir;
       document.getElementById("cenario").onchange = abrir;
+      const parametros = new URLSearchParams(location.search);
+      for (const nome of ["pagina", "cenario"]) {
+        const campo = document.getElementById(nome);
+        if (Array.from(campo.options).some((o) => o.value === parametros.get(nome)))
+          campo.value = parametros.get(nome);
+      }
       abrir();
     </script>
   </body>

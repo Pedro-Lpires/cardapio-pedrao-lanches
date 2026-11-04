@@ -1,0 +1,78 @@
+.ambiente-local-janela-ui {
+  box-sizing: border-box;
+  width: min(460px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid #555;
+  border-radius: 16px;
+  background: #191919;
+  color: #fff;
+  overflow-y: auto;
+}
+.ambiente-local-janela-ui::backdrop {
+  background: #000b;
+}
+.ambiente-local-ui {
+  box-sizing: border-box;
+  width: min(100%, 460px);
+  min-width: 0;
+  margin: 24px auto;
+  padding: 20px;
+  color: #fff;
+  background: #191919;
+  border: 1px solid #555;
+  border-top: 3px solid #ed0017;
+  border-radius: 16px;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.ambiente-local-janela-ui .ambiente-local-ui {
+  margin: 0;
+  border: 0;
+}
+.ambiente-local-ui h2 {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  font-size: 20px;
+  line-height: 1.3;
+  text-transform: none;
+}
+.ambiente-local-ui p {
+  margin: 0 0 18px;
+  line-height: 1.5;
+}
+.ambiente-local-acoes {
+  display: grid;
+  gap: 12px;
+  margin-block: 20px;
+}
+.ambiente-local-acoes a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid #ed0017;
+  border-radius: 10px;
+  background: #ed0017;
+  color: #fff;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+  text-decoration: none;
+}
+.ambiente-local-acoes a + a {
+  background: #303030;
+  border-color: #666;
+}
+.ambiente-local-ui .ambiente-local-ajuda {
+  margin-bottom: 0;
+  color: #ccc;
+  font-size: 14px;
+}
+#area-autoatendimento > .ambiente-local-ui {
+  width: calc(100% - 32px);
+}
