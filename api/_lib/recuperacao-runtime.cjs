@@ -5,6 +5,7 @@ const {
 } = require("./recuperacao-acesso.cjs");
 const { criarDbRecuperacaoRest } = require("./recuperacao-firestore-rest.cjs");
 const { protegerSessoesCliente } = require("./sessao-cliente.cjs");
+const { etapaConfiguracao } = require("./diagnostico.cjs");
 let servico;
 let plataforma;
 function configurado(env = process.env) {
@@ -70,14 +71,23 @@ function obterPlataformaAcesso() {
   if (!configurado())
     throw new ErroRecuperacao(503, "O acesso com senha ainda está em configuração.");
   if (plataforma) return plataforma;
-  const { initializeApp, cert, getApps } = require("firebase-admin/app");
-  const { getAuth } = require("firebase-admin/auth");
-  const conta = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-  if (conta.project_id !== (process.env.FIREBASE_PROJECT_ID || "pedrao-lanches"))
-    throw Error("Projeto de autenticação inválido.");
-  const app =
-    getApps().find((a) => a.name === "recuperacao-pedrao") ||
-    initializeApp({ credential: cert(conta) }, "recuperacao-pedrao");
+  const { initializeApp, cert, getApps } = etapaConfiguracao("carregar_sdk_app", () =>
+    require("firebase-admin/app"),
+  );
+  const { getAuth } = etapaConfiguracao("carregar_sdk_auth", () => require("firebase-admin/auth"));
+  const conta = etapaConfiguracao("ler_json_conta_servico", () =>
+    JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON),
+  );
+  etapaConfiguracao("conferir_projeto", () => {
+    if (conta.project_id !== (process.env.FIREBASE_PROJECT_ID || "pedrao-lanches"))
+      throw Error("Projeto de autenticação inválido.");
+  });
+  const app = etapaConfiguracao(
+    "inicializar_credencial",
+    () =>
+      getApps().find((a) => a.name === "recuperacao-pedrao") ||
+      initializeApp({ credential: cert(conta) }, "recuperacao-pedrao"),
+  );
   const armazenamento = criarArmazenamentoRecuperacao(
     criarDbRecuperacaoRest({
       projectId: conta.project_id,

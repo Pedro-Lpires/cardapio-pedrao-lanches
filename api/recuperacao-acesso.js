@@ -62,6 +62,8 @@ function criarHandlerRecuperacao({
       else throw new ErroRecuperacao(400, "Ação inválida.");
       responder(200, resultado);
     } catch (erro) {
+      if (!(erro instanceof ErroRecuperacao))
+        require("./_lib/diagnostico.cjs").registrarFalha(erro, "api_recuperacao");
       responder(erro instanceof ErroRecuperacao ? erro.status : 503, {
         erro:
           erro instanceof ErroRecuperacao
