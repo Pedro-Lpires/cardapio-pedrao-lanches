@@ -76,6 +76,11 @@ function atualizarConfigBeneficiosDeliveryUI(config) {
   refazerBeneficiosRevisaoUI();
 }
 function aplicarBeneficiosRevisaoDeliveryUI() {
+  if (!clienteLogado?.fidelidadeAtiva) {
+    descontoCreditoEntregaUI = 0;
+    document.getElementById("linha-beneficios-entrega-ui")?.remove();
+    return 0;
+  }
   const box = document.getElementById("detalhe-valores"),
     total = document.getElementById("resumo-total");
   let linha = document.getElementById("linha-beneficios-entrega-ui");

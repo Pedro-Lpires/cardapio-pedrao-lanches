@@ -90,8 +90,10 @@ function limparTelefoneAdmin(valor) {
   return valor.replace(/\D/g, "");
 }
 
-async function buscarClienteAdmin() {
-  const busca = document.getElementById("admin-busca-cliente").value.trim();
+async function buscarClienteAdmin(chave = null) {
+  const busca = (
+    typeof chave === "string" ? chave : document.getElementById("admin-busca-cliente").value
+  ).trim();
   const box = document.getElementById("resultado-cliente-admin");
 
   if (!busca) return alert("Digite telefone, nome ou código.");
@@ -119,11 +121,35 @@ async function buscarClienteAdmin() {
     }
   }
 
-  if (!doc || !doc.exists) {
-    const snapNome = await db.collection("clientes").where("nome", "==", busca).limit(1).get();
-
-    if (!snapNome.empty) {
-      doc = snapNome.docs[0];
+  if ((!doc || !doc.exists) && /\p{L}/u.test(busca)) {
+    const normalizar = (v) =>
+      String(v || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLocaleLowerCase("pt-BR")
+        .trim();
+    const termo = normalizar(busca);
+    const lista = await db.collection("clientes").limit(200).get();
+    const encontrados = lista.docs.filter((d) =>
+      [d.data().nome, d.data().nomeReal].some((n) => normalizar(n).includes(termo)),
+    );
+    if (encontrados.length > 1) {
+      box.replaceChildren();
+      const titulo = document.createElement("p");
+      titulo.textContent = "Escolha o cliente:";
+      box.append(titulo);
+      for (const encontrado of encontrados) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "cliente-resultado-busca-ui";
+        b.textContent = `${encontrado.data().nomeReal || encontrado.data().nome || "Cliente"} · ${encontrado.id}`;
+        b.onclick = () => window.buscarClienteAdmin(encontrado.id);
+        box.append(b);
+      }
+      return;
+    }
+    if (encontrados.length === 1) {
+      doc = encontrados[0];
       telefoneFinal = doc.id;
     }
   }
@@ -150,11 +176,11 @@ async function buscarClienteAdmin() {
                 <p><strong>Nome real:</strong> ${escaparOperacao(c.nomeReal || "-")}</p>
                 <p><strong>Telefone:</strong> ${escaparOperacao(c.telefone || telefoneFinal)}</p>
                 <p><strong>Fidelidade:</strong> ${c.fidelidadeAtiva ? "Ativa" : "Inativa"}</p>
-                <p><strong>Total geral gasto:</strong> R$ ${Number(c.totalGasto || 0).toFixed(2)}</p>
+                <p><strong>Total geral gasto:</strong> ${moedaOperacao(c.totalGasto)}</p>
                 ${typeof htmlRankMensalUI === "function" ? htmlRankMensalUI(c) : ""}
-                <p><strong>Total fidelidade:</strong> R$ ${Number(c.totalFidelidade || 0).toFixed(2)}</p>
-                <p><strong>Bônus disponível:</strong> R$ ${Number(c.bonusDisponivel || 0).toFixed(2)}</p>
-                <p><strong>Bônus gerado total:</strong> R$ ${Number(c.bonusGeradoTotal || 0).toFixed(2)}</p>
+                <p><strong>Total fidelidade:</strong> ${moedaOperacao(c.totalFidelidade)}</p>
+                <p><strong>Bônus disponível:</strong> ${moedaOperacao(c.bonusDisponivel)}</p>
+                <p><strong>Bônus gerado total:</strong> ${moedaOperacao(c.bonusGeradoTotal)}</p>
                 <p><strong>Código:</strong> ${escaparOperacao(c.codigoAtivacao || "Sem código")}</p>
                 <p><strong>Ativado em:</strong> ${c.ativadoEm ? new Date(c.ativadoEm).toLocaleString("pt-BR") : "Não ativado"}</p>
             </div>
@@ -184,8 +210,9 @@ async function buscarClienteAdmin() {
                 <label>Bônus disponível</label>
                 <input type="number" id="admin-bonus-disponivel" value="${Number(c.bonusDisponivel || 0)}">
 
-                <label>Rank mensal (automático)</label>
-                <select id="admin-nivel-cliente" ${c.rankMensal ? 'disabled aria-label="Rank mensal calculado pelas compras pagas"' : ""}>${["Sem nível", "Bronze", "Prata", "Ouro", "Diamante", "Imortal"].map((n) => `<option ${n === nivelFidelidadeOperacao(c) ? "selected" : ""}>${n}</option>`).join("")}</select>
+                <label>Rank do cliente</label>
+                <select id="admin-nivel-cliente">${opcoesRankAdminUI(c)}</select>
+                <small>A escolha manual vale neste mês. Na próxima virada, volta a avaliação pelas compras pagas.</small>
 
                 <button type="button" onclick="salvarClienteAdmin('${telefoneFinal}')">Salvar alterações</button>
             </div>
@@ -244,11 +271,13 @@ async function salvarClienteAdmin(telefoneAntigo) {
     totalFidelidade,
     bonusDisponivel,
     bonusGeradoTotal,
-    nivelCliente: nivelFidelidadeOperacao({
-      ...dados,
-      nivelCliente: document.getElementById("admin-nivel-cliente").value,
-    }),
+    rankManual: ajusteRankAdminUI(document.getElementById("admin-nivel-cliente").value),
   };
+  novosDados.nivelCliente = nivelFidelidadeOperacao(novosDados);
+  if (dados.authUid && telefoneNovo !== telefoneAntigo)
+    return alert(
+      "Esta conta já tem senha. Mantenha o celular de acesso; o telefone de contato do pedido pode ser corrigido na edição do pedido.",
+    );
 
   await db.collection("clientes").doc(telefoneNovo).set(novosDados);
 
@@ -2791,6 +2820,7 @@ let adminAvancadoLiberado = false;
 async function liberarAreaAvancadaAdmin() {
   if (typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI()) {
     if (perfilEquipeProtegidaUI?.admin !== true) return;
+    adminAvancadoLiberado = true;
     const area = document.getElementById("area-admin-avancada");
     area.style.display = area.style.display === "none" ? "block" : "none";
     return;

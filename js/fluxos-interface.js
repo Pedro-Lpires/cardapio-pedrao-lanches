@@ -288,10 +288,31 @@ function montarCheckoutUI() {
   revisao.after(etapa);
   const continuar = document.createElement("button");
   continuar.textContent = "Continuar";
-  continuar.onclick = () =>
-    dadosPedidoTemporario.tipo === "Local"
+  continuar.onclick = () => {
+    if (dadosPedidoTemporario.tipo === "Entrega") {
+      try {
+        calcularTaxaEntregaSiteUI(Number(dadosPedidoTemporario.km));
+        const p =
+          typeof pedidoBeneficiosRevisaoUI === "function" ? pedidoBeneficiosRevisaoUI() : {};
+        validarMinimoEntregaUI(
+          Number(dadosPedidoTemporario.km),
+          Math.max(
+            0,
+            Number(dadosPedidoTemporario.subtotal || 0) +
+              calcularTotalMolhosPagos() -
+              Math.max(0, Number(descontoCupom || 0) - Number(p.descontoCupomTaxa || 0)) -
+              Number(descontoFidelidade || 0),
+          ),
+        );
+      } catch (e) {
+        mostrarAvisoUI(e.message, "entregaDistante");
+        return;
+      }
+    }
+    return dadosPedidoTemporario.tipo === "Local"
       ? enviarConsumoLocalUI()
       : abrirEtapaCheckoutUI("entrega");
+  };
   revisao.append(continuar);
   const cab = document.createElement("div");
   cab.className = "ui-navegacao";

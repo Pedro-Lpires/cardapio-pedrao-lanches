@@ -173,8 +173,7 @@ function janelaEntradaEquipeUI(proprietario, texto = "") {
     };
   return janela;
 }
-async function iniciarAcessoPaginaEquipeUI() {
-  const pagina = location.pathname.split("/").at(-1);
+async function iniciarAcessoPaginaEquipeUI(pagina = location.pathname.split("/").at(-1)) {
   if (!["admin.html", "financeiro.html", "painel-atendente.html", "cozinha.html"].includes(pagina))
     return;
   const proprietario = ["admin.html", "financeiro.html"].includes(pagina);
@@ -194,6 +193,7 @@ async function iniciarAcessoPaginaEquipeUI() {
       return;
     }
     atualizarIdentidadeEquipeUI(perfil);
+    if (perfil.admin && typeof adminAvancadoLiberado !== "undefined") adminAvancadoLiberado = true;
     if (perfil.admin) {
       const sair = document.createElement("button");
       sair.type = "button";

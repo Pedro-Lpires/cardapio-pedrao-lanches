@@ -62,7 +62,6 @@ async function abrirAcessoAdministrativoProtegidoUI() {
       status.textContent = "Acesso protegido desconectado.";
     };
     corpo.append(sair);
-    adicionarPreparacaoContasTesteUI(corpo, auth);
   }
   form.onsubmit = async (e) => {
     e.preventDefault();
@@ -78,7 +77,6 @@ async function abrirAcessoAdministrativoProtegidoUI() {
       form.hidden = true;
       status.textContent =
         "Acesso conectado. O servidor vai conferir sua autorização ao gerar uma recuperação.";
-      adicionarPreparacaoContasTesteUI(corpo, auth);
     } catch {
       status.textContent =
         "Não foi possível conectar. Confira o acesso e a configuração do Authentication.";
@@ -94,48 +92,6 @@ async function abrirAcessoAdministrativoProtegidoUI() {
     },
     { once: true },
   );
-}
-function adicionarPreparacaoContasTesteUI(corpo, auth) {
-  if (corpo.querySelector("[data-preparar-testes]")) return;
-  const botao = document.createElement("button");
-  botao.type = "button";
-  botao.dataset.prepararTestes = "";
-  botao.textContent = "Preparar contas de teste para criar senha";
-  botao.onclick = async () => {
-    if (
-      !(await dialogoOperacao(
-        "Os cadastros atuais são somente contas de teste? Esta ação permite que esses cadastros criem a primeira senha dentro da conta. Contas já protegidas mantêm sua senha.",
-        null,
-        true,
-        { botao: "Preparar contas de teste" },
-      ))
-    )
-      return;
-    botao.disabled = true;
-    const status = corpo.querySelector("[role=status]");
-    try {
-      const usuario = await usuarioAdministradorProtegidoUI(auth);
-      if (!usuario) throw Error("Conecte o proprietário novamente.");
-      const resposta = await fetch("/api/acesso-cliente", {
-        method: "POST",
-        cache: "no-store",
-        credentials: "omit",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + (await usuario.getIdToken()),
-        },
-        body: JSON.stringify({ acao: "prepararTestes" }),
-      });
-      const dados = await resposta.json();
-      if (!resposta.ok) throw Error(dados.erro || "Não foi possível preparar os testes.");
-      status.textContent = `${dados.preparados} conta(s) de teste preparada(s). Cada uma poderá criar a primeira senha no aviso dentro da própria conta.`;
-    } catch (erro) {
-      status.textContent = erro.message;
-    } finally {
-      botao.disabled = false;
-    }
-  };
-  corpo.append(botao);
 }
 async function abrirRecuperacaoClienteAdminUI(cliente) {
   const telefone = String(cliente.telefone || "").replace(/\D/g, "");

@@ -28,9 +28,33 @@ function nivelRankMensalUI(cliente, agora = Date.now()) {
   if (!cliente?.fidelidadeAtiva) return "Sem nível";
   const mes = competenciaRankMensalUI(agora),
     saldos = cliente.rankMensal?.meses || {};
+  if (
+    cliente.rankManual?.competencia === mes &&
+    metasRankMensalUI.some(([n]) => n === cliente.rankManual.nivel)
+  )
+    return cliente.rankManual.nivel;
   // O mês anterior sustenta o nível; o atual permite subir antes da próxima virada.
   return nivelValorRankMensalUI(
     Math.max(Number(saldos[mes] || 0), Number(saldos[anteriorRankMensalUI(mes)] || 0)),
+  );
+}
+function ajusteRankAdminUI(nivel, agora = Date.now()) {
+  if (!nivel || nivel === "automatico") return null;
+  if (!metasRankMensalUI.some(([n]) => n === nivel)) throw Error("Escolha um rank válido.");
+  return { nivel, competencia: competenciaRankMensalUI(agora), editadoEm: agora };
+}
+function opcoesRankAdminUI(cliente) {
+  const manual =
+    cliente.rankManual?.competencia === competenciaRankMensalUI()
+      ? cliente.rankManual.nivel
+      : "automatico";
+  return (
+    '<option value="automatico"' +
+    (manual === "automatico" ? " selected" : "") +
+    ">Avaliação automática</option>" +
+    metasRankMensalUI
+      .map(([n]) => `<option value="${n}"${n === manual ? " selected" : ""}>${n}</option>`)
+      .join("")
   );
 }
 function eventoRankMensalUI(data, centavos) {
@@ -359,4 +383,6 @@ if (typeof module !== "undefined" && module.exports)
     anteriorRankMensalUI,
     eventosRankPedidoMensalUI,
     eventosRankComandaMensalUI,
+    ajusteRankAdminUI,
+    opcoesRankAdminUI,
   };

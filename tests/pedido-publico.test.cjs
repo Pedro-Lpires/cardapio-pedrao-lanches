@@ -6,7 +6,7 @@ const {
   pontoPedido,
 } = require("../api/_lib/pedido-publico.cjs");
 const copia = (v) => (v === undefined ? undefined : structuredClone(v));
-function fixture() {
+function fixture({ agora = () => Date.parse("2026-11-03T18:00:00Z") } = {}) {
   const registros = new Map([
     ["config/loja", { aberta: true }],
     [
@@ -121,7 +121,7 @@ function fixture() {
     db,
     auth,
     siteUrl: "https://pedrao.exemplo/",
-    agora: () => Date.parse("2026-11-03T18:00:00Z"),
+    agora,
     consumirTentativa: async () => {
       if (limitado) throw Object.assign(Error("Limite"), { status: 429 });
     },
@@ -249,6 +249,7 @@ if (require.main === module)
       cnh: "Sim",
       taxaEntrega: 0.01,
     };
+    entrada.itens.push({ produtoId: "lata", quantidade: 3 });
     const entrega = await salvar(f, entrada, auth);
     assert(entrega.pedido.distanciaKm > 15);
     assert(entrega.pedido.taxaEntrega > 40);

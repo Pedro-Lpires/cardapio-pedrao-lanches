@@ -114,7 +114,10 @@ function montarMensagemPedidoWhatsUI(p) {
   linhas.push("");
   if (p.descontoCupom > 0) linhas.push("Desconto de cupom: -" + moeda(p.descontoCupom));
   if (p.descontoFidelidade > 0) linhas.push("Fidelidade: -" + moeda(p.descontoFidelidade));
-  if (p.tipo === "Entrega") linhas.push("Taxa de entrega: " + moeda(p.taxa));
+  if (p.tipo === "Entrega")
+    linhas.push(
+      "Taxa de entrega: " + moeda(p.taxa) + (p.adicionalNoturno ? " (adicional noturno)" : ""),
+    );
   if (p.descontoCreditoEntrega > 0)
     linhas.push("Benefícios - crédito de entrega: -" + moeda(p.descontoCreditoEntrega));
   linhas.push("*Total: " + moeda(p.total) + "*", "Pagamento: " + (p.pagamento || ""));
@@ -420,6 +423,12 @@ function configurarCamposNumericosUI(raiz = document) {
   const campos = [...(raiz.matches?.("input") ? [raiz] : []), ...raiz.querySelectorAll("input")];
   campos.forEach((campo) => {
     if (campo.dataset.digitosUi) return;
+    if (campo.id === "admin-busca-cliente") {
+      campo.dataset.digitosUi = "sim";
+      campo.inputMode = "text";
+      campo.maxLength = 100;
+      return;
+    }
     const rotulo = `${campo.closest?.("label")?.textContent || ""} ${campo.placeholder || ""}`;
     const cda =
       campo.id === "admin-codigo-cliente" ||

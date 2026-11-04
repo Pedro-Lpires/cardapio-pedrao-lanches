@@ -983,7 +983,7 @@
     now: () => ({ toMillis: () => agora }),
   };
   window.firebase = { initializeApp() {}, firestore };
-  if (cenarioFixture === "seguranca-protegida") {
+  if (["seguranca-protegida", "adm-protegido"].includes(cenarioFixture)) {
     const perfil = docs.get("clientes/" + cliente);
     Object.assign(perfil, {
       nome: "Cliente Teste",
@@ -1002,7 +1002,15 @@
       if (apps.some((a) => a.name === nome)) return apps.find((a) => a.name === nome);
       const auth = {
         currentUser:
-          nome === "[DEFAULT]" ? { uid: "cliente", getIdToken: async () => "cliente" } : null,
+          nome !== "[DEFAULT]" && cenarioFixture === "adm-protegido"
+            ? { uid: "dono-teste", getIdToken: async () => "dono-teste" }
+            : nome === "[DEFAULT]"
+              ? {
+                  uid: "cliente",
+                  email: "65999999999@clientes.pedrao-lanches.invalid",
+                  getIdToken: async () => "cliente",
+                }
+              : null,
         setPersistence: async () => {},
         signOut: async () => {
           auth.currentUser = null;
@@ -1016,18 +1024,39 @@
         },
       };
       auths.set(nome, auth);
-      const a = { name: nome, auth: () => auth, firestore: () => db };
+      const a = { name: nome, options: {}, auth: () => auth, firestore: () => db };
       apps.push(a);
       return a;
     }
     window.firebase = {
       initializeApp: (_, n) => app(n),
+      app: () => app(),
       apps,
       auth: () => app().auth(),
       firestore,
     };
     const originalFetch = window.fetch.bind(window);
     window.fetch = async (url, opcoes) => {
+      if (cenarioFixture === "adm-protegido" && String(url) === "/api/acesso-equipe")
+        return new Response(
+          JSON.stringify(
+            opcoes?.body
+              ? {
+                  funcionario: {
+                    id: "dono-teste",
+                    nome: "Proprietário teste",
+                    perfil: "ambos",
+                    admin: true,
+                  },
+                }
+              : { disponivel: true },
+          ),
+          { headers: { "Content-Type": "application/json" } },
+        );
+      if (cenarioFixture === "adm-protegido" && String(url) === "/api/recuperacao-acesso")
+        return new Response(JSON.stringify({ disponivel: true, validadeMinutos: 30 }), {
+          headers: { "Content-Type": "application/json" },
+        });
       if (!/^\/api\/(pedido-publico|mesa-publica|acesso-cliente)$/.test(String(url)))
         return originalFetch(url, opcoes);
       const r = await originalFetch(
@@ -1059,6 +1088,10 @@
       return r;
     };
     window.open = () => null; // WhatsApp nunca sai desta prévia.
+    if (cenarioFixture === "adm-protegido")
+      document.addEventListener("DOMContentLoaded", () =>
+        iniciarAcessoPaginaEquipeUI("admin.html"),
+      );
   }
   if (cenarioFixture === "funcionario-chapa" || cenarioFixture === "funcionario-atendimento")
     docs.get("atendentes/teste").perfil =

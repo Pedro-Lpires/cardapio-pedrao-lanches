@@ -295,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (document.getElementById("admin-busca-cliente").value.trim()) {
         const box = document.getElementById("resultado-cliente-admin");
         if (!box.parentElement.matches("dialog.interface-janela")) box.style.display = "none";
-        abrirJanelaElementoUI(box, "Cliente e fidelidade");
+        abrirJanelaElementoUI(box, "Dados do cliente");
         box.innerHTML = htmlCarregandoUI("Buscando cliente…");
       }
       const resultado = await buscar(...args);

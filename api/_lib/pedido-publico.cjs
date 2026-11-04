@@ -1,3 +1,8 @@
+const {
+  horarioNoturnoEntregaUI,
+  taxaEntregaRegraUI,
+  validarMinimoEntregaUI,
+} = require("../../js/regras-entrega.js");
 const crypto = require("node:crypto");
 const { ErroRecuperacao } = require("./recuperacao-acesso.cjs");
 const { reconstruirItensPedido, moeda, texto } = require("./pedido-catalogo.cjs");
@@ -72,45 +77,7 @@ function distanciaPedido(ponto) {
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
 }
 function taxaPedido(km, em) {
-  const limites = [
-    [2, 6],
-    [3, 7],
-    [4, 8],
-    [5, 10],
-    [6, 11],
-    [7, 13],
-    [8, 14],
-    [9, 15],
-    [10, 16],
-  ];
-  let taxa = limites.find(([limite]) => km <= limite)?.[1] ?? km * 2;
-  const partes = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Cuiaba",
-    weekday: "short",
-    day: "numeric",
-    month: "numeric",
-  }).formatToParts(new Date(em));
-  const parte = (v) => partes.find((p) => p.type === v)?.value;
-  const feriados = [
-    "1/1",
-    "3/4",
-    "8/4",
-    "21/4",
-    "1/5",
-    "4/6",
-    "7/9",
-    "12/10",
-    "2/11",
-    "15/11",
-    "20/11",
-    "25/12",
-  ];
-  if (
-    ["Sat", "Sun"].includes(parte("weekday")) ||
-    feriados.includes(parte("day") + "/" + parte("month"))
-  )
-    taxa++;
-  return centavos(taxa) / 100;
+  return taxaEntregaRegraUI(km, em);
 }
 function diaPedido(em) {
   const partes = new Intl.DateTimeFormat("en-CA", {
@@ -310,7 +277,11 @@ function criarServicoPedidoPublico({
         km = distanciaPedido(ponto);
         if (km > 200)
           throw new ErroRecuperacao(400, "Localização muito distante. Confira com a loja.");
-        taxa = centavos(taxaPedido(km, em));
+        try {
+          taxa = centavos(taxaPedido(km, em));
+        } catch (e) {
+          throw new ErroRecuperacao(400, e.message);
+        }
         const destino = new URL("/localizacao.html", site);
         destino.searchParams.set("p", ponto.latitude + "," + ponto.longitude);
         localizacao = destino.href;
@@ -367,6 +338,16 @@ function criarServicoPedidoPublico({
         throw new ErroRecuperacao(409, "Seu bônus mudou. Confira o pedido novamente.");
       const cfgDoc = await t.get(db.collection("config").doc("beneficios")),
         config = configurarBeneficiosEntregaUI(cfgDoc.exists ? cfgDoc.data() : {});
+      if (entrada.tipo === "Entrega") {
+        try {
+          validarMinimoEntregaUI(
+            km,
+            (base + molhos - descontoCupom + descontoCupomTaxa - descontoFidelidade) / 100,
+          );
+        } catch (e) {
+          throw new ErroRecuperacao(400, e.message);
+        }
+      }
       const parcial = {
         tipo: entrada.tipo,
         clienteId: pessoa?.clienteId || null,
@@ -411,6 +392,7 @@ function criarServicoPedidoPublico({
         valorTotal: total,
         valorAntesDesconto: (base + molhos + taxa) / 100,
         distanciaKm: km,
+        adicionalNoturno: entrada.tipo === "Entrega" && horarioNoturnoEntregaUI(em),
         localizacao,
         endereco,
         condominio: entrada.tipo === "Entrega" && entrada.condominio === "Sim" ? "Sim" : "Não",

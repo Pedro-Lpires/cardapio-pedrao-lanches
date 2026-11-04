@@ -100,6 +100,7 @@ const ctx = vm.createContext({
   },
 });
 vm.runInContext(fs.readFileSync("js/operacao.js", "utf8"), ctx);
+ctx.ajusteRankAdminUI = require("../js/rank-mensal.js").ajusteRankAdminUI;
 vm.runInContext(fs.readFileSync("js/pedidos-site-atendente.js", "utf8"), ctx);
 vm.runInContext(fs.readFileSync("js/editor-pedido-ui.js", "utf8"), ctx);
 vm.runInContext(fs.readFileSync("js/editor-cliente-admin-ui.js", "utf8"), ctx);

@@ -26,6 +26,7 @@ async function salvarCadastroClientePedidoAdminUI(id, original, entrada) {
   dados.fidelidadeAtiva = entrada.fidelidadeAtiva === true || entrada.fidelidadeAtiva === "sim";
   dados.codigoAtivacao = String(entrada.codigoAtivacao || "").trim();
   if (original.fidelidadeAtiva && !dados.fidelidadeAtiva) dados.codigoAtivacao = "";
+  dados.rankManual = ajusteRankAdminUI(entrada.nivelCliente);
   dados.nivelCliente = nivelFidelidadeOperacao({ ...original, ...dados });
   for (const k of ["totalGasto", "totalFidelidade", "bonusDisponivel"]) {
     dados[k] = Number(dados[k]);
@@ -134,7 +135,7 @@ async function abrirClientePedidoAdminUI(pedidoId, pedido) {
     };
     const cadastro = () => {
       const token = controle.iniciar();
-      painel.innerHTML = `<form><div class="editor-grade-ui">${campoEditorUI("Nome usado no site", original.nome, "text", 'name="nome" required')}${campoEditorUI("Nome completo", original.nomeReal || "", "text", 'name="nomeReal"')}${campoEditorUI("CDA (4 números)", original.codigoAtivacao || "", "text", 'name="codigoAtivacao" maxlength="4" pattern="[0-9]{4}" inputmode="numeric"')}<label>Fidelidade<select name="fidelidadeAtiva"><option value="nao">Inativa</option><option value="sim" ${original.fidelidadeAtiva ? "selected" : ""}>Ativa</option></select></label><label>Rank mensal (automático)<select name="nivelCliente" ${original.rankMensal ? "disabled" : ""}>${["Sem nível", "Bronze", "Prata", "Ouro", "Diamante", "Imortal"].map((n) => `<option ${n === nivelFidelidadeOperacao(original) ? "selected" : ""}>${n}</option>`).join("")}</select></label>${campoEditorUI("Total gasto (R$)", original.totalGasto || 0, "number", 'name="totalGasto" min="0" step="0.01"')}${campoEditorUI("Acumulado fidelidade (R$)", original.totalFidelidade || 0, "number", 'name="totalFidelidade" min="0" step="0.01"')}${campoEditorUI("Bônus disponível (R$)", original.bonusDisponivel || 0, "number", 'name="bonusDisponivel" min="0" step="0.01"')}</div><p>O telefone identifica esta conta. O contato usado apenas neste pedido pode ser corrigido na edição do pedido.</p><p role="status"></p><footer><button type="submit">Salvar cliente</button></footer></form>`;
+      painel.innerHTML = `<form><div class="editor-grade-ui">${campoEditorUI("Nome usado no site", original.nome, "text", 'name="nome" required')}${campoEditorUI("Nome completo", original.nomeReal || "", "text", 'name="nomeReal"')}${campoEditorUI("CDA (4 números)", original.codigoAtivacao || "", "text", 'name="codigoAtivacao" maxlength="4" pattern="[0-9]{4}" inputmode="numeric"')}<label>Fidelidade<select name="fidelidadeAtiva"><option value="nao">Inativa</option><option value="sim" ${original.fidelidadeAtiva ? "selected" : ""}>Ativa</option></select></label><label>Rank do cliente<select name="nivelCliente">${opcoesRankAdminUI(original)}</select><small>Escolha manual válida neste mês; na virada, volta a avaliação automática.</small></label>${campoEditorUI("Total gasto (R$)", original.totalGasto || 0, "number", 'name="totalGasto" min="0" step="0.01"')}${campoEditorUI("Acumulado fidelidade (R$)", original.totalFidelidade || 0, "number", 'name="totalFidelidade" min="0" step="0.01"')}${campoEditorUI("Bônus disponível (R$)", original.bonusDisponivel || 0, "number", 'name="bonusDisponivel" min="0" step="0.01"')}</div><p>O telefone identifica esta conta. O contato usado apenas neste pedido pode ser corrigido na edição do pedido.</p><p role="status"></p><footer><button type="submit">Salvar cliente</button></footer></form>`;
       const f = painel.querySelector("form"),
         status = f.querySelector("[role=status]");
       const nota = document.createElement("p");
@@ -147,7 +148,7 @@ async function abrirClientePedidoAdminUI(pedidoId, pedido) {
           original = await salvarCadastroClientePedidoAdminUI(id, original, dados);
           if (controle.atual(token)) {
             f.elements.codigoAtivacao.value = original.codigoAtivacao;
-            f.elements.nivelCliente.value = original.nivelCliente;
+            f.elements.nivelCliente.value = original.rankManual?.nivel || "automatico";
             status.textContent = "Cliente atualizado.";
           }
         });

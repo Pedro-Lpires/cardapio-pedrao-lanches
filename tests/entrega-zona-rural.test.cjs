@@ -99,6 +99,7 @@ function contexto() {
       areaUrbanaConfirmada: true,
     },
   });
+  vm.runInContext(fs.readFileSync("js/regras-entrega.js", "utf8"), ctx);
   carregar(ctx, "montarMensagemPedidoWhatsUI", fs.readFileSync("js/ui-comum.js", "utf8"));
   for (const nome of [
     "calcularTaxaEntregaSiteUI",
@@ -180,9 +181,7 @@ async function testar() {
     assert.equal(taxa(km, quarta), valor);
   assert.equal(taxa(12, sabado), 25);
   assert.equal(taxa(12, domingo), 25);
-  t.ctx.feriados.push("28/10");
-  assert.equal(taxa(12, quarta), 25);
-  t.ctx.feriados.length = 0;
+  assert.equal(taxa(12, new Date("2026-11-02T20:00:00-04:00")), 25);
   for (const [area, km] of [
     ["rural", 2],
     ["rural", 18],

@@ -1,5 +1,10 @@
 /* Senhas ficam no Firebase Authentication; clientePedrao não comprova identidade. */
-function criarAcessoClienteUI({ auth, fetchHttp = fetch, limparLegado = () => {} }) {
+function criarAcessoClienteUI({
+  auth,
+  fetchHttp = fetch,
+  limparLegado = () => {},
+  credencialSenha = (email, senha) => firebase.auth.EmailAuthProvider.credential(email, senha),
+}) {
   let disponibilidade;
   let versaoSessao = 0;
   async function ativo() {
@@ -140,6 +145,30 @@ function criarAcessoClienteUI({ auth, fetchHttp = fetch, limparLegado = () => {}
           "A senha foi criada, mas não conseguimos abrir sua conta. Entre com celular e a nova senha.",
         );
       }
+    },
+    async alterarSenha({ atual, senha, confirmacao }) {
+      if (typeof atual !== "string" || !atual || atual.length > 128)
+        throw Error("Informe sua senha atual.");
+      if (
+        typeof senha !== "string" ||
+        senha.length < 8 ||
+        senha.length > 128 ||
+        senha !== confirmacao
+      )
+        throw Error("Escolha uma nova senha de pelo menos 8 caracteres e repita nos dois campos.");
+      const versao = versaoSessao;
+      if (!(await ativo())) throw Error("O acesso com senha não está disponível.");
+      const usuario = await usuarioAtual();
+      if (!usuario?.email) throw Error("Entre novamente com celular e senha para continuar.");
+      await perfil();
+      try {
+        await usuario.reauthenticateWithCredential(credencialSenha(usuario.email, atual));
+        if (versao !== versaoSessao || auth.currentUser?.uid !== usuario.uid) throw Error();
+        await usuario.updatePassword(senha);
+      } catch {
+        throw Error("Não foi possível alterar a senha. Confira a senha atual e tente novamente.");
+      }
+      return { sucesso: true };
     },
     async sair() {
       versaoSessao++;
@@ -317,6 +346,50 @@ async function cadastrarClienteSenhaDeliveryUI() {
   }
 }
 
+function abrirAlteracaoSenhaClienteUI() {
+  if (document.querySelector("dialog.cliente-alterar-senha-ui")) return;
+  const d = document.createElement("dialog");
+  d.className = "cliente-criar-senha-ui cliente-alterar-senha-ui";
+  d.setAttribute("aria-labelledby", "cliente-alterar-senha-titulo");
+  d.innerHTML =
+    '<header><button type="button" data-voltar>← Voltar</button><h2 id="cliente-alterar-senha-titulo">Alterar senha</h2><button type="button" data-fechar aria-label="Fechar">×</button></header><form><label>Senha atual<input name="atual" type="password" autocomplete="current-password" maxlength="128" required></label><label>Nova senha<input name="senha" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></label><small>Use pelo menos 8 caracteres.</small><label>Repita a nova senha<input name="confirmacao" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></label><p role="status" aria-live="polite"></p><button type="submit">Salvar nova senha</button></form>';
+  const f = d.querySelector("form"),
+    status = f.querySelector("[role=status]");
+  d.querySelectorAll("[data-voltar],[data-fechar]").forEach((b) => (b.onclick = () => d.close()));
+  d.addEventListener(
+    "close",
+    () => {
+      f.reset();
+      d.remove();
+    },
+    { once: true },
+  );
+  f.onsubmit = async (e) => {
+    e.preventDefault();
+    const b = f.querySelector("[type=submit]");
+    if (b.disabled) return;
+    b.disabled = true;
+    status.textContent = "Alterando senha…";
+    try {
+      await window.acessoClienteSenhaUI.alterarSenha({
+        atual: f.elements.atual.value,
+        senha: f.elements.senha.value,
+        confirmacao: f.elements.confirmacao.value,
+      });
+      f.reset();
+      status.textContent = "Senha alterada. No próximo login, use a nova senha.";
+      b.type = "button";
+      b.textContent = "Concluir";
+      b.onclick = () => d.close();
+    } catch (e) {
+      status.textContent = e.message;
+    } finally {
+      b.disabled = false;
+    }
+  };
+  document.body.append(d);
+  d.showModal();
+}
 function montarCamposSenhaClienteUI(canal) {
   const delivery = canal === "delivery";
   const base = delivery
@@ -332,7 +405,18 @@ function montarCamposSenhaClienteUI(canal) {
   const prefixo = delivery ? "perfil" : "login-auto";
   grupo.innerHTML = `<label for="${prefixo}-senha-protegida">Senha</label><input id="${prefixo}-senha-protegida" type="password" maxlength="128" autocomplete="current-password"><div data-confirmar-senha hidden><label for="${prefixo}-senha-confirmacao">Repita a senha</label><input id="${prefixo}-senha-confirmacao" type="password" minlength="8" maxlength="128" autocomplete="new-password"></div><a href="https://wa.me/5565992386045?text=Ol%C3%A1%2C%20esqueci%20minha%20senha%20do%20Pedr%C3%A3o.%20Preciso%20de%20um%20link%20de%20recupera%C3%A7%C3%A3o." target="_blank" rel="noopener noreferrer">Esqueci minha senha</a>`;
   base.after(grupo);
+  let alterar;
+  if (delivery) {
+    alterar = document.createElement("button");
+    alterar.type = "button";
+    alterar.textContent = "Alterar senha";
+    alterar.className = "cliente-alterar-senha-botao-ui";
+    alterar.onclick = abrirAlteracaoSenhaClienteUI;
+    alterar.hidden = true;
+    document.getElementById("btn-entrar-perfil").after(alterar);
+  }
   const ajustar = (modo) => {
+    if (alterar) alterar.hidden = modo !== "editar" || !clienteLogado?.authUid;
     const criando = modo === "cadastro" || modo === "criar";
     grupo.hidden = !["login", "cadastro", "criar"].includes(modo);
     grupo.querySelector("[data-confirmar-senha]").hidden = !criando;

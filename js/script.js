@@ -632,20 +632,7 @@ function irParaFinalizar() {
 }
 
 function calcularTaxaEntregaSiteUI(km, agora = new Date()) {
-  let taxa;
-  if (km <= 2) taxa = 6;
-  else if (km <= 3) taxa = 7;
-  else if (km <= 4) taxa = 8;
-  else if (km <= 5) taxa = 10;
-  else if (km <= 6) taxa = 11;
-  else if (km <= 7) taxa = 13;
-  else if (km <= 8) taxa = 14;
-  else if (km <= 9) taxa = 15;
-  else if (km <= 10) taxa = 16;
-  else taxa = km * 2;
-  const data = `${agora.getDate()}/${agora.getMonth() + 1}`;
-  if ([0, 6].includes(agora.getDay()) || feriados.includes(data)) taxa += 1;
-  return Math.round((taxa + Number.EPSILON) * 100) / 100;
+  return taxaEntregaRegraUI(km, agora);
 }
 
 function finalizarPedido() {
@@ -732,12 +719,21 @@ function finalizarPedido() {
         );
 
         const foraDaArea = kmDistancia > 15;
-        const taxa = calcularTaxaEntregaSiteUI(kmDistancia);
+        let taxa;
+        try {
+          taxa = calcularTaxaEntregaSiteUI(kmDistancia);
+        } catch (e) {
+          alert(e.message, "entregaDistante");
+          return;
+        }
         if (kmDistancia > 10)
           alert(
             foraDaArea
               ? "Seu endereço fica a mais de 15 km e está fora da área de entrega. Você pode enviar o pedido para verificarmos se será possível atender. Se a entrega for aceita, pode haver demora pelo percurso longo."
-              : "Seu endereço fica a mais de 10 km. Pode haver demora na entrega por causa do percurso longo.",
+              : "Seu endereço fica a mais de 10 km. Pode haver demora na entrega por causa do percurso longo." +
+                  (kmDistancia > 11
+                    ? " A compra mínima é R$ 50,00 em produtos, após descontos e sem a taxa de entrega."
+                    : ""),
             "entregaDistante",
           );
 
@@ -877,7 +873,7 @@ function exibirRevisao(
 
   document.getElementById("resumo-taxa").innerText = foraDaArea
     ? `R$ ${taxa.toFixed(2)} (estimada)`
-    : `R$ ${taxa.toFixed(2)}`;
+    : `R$ ${taxa.toFixed(2)}${tipo === "Entrega" && horarioNoturnoEntregaUI() ? " · adicional noturno" : ""}`;
 
   const totalMolhosPagos = calcularTotalMolhosPagos();
 
@@ -991,7 +987,9 @@ function exibirRevisao(
       avisoDistancia.setAttribute("role", "note");
       document.getElementById("revisao-pedido").append(avisoDistancia);
     }
-    avisoDistancia.textContent = "O percurso é longo e pode haver demora na entrega.";
+    avisoDistancia.textContent =
+      "O percurso é longo e pode haver demora na entrega." +
+      (km > 11 ? " Compra mínima: R$ 50,00 em produtos, após descontos e sem frete." : "");
   } else avisoDistancia?.remove();
 
   let cupomEl = document.getElementById("linha-desconto-cupom");

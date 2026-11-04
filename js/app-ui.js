@@ -396,7 +396,10 @@ function organizarModulosAdminUI() {
         ],
         [/online/i, "Veja as contas que estão usando o sistema."],
         [/^benefícios$/i, "Configure créditos por rank, consulte saldos e confira os usos."],
-        [/fidelidade/i, "Consulte contas, histórico, códigos e benefícios."],
+        [
+          /fidelidade|buscar cliente/i,
+          "Busque por nome, celular ou CDA e consulte histórico, rank e benefícios.",
+        ],
         [/campanhas/i, "Escolha o público e envie avisos ou cupons às contas."],
         [/raspadinhas/i, "Configure campanhas, emita e acompanhe prêmios."],
         [/produtos/i, "Crie, edite, fotografe, pause ou exclua itens do cardápio."],

@@ -46,12 +46,15 @@ acesso ao banco. Não copie credenciais privadas da Vercel para o código da pá
 ## Botões do acesso de recuperação
 
 - **Desconectar acesso protegido:** encerra a sessão do proprietário.
-- **Preparar contas de teste para criar senha:** libera a primeira senha dos
-  cadastros antigos de teste aprovados. Já foi utilizado na virada de 04/11/2026;
-  não é um comando de rotina e não deve ser usado com contas de clientes reais.
+- O botão de preparar contas de teste foi retirado na revisão local seguinte à
+  migração. As três contas antigas já foram preparadas; contas novas exigem senha
+  no cadastro. Essa remoção integra a revisão aprovada para publicação em 04/11/2026.
 - **Redefinir acesso**, dentro da consulta de um cliente: gera a recuperação
   individual, com validade de 30 minutos. O administrador envia o link ao
   WhatsApp cadastrado; o cliente escolhe uma nova senha. O ADM não vê a senha.
+- **Editar perfil → Alterar senha:** o próprio cliente informa a senha atual,
+  a nova senha e a confirmação. O Firebase confere novamente sua identidade antes
+  de alterar a credencial. Essa opção integra a mesma revisão aprovada.
 
 Para publicar mudanças nos arquivos, o fluxo existente é enviar os commits para
 `main`, que aciona a Vercel. Salvar no Live Server só muda os arquivos locais.

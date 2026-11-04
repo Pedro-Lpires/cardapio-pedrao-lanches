@@ -57,8 +57,7 @@ function calcularBeneficioEntregaUI(cliente, config, pedido, agora = Date.now(),
   if (!config.ativo) motivo = "";
   else if (pedido.tipo !== "Entrega")
     motivo = "O crédito de entrega fica disponível para pedidos de entrega.";
-  else if (!cliente?.fidelidadeAtiva)
-    motivo = "Entre em uma conta com fidelidade ativa para usar seus benefícios.";
+  else if (!cliente?.fidelidadeAtiva) motivo = "";
   else if (saldo.bloqueado) motivo = "O crédito de entrega está pausado para esta conta.";
   else if (!config.acumularCupom && Number(pedido.descontoCupom) > 0)
     motivo = "Este benefício não acumula com cupom. Remova o cupom para usar o crédito de entrega.";

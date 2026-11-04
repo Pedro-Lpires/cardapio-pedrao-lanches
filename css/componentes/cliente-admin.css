@@ -1,0 +1,61 @@
+.interface-janela .card-admin-cliente {
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+}
+.interface-janela .topo-cliente-admin {
+  gap: 12px;
+  align-items: flex-start;
+}
+.interface-janela .topo-cliente-admin h3 {
+  min-width: 0;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.interface-janela .topo-cliente-admin button {
+  flex: none;
+  margin: 0;
+  padding: 9px 12px;
+}
+.interface-janela .dados-cliente-admin {
+  padding: 0;
+  background: transparent;
+}
+.interface-janela .dados-cliente-admin > p {
+  display: block;
+  padding: 12px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.interface-janela .dados-cliente-admin > p > strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #bbb;
+  font-size: 13px;
+}
+.interface-janela .dados-cliente-admin .rank-mensal-ui {
+  margin: 14px 0;
+  padding: 12px;
+}
+.interface-janela .dados-cliente-admin .rank-mensal-ui p {
+  display: block;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.interface-janela .rank-mensal-meta-ui strong {
+  white-space: nowrap;
+}
+.cliente-resultado-busca-ui {
+  display: block;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 12px;
+  line-height: 1.5;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
