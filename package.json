@@ -2,6 +2,9 @@
   "name": "cardapio-pedrao-lanches",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "description": "Cardápio, atendimento e operação do Pedrão Lanches.",
   "scripts": {
     "format": "prettier --write \"*.{html,json,md}\" \"css/**/*.css\" \"js/**/*.js\" \"api/**/*.{js,cjs}\" \"tests/**/*.{js,cjs,html}\" \"scripts/**/*.mjs\"",

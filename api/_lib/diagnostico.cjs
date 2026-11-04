@@ -4,6 +4,7 @@ function registrarFalha(erro, etapa) {
   console.error(
     JSON.stringify({
       evento: "falha_acesso_protegido",
+      node: process.version,
       etapa,
       codigo: /^[a-zA-Z0-9/_-]{1,100}$/.test(codigo) ? codigo : "erro",
       status: Number(erro?.response?.status) || undefined,
