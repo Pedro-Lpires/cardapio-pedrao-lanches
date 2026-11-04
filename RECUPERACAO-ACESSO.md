@@ -185,7 +185,8 @@ pendência e não gera uma autorização fictícia.
 - `js/acesso-equipe-ui.js` e `css/componentes/acesso-equipe.css`: Auth operacional
   separado do cliente, acesso salvo conforme escolha e bloqueio dos painéis.
 - `security/firestore.proposta.rules`: proposta com permissões separadas,
-  ainda não publicada. Instruções em `security/COMO-TESTAR.md`.
+  posteriormente publicada em 04/11/2026. Estado atual em
+  `security/ESTADO-PUBLICACAO.md`; testes em `security/COMO-TESTAR.md`.
 
 O SDK Admin usa somente o módulo Auth. Os módulos opcionais de Storage/Firestore
 e Pipeline não são instalados; o estado de uso único usa a API REST oficial do
@@ -240,7 +241,8 @@ perfil atual em cada operação, sem depender de renovar o token do funcionário
 Auth/REST/Firestore. Nada foi publicado nem foi utilizada uma conta real nesses
 testes. A integração inclui a primeira senha de uma conta antiga de teste,
 preservando rank e saldo, e o reset nativo da senha com uso único e expiração em
-30 minutos. Os indicadores de ativação da Vercel continuam desligados.
+30 minutos. Esses testes foram isolados; a publicação posterior ativou os
+indicadores da Vercel, conforme `security/ESTADO-PUBLICACAO.md`.
 
 Referências: [Firebase Admin](https://firebase.google.com/docs/auth/admin/manage-users),
 [códigos de recuperação](https://firebase.google.com/docs/auth/admin/email-action-links),

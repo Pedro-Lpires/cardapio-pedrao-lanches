@@ -1,6 +1,6 @@
 # Regras em homologação
 
-`firestore.proposta.rules` é a proposta de publicação conjunta com as APIs e as telas. Checkout, visita à mesa e operações privadas do perfil estão conectados no modo protegido. A ativação real ainda está pendente; siga `PUBLICACAO.md`. Não há `firebase.json` nem comando de deploy de produção neste projeto.
+`firestore.proposta.rules` foi publicada em conjunto com as APIs e as telas em 04/11/2026. Checkout, visita à mesa e operações privadas do perfil estão conectados no modo protegido. O registro da verificação em produção está em `ESTADO-PUBLICACAO.md`; este arquivo descreve os testes isolados. Não há `firebase.json` nem comando de deploy de produção neste projeto.
 
 O teste utiliza os emuladores oficiais de Auth e Firestore, Java 21 e somente o projeto fictício `demo-pedrao-seguranca`. Não precisa de login no CLI, chave privada ou acesso ao Firebase da loja. A execução falha se os endereços não forem `127.0.0.1:8188` e `127.0.0.1:9099`.
 

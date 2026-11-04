@@ -1,5 +1,12 @@
 # Revisão de acesso e publicação — 04/11/2026
 
+> **Atualização após a virada:** autenticação, APIs e regras protegidas já foram
+> publicadas e verificadas em produção. O proprietário entrou no ADM e autorizou
+> a preparação das 3 contas antigas de teste. Consulte o registro atual em
+> [security/ESTADO-PUBLICACAO.md](security/ESTADO-PUBLICACAO.md). As etapas abaixo
+> documentam também o estado anterior e a preparação local; referências a uma
+> publicação pendente descrevem esse histórico, não o estado atual.
+
 ## Situação da revisão
 
 Revisão do código local e das regras fornecidas pelo proprietário em 03/11/2026.
