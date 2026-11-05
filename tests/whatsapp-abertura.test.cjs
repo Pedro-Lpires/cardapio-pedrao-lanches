@@ -7,7 +7,9 @@ let init,
 const abertos = [];
 const ctx = vm.createContext({
   navigator: { userAgent: "Windows" },
-  document: { addEventListener: (n, f) => (init = f) },
+  document: { addEventListener: (n, f) => (init = f), querySelector: () => ({ checked: true }) },
+  iniciarCarregamentoUI: () => () => {},
+  mostrarAvisoUI: (m) => assert.fail(m),
   window: {
     open: (...a) => abertos.push(a),
     confirmarEEnviar: async () => {

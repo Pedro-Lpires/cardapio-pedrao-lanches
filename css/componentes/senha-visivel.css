@@ -1,0 +1,50 @@
+.senha-visivel-campo-ui {
+  position: relative;
+  display: block;
+  min-width: 0;
+  width: 100%;
+  line-height: normal;
+}
+.senha-visivel-campo-ui > input {
+  display: block;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding-right: 42px !important;
+}
+.senha-visivel-campo-ui > button.senha-visivel-botao-ui {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  min-width: 28px;
+  margin: 0 !important;
+  padding: 5px !important;
+  border: 1px solid #666;
+  border-radius: 50%;
+  background: #353535;
+  color: #eee;
+  cursor: pointer;
+  box-shadow: none;
+}
+.senha-visivel-botao-ui svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.senha-visivel-botao-ui[aria-pressed="true"] .senha-visivel-risco-ui {
+  display: none;
+}
+.senha-visivel-campo-ui > button:focus-visible {
+  outline: 2px solid #ffd700;
+  outline-offset: 2px;
+}

@@ -109,10 +109,13 @@ for (const nome of [
   const inicio = fonte.search(new RegExp(`(?:async )?function ${nome}\\(`));
   vm.runInContext(fonte.slice(inicio, fonte.indexOf("\n}", inicio) + 2), ctx);
 }
-const clique = (compra, key) => {
+const clique = (compra, key, privacidade = false) => {
   const e = {
     key,
-    target: { closest: (seletor) => (seletor.startsWith(".ui-x") ? null : compra ? {} : null) },
+    target: {
+      closest: (seletor) =>
+        seletor.startsWith(".ui-x") ? (privacidade ? {} : null) : compra ? {} : null,
+    },
     preventDefault() {
       this.cancelado = true;
     },
@@ -130,6 +133,11 @@ const clique = (compra, key) => {
   snapshotLoja({ exists: true, data: () => ({ aberta: false }) });
   assert.equal(ctx.lojaAberta, false);
   assert.equal(faixa.apagada, true);
+  assert.equal(
+    clique(true, undefined, true).cancelado,
+    undefined,
+    "Privacidade permanece disponível com loja fechada",
+  );
   assert.equal(clique(true).cancelado, true);
   assert.equal(avisos.at(-1).personagem, "lojaFechada");
   const quantidade = avisos.length;

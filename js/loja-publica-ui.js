@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (estadoLojaPublicaUI === "aberta" || ["Escape", "Tab"].includes(evento.key)) return;
     if (
       evento.target.closest?.(
-        '.ui-x, .ui-voltar, [aria-label^="Fechar"], button[onclick^="fechar"]',
+        '.ui-x, .ui-voltar, [aria-label^="Fechar"], button[onclick^="fechar"], a[data-privacidade-ui]',
       )
     )
       return;

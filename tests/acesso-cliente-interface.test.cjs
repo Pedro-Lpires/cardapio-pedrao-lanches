@@ -19,7 +19,7 @@ function fixture() {
   const novoUsuario = () => ({
     uid: "u1",
     async getIdToken(atualizar) {
-      assert.equal(atualizar, true);
+      assert.equal(atualizar, undefined);
       return "id-u1";
     },
   });

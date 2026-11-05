@@ -46,7 +46,7 @@ function criarMesaProtegidaUI({
       referrerPolicy: "no-referrer",
       headers: {
         "Content-Type": "application/json",
-        ...(usuario ? { Authorization: "Bearer " + (await usuario.getIdToken(true)) } : {}),
+        ...(usuario ? { Authorization: "Bearer " + (await usuario.getIdToken()) } : {}),
       },
       body: JSON.stringify({
         acao,
@@ -117,13 +117,15 @@ let enviandoMesaProtegidaUI = false;
 async function enviarMesaProtegidaUI() {
   if (enviandoMesaProtegidaUI || !sessaoAutoatendimentoAtual || !carrinhoAutoatendimento.length)
     return;
-  if (!(await confirmarOperacao("Enviar pedido ao chapeiro?"))) return;
   enviandoMesaProtegidaUI = true;
+  let concluirCarregamento = () => {};
   const b = document.querySelector(
     '#modal-resumo-auto button[onclick*="confirmarEnvioPedidoAuto"]',
   );
   if (b) b.disabled = true;
   try {
+    if (!(await confirmarOperacao("Enviar pedido ao chapeiro?"))) return;
+    concluirCarregamento = iniciarCarregamentoUI("Enviando seu pedido para a cozinha…");
     const r = await mesaProtegidaUI.enviar(
       mesaAutoatendimentoAtual.numero,
       carrinhoAutoatendimento,
@@ -138,6 +140,7 @@ async function enviarMesaProtegidaUI() {
     if (e.status === 410) mostrarAtendimentoEncerradoAutoUI();
     mostrarAvisoUI(e.message, "conferir");
   } finally {
+    concluirCarregamento();
     enviandoMesaProtegidaUI = false;
     if (b) b.disabled = false;
   }

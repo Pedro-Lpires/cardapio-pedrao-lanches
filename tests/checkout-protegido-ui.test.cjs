@@ -15,7 +15,11 @@ function fixture() {
         ? {
             uid,
             getIdToken: async (forcar) => {
-              assert.equal(forcar, true);
+              assert.equal(
+                forcar,
+                undefined,
+                "O SDK reaproveita o token válido e renova quando expira",
+              );
               return "token-" + uid;
             },
           }

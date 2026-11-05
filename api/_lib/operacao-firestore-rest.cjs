@@ -161,7 +161,41 @@ function criarDbOperacaoRest({ projectId, obterToken, fetchHttp = fetch, colecoe
       for (let tentativa = 0; tentativa < 4; tentativa++) {
         const { transaction } = await chamar(":beginTransaction", { options: { readWrite: {} } });
         const writes = [],
-          leituras = new Map();
+          leituras = new Map(),
+          filaLeituras = [];
+        let leituraAgendada = false;
+        function agendarLeitura(ref) {
+          return new Promise((resolve, reject) => {
+            filaLeituras.push({ ref, resolve, reject });
+            if (leituraAgendada) return;
+            leituraAgendada = true;
+            queueMicrotask(async () => {
+              leituraAgendada = false;
+              const lote = filaLeituras.splice(0);
+              try {
+                const respostas = await chamar(":batchGet", {
+                  documents: lote.map(({ ref }) => ref.name),
+                  transaction,
+                });
+                const documentos = new Map(
+                  (Array.isArray(respostas) ? respostas : []).map((d) => [
+                    d.found?.name || d.missing,
+                    d,
+                  ]),
+                );
+                // Valida o lote inteiro antes de resolver qualquer leitura.
+                const snapshots = lote.map(({ ref }) => {
+                  const dado = documentos.get(ref.name);
+                  if (!dado) throw Error("Leitura transacional inválida.");
+                  return snapshot(ref.path, dado.found || null);
+                });
+                lote.forEach((entrada, i) => entrada.resolve(snapshots[i]));
+              } catch (erro) {
+                lote.forEach(({ reject }) => reject(erro));
+              }
+            });
+          });
+        }
         try {
           function validarRef(ref) {
             if (!ref || ref.name !== recurso + "/" + caminhoValido(ref.path, true))
@@ -170,21 +204,7 @@ function criarDbOperacaoRest({ projectId, obterToken, fetchHttp = fetch, colecoe
           const resultado = await fn({
             async get(ref) {
               validarRef(ref);
-              if (!leituras.has(ref.path))
-                leituras.set(
-                  ref.path,
-                  (async () => {
-                    const respostas = await chamar(":batchGet", {
-                      documents: [ref.name],
-                      transaction,
-                    });
-                    const dado =
-                      Array.isArray(respostas) &&
-                      respostas.find((d) => d.found?.name === ref.name || d.missing === ref.name);
-                    if (!dado) throw Error("Leitura transacional inválida.");
-                    return snapshot(ref.path, dado.found || null);
-                  })(),
-                );
+              if (!leituras.has(ref.path)) leituras.set(ref.path, agendarLeitura(ref));
               return leituras.get(ref.path);
             },
             set(ref, dados, opcoes = {}) {

@@ -61,6 +61,7 @@ function contexto() {
     pedirPermissaoLocalizacaoUI: async () =>
       assert.fail("A explicação do GPS já está na pergunta do asfalto"),
     alert: (mensagem, personagem) => avisos.push({ mensagem, personagem }),
+    iniciarCarregamentoUI: () => () => {},
     exibirRevisao: (...args) => revisoes.push(args),
     calcularTotalMolhosPagos: () => 0,
     salvarPedidoFirebase: async (pedido) => {

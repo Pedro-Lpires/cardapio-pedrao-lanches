@@ -1,6 +1,7 @@
 /* Uma validação do código permite escolher atendimento ou chapa nesta sessão. */
 let funcionarioValidadoUI = null;
 let validandoFuncionarioUI = false;
+let versaoEntradaFuncionarioUI = 0;
 async function loginAtendente() {
   if (validandoFuncionarioUI) return;
   const campo = document.getElementById("codigo-atendente");
@@ -10,12 +11,14 @@ async function loginAtendente() {
     status.textContent = "Digite seu código de funcionário.";
     return;
   }
+  versaoEntradaFuncionarioUI++;
   funcionarioValidadoUI = null;
   validandoFuncionarioUI = true;
   const botao = document.getElementById("entrar-funcionario");
   botao.disabled = true;
   campo.disabled = true;
   status.textContent = "Conferindo código…";
+  const concluirCarregamento = iniciarCarregamentoUI("Conferindo seu acesso…");
   try {
     if (typeof acessoEquipeDisponivelUI === "function" && (await acessoEquipeDisponivelUI())) {
       const lembrar = document.getElementById("lembrar-funcionario")?.checked === true;
@@ -25,6 +28,11 @@ async function loginAtendente() {
       campo.value = "";
       status.textContent = "";
       mostrarDestinosFuncionarioUI();
+      return;
+    }
+    if (typeof ambienteLocalSemServidorUI === "function" && ambienteLocalSemServidorUI()) {
+      status.textContent = "";
+      abrirAmbienteLocalEquipeUI("atendente.html");
       return;
     }
     const snap = await db
@@ -48,11 +56,21 @@ async function loginAtendente() {
     else localStorage.removeItem("funcionarioSalvoPedrao");
     mostrarDestinosFuncionarioUI();
   } catch (erro) {
+    if (
+      typeof ambienteLocalSemServidorUI === "function" &&
+      ambienteLocalSemServidorUI() &&
+      !(typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI())
+    ) {
+      status.textContent = "";
+      abrirAmbienteLocalEquipeUI("atendente.html");
+      return;
+    }
     status.textContent =
       typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI()
         ? erro.message
         : "Não foi possível conferir o código. Tente novamente.";
   } finally {
+    concluirCarregamento();
     validandoFuncionarioUI = false;
     botao.disabled = false;
     campo.disabled = false;
@@ -70,6 +88,7 @@ function abrirDestinoFuncionarioUI(destino) {
   location.href = destino === "chapa" ? "cozinha.html" : "painel-atendente.html";
 }
 async function trocarCodigoFuncionarioUI() {
+  versaoEntradaFuncionarioUI++;
   funcionarioValidadoUI = null;
   localStorage.removeItem("funcionarioSalvoPedrao");
   localStorage.removeItem("atendenteId");
@@ -102,30 +121,39 @@ function mostrarDestinosFuncionarioUI() {
   document.querySelector(".funcionario-destinos-ui button:not([hidden])")?.focus();
 }
 async function restaurarFuncionarioSalvoUI() {
+  if (validandoFuncionarioUI) return;
+  const versao = versaoEntradaFuncionarioUI;
+  const entradaAtual = () => versao === versaoEntradaFuncionarioUI;
   const id = localStorage.getItem("funcionarioSalvoPedrao");
   const status = document.getElementById("login-funcionario-status");
   try {
+    if (typeof usuarioEquipeProtegidaUI === "function") {
+      const usuario = await usuarioEquipeProtegidaUI();
+      if (!entradaAtual() || (!usuario && !id)) return;
+    }
     if (typeof acessoEquipeDisponivelUI === "function" && (await acessoEquipeDisponivelUI())) {
-      funcionarioValidadoUI = await restaurarEquipeProtegidaUI();
-      if (!funcionarioValidadoUI) return;
+      if (!entradaAtual()) return;
+      const funcionario = await restaurarEquipeProtegidaUI();
+      if (!entradaAtual() || !funcionario) return;
+      funcionarioValidadoUI = funcionario;
       status.textContent = "";
       mostrarDestinosFuncionarioUI();
       return;
     }
-    if (!id) return;
-    status.textContent = "Conferindo acesso salvo…";
+    if (!entradaAtual() || !id) return;
     const doc = await db.collection("atendentes").doc(id).get();
+    if (!entradaAtual()) return;
     if (!doc.exists || doc.data().ativo !== true || perfilFuncionarioUI(doc.data()) === "nenhum") {
       localStorage.removeItem("funcionarioSalvoPedrao");
-      status.textContent = "O acesso salvo não está mais ativo. Informe seu código.";
+      status.textContent = "";
       return;
     }
     funcionarioValidadoUI = { ...doc.data(), id: doc.id, nome: doc.data().nome || "Funcionário" };
     status.textContent = "";
     mostrarDestinosFuncionarioUI();
   } catch {
-    status.textContent =
-      "Não foi possível conferir o acesso salvo. Tente novamente com seu código.";
+    // Restaurar é automático; a falha deixa a entrada disponível, sem acusar erro antes do uso.
+    if (entradaAtual()) status.textContent = "";
   }
 }
 document.addEventListener?.("DOMContentLoaded", restaurarFuncionarioSalvoUI);

@@ -1916,8 +1916,16 @@ function assinarFilaDiaCozinhaOperacao() {
     Math.max(1000, janelaOperacionalOperacao().fim - Date.now() + 50),
   );
 }
+const enviosCozinhaEmAndamentoUI = new Set();
 async function confirmarProducaoOperacao(colecao, id, automatico = false, reenviarTudo = false) {
   if (automatico && colecao !== "comandas") return false;
+  const chaveEnvio = colecao + "/" + id;
+  if (enviosCozinhaEmAndamentoUI.has(chaveEnvio)) return false;
+  enviosCozinhaEmAndamentoUI.add(chaveEnvio);
+  let concluirCarregamento =
+    typeof iniciarCarregamentoUI === "function"
+      ? iniciarCarregamentoUI("Conferindo e enviando para a cozinha…")
+      : () => {};
   try {
     const configProducao = await db.collection("config").doc("producaoTela").get();
     const corteEnvio = Math.max(
@@ -1942,6 +1950,7 @@ async function confirmarProducaoOperacao(colecao, id, automatico = false, reenvi
         ),
       ).length
     ) {
+      concluirCarregamento();
       if (
         !(await confirmarOperacao(
           "O chapeiro já fez todos os itens deste pedido. Deseja reenviar tudo para ele?",
@@ -1949,6 +1958,10 @@ async function confirmarProducaoOperacao(colecao, id, automatico = false, reenvi
       )
         return false;
       reenviarTudo = true;
+      concluirCarregamento =
+        typeof iniciarCarregamentoUI === "function"
+          ? iniciarCarregamentoUI("Reenviando para a cozinha…")
+          : () => {};
     }
     await db.runTransaction(async (t) => {
       const doc = await t.get(origem);
@@ -2063,6 +2076,9 @@ async function confirmarProducaoOperacao(colecao, id, automatico = false, reenvi
   } catch (e) {
     avisoOperacao(e.message);
     return false;
+  } finally {
+    concluirCarregamento();
+    enviosCozinhaEmAndamentoUI.delete(chaveEnvio);
   }
 }
 async function cancelarPreparoComandaOperacao(id) {

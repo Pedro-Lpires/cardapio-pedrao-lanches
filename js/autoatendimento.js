@@ -2665,6 +2665,7 @@ async function confirmarEnvioPedidoAuto() {
     botao.textContent = "Enviando...";
   }
   let pedidoFoiSalvo = false;
+  const concluirCarregamento = iniciarCarregamentoUI("Enviando seu pedido para a cozinha…");
 
   try {
     const agora = new Date();
@@ -3084,6 +3085,7 @@ async function confirmarEnvioPedidoAuto() {
 
     alert("Não foi possível enviar o pedido. Tente novamente.");
   } finally {
+    concluirCarregamento();
     if (botao) {
       botao.disabled = false;
 

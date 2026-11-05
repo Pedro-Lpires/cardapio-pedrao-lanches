@@ -80,7 +80,7 @@ function criarCheckoutProtegidoUI({
       referrerPolicy: "no-referrer",
       headers: {
         "Content-Type": "application/json",
-        ...(usuario ? { Authorization: "Bearer " + (await usuario.getIdToken(true)) } : {}),
+        ...(usuario ? { Authorization: "Bearer " + (await usuario.getIdToken()) } : {}),
       },
       body: JSON.stringify({ ...dados, acao }),
     });

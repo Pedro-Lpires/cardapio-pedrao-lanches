@@ -32,7 +32,7 @@ function criarAcessoClienteUI({
       referrerPolicy: "no-referrer",
       headers: {
         "Content-Type": "application/json",
-        ...(usuario ? { Authorization: "Bearer " + (await usuario.getIdToken(true)) } : {}),
+        ...(usuario ? { Authorization: "Bearer " + (await usuario.getIdToken()) } : {}),
       },
       body: JSON.stringify(dados),
     });
@@ -326,14 +326,13 @@ async function entrarClienteSenhaDeliveryUI() {
 }
 
 async function cadastrarClienteSenhaDeliveryUI() {
-  const senha = document.getElementById("perfil-senha-protegida"),
-    repetir = document.getElementById("perfil-senha-confirmacao");
+  const senha = document.getElementById("perfil-senha-protegida");
   try {
     const cliente = await window.acessoClienteSenhaUI.criarSenha({
       nome: document.getElementById("perfil-nome").value.trim(),
       telefone: limparTelefonePerfil(),
       senha: senha?.value || "",
-      confirmacao: repetir?.value || "",
+      confirmacao: senha?.value || "",
       avatar: avatarClienteAtual,
       lembrar: document.getElementById("check-salvar-login")?.checked === true,
     });
@@ -342,7 +341,6 @@ async function cadastrarClienteSenhaDeliveryUI() {
     alert(erro.message);
   } finally {
     if (senha) senha.value = "";
-    if (repetir) repetir.value = "";
   }
 }
 
@@ -403,7 +401,7 @@ function montarCamposSenhaClienteUI(canal) {
   const grupo = document.createElement("div");
   grupo.className = "cliente-campos-senha-ui";
   const prefixo = delivery ? "perfil" : "login-auto";
-  grupo.innerHTML = `<label for="${prefixo}-senha-protegida">Senha</label><input id="${prefixo}-senha-protegida" type="password" maxlength="128" autocomplete="current-password"><div data-confirmar-senha hidden><label for="${prefixo}-senha-confirmacao">Repita a senha</label><input id="${prefixo}-senha-confirmacao" type="password" minlength="8" maxlength="128" autocomplete="new-password"></div><a href="https://wa.me/5565992386045?text=Ol%C3%A1%2C%20esqueci%20minha%20senha%20do%20Pedr%C3%A3o.%20Preciso%20de%20um%20link%20de%20recupera%C3%A7%C3%A3o." target="_blank" rel="noopener noreferrer">Esqueci minha senha</a>`;
+  grupo.innerHTML = `<label for="${prefixo}-senha-protegida">Senha<input id="${prefixo}-senha-protegida" type="password" maxlength="128" autocomplete="current-password"></label><a data-recuperar-senha href="https://wa.me/5565992386045?text=Ol%C3%A1%2C%20esqueci%20minha%20senha%20do%20Pedr%C3%A3o.%20Preciso%20de%20um%20link%20de%20recupera%C3%A7%C3%A3o." target="_blank" rel="noopener noreferrer">Esqueci minha senha</a>`;
   base.after(grupo);
   let alterar;
   if (delivery) {
@@ -419,11 +417,13 @@ function montarCamposSenhaClienteUI(canal) {
     if (alterar) alterar.hidden = modo !== "editar" || !clienteLogado?.authUid;
     const criando = modo === "cadastro" || modo === "criar";
     grupo.hidden = !["login", "cadastro", "criar"].includes(modo);
-    grupo.querySelector("[data-confirmar-senha]").hidden = !criando;
+    grupo.querySelector("[data-recuperar-senha]").hidden = criando;
     const campo = document.getElementById(prefixo + "-senha-protegida");
     campo.autocomplete = criando ? "new-password" : "current-password";
+    campo.minLength = criando ? 8 : 0;
+    campo.placeholder = criando ? "Pelo menos 8 caracteres" : "Sua senha";
     campo.value = "";
-    document.getElementById(prefixo + "-senha-confirmacao").value = "";
+    window.ocultarSenhasUI?.(grupo);
   };
   if (delivery) {
     const anterior = abrirPerfilModo;
@@ -450,9 +450,10 @@ else {
     limparLegado: () => localStorage.removeItem("clientePedrao"),
   });
   document.addEventListener("DOMContentLoaded", async () => {
+    // Campos do formulário não dependem de esperar a conexão com a API.
+    montarCamposSenhaClienteUI(document.getElementById("perfil-form") ? "delivery" : "auto");
     try {
-      if (await window.acessoClienteSenhaUI.ativo())
-        montarCamposSenhaClienteUI(document.getElementById("perfil-form") ? "delivery" : "auto");
+      await window.acessoClienteSenhaUI.ativo();
     } catch {
       /* O formulário avisa se a consulta falhar; uma falha não vira login legado. */
     }

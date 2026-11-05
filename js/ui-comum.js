@@ -303,6 +303,24 @@ function htmlCarregandoUI(texto = "Carregando…") {
     '</strong><span class="ui-carregando-circulo" aria-hidden="true"></span><span class="ui-carregando-bolinhas" aria-hidden="true"><i></i><i></i><i></i></span></div>'
   );
 }
+// Dialog nativo fica acima das outras janelas e impede repetir a ação em andamento.
+function iniciarCarregamentoUI(texto = "Carregando…") {
+  const janela = document.createElement("dialog");
+  janela.className = "carregamento-operacao-ui";
+  janela.setAttribute("aria-label", texto);
+  janela.setAttribute("aria-busy", "true");
+  janela.innerHTML = htmlCarregandoUI(texto);
+  janela.addEventListener("cancel", (e) => e.preventDefault());
+  document.body.append(janela);
+  janela.showModal();
+  let encerrado = false;
+  return () => {
+    if (encerrado) return;
+    encerrado = true;
+    janela.close();
+    janela.remove();
+  };
+}
 function abrirJanelaElementoUI(elemento, titulo) {
   const aberta = elemento.parentElement?.matches("dialog.interface-janela")
     ? elemento.parentElement

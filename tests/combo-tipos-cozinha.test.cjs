@@ -158,6 +158,7 @@ async function enviar(colecao, item, combo) {
       });
       ctx.sessaoAutoatendimentoAtual = { id: "teste" };
       ctx.mesaAutoatendimentoId = "mesa2";
+      ctx.iniciarCarregamentoUI = () => () => {};
       await ctx.confirmarEnvioPedidoAuto();
       const filaAuto = [...ctx.db.docs.entries()].find(([id]) => id.startsWith("filaCozinha/"));
       assert(filaAuto, "Envio real do autoatendimento cria a fila da cozinha");

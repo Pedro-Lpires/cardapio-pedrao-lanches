@@ -23,12 +23,17 @@ Para testar a interface com dados fictícios, abra pelo Live Server:
 
 ```text
 http://127.0.0.1:5501/tests/revisao-browser.html?pagina=admin.html
+http://127.0.0.1:5501/tests/revisao-browser.html?pagina=atendente.html
 http://127.0.0.1:5501/tests/revisao-browser.html?pagina=autoatendimento.html
 ```
 
 Use a porta que seu Live Server mostrar. A página permite escolher a tela e a
 largura: 320, 375, 430 pixels ou computador. A senha fictícia indicada na prévia
 é `teste1234`. Os dados dessa prévia ficam em memória; não são o banco real.
+No acesso de funcionário dessa prévia, use também o código fictício `teste1234`.
+O código real só é validado pelo servidor do site publicado. Ao tentar entrar
+pela página `atendente.html` no Live Server sem API, a janela oferece abrir
+o acesso publicado da equipe ou esta prévia, sem consultar o banco privado.
 
 Alternativa pelo terminal da pasta do projeto:
 

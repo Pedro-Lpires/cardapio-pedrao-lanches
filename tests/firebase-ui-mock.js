@@ -21,25 +21,34 @@
   const parametrosFixture = new URL(document.currentScript.src).searchParams;
   const mesaFixture = parametrosFixture.get("mesa") || "2";
   const cenarioFixture = parametrosFixture.get("cenario");
-  if (["entrega-distante", "entrega-fora-area", "beneficios-entrega"].includes(cenarioFixture)) {
+  if (
+    ["entrega-distante", "entrega-fora-area", "beneficios-entrega", "carregamento"].includes(
+      cenarioFixture,
+    )
+  ) {
     Object.defineProperty(navigator, "geolocation", {
       configurable: true,
       value: {
         getCurrentPosition(sucesso) {
           // Ponto fictício, sem pedir a localização real do aparelho.
-          sucesso({
-            coords: {
-              latitude:
-                -15.553076945525193 -
-                (cenarioFixture === "entrega-fora-area"
-                  ? 22
-                  : cenarioFixture === "beneficios-entrega"
-                    ? 3
-                    : 12) /
-                  111.19492664455873,
-              longitude: -56.05602240360688,
-            },
-          });
+          const emitir = () =>
+            sucesso({
+              coords: {
+                latitude:
+                  -15.553076945525193 -
+                  (cenarioFixture === "entrega-fora-area"
+                    ? 22
+                    : cenarioFixture === "beneficios-entrega"
+                      ? 3
+                      : cenarioFixture === "carregamento"
+                        ? 3
+                        : 12) /
+                    111.19492664455873,
+                longitude: -56.05602240360688,
+              },
+            });
+          if (cenarioFixture === "carregamento") setTimeout(emitir, 6000);
+          else emitir();
         },
       },
     });
@@ -802,6 +811,7 @@
       orderBy: () => collection(path, filtros),
       limit: () => collection(path, filtros),
       get: async () => {
+        if (cenarioFixture === "carregamento") await new Promise((r) => setTimeout(r, 6000));
         if (cenarioFixture === "lento") await new Promise((r) => setTimeout(r, 1200));
         if (cenarioFixture === "falha" && path.endsWith("/mensagens"))
           throw Error("Falha de conexão simulada");
@@ -840,6 +850,7 @@
       };
     },
     runTransaction: async (fn) => {
+      if (cenarioFixture === "carregamento") await new Promise((r) => setTimeout(r, 6000));
       const writes = [];
       const result = await fn({
         get: (r) => r.get(),

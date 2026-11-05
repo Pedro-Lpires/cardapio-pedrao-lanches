@@ -235,13 +235,15 @@ function criarServicoPedidoPublico({
           return { pedido: p, repetido: true };
         }
       }
-      const loja = await t.get(db.collection("config").doc("loja"));
+      const [loja, dadosCatalogo] = await Promise.all([
+        t.get(db.collection("config").doc("loja")),
+        Promise.all(referencias.map((r) => t.get(r))),
+      ]);
       if (loja.exists && loja.data().aberta === false)
         throw new ErroRecuperacao(
           409,
           "A loja fechou antes da confirmação. Seu pedido não foi enviado.",
         );
-      const dadosCatalogo = await Promise.all(referencias.map((r) => t.get(r)));
       const catalogo = (tipo) =>
         dadosCatalogo
           .filter((d) => d.exists && d.ref.path.startsWith(tipo + "/"))

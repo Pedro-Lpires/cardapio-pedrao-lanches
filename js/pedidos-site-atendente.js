@@ -5,6 +5,9 @@ let pedidosSitePendentesUI = [],
   viradaPedidosSiteUI = null;
 let pedidosSiteInicioUI = null,
   pedidosSiteRecebidosUI = false;
+let versaoEscutaPedidosSiteUI = 0,
+  tentativaEscutaPedidosSiteUI = 0,
+  repetirEscutaPedidosSiteUI = null;
 const pedidosSiteVistosUI = new Set();
 let janelaPedidoLocalUI = null,
   areaPedidoLocalUI = null,
@@ -112,14 +115,25 @@ function processarPedidosSiteUI(pedidos, inicio) {
   if (novos.length && typeof avisarSomPedidosSiteUI === "function") avisarSomPedidosSiteUI(novos);
 }
 function encerrarPedidosSiteUI() {
+  versaoEscutaPedidosSiteUI++;
+  clearTimeout(repetirEscutaPedidosSiteUI);
   pararPedidosSiteUI?.();
   pararPedidosSiteUI = null;
   clearTimeout(viradaPedidosSiteUI);
   viradaPedidosSiteUI = null;
 }
-function iniciarPedidosSiteUI() {
+async function iniciarPedidosSiteUI() {
   if (!document.querySelector(".menu-atendente")) return;
   encerrarPedidosSiteUI();
+  const versao = versaoEscutaPedidosSiteUI;
+  if (typeof inicializacaoEquipeProtegidaUI !== "undefined") await inicializacaoEquipeProtegidaUI;
+  if (versao !== versaoEscutaPedidosSiteUI) return;
+  if (
+    typeof equipeProtegidaAtivaUI === "function" &&
+    equipeProtegidaAtivaUI() &&
+    !perfilEquipeProtegidaUI
+  )
+    return;
   const janela = janelaOperacionalOperacao();
   pararPedidosSiteUI = db
     .collection("pedidos")
@@ -127,6 +141,8 @@ function iniciarPedidosSiteUI() {
     .where("dataMs", "<", janela.fim)
     .onSnapshot(
       (snap) => {
+        if (versao !== versaoEscutaPedidosSiteUI) return;
+        tentativaEscutaPedidosSiteUI = 0;
         const status = document.getElementById("pedidos-site-status");
         if (status) status.hidden = true;
         processarPedidosSiteUI(
@@ -135,13 +151,29 @@ function iniciarPedidosSiteUI() {
         );
       },
       (erro) => {
+        if (versao !== versaoEscutaPedidosSiteUI) return;
         console.error("Não foi possível acompanhar os pedidos do site:", erro);
         const status = document.getElementById("pedidos-site-status");
         if (status) {
           status.hidden = false;
-          status.textContent =
-            "Não foi possível acompanhar os pedidos novos. Recarregue o painel para tentar novamente.";
+          status.replaceChildren();
+          const texto = document.createElement("span");
+          texto.textContent = "A conexão com os pedidos foi interrompida. Tentando reconectar… ";
+          const repetir = document.createElement("button");
+          repetir.type = "button";
+          repetir.textContent = "Tentar novamente";
+          repetir.onclick = () => {
+            tentativaEscutaPedidosSiteUI = 0;
+            return iniciarPedidosSiteUI();
+          };
+          status.append(texto, repetir);
         }
+        if (tentativaEscutaPedidosSiteUI < 5) {
+          const atraso = Math.min(30000, 2000 * 2 ** tentativaEscutaPedidosSiteUI++);
+          repetirEscutaPedidosSiteUI = setTimeout(iniciarPedidosSiteUI, atraso);
+        } else if (status)
+          status.querySelector("span").textContent =
+            "Sem conexão com os pedidos. Toque para tentar novamente. ";
       },
     );
   viradaPedidosSiteUI = setTimeout(
@@ -543,4 +575,8 @@ document.addEventListener("DOMContentLoaded", iniciarPedidosSiteUI);
 window.addEventListener("pagehide", encerrarPedidosSiteUI);
 window.addEventListener("pageshow", (evento) => {
   if (evento.persisted) iniciarPedidosSiteUI();
+});
+window.addEventListener("online", () => {
+  tentativaEscutaPedidosSiteUI = 0;
+  iniciarPedidosSiteUI();
 });

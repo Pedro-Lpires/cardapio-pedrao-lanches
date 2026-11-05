@@ -8346,9 +8346,17 @@ function fecharComandaNaLista(areaDestinoId) {
 
   modoEditarItem = false;
 }
-if (document.getElementById("area-chamados-mesa-atendente")) {
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!document.getElementById("area-chamados-mesa-atendente")) return;
+  if (typeof inicializacaoEquipeProtegidaUI !== "undefined") await inicializacaoEquipeProtegidaUI;
+  if (
+    typeof equipeProtegidaAtivaUI === "function" &&
+    equipeProtegidaAtivaUI() &&
+    !perfilEquipeProtegidaUI
+  )
+    return;
   iniciarListenerChamadosMesaAtendente();
-}
+});
 
 function atualizarAcoesItensComandaUI() {
   document.querySelectorAll("[data-acao-comanda]").forEach((b) => {

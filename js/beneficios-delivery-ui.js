@@ -123,7 +123,7 @@ async function conferirBeneficiosAntesEnvioUI() {
   if (!dadosPedidoTemporario?.tipo) return true;
   if (typeof checkoutProtegidoUI !== "undefined" && (await checkoutProtegidoUI.ativo())) {
     const versao = carrinhoVersao;
-    await carregarBeneficiosDeliveryUI(true);
+    if (clienteLogado?.fidelidadeAtiva) await carregarBeneficiosDeliveryUI(true);
     let resultado;
     try {
       resultado = await checkoutProtegidoUI.conferir(pedidoAtualCheckoutProtegidoUI());

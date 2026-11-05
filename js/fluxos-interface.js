@@ -10,11 +10,16 @@ function configurarAcoesDestinoPedidoUI(janela, imprimir, enviar, rotulo) {
   const executar = async (acao) => {
     const botoes = janela.querySelectorAll(".operacao-acoes button");
     botoes.forEach((botao) => (botao.disabled = true));
+    const concluirCarregamento =
+      typeof iniciarCarregamentoUI === "function"
+        ? iniciarCarregamentoUI("Preparando " + rotulo.toLocaleLowerCase("pt-BR") + "…")
+        : () => {};
     try {
       if ((await acao()) !== false) janela.close();
     } catch (erro) {
       avisoOperacao("Não foi possível concluir: " + erro.message);
     } finally {
+      concluirCarregamento();
       botoes.forEach((botao) => (botao.disabled = false));
     }
   };
@@ -399,6 +404,8 @@ function montarCheckoutUI() {
     acoes.className = "perfil-edicao-acoes";
     formulario.append(acoes);
     acoes.append(document.getElementById("btn-entrar-perfil"), enderecoBtn);
+    const privacidadeCadastro = formulario.querySelector("#privacidade-cadastro-delivery-ui");
+    if (privacidadeCadastro) formulario.append(privacidadeCadastro);
     const modoOriginal = abrirPerfilModo;
     window.abrirPerfilModo = (modo) => {
       area.replaceChildren();
@@ -499,6 +506,8 @@ function mostrarModoContaAutoUI(modo) {
   m.querySelector("#auto-grupo-codigo").hidden = modo === "criar";
   m.querySelector("#auto-confirmar-conta").textContent =
     modo === "criar" ? "Criar login" : "Entrar";
+  const avisoPrivacidade = m.querySelector("#privacidade-cadastro-auto-ui");
+  if (avisoPrivacidade) avisoPrivacidade.hidden = modo !== "criar";
 }
 async function criarContaAutoUI() {
   const nome = document.getElementById("login-auto-nome").value.trim(),
@@ -514,19 +523,17 @@ async function criarContaAutoUI() {
       (await window.acessoClienteSenhaUI.ativo())
     ) {
       const senha = document.getElementById("login-auto-senha-protegida");
-      const confirmar = document.getElementById("login-auto-senha-confirmacao");
       try {
         const cliente = await window.acessoClienteSenhaUI.criarSenha({
           nome,
           telefone,
           senha: senha?.value || "",
-          confirmacao: confirmar?.value || "",
+          confirmacao: senha?.value || "",
           lembrar: document.getElementById("login-auto-salvar")?.checked === true,
         });
         await aplicarClienteSenhaUI(cliente);
       } finally {
         if (senha) senha.value = "";
-        if (confirmar) confirmar.value = "";
       }
       return;
     }
@@ -595,6 +602,10 @@ function montarContaAutoUI() {
   b.id = "auto-confirmar-conta";
   b.onclick = () => (modoContaAutoUI === "criar" ? criarContaAutoUI() : entrarContaAutoUI());
   form.append(b, campos["status-login-auto"]);
+  form.insertAdjacentHTML(
+    "beforeend",
+    '<p class="aviso-privacidade-ui aviso-privacidade-cadastro-ui" id="privacidade-cadastro-auto-ui" hidden>Usamos seus dados para cuidar da sua conta. <a href="privacidade.html" data-privacidade-ui>Privacidade</a></p>',
+  );
   const original = abrirLoginAutoatendimento;
   window.abrirLoginAutoatendimento = async () => {
     await original();

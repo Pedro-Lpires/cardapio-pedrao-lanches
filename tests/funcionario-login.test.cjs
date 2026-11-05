@@ -42,6 +42,7 @@ const query = {
 };
 const ctx = vm.createContext({
   console,
+  iniciarCarregamentoUI: () => () => {},
   URLSearchParams,
   document: {
     getElementById: campo,
@@ -65,6 +66,68 @@ const fonte = fs.readFileSync("js/operacao.js", "utf8"),
   fim = fonte.indexOf("\nwindow.addEventListener", inicio);
 vm.runInContext(fonte.slice(fonte.indexOf("let restaurandoAcessoMonitorCozinhaUI"), fim), ctx);
 (async () => {
+  let consultasDisponibilidade = 0;
+  ctx.usuarioEquipeProtegidaUI = async () => null;
+  ctx.acessoEquipeDisponivelUI = async () => {
+    consultasDisponibilidade++;
+    throw Error("offline");
+  };
+  await ctx.restaurarFuncionarioSalvoUI();
+  assert.equal(consultasDisponibilidade, 0, "Sem sessão salva não consulta a API ao abrir");
+  assert.equal(campo("login-funcionario-status").textContent, "");
+  local.set("funcionarioSalvoPedrao", "func-1");
+  await ctx.restaurarFuncionarioSalvoUI();
+  assert.equal(consultasDisponibilidade, 1);
+  assert.equal(
+    campo("login-funcionario-status").textContent,
+    "",
+    "Falha da restauração automática não acusa erro de entrada",
+  );
+  let rejeitarConsulta, iniciarConsulta;
+  const consultaIniciada = new Promise((resolve) => (iniciarConsulta = resolve));
+  ctx.acessoEquipeDisponivelUI = () =>
+    new Promise((_, reject) => {
+      rejeitarConsulta = reject;
+      iniciarConsulta();
+    });
+  const restauracao = ctx.restaurarFuncionarioSalvoUI();
+  await consultaIniciada;
+  await ctx.trocarCodigoFuncionarioUI();
+  campo("login-funcionario-status").textContent = "Mensagem da entrada atual";
+  rejeitarConsulta(Error("offline"));
+  await restauracao;
+  assert.equal(
+    campo("login-funcionario-status").textContent,
+    "Mensagem da entrada atual",
+    "Restauração atrasada não altera a entrada atual",
+  );
+  campo("login-funcionario-status").textContent = "";
+  delete ctx.usuarioEquipeProtegidaUI;
+  delete ctx.acessoEquipeDisponivelUI;
+  const consultasAntesDoLocal = consultas;
+  const destinosLocais = [];
+  ctx.ambienteLocalSemServidorUI = () => true;
+  ctx.abrirAmbienteLocalEquipeUI = (pagina) => destinosLocais.push(pagina);
+  ctx.acessoEquipeDisponivelUI = async () => false;
+  campo("codigo-atendente").value = "codigo-ficticio-local";
+  await ctx.loginAtendente();
+  assert.equal(
+    consultas,
+    consultasAntesDoLocal,
+    "Live Server sem API não consulta dados privados no Firestore",
+  );
+  assert.equal(campo("login-funcionario-status").textContent, "");
+  assert.deepEqual(destinosLocais, ["atendente.html"]);
+  ctx.acessoEquipeDisponivelUI = async () => {
+    throw Error("offline");
+  };
+  await ctx.loginAtendente();
+  assert.equal(consultas, consultasAntesDoLocal);
+  assert.equal(destinosLocais.length, 2);
+  assert.equal(campo("entrar-funcionario").disabled, false);
+  delete ctx.ambienteLocalSemServidorUI;
+  delete ctx.abrirAmbienteLocalEquipeUI;
+  delete ctx.acessoEquipeDisponivelUI;
   ctx.abrirDestinoFuncionarioUI("chapa");
   assert.equal(ctx.location.href, "atendente.html");
   campo("codigo-atendente").value = "errado";

@@ -154,17 +154,19 @@ dialog.cliente-criar-senha-ui > header > .ui-x {
 .cliente-campos-senha-ui {
   display: grid;
   gap: 8px;
-  margin: 14px 0;
+  margin: 14px 0 6px;
 }
-.cliente-campos-senha-ui [data-confirmar-senha] {
+.cliente-campos-senha-ui > label {
   display: grid;
   gap: 8px;
+  margin: 0;
 }
 .cliente-campos-senha-ui a {
   color: #ff5363;
   text-decoration: underline;
   font-size: 14px;
 }
+.cliente-campos-senha-ui[hidden],
 .cliente-campos-senha-ui [hidden] {
   display: none !important;
 }
@@ -172,4 +174,48 @@ dialog.cliente-criar-senha-ui > header > .ui-x {
 .cliente-campos-senha-ui :focus-visible {
   outline: 2px solid #ffd700;
   outline-offset: 3px;
+}
+#perfil-form .check-salvar-login {
+  margin: 6px 0 16px;
+}
+#perfil-form .cliente-campos-senha-ui {
+  margin: 6px 0 2px;
+}
+#perfil-form .cliente-campos-senha-ui > label {
+  gap: 4px;
+}
+#perfil-form:has(> #privacidade-cadastro-delivery-ui:not([hidden])) .perfil-edicao-acoes {
+  justify-content: center;
+  margin: 18px 0 28px;
+}
+#modal-login-auto .cliente-campos-senha-ui {
+  display: block;
+  margin: 0;
+}
+#modal-login-auto .cliente-campos-senha-ui > label {
+  display: block;
+  margin: 8px 0 4px;
+  line-height: 1.2;
+}
+#modal-login-auto .cliente-campos-senha-ui .senha-visivel-campo-ui {
+  margin: 4px 0 8px;
+}
+#modal-login-auto .cliente-campos-senha-ui input {
+  height: 42px;
+  min-height: 42px;
+  margin: 0 !important;
+  padding: 8px 48px 8px 10px !important;
+  background: #222;
+}
+#modal-login-auto label.auto-lembrar {
+  margin: 4px 0 10px;
+  padding: 4px 0;
+  min-height: 36px;
+}
+#modal-login-auto[data-modo="criar"] #auto-confirmar-conta {
+  display: block;
+  width: 80%;
+  min-height: 40px;
+  padding: 10px 14px;
+  margin: 0 auto 18px;
 }

@@ -148,6 +148,7 @@ function janelaEntradaEquipeUI(proprietario, texto = "") {
         status = janela.querySelector("[role=status]");
       botao.disabled = true;
       status.textContent = "Conferindo acesso…";
+      const concluirCarregamento = iniciarCarregamentoUI("Conferindo seu acesso…");
       let auth;
       try {
         auth = appEquipeProtegidaUI().auth();
@@ -167,6 +168,7 @@ function janelaEntradaEquipeUI(proprietario, texto = "") {
         if (auth) await auth.signOut();
         status.textContent = "Não foi possível entrar. Confira seu acesso de proprietário.";
       } finally {
+        concluirCarregamento();
         form.elements.senha.value = "";
         botao.disabled = false;
       }
