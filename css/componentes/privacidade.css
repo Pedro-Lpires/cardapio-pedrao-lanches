@@ -67,6 +67,9 @@ p.aviso-privacidade-cadastro-ui {
   padding: 14px 16px 90px;
   text-align: center;
 }
+main:has(#area-autoatendimento .auto-identificacao-ui) + .auto-rodape-privacidade-ui {
+  display: none;
+}
 .ambiente-local-pagina-ui .auto-rodape-privacidade-ui {
   padding: 6px 16px 16px;
 }
