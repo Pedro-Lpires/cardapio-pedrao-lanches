@@ -7,11 +7,43 @@
   background-color: var(--bg-color);
 }
 
-.admin-header {
-  height: 150px;
+.admin-body > .admin-header {
+  height: auto;
+  min-height: clamp(178px, 20vw, 225px);
+  gap: 8px;
+  padding: clamp(18px, 3vw, 32px) 14px;
   background:
-    linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
-    url("../images/banner-pedrao.webp") center/px cover;
+    linear-gradient(rgb(0 0 0 / 56%), rgb(0 0 0 / 78%)),
+    #171717 url("../images/banner-pedrao.webp") center / cover no-repeat;
+}
+
+.admin-body > .admin-header h1 {
+  font-size: clamp(24px, 4vw, 38px);
+  line-height: 1.16;
+}
+
+.admin-header > .subtitulo {
+  margin: 0;
+}
+
+.admin-header-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.admin-header .admin-header-acoes > button {
+  margin: 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.admin-header-acoes .acesso-equipe-sair-ui {
+  background: #242424;
+  border: 1px solid #777;
 }
 
 /* main / section — conteúdo e componentes */

@@ -106,7 +106,7 @@ function mostrarAtendimentoEncerradoAutoUI() {
   const area = document.getElementById("area-autoatendimento");
   if (area)
     area.innerHTML =
-      '<section class="auto-atendimento-encerrado-ui"><h2>Atendimento encerrado</h2><p>Esta comanda foi encerrada. Para começar um novo atendimento, escaneie o QR Code da mesa novamente.</p></section>';
+      '<section class="auto-atendimento-encerrado-ui"><h2>Atendimento encerrado</h2><p>O atendimento anterior desta mesa terminou. Para começar de novo, escaneie o QR Code da mesa.</p></section>';
 }
 async function recuperarSessaoDaMesaAutoUI() {
   if (typeof mesaProtegidaUI !== "undefined" && (await mesaProtegidaUI.ativo())) {

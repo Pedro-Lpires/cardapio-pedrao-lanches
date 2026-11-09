@@ -48,7 +48,8 @@ function criarServicoMesaPublica({ db, auth, pedidos, consumirTentativa, agora =
           comanda.data().status !== "Aberta" ||
           comanda.data().sessaoAutoatendimentoId !== c.id ||
           m.data().ocupada !== true
-        : diaPedido(sessao.criadoEmMs) !== diaPedido(agora()));
+        : diaPedido(sessao.criadoEmMs) !== diaPedido(agora()) ||
+          (sessao.rodadaAutoatendimento ?? 0) !== (m.data().rodadaAutoatendimento ?? 0));
     return { sessao, sr, mr, cr, mesa: m.data(), comanda: comanda?.data(), encerrada };
   }
   async function resposta(v) {
@@ -111,6 +112,7 @@ function criarServicoMesaPublica({ db, auth, pedidos, consumirTentativa, agora =
           nomeTemporario: nome,
           status: "ativa",
           pedidoEnviado: false,
+          rodadaAutoatendimento: m.data()?.rodadaAutoatendimento ?? 0,
           comandaId: null,
           clienteId: cliente?.telefone || null,
           clienteAuthUid: cliente?.authUid || null,
@@ -153,7 +155,8 @@ function criarServicoMesaPublica({ db, auth, pedidos, consumirTentativa, agora =
       const loja = await t.get(db.collection("config").doc("loja"));
       if (loja.exists && loja.data().aberta === false)
         throw new ErroRecuperacao(409, "Estamos fechados para novos pedidos.");
-      if (v.mesa.ocupada === true)
+      // Visitas abertas antes da atualização não registraram a rodada da mesa.
+      if (v.mesa.ocupada === true && v.sessao.rodadaAutoatendimento == null)
         throw new ErroRecuperacao(
           409,
           "A mesa entrou em atendimento. Chame o atendente antes de enviar.",
@@ -244,7 +247,7 @@ function criarServicoMesaPublica({ db, auth, pedidos, consumirTentativa, agora =
         confirmadoPor: "Autoatendimento",
       });
       t.set(contador, { ultimoNumero: numero });
-      t.update(v.mr, { ocupada: true });
+      t.update(v.mr, { ocupada: true, ultimaComandaAbertaId: comandaId });
       const patch = {
         pedidoEnviado: true,
         comandaId,

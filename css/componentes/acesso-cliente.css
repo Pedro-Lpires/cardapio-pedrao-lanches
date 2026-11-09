@@ -101,9 +101,6 @@ dialog.cliente-criar-senha-ui > header > .ui-x {
   gap: 8px;
   min-width: 0;
 }
-.cliente-alterar-senha-botao-ui {
-  margin: 10px 0 0 10px;
-}
 .cliente-alterar-senha-botao-ui[hidden] {
   display: none !important;
 }
@@ -161,17 +158,26 @@ dialog.cliente-criar-senha-ui > header > .ui-x {
   gap: 8px;
   margin: 0;
 }
-.cliente-campos-senha-ui a {
+#perfil-form [data-recuperar-senha],
+#auto-form-conta [data-recuperar-senha] {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 44px;
+  margin-top: 8px;
   color: #ff5363;
   text-decoration: underline;
   font-size: 14px;
 }
 .cliente-campos-senha-ui[hidden],
-.cliente-campos-senha-ui [hidden] {
+.cliente-campos-senha-ui [hidden],
+[data-recuperar-senha][hidden],
+.perfil-edicao-secundarias[hidden] {
   display: none !important;
 }
 .cliente-criar-senha-ui :focus-visible,
-.cliente-campos-senha-ui :focus-visible {
+.cliente-campos-senha-ui :focus-visible,
+[data-recuperar-senha]:focus-visible {
   outline: 2px solid #ffd700;
   outline-offset: 3px;
 }
@@ -187,6 +193,24 @@ dialog.cliente-criar-senha-ui > header > .ui-x {
 #perfil-form:has(> #privacidade-cadastro-delivery-ui:not([hidden])) .perfil-edicao-acoes {
   justify-content: center;
   margin: 18px 0 28px;
+}
+#perfil-form .perfil-edicao-acoes[data-modo="editar"] {
+  display: grid;
+}
+#perfil-form .perfil-edicao-secundarias {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+#perfil-form .perfil-edicao-secundarias button {
+  background: #262626;
+  border: 1px solid #606060;
+  min-height: 44px !important;
+  padding-inline: 8px !important;
+}
+#perfil-form .perfil-edicao-secundarias button:hover {
+  background: #363636;
 }
 #modal-login-auto .cliente-campos-senha-ui {
   display: block;

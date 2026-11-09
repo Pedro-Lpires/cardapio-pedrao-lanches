@@ -86,6 +86,8 @@ vm.runInContext(fs.readFileSync("js/mesas-limpeza.js", "utf8"), ctx);
   assert.equal(resultado.comPagamento, 1);
   assert.equal(ctx.db.dados.get("mesas/m1").ocupada, false);
   assert.equal(ctx.db.dados.get("mesas/m2").ocupada, false);
+  assert.equal(ctx.db.dados.get("mesas/m1").rodadaAutoatendimento, 1);
+  assert.equal(ctx.db.dados.get("mesas/m2").rodadaAutoatendimento, 1);
   assert.equal(ctx.db.dados.get("sessoesMesa/s1").status, "encerrada");
   assert.equal(ctx.db.dados.get("chamadosMesa/a1").status, "cancelado");
   assert.equal(ctx.db.dados.get("filaCozinha/f1").status, "cancelado");

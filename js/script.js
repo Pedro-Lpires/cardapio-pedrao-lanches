@@ -1794,6 +1794,8 @@ async function buscarCliente() {
       alert(erro.message);
       return;
     }
+    if (typeof ambienteLocalSemServidorUI === "function" && ambienteLocalSemServidorUI())
+      return abrirAmbienteLocalUI("index.html");
   }
   const nome = document.getElementById("perfil-nome").value.trim();
   const telefone = limparTelefonePerfil();
@@ -3123,6 +3125,7 @@ window.addEventListener("load", async () => {
     } catch {
       return;
     }
+    if (typeof ambienteLocalSemServidorUI === "function" && ambienteLocalSemServidorUI()) return;
   }
 
   const clienteSalvo = localStorage.getItem("clientePedrao");
@@ -4193,6 +4196,8 @@ async function criarPerfilCliente() {
       alert(erro.message);
       return;
     }
+    if (typeof ambienteLocalSemServidorUI === "function" && ambienteLocalSemServidorUI())
+      return abrirAmbienteLocalUI("index.html");
   }
   const nome = document.getElementById("perfil-nome").value.trim();
   const telefone = limparTelefonePerfil();

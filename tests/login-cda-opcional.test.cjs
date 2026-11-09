@@ -105,39 +105,27 @@ async function conferir(canal, codigo, nome = "Cliente Teste") {
     assert.equal(boasVindas, 1);
     return;
   }
-  if (codigo === "CDA-CERTO") {
-    assert.deepEqual(
-      avisos.map((a) => a.personagem),
-      ["ativado", "acordo"],
-    );
-    assert.equal(
-      escritas.filter((e) => e.colecao === "clientes" && e.dados.fidelidadeAtiva).length,
-      1,
-    );
-  } else {
-    assert.equal(
-      escritas.filter((e) => e.colecao === "clientes").length,
-      0,
-      "CDA inválido não ativa benefícios",
-    );
-    assert.equal(
-      canal === "index"
-        ? ctx.clienteLogado.fidelidadeAtiva
-        : ctx.sessaoAutoatendimentoAtual.clienteLogado,
-      canal === "index" ? false : true,
-    );
-    if (codigo) {
-      assert.equal(avisos.at(-1).personagem, "codigoLogin");
-      assert.match(
-        avisos.at(-1).mensagem,
-        /Entramos na sua conta, mas o CDA informado está errado/,
-      );
-      assert.match(avisos.at(-1).mensagem, /Seria interessante você não esquecer ele!/);
-      assert.equal(boasVindas, 0, "Só um aviso, sem boas-vindas duplicadas");
-    } else assert.equal(boasVindas, 1);
-  }
+  assert.equal(escritas.filter((e) => e.colecao === "clientes").length, 0);
+  assert.equal(ctx.sessaoAutoatendimentoAtual.clienteLogado, true);
+  assert.equal(avisos.length, 0, "Login da mesa ignora qualquer CDA antigo no formulário");
+  assert.equal(boasVindas, 1);
 }
 (async () => {
+  const destinos = [];
+  const local = vm.createContext({
+    document: { addEventListener() {} },
+    window: { acessoClienteSenhaUI: { ativo: async () => false } },
+    ambienteLocalSemServidorUI: () => true,
+    abrirAmbienteLocalUI: (pagina) => destinos.push(pagina),
+    db: { collection: () => assert.fail("Live Server tentou ler contas no Firebase") },
+    alert: (msg) => assert.fail(msg),
+  });
+  local.acessoClienteSenhaUI = local.window.acessoClienteSenhaUI;
+  for (const funcao of ["buscarCliente", "criarPerfilCliente"]) {
+    carregarFuncao(local, "js/script.js", funcao);
+    await local[funcao]();
+  }
+  assert.deepEqual(destinos, ["index.html", "index.html"]);
   for (const canal of ["index", "auto"]) {
     await conferir(canal, "CDA-ERRADO");
     await conferir(canal, "");
@@ -145,7 +133,7 @@ async function conferir(canal, codigo, nome = "Cliente Teste") {
     await conferir(canal, "CDA-CERTO", "Nome errado");
   }
   console.log(
-    "PASS: delivery entra só com nome e telefone, sem campo/validação/ativação de CDA; autoatendimento mantém CDA opcional, ativação e avisos; nome errado não entra.",
+    "PASS: login do delivery e da mesa ignora CDA, preserva o cadastro e valida o nome no ambiente legado.",
   );
 })().catch((erro) => {
   console.error(erro);

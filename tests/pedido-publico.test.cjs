@@ -312,7 +312,52 @@ if (require.main === module)
         teste.servico.conferir({ pedido: entradaComRota }),
         (e) => e.status === 409,
       );
+      for (const [data, adicional] of [
+        ["2026-11-09", 0], // Segunda-feira
+        ["2026-11-14", 1], // Sábado
+        ["2026-11-15", 1], // Domingo e feriado
+        ["2026-11-20", 1], // Feriado na sexta-feira
+        ["2026-11-22", 1], // Domingo
+      ]) {
+        em = Date.parse(`${data}T19:00:00-04:00`);
+        for (const [metros, taxaBase] of [
+          [2000, 6],
+          [2010, 7],
+          [3000, 7],
+          [3010, 8],
+          [10000, 16],
+          [10010, 20.02],
+          [11000, 22],
+          [11010, 22.02],
+        ]) {
+          distancia = metros;
+          const { frete: cotacao } = await teste.servico.frete({ pedido: entregaRota });
+          const taxaEsperada = taxaBase + adicional;
+          assert.equal(cotacao.distanciaKm, metros / 1000);
+          assert.equal(cotacao.taxaEntrega, taxaEsperada, `${data}, ${metros} m`);
+          const pedidoCotado = { ...entregaRota, cotacaoFrete: cotacao.comprovante };
+          if (metros > 11000) {
+            await assert.rejects(teste.servico.conferir({ pedido: pedidoCotado }), /50,00/);
+            pedidoCotado.itens = [{ produtoId: "bagunca", quantidade: 2, tipo: "artesanal" }];
+          }
+          const { pedido: conferido } = await teste.servico.conferir({ pedido: pedidoCotado });
+          assert.equal(conferido.taxaEntrega, taxaEsperada);
+        }
+        em = Date.parse(`${data}T23:00:00-04:00`);
+        for (const [metros, taxaNoturna] of [
+          [2000, 10],
+          [3000, 12],
+          [4000, 15],
+        ]) {
+          distancia = metros;
+          const { frete: cotacao } = await teste.servico.frete({ pedido: entregaRota });
+          assert.equal(cotacao.taxaEntrega, taxaNoturna, `${data} à noite, ${metros} m`);
+        }
+        distancia = 11000;
+        await assert.rejects(teste.servico.frete({ pedido: entregaRota }), /Devido ao horário/);
+      }
       em = Date.parse("2026-11-04T03:10:00Z");
+      distancia = 3700;
       const noturno = await teste.servico.frete({ pedido: entregaRota });
       assert.equal(chamadas.at(-1).searchParams.get("mode"), "drive");
       assert.equal(noturno.frete.taxaEntrega, 15);

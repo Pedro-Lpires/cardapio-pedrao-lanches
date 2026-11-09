@@ -9,7 +9,7 @@
     <title>Painel Administrativo - Pedrão Lanches</title>
     <link rel="icon" href="images/logo-trailer.webp" />
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/admin.css?v=20261104-4" />
+    <link rel="stylesheet" href="css/paginas/admin.css?v=20261109-1" />
     <link rel="stylesheet" href="css/componentes/cupons-rank.css?v=20261102-7" />
 
     <script src="js/ui-comum.js?v=20261104-4"></script>
@@ -27,13 +27,15 @@
     <header class="admin-header">
       <h1>Administração Pedrão Lanches</h1>
       <p class="subtitulo">Pedidos, atendimento e cardápio</p>
-      <button
-        type="button"
-        class="admin-protegido-ui"
-        onclick="abrirAcessoAdministrativoProtegidoUI()"
-      >
-        Acesso de recuperação
-      </button>
+      <div class="admin-header-acoes">
+        <button
+          type="button"
+          class="admin-protegido-ui"
+          onclick="abrirAcessoAdministrativoProtegidoUI()"
+        >
+          Acesso de recuperação
+        </button>
+      </div>
     </header>
 
     <!-- MAIN — conteúdo principal -->
@@ -392,7 +394,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="js/acesso-equipe-ui.js?v=20261104-4"></script>
+    <script src="js/acesso-equipe-ui.js?v=20261109-1"></script>
 
     <script src="js/produtos.js?v=20261031-2"></script>
     <script src="js/admin.js?v=20261104-3"></script>

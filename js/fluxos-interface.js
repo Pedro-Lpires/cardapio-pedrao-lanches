@@ -403,17 +403,21 @@ function montarCheckoutUI() {
       area = document.getElementById("area-perfil");
     const acoes = document.createElement("div");
     acoes.className = "perfil-edicao-acoes";
+    const secundarias = document.createElement("div");
+    secundarias.className = "perfil-edicao-secundarias";
+    secundarias.hidden = true;
+    secundarias.append(enderecoBtn);
     formulario.append(acoes);
-    acoes.append(document.getElementById("btn-entrar-perfil"), enderecoBtn);
+    acoes.append(document.getElementById("btn-entrar-perfil"), secundarias);
     const privacidadeCadastro = formulario.querySelector("#privacidade-cadastro-delivery-ui");
     if (privacidadeCadastro) formulario.append(privacidadeCadastro);
     const modoOriginal = abrirPerfilModo;
     window.abrirPerfilModo = (modo) => {
       area.replaceChildren();
-      enderecoBtn.hidden = modo !== "editar";
+      acoes.dataset.modo = modo;
+      secundarias.hidden = modo !== "editar";
       return modoOriginal(modo);
     };
-    enderecoBtn.hidden = true;
     const enderecosOriginal = abrirEnderecosCliente;
     window.abrirEnderecosCliente = async (...args) => {
       abrirJanelaElementoUI(area, "Seus endereços");
@@ -448,46 +452,12 @@ function montarCheckoutUI() {
   modal.append(modal.querySelector(".acoes-carrinho"));
 }
 let modoContaAutoUI = "escolha";
-async function buscarContaPorCodigoAutoUI(banco, codigo) {
-  const resultado = await banco
-    .collection("clientes")
-    .where("codigoAtivacao", "==", codigo.trim())
-    .limit(2)
-    .get();
-  if (resultado.docs.length !== 1)
-    throw Error(
-      resultado.docs.length
-        ? "Este código está vinculado a mais de uma conta. Procure o atendimento."
-        : "Código de ativação não encontrado.",
-    );
-  const doc = resultado.docs[0],
-    cliente = doc.data(),
-    telefone = String(cliente.telefone || doc.id).replace(/\D/g, "");
-  if (!cliente.nome || telefone.length !== 11)
-    throw Error("Cadastro incompleto. Procure o atendimento.");
-  return { nome: cliente.nome, telefone };
-}
 async function entrarContaAutoUI() {
-  const codigo = document.getElementById("login-auto-codigo").value.trim(),
-    status = document.getElementById("status-login-auto"),
+  const status = document.getElementById("status-login-auto"),
     botao = document.getElementById("auto-confirmar-conta");
   status.textContent = "";
   botao.disabled = true;
   try {
-    if (
-      typeof acessoClienteSenhaUI !== "undefined" &&
-      (await window.acessoClienteSenhaUI.ativo())
-    ) {
-      await entrarClienteAutoatendimento();
-      return;
-    }
-    const nome = document.getElementById("login-auto-nome").value.trim();
-    const telefone = document.getElementById("login-auto-telefone").value.replace(/\D/g, "");
-    if (codigo && !(nome && telefone.length === 11)) {
-      const conta = await buscarContaPorCodigoAutoUI(db, codigo);
-      document.getElementById("login-auto-nome").value = conta.nome;
-      document.getElementById("login-auto-telefone").value = conta.telefone;
-    }
     await entrarClienteAutoatendimento();
   } catch (e) {
     status.textContent = e.message;
@@ -504,7 +474,6 @@ function mostrarModoContaAutoUI(modo) {
   m.querySelector("#auto-form-conta").hidden = modo === "escolha";
   m.querySelector("#auto-voltar-escolha").hidden = modo === "escolha";
   m.querySelector("#auto-form-conta h3").textContent = modo === "criar" ? "Criar login" : "Login";
-  m.querySelector("#auto-grupo-codigo").hidden = modo === "criar";
   m.querySelector("#auto-confirmar-conta").textContent =
     modo === "criar" ? "Criar login" : "Entrar";
   const avisoPrivacidade = m.querySelector("#privacidade-cadastro-auto-ui");
@@ -555,7 +524,6 @@ async function criarContaAutoUI() {
         criadoEm: Date.now(),
       });
     });
-    document.getElementById("login-auto-codigo").value = "";
     await entrarClienteAutoatendimento();
   } catch (e) {
     status.textContent = e.message;
@@ -564,13 +532,7 @@ async function criarContaAutoUI() {
 function montarContaAutoUI() {
   const modal = document.querySelector("#modal-login-auto .modal-conteudo");
   if (!modal) return;
-  const ids = [
-    "login-auto-nome",
-    "login-auto-telefone",
-    "login-auto-codigo",
-    "login-auto-salvar",
-    "status-login-auto",
-  ];
+  const ids = ["login-auto-nome", "login-auto-telefone", "login-auto-salvar", "status-login-auto"];
   const campos = Object.fromEntries(ids.map((id) => [id, document.getElementById(id)]));
   const x = modal.querySelector(".btn-fechar-modal-auto");
   modal.replaceChildren(x);
@@ -588,13 +550,6 @@ function montarContaAutoUI() {
     l.append(campos[id]);
     form.append(l);
   }
-  const cod = document.createElement("div");
-  cod.id = "auto-grupo-codigo";
-  cod.innerHTML =
-    '<div class="auto-ou">ou</div><label for="login-auto-codigo">Código de ativação</label>';
-  cod.append(campos["login-auto-codigo"]);
-  campos["login-auto-codigo"].placeholder = "Entre somente com seu código";
-  form.append(cod);
   const salvar = document.createElement("label");
   salvar.className = "auto-lembrar";
   salvar.append(campos["login-auto-salvar"], document.createTextNode(" Lembrar neste dispositivo"));
@@ -639,4 +594,4 @@ document.addEventListener("DOMContentLoaded", () => {
   const concluidos = document.querySelector(".cozinha-body details");
   if (concluidos) document.querySelector(".cozinha-body>header").append(concluidos);
 });
-if (typeof module !== "undefined") module.exports = { semanasDoMesUI, buscarContaPorCodigoAutoUI };
+if (typeof module !== "undefined") module.exports = { semanasDoMesUI };

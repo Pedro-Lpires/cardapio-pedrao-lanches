@@ -202,7 +202,9 @@ async function iniciarAcessoPaginaEquipeUI(pagina = location.pathname.split("/")
       sair.className = "acesso-equipe-sair-ui";
       sair.textContent = "Sair do acesso protegido";
       sair.onclick = sairOperacaoProtegidaUI;
-      (document.querySelector(".admin-header") || document.querySelector("main")).append(sair);
+      (document.querySelector(".admin-header-acoes") || document.querySelector("main")).append(
+        sair,
+      );
     }
     if (pagina === "cozinha.html" && !localStorage.getItem("funcionarioSalvoPedrao")) {
       const monitor = document.querySelector('a[href="cozinha.html?modo=monitor"]');

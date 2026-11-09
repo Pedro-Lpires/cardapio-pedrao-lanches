@@ -10,8 +10,8 @@ function mostrarAmbienteLocalUI(container, pagina) {
   const destino =
     pagina === "autoatendimento.html"
       ? pagina + location.search
-      : pagina === "atendente.html"
-        ? "atendente.html"
+      : ["index.html", "atendente.html"].includes(pagina)
+        ? pagina
         : "admin.html";
   const caixa = document.createElement("section");
   caixa.className = "ambiente-local-ui";
@@ -25,12 +25,22 @@ function mostrarAmbienteLocalUI(container, pagina) {
   caixa.querySelector("[data-previa]").href = previa.href;
   container.replaceChildren(caixa);
 }
-function abrirAmbienteLocalEquipeUI(pagina = "admin.html") {
+function abrirAmbienteLocalUI(pagina) {
   if (document.querySelector("dialog.ambiente-local-janela-ui")) return;
   const janela = document.createElement("dialog");
   janela.className = "ambiente-local-janela-ui";
   mostrarAmbienteLocalUI(janela, pagina);
-  janela.addEventListener("cancel", (e) => e.preventDefault());
+  if (pagina === "index.html") {
+    const voltar = document.createElement("button");
+    voltar.type = "button";
+    voltar.textContent = "Voltar";
+    voltar.onclick = () => janela.close();
+    janela.querySelector(".ambiente-local-ui").append(voltar);
+  } else janela.addEventListener("cancel", (e) => e.preventDefault());
+  janela.addEventListener("close", () => janela.remove(), { once: true });
   document.body.append(janela);
   janela.showModal();
+}
+function abrirAmbienteLocalEquipeUI(pagina = "admin.html") {
+  abrirAmbienteLocalUI(pagina);
 }

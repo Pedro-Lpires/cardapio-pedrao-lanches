@@ -337,7 +337,7 @@ function instalarNavegacaoAtendenteUI() {
         itens: [],
         valorTotal: 0,
       });
-      b.update(mesa.ref, { ocupada: true });
+      b.update(mesa.ref, { ocupada: true, ultimaComandaAbertaId: ref.id });
       await b.commit();
       await abrirComandaVisual(ref.id);
     } catch (e) {

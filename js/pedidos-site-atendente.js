@@ -518,7 +518,7 @@ async function vincularPedidoLocalTransacaoUI(pedidoId, mesaId, comandaId = null
         pedidoOrigemNumero: pedido.numero || null,
       });
     t.set(comandaRef, patch, { merge: true });
-    t.update(mesaRef, { ocupada: true });
+    t.update(mesaRef, { ocupada: true, ultimaComandaAbertaId: comandaRef.id });
     t.update(pedidoRef, {
       itens: itensPedido,
       itensAntesVinculo: pedido.itens || [],

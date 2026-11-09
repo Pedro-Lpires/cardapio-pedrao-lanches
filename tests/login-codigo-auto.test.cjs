@@ -1,91 +1,57 @@
-const fs = require("fs"),
-  vm = require("vm"),
-  assert = require("node:assert/strict");
-const campos = Object.fromEntries(
-  [
-    "login-auto-nome",
-    "login-auto-telefone",
-    "login-auto-codigo",
-    "status-login-auto",
-    "auto-confirmar-conta",
-  ].map((id) => [id, { value: "", textContent: "", disabled: false }]),
-);
-let documentos = [],
-  consultas = 0,
-  entradas = 0;
-const avisos = [];
-const db = {
-  collection(nome) {
-    assert.equal(nome, "clientes");
-    return {
-      where(campo, op, codigo) {
-        consultas++;
-        assert.equal(campo, "codigoAtivacao");
-        assert.equal(op, "==");
-        assert.equal(codigo, "TESTE-123");
-        return {
-          limit(n) {
-            assert.equal(n, 2);
-            return {
-              async get() {
-                return { docs: documentos };
-              },
-            };
-          },
-        };
-      },
-    };
-  },
+const fs = require("node:fs");
+const vm = require("node:vm");
+const assert = require("node:assert/strict");
+
+const campos = {
+  "login-auto-nome": { value: "Cliente fictício" },
+  "login-auto-telefone": { value: "(65) 99999-9999" },
+  "login-auto-senha-protegida": { value: "senha-de-teste" },
+  "login-auto-salvar": { checked: true },
+  "status-login-auto": {},
+  "auto-confirmar-conta": {},
 };
-const ctx = vm.createContext({
-  console,
-  mostrarAvisoUI: (mensagem) => avisos.push(mensagem),
+let credenciais,
+  vinculou = false;
+const contexto = vm.createContext({
+  sessaoAutoatendimentoAtual: { id: "visita-teste" },
   document: { addEventListener() {}, getElementById: (id) => campos[id] },
-  db,
-  async entrarClienteAutoatendimento() {
-    entradas++;
-    assert.equal(campos["login-auto-nome"].value, "Cliente fictício");
-    assert.equal(campos["login-auto-telefone"].value, "65999999999");
+  acessoClienteSenhaUI: {
+    ativo: async () => true,
+    entrar: async (dados) => {
+      credenciais = { ...dados };
+      return { nome: "Cliente fictício", telefone: "65999999999" };
+    },
   },
+  mesaProtegidaUI: { ativo: async () => true },
+  vincularClienteMesaProtegidaUI: async () => {
+    vinculou = true;
+  },
+  alert: (msg) => assert.fail(msg),
 });
-vm.runInContext(fs.readFileSync("js/fluxos-interface.js", "utf8"), ctx);
+contexto.window = contexto;
+const fonte = fs.readFileSync("js/autoatendimento.js", "utf8");
+vm.runInContext(
+  fonte.slice(
+    fonte.indexOf("async function entrarClienteAutoatendimento("),
+    fonte.indexOf("function atualizarAvataresContaAutoUI("),
+  ),
+  contexto,
+);
+vm.runInContext(fs.readFileSync("js/fluxos-interface.js", "utf8"), contexto);
 (async () => {
-  campos["login-auto-codigo"].value = " TESTE-123 ";
-  documentos = [
-    { id: "65999999999", data: () => ({ nome: "Cliente fictício", telefone: "(65) 99999-9999" }) },
-  ];
-  await ctx.entrarContaAutoUI();
-  assert.equal(entradas, 1);
+  assert.doesNotMatch(fs.readFileSync("autoatendimento.html", "utf8"), /id="login-auto-codigo"/);
+  await contexto.entrarContaAutoUI();
+  assert.deepEqual(credenciais, {
+    nome: "Cliente fictício",
+    telefone: "65999999999",
+    senha: "senha-de-teste",
+    lembrar: true,
+  });
+  assert.equal(vinculou, true);
+  assert.equal(campos["login-auto-senha-protegida"].value, "");
   assert.equal(campos["auto-confirmar-conta"].disabled, false);
-  documentos = [];
-  campos["login-auto-nome"].value = "";
-  campos["login-auto-telefone"].value = "";
-  await ctx.entrarContaAutoUI();
-  assert.equal(entradas, 1);
-  assert.match(campos["status-login-auto"].textContent, /não encontrado/);
-  assert.match(avisos.at(-1), /Código de ativação não encontrado/);
-  documentos = [{ data: () => ({}) }, { data: () => ({}) }];
-  await ctx.entrarContaAutoUI();
-  assert.equal(entradas, 1);
-  assert.match(campos["status-login-auto"].textContent, /mais de uma conta/);
-  campos["login-auto-codigo"].value = "";
-  campos["login-auto-nome"].value = "Cliente fictício";
-  campos["login-auto-telefone"].value = "65999999999";
-  await ctx.entrarContaAutoUI();
-  assert.equal(entradas, 2);
-  assert.equal(consultas, 3);
-  campos["login-auto-codigo"].value = "CDA-ERRADO";
-  await ctx.entrarContaAutoUI();
-  assert.equal(entradas, 3);
-  assert.equal(
-    consultas,
-    3,
-    "Nome e telefone completos seguem para validação, sem depender do CDA",
-  );
-  console.log(
-    "PASS: código sozinho recupera a conta; inválido/duplicado não entra; nome e celular continuam funcionando sem código.",
-  );
-})().catch((e) => {
-  console.error(e);
+  console.log("PASS: login da mesa envia celular e senha, sem CDA, e vincula a conta à visita.");
+})().catch((erro) => {
+  console.error(erro);
   process.exitCode = 1;
 });

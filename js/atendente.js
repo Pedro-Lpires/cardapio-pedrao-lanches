@@ -4303,7 +4303,9 @@ async function novaComandaMesa(mesaId) {
 
   const atendenteNome = localStorage.getItem("atendenteNome");
 
-  await db.collection("comandas").add({
+  const refComanda = db.collection("comandas").doc();
+  const batch = db.batch();
+  batch.set(refComanda, {
     cliente: nomeCliente,
 
     mesa: mesa.numero,
@@ -4321,9 +4323,11 @@ async function novaComandaMesa(mesaId) {
     valorTotal: 0,
   });
 
-  await db.collection("mesas").doc(mesaId).update({
+  batch.update(mesaDoc.ref, {
     ocupada: true,
+    ultimaComandaAbertaId: refComanda.id,
   });
+  await batch.commit();
 
   areaConsumoLocalRecarregar();
 
@@ -6184,24 +6188,9 @@ async function confirmarPagamentoTudoJunto(comandaId, total) {
   cuponsPagamentoAtendenteAtuais = [];
 
   // =========================
-  // VER OUTRAS COMANDAS
-  // =========================
-
-  const outrasComandas = await db
-    .collection("comandas")
-    .where("mesa", "==", comanda.mesa)
-    .where("status", "==", "Aberta")
-    .get();
-
-  // =========================
   // LIBERAR MESA
   // =========================
-
-  if (outrasComandas.empty && mesaAbertaAtual) {
-    await db.collection("mesas").doc(mesaAbertaAtual).update({
-      ocupada: false,
-    });
-  }
+  await liberarMesaSemComandasAbertasOperacao(comanda.mesaId || mesaAbertaAtual, comanda.mesa);
 
   // =========================
   // LIMPAR ESTADOS
@@ -8268,19 +8257,8 @@ async function confirmarPagamentoSeparado(comandaId, total) {
   // VERIFICAR A MESA
   // =========================
 
-  if (totalmentePaga) {
-    const outrasComandas = await db
-      .collection("comandas")
-      .where("mesa", "==", comanda.mesa)
-      .where("status", "==", "Aberta")
-      .get();
-
-    if (outrasComandas.empty && mesaAbertaAtual) {
-      await db.collection("mesas").doc(mesaAbertaAtual).update({
-        ocupada: false,
-      });
-    }
-  }
+  if (totalmentePaga)
+    await liberarMesaSemComandasAbertasOperacao(comanda.mesaId || mesaAbertaAtual, comanda.mesa);
 
   // =========================
   // LIMPAR ESTADOS

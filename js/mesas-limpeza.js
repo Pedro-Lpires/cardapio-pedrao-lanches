@@ -1,3 +1,24 @@
+function dadosLiberacaoMesaOperacao(mesa) {
+  return { ocupada: false, rodadaAutoatendimento: (mesa.rodadaAutoatendimento ?? 0) + 1 };
+}
+
+async function liberarMesaSemComandasAbertasOperacao(mesaId, numero) {
+  if (!mesaId) return;
+  const ref = db.collection("mesas").doc(mesaId);
+  await db.runTransaction(async (t) => {
+    // Cada nova comanda atualiza a mesa junto com a abertura, fazendo o fechamento reler a fila.
+    const mesa = (await t.get(ref)).data();
+    if (!mesa?.ocupada || Number(mesa.numero) !== Number(numero)) return;
+    const abertas = await db
+      .collection("comandas")
+      .where("mesa", "==", numero)
+      .where("status", "==", "Aberta")
+      .limit(1)
+      .get({ source: "server" });
+    if (abertas.empty) t.update(ref, dadosLiberacaoMesaOperacao(mesa));
+  });
+}
+
 /* Cancelamento sem finalizar venda. Pagamentos existentes continuam no histórico. */
 async function cancelarComandasMesasOperacao({
   comandaId = "",
@@ -82,11 +103,10 @@ async function cancelarComandasMesasOperacao({
       },
     }));
     for (const mesa of liberar) {
-      if (mesa.data().ocupada)
-        alteracoes.push({
-          ref: db.collection("mesas").doc(mesa.id),
-          dados: { ocupada: false, limpaEm: agora },
-        });
+      alteracoes.push({
+        ref: db.collection("mesas").doc(mesa.id),
+        dados: { ...dadosLiberacaoMesaOperacao(mesa.data()), limpaEm: agora },
+      });
     }
     for (const { colecao, ref, doc } of documentos) {
       if (!doc.exists) continue;

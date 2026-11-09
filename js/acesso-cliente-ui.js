@@ -105,7 +105,7 @@ function criarAcessoClienteUI({
       } catch {
         await auth.signOut().catch(() => {});
         throw Error(
-          "Celular ou código e senha não conferem. Se esqueceu a senha, peça ajuda à loja.",
+          `${!telefone && codigo ? "Código" : "Celular"} e senha não conferem. Se esqueceu a senha, peça ajuda à loja.`,
         );
       }
     },
@@ -393,8 +393,12 @@ function montarCamposSenhaClienteUI(canal) {
   const base = delivery
     ? document.getElementById("perfil-telefone")
     : document.getElementById("login-auto-telefone")?.closest("label");
+  const confirmar = document.getElementById(
+    delivery ? "btn-entrar-perfil" : "auto-confirmar-conta",
+  );
   if (
     !base ||
+    !confirmar ||
     document.getElementById(delivery ? "perfil-senha-protegida" : "login-auto-senha-protegida")
   )
     return;
@@ -403,6 +407,8 @@ function montarCamposSenhaClienteUI(canal) {
   const prefixo = delivery ? "perfil" : "login-auto";
   grupo.innerHTML = `<label for="${prefixo}-senha-protegida">Senha<input id="${prefixo}-senha-protegida" type="password" maxlength="128" autocomplete="current-password"></label><a data-recuperar-senha href="https://wa.me/5565992386045?text=Ol%C3%A1%2C%20esqueci%20minha%20senha%20do%20Pedr%C3%A3o.%20Preciso%20de%20um%20link%20de%20recupera%C3%A7%C3%A3o." target="_blank" rel="noopener noreferrer">Esqueci minha senha</a>`;
   base.after(grupo);
+  const recuperar = grupo.querySelector("[data-recuperar-senha]");
+  (confirmar.closest(".perfil-edicao-acoes") || confirmar).after(recuperar);
   let alterar;
   if (delivery) {
     alterar = document.createElement("button");
@@ -411,13 +417,15 @@ function montarCamposSenhaClienteUI(canal) {
     alterar.className = "cliente-alterar-senha-botao-ui";
     alterar.onclick = abrirAlteracaoSenhaClienteUI;
     alterar.hidden = true;
-    document.getElementById("btn-entrar-perfil").after(alterar);
+    const secundarias = document.querySelector(".perfil-edicao-secundarias");
+    if (secundarias) secundarias.prepend(alterar);
+    else confirmar.after(alterar);
   }
   const ajustar = (modo) => {
     if (alterar) alterar.hidden = modo !== "editar" || !clienteLogado?.authUid;
     const criando = modo === "cadastro" || modo === "criar";
     grupo.hidden = !["login", "cadastro", "criar"].includes(modo);
-    grupo.querySelector("[data-recuperar-senha]").hidden = criando;
+    recuperar.hidden = modo !== "login";
     const campo = document.getElementById(prefixo + "-senha-protegida");
     campo.autocomplete = criando ? "new-password" : "current-password";
     campo.minLength = criando ? 8 : 0;

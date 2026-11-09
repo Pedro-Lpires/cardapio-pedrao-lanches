@@ -2212,105 +2212,6 @@ function adicionarProdutoCarrinhoAuto() {
     return;
   }
 }
-function montarDetalhesComboResumoAuto(item) {
-  if (item.categoria !== "combos") {
-    return "";
-  }
-
-  const lanches = item.lanchesCombo || [];
-
-  if (lanches.length === 0) {
-    return "";
-  }
-
-  let html = `
-
-        <div
-            style="
-                margin-top:10px;
-                padding-left:10px;
-            "
-        >
-
-    `;
-
-  lanches.forEach((lanche) => {
-    const adicionais = lanche.adicionais || [];
-
-    const observacao = lanche.observacao || "";
-
-    html += `
-
-                <div
-                    style="
-                        margin-bottom:10px;
-                    "
-                >
-
-                    <strong>
-                        Lanche ${lanche.numero}
-                    </strong>
-
-            `;
-
-    // =========================
-    // PADRÃO
-    // =========================
-
-    if (adicionais.length === 0 && !observacao) {
-      html += `
-
-                    <br>
-                    Padrão
-
-                `;
-    }
-
-    // =========================
-    // ADICIONAIS
-    // =========================
-
-    adicionais.forEach((adicional) => {
-      html += `
-
-                        <br>
-
-                        + ${adicional.qtd}
-                        ${adicional.nome}
-
-                    `;
-    });
-
-    // =========================
-    // OBSERVAÇÃO
-    // =========================
-
-    if (observacao) {
-      html += `
-
-                    <br>
-
-                    Obs:
-                    ${observacao}
-
-                `;
-    }
-
-    html += `
-
-                </div>
-
-            `;
-  });
-
-  html += `
-
-        </div>
-
-    `;
-
-  return html;
-}
 function abrirResumoPedidoAuto() {
   if (carrinhoAutoatendimento.length === 0) {
     alert("Seu pedido está vazio.");
@@ -2345,7 +2246,7 @@ function abrirResumoPedidoAuto() {
     const adicionaisTexto = (item.adicionais || [])
       .map((adicional) => `+ ${adicional.qtd} ${adicional.nome}`)
       .join("<br>");
-    const detalhesCombo = montarDetalhesComboResumoAuto(item);
+    const detalhesCombo = item.categoria === "combos" ? detalhesLanchesComboOperacao(item) : "";
 
     html += `<article class="resumo-auto-item"><div class="resumo-auto-item-topo"><strong>${Number(item.quantidade || 1)} ${escaparOperacao(item.nome)}</strong><strong class="resumo-auto-preco">${moedaOperacao(item.subtotal || 0)}</strong></div>${item.tipo ? '<p class="resumo-auto-tipo">' + escaparOperacao(item.tipo) + "</p>" : ""}${adicionaisTexto ? '<div class="resumo-auto-extras">' + adicionaisTexto + "</div>" : ""}${detalhesCombo}${item.observacao ? "<p>" + (item.categoria === "combos" ? "Obs. geral: " : "Obs.: ") + escaparOperacao(item.observacao) + "</p>" : ""}<div class="resumo-auto-acoes"><button type="button" onclick="editarItemCarrinhoAuto(${index})">Editar</button><button type="button" onclick="removerItemCarrinhoAuto(${index})">Remover</button></div></article>`;
   });
@@ -3166,16 +3067,10 @@ async function abrirLoginAutoatendimento() {
 
   const telefoneInput = document.getElementById("login-auto-telefone");
 
-  const codigoInput = document.getElementById("login-auto-codigo");
-
   const status = document.getElementById("status-login-auto");
 
   if (status) {
     status.innerHTML = "";
-  }
-
-  if (codigoInput) {
-    codigoInput.value = "";
   }
 
   // =====================================================
@@ -3748,7 +3643,6 @@ async function entrarClienteAutoatendimento(clienteAutenticado = null) {
             nome: document.getElementById("login-auto-nome")?.value.trim() || "",
             telefone:
               document.getElementById("login-auto-telefone")?.value.replace(/\D/g, "") || "",
-            codigo: document.getElementById("login-auto-codigo")?.value.trim() || "",
             senha: document.getElementById("login-auto-senha-protegida")?.value || "",
             lembrar: document.getElementById("login-auto-salvar")?.checked === true,
           });
@@ -3781,8 +3675,6 @@ async function entrarClienteAutoatendimento(clienteAutenticado = null) {
 
   const telefone =
     document.getElementById("login-auto-telefone")?.value.replace(/\D/g, "").slice(0, 11) || "";
-
-  const codigo = document.getElementById("login-auto-codigo")?.value.trim() || "";
 
   const salvarLogin = document.getElementById("login-auto-salvar")?.checked === true;
 
@@ -3842,26 +3734,6 @@ async function entrarClienteAutoatendimento(clienteAutenticado = null) {
       alert("Nome e telefone não conferem com o cadastro.");
 
       return;
-    }
-
-    // =====================================================
-    // CÓDIGO DE ATIVAÇÃO OPCIONAL
-    // =====================================================
-
-    const codigoIncorreto = Boolean(codigo && codigo !== cliente.codigoAtivacao);
-    const ativouCda = Boolean(codigo && !codigoIncorreto && !cliente.fidelidadeAtiva);
-    if (ativouCda) {
-      await clienteRef.update({
-        fidelidadeAtiva: true,
-        nivelCliente: nivelFidelidadeOperacao(cliente, true),
-
-        ativadoEm: new Date().toISOString(),
-
-        totalFidelidade: Number(cliente.totalFidelidade || 0),
-      });
-
-      cliente.fidelidadeAtiva = true;
-      cliente.nivelCliente = nivelFidelidadeOperacao(cliente);
     }
 
     // =====================================================
@@ -4007,13 +3879,7 @@ async function entrarClienteAutoatendimento(clienteAutenticado = null) {
 
     fecharLoginAutoatendimento();
 
-    if (codigoIncorreto)
-      alert(
-        "Entramos na sua conta, mas o CDA informado está errado. Seria interessante você não esquecer ele!",
-        "codigoLogin",
-      );
-    else if (ativouCda) mostrarAtivacaoCdaPedraoUI();
-    else mostrarBoasVindasUI(nomeConta);
+    mostrarBoasVindasUI(nomeConta);
     if (typeof acompanharBeneficiosClientePedraoUI === "function")
       acompanharBeneficiosClientePedraoUI({ ...cliente, telefone }, atualizarAvataresContaAutoUI);
   } catch (erro) {
