@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const { criarFreteRota, criarLimitadorFreteRota } = require("../api/_lib/frete-rota.cjs");
 const {
   criarServicoPedidoPublico,
   taxaPedido,
@@ -6,7 +7,7 @@ const {
   pontoPedido,
 } = require("../api/_lib/pedido-publico.cjs");
 const copia = (v) => (v === undefined ? undefined : structuredClone(v));
-function fixture({ agora = () => Date.parse("2026-11-03T18:00:00Z") } = {}) {
+function fixture({ agora = () => Date.parse("2026-11-03T18:00:00Z"), rotasEntrega } = {}) {
   const registros = new Map([
     ["config/loja", { aberta: true }],
     [
@@ -122,6 +123,7 @@ function fixture({ agora = () => Date.parse("2026-11-03T18:00:00Z") } = {}) {
     auth,
     siteUrl: "https://pedrao.exemplo/",
     agora,
+    rotasEntrega,
     consumirTentativa: async () => {
       if (limitado) throw Object.assign(Error("Limite"), { status: 429 });
     },
@@ -238,6 +240,94 @@ if (require.main === module)
     f = fixture();
     f.limitar();
     await assert.rejects(salvar(f, pedido()), (e) => e.status === 429);
+    f = fixture();
+    const semEnderecoEscrito = {
+      ...pedido(),
+      tipo: "Entrega",
+      areaUrbanaConfirmada: true,
+      localizacao: "https://www.google.com/maps?q=-15.560671,-56.0802923",
+    };
+    const apenasGps = await salvar(f, semEnderecoEscrito);
+    assert.equal(apenasGps.pedido.endereco, "", "Endereço escrito é opcional também na gravação");
+    assert.equal(
+      new URL(apenasGps.pedido.localizacao).searchParams.get("p"),
+      "-15.560671,-56.0802923",
+    );
+    assert(apenasGps.pedido.id, "Entrega com GPS e sem endereço escrito é salva");
+    await assert.rejects(
+      fixture().servico.conferir({ pedido: { ...semEnderecoEscrito, localizacao: "" } }),
+      /localização/,
+      "O GPS válido continua obrigatório",
+    );
+    {
+      let em = Date.parse("2026-11-03T18:00:00Z");
+      let consultas = 0;
+      let distancia = 3700;
+      const chamadas = [];
+      const rotasEntrega = criarFreteRota({
+        apiKey: "chave-ficticia",
+        chave: Buffer.alloc(32, 42),
+        consumirConsulta: async () => {
+          consultas++;
+        },
+        fetchHttp: async (url) => {
+          chamadas.push(url);
+          return {
+            ok: distancia !== null,
+            json: async () => ({ features: [{ properties: { distance: distancia } }] }),
+          };
+        },
+      });
+      const teste = fixture({ rotasEntrega, agora: () => em });
+      const localizacao = "https://www.google.com/maps?q=-15.5776,-56.056";
+      const entregaRota = { ...semEnderecoEscrito, localizacao };
+      await assert.rejects(
+        teste.servico.frete({ pedido: { localizacao } }),
+        (e) => e.status === 400,
+      );
+      const { frete } = await teste.servico.frete({ pedido: entregaRota });
+      assert.equal(chamadas[0].origin, "https://api.geoapify.com");
+      assert.equal(chamadas[0].searchParams.get("mode"), "motorcycle");
+      assert.equal(chamadas[0].searchParams.get("units"), "metric");
+      assert.deepEqual(
+        [...chamadas[0].searchParams.keys()],
+        ["waypoints", "mode", "format", "units", "apiKey"],
+      );
+      assert.equal(frete.distanciaKm, 3.7);
+      assert.equal(frete.taxaEntrega, 8);
+      const entradaComRota = { ...entregaRota, cotacaoFrete: frete.comprovante, distanciaKm: 2.73 };
+      for (const entrada of [
+        entregaRota,
+        { ...entradaComRota, localizacao: "https://www.google.com/maps?q=-15.58,-56.056" },
+        { ...entradaComRota, cotacaoFrete: frete.comprovante.replace(":3700:", ":2700:") },
+      ])
+        await assert.rejects(teste.servico.conferir({ pedido: entrada }), (e) => e.status === 409);
+      const resultado = await salvar(teste, entradaComRota);
+      assert.equal(resultado.pedido.distanciaKm, 3.7);
+      assert.equal(resultado.pedido.taxaEntrega, 8);
+      assert.equal(resultado.pedido.cotacaoFrete, undefined);
+      assert.equal(consultas, 1, "Conferir e salvar reutilizam a rota validada");
+      em += 15 * 60_000;
+      await assert.rejects(
+        teste.servico.conferir({ pedido: entradaComRota }),
+        (e) => e.status === 409,
+      );
+      em = Date.parse("2026-11-04T03:10:00Z");
+      const noturno = await teste.servico.frete({ pedido: entregaRota });
+      assert.equal(chamadas.at(-1).searchParams.get("mode"), "drive");
+      assert.equal(noturno.frete.taxaEntrega, 15);
+      distancia = 4100;
+      await assert.rejects(teste.servico.frete({ pedido: entregaRota }), /Devido ao horário/);
+      distancia = null;
+      await assert.rejects(teste.servico.frete({ pedido: entregaRota }), (e) => e.status === 503);
+      const limitar = criarLimitadorFreteRota(teste.db);
+      teste.registros.set("config/usoFreteRotas", { dia: "2026-11-04", quantidade: 2499 });
+      const tentativas = await Promise.allSettled([limitar(em), limitar(em)]);
+      assert.equal(tentativas[0].status, "fulfilled");
+      assert.equal(tentativas[1].reason.status, 429);
+      await limitar(em + 86_400_000);
+      assert.equal(teste.registros.get("config/usoFreteRotas").quantidade, 1);
+    }
     f = fixture();
     entrada = {
       ...pedido(),

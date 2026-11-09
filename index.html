@@ -217,10 +217,6 @@
               inputmode="numeric"
               maxlength="11"
             />
-            <p class="aviso-privacidade-ui">
-              Seus dados serão usados para atender seu pedido.
-              <a href="privacidade.html" data-privacidade-ui>Privacidade</a>
-            </p>
           </div>
           <label class="observacao-pedido-ui" for="observacao"
             >Observação do pedido (opcional)</label
@@ -242,6 +238,14 @@
             <div id="detalhe-valores">
               <p>Subtotal: <span id="resumo-subtotal">R$ 0,00</span></p>
               <p>Taxa de Entrega: <span id="resumo-taxa">R$ 0,00</span></p>
+              <small id="frete-rota-atribuicao" hidden>
+                <span id="frete-rota-km"></span> por
+                <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a>
+                · ©
+                <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener"
+                  >OpenStreetMap contributors</a
+                >
+              </small>
               <p>
                 Molhos pagos:
                 <span id="linha-molhos-pagos"> R$ 0,00 </span>
@@ -719,7 +723,7 @@
     <script src="js/personagens-ui.js?v=20261102-10"></script>
     <script src="js/loja-publica-ui.js?v=20261104-5"></script>
     <script src="js/regras-entrega.js?v=20261104-1"></script>
-    <script src="js/script.js?v=20261104-5"></script>
+    <script src="js/script.js?v=20261109-1"></script>
     <script src="js/mensagens-tempo-real-ui.js?v=20261025-2"></script>
     <script src="js/beneficios-entrega.js?v=20261104-3"></script>
     <script src="js/rank-mensal.js?v=20261104-3"></script>
@@ -729,7 +733,7 @@
     <script src="js/app-ui.js?v=20261104-3"></script>
     <script src="js/raspadinhas-recuperacao.js?v=20261025-2"></script>
     <script src="js/raspadinhas.js?v=20261025-2"></script>
-    <script src="js/fluxos-interface.js?v=20261105-2"></script>
+    <script src="js/fluxos-interface.js?v=20261105-7"></script>
     <script src="js/janelas-fluxos.js?v=20261104-3"></script>
     <script src="js/combos-site-ui.js?v=20261102-6"></script>
     <script src="js/editor-pedido-ui.js?v=20261102-4"></script>
@@ -737,10 +741,10 @@
     <script src="js/carrinho-edicao-ui.js?v=20261031-2"></script>
     <script src="js/whatsapp-pedido-ui.js?v=20261104-4"></script>
     <script src="js/beneficios-pedido.js?v=20261101-2"></script>
-    <script src="js/beneficios-delivery-ui.js?v=20261104-4"></script>
+    <script src="js/beneficios-delivery-ui.js?v=20261109-1"></script>
     <link rel="stylesheet" href="css/componentes/acesso-cliente.css?v=20261105-4" />
     <script src="js/acesso-cliente-ui.js?v=20261105-3"></script>
-    <script src="js/checkout-protegido-ui.js?v=20261104-4"></script>
+    <script src="js/checkout-protegido-ui.js?v=20261109-1"></script>
     <script src="js/privacidade-ui.js?v=20261104-1"></script>
   </body>
 </html>

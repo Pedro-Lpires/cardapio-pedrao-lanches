@@ -203,6 +203,40 @@ async function testar() {
   assert.equal(r.revisoes[0][2], 24);
   assert.equal(r.revisoes[0][8], true);
   assert(r.avisos.some((a) => a.personagem === "entregaDistante"));
+  const porRota = contexto();
+  let resolverRota, iniciouRota;
+  let carregando = false;
+  const esperandoRota = new Promise((resolver) => (iniciouRota = resolver));
+  porRota.ctx.iniciarCarregamentoUI = () => {
+    carregando = true;
+    return () => (carregando = false);
+  };
+  porRota.ctx.calcularDistancia = () => assert.fail("O frete por rota não usa linha reta");
+  porRota.ctx.checkoutProtegidoUI = {
+    cotarFrete: () =>
+      new Promise((resolver) => {
+        resolverRota = resolver;
+        iniciouRota();
+      }),
+  };
+  const fluxo = porRota.ctx.finalizarPedido();
+  await esperandoRota;
+  assert.equal(carregando, true);
+  await porRota.ctx.finalizarPedido();
+  assert.equal(porRota.gps, 1, "Bloqueia cliques repetidos enquanto calcula a rota");
+  resolverRota({ distanciaKm: 3.7, taxaEntrega: 8, comprovante: "rota-teste" });
+  await fluxo;
+  assert.equal(carregando, false);
+  assert.equal(porRota.revisoes[0][2], 8);
+  assert.equal(porRota.revisoes[0][6], 3.7);
+  assert.equal(porRota.revisoes[0][9], "rota-teste");
+  porRota.ctx.checkoutProtegidoUI.cotarFrete = async () => {
+    throw Error("Sem conexão");
+  };
+  await porRota.ctx.finalizarPedido();
+  assert.equal(porRota.revisoes.length, 1);
+  assert.match(porRota.avisos.at(-1).mensagem, /Não foi possível calcular a rota/);
+  assert.equal(carregando, false);
   const perto = contexto();
   perto.definir({ km: 10 });
   await perto.ctx.finalizarPedido();

@@ -5,6 +5,7 @@ const {
 } = require("../../js/regras-entrega.js");
 const crypto = require("node:crypto");
 const { ErroRecuperacao } = require("./recuperacao-acesso.cjs");
+const { ORIGEM_ENTREGA } = require("./frete-rota.cjs");
 const { reconstruirItensPedido, moeda, texto } = require("./pedido-catalogo.cjs");
 const { competenciaRankMensalUI, nivelRankMensalUI } = require("../../js/rank-mensal.js");
 const { resolverCupomRankUI, calcularCupomRankUI } = require("../../js/cupons-rank.js");
@@ -70,14 +71,30 @@ function pontoPedido(valor) {
 function distanciaPedido(ponto) {
   const rad = (v) => (v * Math.PI) / 180;
   const a =
-    Math.sin(rad(ponto.latitude + 15.553076945525193) / 2) ** 2 +
-    Math.cos(rad(-15.553076945525193)) *
+    Math.sin(rad(ponto.latitude - ORIGEM_ENTREGA.latitude) / 2) ** 2 +
+    Math.cos(rad(ORIGEM_ENTREGA.latitude)) *
       Math.cos(rad(ponto.latitude)) *
-      Math.sin(rad(ponto.longitude + 56.05602240360688) / 2) ** 2;
+      Math.sin(rad(ponto.longitude - ORIGEM_ENTREGA.longitude) / 2) ** 2;
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
 }
 function taxaPedido(km, em) {
   return taxaEntregaRegraUI(km, em);
+}
+function pontoEntrega(entrada) {
+  if (entrada?.areaUrbanaConfirmada !== true)
+    throw new ErroRecuperacao(400, "Confirme se sua localidade é atendida.");
+  return pontoPedido(entrada.localizacao);
+}
+function validarAlcanceEntrega(km) {
+  if (km > 200) throw new ErroRecuperacao(400, "Localização muito distante. Confira com a loja.");
+}
+function taxaEntregaSegura(km, em) {
+  validarAlcanceEntrega(km);
+  try {
+    return taxaPedido(km, em);
+  } catch (e) {
+    throw new ErroRecuperacao(400, e.message);
+  }
 }
 function diaPedido(em) {
   const partes = new Intl.DateTimeFormat("en-CA", {
@@ -94,6 +111,7 @@ function criarServicoPedidoPublico({
   siteUrl,
   consumirTentativa = async () => {},
   agora = Date.now,
+  rotasEntrega,
 }) {
   const site = new URL(siteUrl);
   if (
@@ -273,22 +291,15 @@ function criarServicoPedidoPublico({
         localizacao = "",
         endereco = "";
       if (entrada.tipo === "Entrega") {
-        if (entrada.areaUrbanaConfirmada !== true)
-          throw new ErroRecuperacao(400, "Confirme se sua localidade é atendida.");
-        const ponto = pontoPedido(entrada.localizacao);
-        km = distanciaPedido(ponto);
-        if (km > 200)
-          throw new ErroRecuperacao(400, "Localização muito distante. Confira com a loja.");
-        try {
-          taxa = centavos(taxaPedido(km, em));
-        } catch (e) {
-          throw new ErroRecuperacao(400, e.message);
-        }
+        const ponto = pontoEntrega(entrada);
+        km = rotasEntrega
+          ? rotasEntrega.conferir(ponto, entrada.cotacaoFrete, em)
+          : distanciaPedido(ponto);
+        taxa = centavos(taxaEntregaSegura(km, em));
         const destino = new URL("/localizacao.html", site);
         destino.searchParams.set("p", ponto.latitude + "," + ponto.longitude);
         localizacao = destino.href;
         endereco = texto(entrada.endereco, 1500);
-        if (!endereco && gravar) throw new ErroRecuperacao(400, "Informe o endereço da entrega.");
       }
       let descontoCupom = 0,
         descontoCupomTaxa = 0,
@@ -777,6 +788,15 @@ function criarServicoPedidoPublico({
     },
     conferir: (dados) => processar({ ...dados, gravar: false }),
     salvar: (dados) => processar({ ...dados, gravar: true }),
+    async frete({ pedido, origemRede }) {
+      if (!rotasEntrega) throw new ErroRecuperacao(503, "O cálculo por rota está indisponível.");
+      const ponto = pontoEntrega(pedido);
+      validarAlcanceEntrega(distanciaPedido(ponto));
+      const em = agora();
+      await consumirTentativa({ origemRede, em });
+      const cotacao = await rotasEntrega.cotar(ponto, em);
+      return { frete: { ...cotacao, taxaEntrega: taxaEntregaSegura(cotacao.distanciaKm, em) } };
+    },
   };
 }
 module.exports = { criarServicoPedidoPublico, pontoPedido, distanciaPedido, taxaPedido, diaPedido };

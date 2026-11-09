@@ -7,6 +7,7 @@ function criarCheckoutProtegidoUI({
 }) {
   let disponibilidade,
     habilitado = null,
+    fretePorRota = false,
     pendente;
   const confirmacoesSuporte = new Map();
   async function enviarSuporte(acao, dados) {
@@ -51,7 +52,9 @@ function criarCheckoutProtegidoUI({
           return false;
         }
         if (!r.ok) throw Error();
-        habilitado = (await r.json()).disponivel === true;
+        const config = await r.json();
+        habilitado = config.disponivel === true;
+        fretePorRota = config.fretePorRota === true;
         return habilitado;
       })().catch(() => {
         disponibilidade = null;
@@ -97,6 +100,20 @@ function criarCheckoutProtegidoUI({
     ativo,
     get habilitado() {
       return habilitado;
+    },
+    async cotarFrete(localizacao) {
+      await ativo();
+      if (!fretePorRota) return null;
+      const { frete } = await chamar("frete", {
+        pedido: { localizacao, areaUrbanaConfirmada: true },
+      });
+      if (
+        !frete?.comprovante ||
+        !Number.isFinite(frete.distanciaKm) ||
+        !Number.isFinite(frete.taxaEntrega)
+      )
+        throw Error("Cotação de entrega inválida.");
+      return frete;
     },
     conferir: (pedido) => chamar("conferir", { pedido }),
     perfil: () => chamar("perfil"),
@@ -146,6 +163,7 @@ function pedidoAtualCheckoutProtegidoUI(codigo = cupomDescontoAplicado?.codigo |
     localizacao: p.mapa || "",
     endereco: document.getElementById("endereco-escrito")?.value || "",
     areaUrbanaConfirmada: p.areaUrbanaConfirmada,
+    ...(p.cotacaoFrete ? { cotacaoFrete: p.cotacaoFrete } : {}),
     condominio: document.getElementById("condominio")?.value || "Não",
     cnh: document.getElementById("cnh")?.value || "Não",
     observacao: p.obs || "",

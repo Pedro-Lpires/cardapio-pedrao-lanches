@@ -1,10 +1,15 @@
 const { ErroRecuperacao } = require("./_lib/recuperacao-acesso.cjs");
 const { configurado } = require("./_lib/recuperacao-runtime.cjs");
-const { obterServicoPedidoPublico } = require("./_lib/pedido-publico-runtime.cjs");
+const {
+  obterServicoPedidoPublico,
+  fretePorRotaConfigurado,
+} = require("./_lib/pedido-publico-runtime.cjs");
 function criarHandlerPedidoPublico({
   obterServico = obterServicoPedidoPublico,
   estaConfigurado = configurado,
+  fretePorRota = fretePorRotaConfigurado,
   acoes = [
+    "frete",
     "conferir",
     "salvar",
     "recuperar",
@@ -29,7 +34,11 @@ function criarHandlerPedidoPublico({
       res.statusCode = status;
       res.end(JSON.stringify(dados));
     };
-    if (req.method === "GET") return responder(200, { disponivel: estaConfigurado() });
+    if (req.method === "GET")
+      return responder(200, {
+        disponivel: estaConfigurado(),
+        ...(acoes.includes("frete") && fretePorRota() ? { fretePorRota: true } : {}),
+      });
     if (req.method !== "POST") {
       res.setHeader("Allow", "GET, POST");
       return responder(405, { erro: "Método indisponível." });

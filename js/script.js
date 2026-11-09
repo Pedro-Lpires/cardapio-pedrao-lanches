@@ -703,7 +703,7 @@ function finalizarPedido() {
   localizandoEntregaSiteUI = true;
   let concluirLocalizacao = () => {};
   return perguntarZonaRuralUI()
-    .then((area) => {
+    .then(async (area) => {
       if (area === "rural") {
         alert(
           "Os motoboys não atendem essas localidades, conforme os critérios da empresa que nos fornece o serviço. Você pode pedir para retirar ou comer no local.",
@@ -715,75 +715,86 @@ function finalizarPedido() {
       concluirLocalizacao = iniciarCarregamentoUI(
         "Buscando sua localização e calculando a entrega…",
       );
-      return new Promise((resolver) =>
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            concluirLocalizacao();
-            resolver();
-            const latCliente = pos.coords.latitude;
-            const lonCliente = pos.coords.longitude;
-            const kmDistancia = calcularDistancia(
-              LAT_ESTABELECIMENTO,
-              LON_ESTABELECIMENTO,
-              latCliente,
-              lonCliente,
-            );
+      let pos;
+      try {
+        pos = await new Promise((resolver, rejeitar) =>
+          navigator.geolocation.getCurrentPosition(resolver, rejeitar, {
+            timeout: 15000,
+            maximumAge: 60000,
+          }),
+        );
+      } catch (erro) {
+        concluirLocalizacao();
+        if (erro.code === 1) {
+          alert(
+            "🚫 Você bloqueou a localização.\n\n" +
+              "Para ativar:\n" +
+              "1. Clique no cadeado 🔒 na barra do navegador\n" +
+              "2. Permita localização\n" +
+              "3. Atualize a página\n\n" +
+              "Ou escolha RETIRADA.",
+          );
+        } else if (erro.code === 3) {
+          alert("⏱️ Tempo de localização esgotado. Tente novamente.");
+        } else {
+          alert("❌ Não conseguimos obter sua localização. Tente novamente.");
+        }
+        return;
+      }
 
-            const foraDaArea = kmDistancia > 15;
-            let taxa;
-            try {
-              taxa = calcularTaxaEntregaSiteUI(kmDistancia);
-            } catch (e) {
-              alert(e.message, "entregaDistante");
-              return;
-            }
-            if (kmDistancia > 10)
-              alert(
-                foraDaArea
-                  ? "Seu endereço fica a mais de 15 km e está fora da área de entrega. Você pode enviar o pedido para verificarmos se será possível atender. Se a entrega for aceita, pode haver demora pelo percurso longo."
-                  : "Seu endereço fica a mais de 10 km. Pode haver demora na entrega por causa do percurso longo." +
-                      (kmDistancia > 11
-                        ? " A compra mínima é R$ 50,00 em produtos, após descontos e sem a taxa de entrega."
-                        : ""),
-                "entregaDistante",
-              );
-
-            const localizacaoLink = `https://www.google.com/maps?q=${latCliente},${lonCliente}`;
-            exibirRevisao(
-              itensPedido,
-              valorLanches,
-              taxa,
-              "Entrega",
-              obs,
-              localizacaoLink,
-              kmDistancia,
-              foraDaArea,
-              true,
-            );
-          },
-          (erro) => {
-            concluirLocalizacao();
-            resolver();
-            if (erro.code === 1) {
-              alert(
-                "🚫 Você bloqueou a localização.\n\n" +
-                  "Para ativar:\n" +
-                  "1. Clique no cadeado 🔒 na barra do navegador\n" +
-                  "2. Permita localização\n" +
-                  "3. Atualize a página\n\n" +
-                  "Ou escolha RETIRADA.",
-              );
-            } else if (erro.code === 2) {
-              alert("❌ Não conseguimos obter sua localização. Tente novamente.");
-            } else if (erro.code === 3) {
-              alert("⏱️ Tempo de localização esgotado. Tente novamente.");
-            }
-          },
-          { timeout: 15000, maximumAge: 60000 },
-        ),
+      const { latitude, longitude } = pos.coords;
+      const localizacaoLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      let cotacao;
+      try {
+        if (typeof checkoutProtegidoUI !== "undefined")
+          cotacao = await checkoutProtegidoUI.cotarFrete(localizacaoLink);
+      } catch (erro) {
+        concluirLocalizacao();
+        alert(
+          erro.status
+            ? erro.message
+            : "Não foi possível calcular a rota de entrega. Tente novamente, fale com a loja ou escolha retirada.",
+          "entregaDistante",
+        );
+        return;
+      }
+      concluirLocalizacao();
+      const kmDistancia =
+        cotacao?.distanciaKm ??
+        calcularDistancia(LAT_ESTABELECIMENTO, LON_ESTABELECIMENTO, latitude, longitude);
+      let taxa;
+      try {
+        taxa = cotacao?.taxaEntrega ?? calcularTaxaEntregaSiteUI(kmDistancia);
+      } catch (erro) {
+        alert(erro.message, "entregaDistante");
+        return;
+      }
+      const foraDaArea = kmDistancia > 15;
+      if (kmDistancia > 10)
+        alert(
+          foraDaArea
+            ? "Seu endereço fica a mais de 15 km e está fora da área de entrega. Você pode enviar o pedido para verificarmos se será possível atender. Se a entrega for aceita, pode haver demora pelo percurso longo."
+            : "Seu endereço fica a mais de 10 km. Pode haver demora na entrega por causa do percurso longo." +
+                (kmDistancia > 11
+                  ? " A compra mínima é R$ 50,00 em produtos, após descontos e sem a taxa de entrega."
+                  : ""),
+          "entregaDistante",
+        );
+      exibirRevisao(
+        itensPedido,
+        valorLanches,
+        taxa,
+        "Entrega",
+        obs,
+        localizacaoLink,
+        kmDistancia,
+        foraDaArea,
+        true,
+        cotacao?.comprovante,
       );
     })
     .catch(() => {
+      concluirLocalizacao();
       mostrarAvisoUI(
         "Não foi possível obter sua localização. Tente novamente ou escolha retirada.",
         "conferir",
@@ -809,6 +820,7 @@ function exibirRevisao(
   km = 0,
   foraDaArea = false,
   areaUrbanaConfirmada = false,
+  cotacaoFrete = null,
 ) {
   if (typeof permitirPedidoLojaUI === "function" && !permitirPedidoLojaUI()) return;
   dadosPedidoTemporario = {
@@ -821,6 +833,7 @@ function exibirRevisao(
     km,
     foraDaArea,
     areaUrbanaConfirmada,
+    cotacaoFrete,
   };
   revisaoCarrinhoVersao = carrinhoVersao;
 
@@ -899,6 +912,13 @@ function exibirRevisao(
   document.getElementById("resumo-taxa").innerText = foraDaArea
     ? `R$ ${taxa.toFixed(2)} (estimada)`
     : `R$ ${taxa.toFixed(2)}${tipo === "Entrega" && horarioNoturnoEntregaUI() ? " · adicional noturno" : ""}`;
+  const atribuicaoFrete = document.getElementById("frete-rota-atribuicao");
+  if (atribuicaoFrete) {
+    atribuicaoFrete.hidden = !cotacaoFrete;
+    if (cotacaoFrete)
+      document.getElementById("frete-rota-km").textContent =
+        `${km.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} km`;
+  }
 
   const totalMolhosPagos = calcularTotalMolhosPagos();
 
@@ -1087,6 +1107,7 @@ function toggleCupomDesconto() {
       dadosPedidoTemporario.km,
       dadosPedidoTemporario.foraDaArea,
       dadosPedidoTemporario.areaUrbanaConfirmada,
+      dadosPedidoTemporario.cotacaoFrete,
     );
   }
 }
@@ -1128,9 +1149,11 @@ async function confirmarEEnviar() {
   if (typeof conferirBeneficiosAntesEnvioUI === "function") {
     try {
       if (!(await conferirBeneficiosAntesEnvioUI())) return;
-    } catch {
+    } catch (erro) {
       return mostrarAvisoUI(
-        "Não foi possível conferir seus benefícios. Tente novamente antes de enviar.",
+        dadosPedidoTemporario?.cotacaoFrete && [400, 409].includes(erro.status)
+          ? erro.message
+          : "Não foi possível conferir seus benefícios. Tente novamente antes de enviar.",
         "conferir",
       );
     }
@@ -1255,6 +1278,7 @@ async function confirmarEEnviar() {
     cnh,
     localizacao: d.mapa || "",
     areaUrbanaConfirmada: d.tipo === "Entrega" ? d.areaUrbanaConfirmada === true : null,
+    ...(d.cotacaoFrete ? { cotacaoFrete: d.cotacaoFrete } : {}),
     pagamento: pagamento,
     trocoPara: precisaTroco && valorTroco ? Number(valorTroco) : null,
     observacao: d.obs || "",
@@ -2887,6 +2911,7 @@ async function aplicarCupomDesconto() {
     dadosPedidoTemporario.km,
     dadosPedidoTemporario.foraDaArea,
     dadosPedidoTemporario.areaUrbanaConfirmada,
+    dadosPedidoTemporario.cotacaoFrete,
   );
 }
 function arredondarPagamento(valor) {
@@ -2945,6 +2970,7 @@ function removerCupomDescontoCliente(mensagem = "") {
       dadosPedidoTemporario.km,
       dadosPedidoTemporario.foraDaArea,
       dadosPedidoTemporario.areaUrbanaConfirmada,
+      dadosPedidoTemporario.cotacaoFrete,
     );
   }
 }
@@ -4433,6 +4459,7 @@ function salvarMolhosItem(fechar = true) {
     dadosPedidoTemporario.km,
     dadosPedidoTemporario.foraDaArea,
     dadosPedidoTemporario.areaUrbanaConfirmada,
+    dadosPedidoTemporario.cotacaoFrete,
   );
 }
 

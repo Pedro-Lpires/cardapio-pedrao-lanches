@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 const { criarDbOperacaoRest } = require("./operacao-firestore-rest.cjs");
 const { criarServicoPedidoPublico } = require("./pedido-publico.cjs");
+const { criarFreteRota, criarLimitadorFreteRota } = require("./frete-rota.cjs");
 const { obterPlataformaAcesso } = require("./recuperacao-runtime.cjs");
 const { ErroRecuperacao } = require("./recuperacao-acesso.cjs");
 function criarLimitadorPedido(
@@ -35,6 +36,9 @@ function criarLimitadorPedido(
   };
 }
 let servico;
+function fretePorRotaConfigurado() {
+  return Boolean(process.env.GEOAPIFY_ROUTING_API_KEY?.trim());
+}
 function obterServicoPedidoPublico() {
   if (servico) return servico;
   const { app, auth, conta } = obterPlataformaAcesso();
@@ -59,7 +63,14 @@ function obterServicoPedidoPublico() {
     auth,
     siteUrl: process.env.SITE_PUBLICO_URL,
     consumirTentativa: criarLimitadorPedido(db),
+    rotasEntrega: fretePorRotaConfigurado()
+      ? criarFreteRota({
+          apiKey: process.env.GEOAPIFY_ROUTING_API_KEY.trim(),
+          chave: Buffer.from(process.env.RECUPERACAO_CHAVE, "base64"),
+          consumirConsulta: criarLimitadorFreteRota(db),
+        })
+      : null,
   });
   return servico;
 }
-module.exports = { obterServicoPedidoPublico, criarLimitadorPedido };
+module.exports = { obterServicoPedidoPublico, criarLimitadorPedido, fretePorRotaConfigurado };

@@ -326,7 +326,8 @@ function montarCheckoutUI() {
   revisao.prepend(cab);
   document.getElementById("endereco-escrito").placeholder =
     "Ajude o motoboy: rua, número, bairro e ponto de referência";
-  document.querySelector("#box-endereco-salvo>label").textContent = "Endereço por escrito";
+  document.querySelector("#box-endereco-salvo>label").textContent =
+    "Endereço por escrito (opcional)";
   document.querySelector(".linha-salvar-endereco").hidden = true;
   const salvos = document.createElement("button");
   salvos.type = "button";

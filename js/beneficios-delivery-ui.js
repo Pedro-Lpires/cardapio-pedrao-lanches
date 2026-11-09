@@ -35,6 +35,7 @@ function refazerBeneficiosRevisaoUI() {
     p.km,
     p.foraDaArea,
     p.areaUrbanaConfirmada,
+    p.cotacaoFrete,
   );
 }
 async function carregarBeneficiosDeliveryUI(forcar = false) {
