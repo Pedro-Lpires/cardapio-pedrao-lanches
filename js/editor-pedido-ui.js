@@ -46,6 +46,9 @@ function assinaturaEdicaoPedidoUI(p) {
     p.retirado,
   ]);
 }
+function somaFormasRecebimentoUI(formas) {
+  return formas.reduce((total, f) => total + centavosOperacao(f.valor), 0);
+}
 async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
   if (!rascunho.nome?.trim()) throw Error("Informe o nome do cliente.");
   if (rascunho.telefone && !/^\d{11}$/.test(rascunho.telefone))
@@ -84,20 +87,10 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
     if (assinaturaEdicaoPedidoUI(atual) !== assinaturaEdicaoPedidoUI(original))
       throw Error("O pedido foi alterado em outra tela. Feche e abra a edição novamente.");
     const recebimentosPedido = clonarEdicaoPedidoUI(recebimentosPedidoOperacao(atual));
-    for (const [indice, formas] of Object.entries(rascunho.correcaoRecebimentos || {})) {
-      const r = recebimentosPedido[Number(indice)];
-      if (
-        !r ||
-        !Array.isArray(formas) ||
-        centavosOperacao(formas.reduce((n, f) => n + Number(f.valor || 0), 0)) !==
-          centavosOperacao(r.valor) ||
-        formas.some((f) => !f.forma || !Number.isFinite(Number(f.valor)) || Number(f.valor) < 0)
-      )
-        throw Error("Confira as formas dos recebimentos anteriores.");
-      r.formas = clonarEdicaoPedidoUI(formas);
-      r.forma = formas.map((f) => f.forma).join(" + ");
-      r.formaCorrigidaEm = Date.now();
-    }
+    const semFormaAnterior = recebimentosPedido.reduce(
+      (n, r) => n + centavosOperacao(r.valorSemForma),
+      0,
+    );
     const clienteRef =
       atual.clienteId && (atual.origem === "site_delivery" || atual.fidelidadeAtivaNoPedido)
         ? db.collection("clientes").doc(atual.clienteId)
@@ -126,6 +119,31 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
     )
       throw Error("Os descontos ultrapassam o valor do pedido.");
     const recebido = valorRecebidoPedidoOperacao(atual);
+    const excedente = Math.max(0, centavosOperacao(recebido) - centavosOperacao(totais.valorTotal));
+    for (const [indice, formas] of Object.entries(rascunho.correcaoRecebimentos || {})) {
+      const r = recebimentosPedido[Number(indice)];
+      if (
+        !r ||
+        !Array.isArray(formas) ||
+        formas.some((f) => !f?.forma || !Number.isFinite(Number(f.valor)) || Number(f.valor) < 0)
+      )
+        throw Error("Confira as formas dos recebimentos anteriores.");
+      const semForma = centavosOperacao(r.valor) - somaFormasRecebimentoUI(formas);
+      if (semForma < 0) throw Error("As formas ultrapassam o valor recebido.");
+      r.formas = clonarEdicaoPedidoUI(formas);
+      r.forma = formas.map((f) => f.forma).join(" + ");
+      r.valorSemForma = semForma / 100;
+      r.formaCorrigidaEm = Date.now();
+    }
+    const semFormaNovo = recebimentosPedido.reduce(
+      (n, r) => n + centavosOperacao(r.valorSemForma),
+      0,
+    );
+    if (semFormaNovo > Math.max(excedente, semFormaAnterior)) {
+      throw Error(
+        "Confira a divisão dos recebimentos. Só o valor a devolver pode ficar sem forma.",
+      );
+    }
     const patch = {
       nome: rascunho.nome.trim(),
       telefone: rascunho.telefone || "",
@@ -154,8 +172,7 @@ async function salvarEdicaoPedidoTransacaoUI(id, original, rascunho) {
       valorRecebido: recebido,
       saldoPendente:
         Math.max(0, centavosOperacao(totais.valorTotal) - centavosOperacao(recebido)) / 100,
-      valorADevolver:
-        Math.max(0, centavosOperacao(recebido) - centavosOperacao(totais.valorTotal)) / 100,
+      valorADevolver: excedente / 100,
       pagamentoConfirmado: centavosOperacao(recebido) >= centavosOperacao(totais.valorTotal),
       editadoEm: new Date().toISOString(),
       editadoPor: localStorage.getItem("atendenteNome") || "Admin",
@@ -316,40 +333,30 @@ async function abrirEditorPedidoUI(id, opcoes = {}) {
       const historico = recebimentosPedidoOperacao(original);
       if (historico.length) {
         const detalhes = document.createElement("details");
+        detalhes.open = Object.keys(p.correcaoRecebimentos || {}).length > 0;
+        const formasDoRecebimento = (r, n) =>
+          p.correcaoRecebimentos?.[n] || r.formas || [{ forma: r.forma, valor: r.valor }];
         detalhes.innerHTML =
-          "<summary>Corrigir forma dos pagamentos já recebidos</summary><p>Esta correção mantém o valor e a data de cada recebimento.</p>" +
+          "<summary>Corrigir forma dos pagamentos já recebidos</summary><p>O valor e a data originais ficam no histórico. Se houver valor a devolver, você pode dividir só a parte que ficou no pedido.</p>" +
           historico
             .map((r, n) => {
-              const formas = p.correcaoRecebimentos?.[n] ||
-                r.formas || [{ forma: r.forma, valor: r.valor }];
-              return (
-                "<strong>" +
-                moedaOperacao(r.valor) +
-                "</strong>" +
-                formas
-                  .map(
-                    (f, k) =>
-                      "<label>" +
-                      moedaOperacao(f.valor) +
-                      '<select data-recibo="' +
-                      n +
-                      '" data-forma="' +
-                      k +
-                      '">' +
-                      [...new Set(["Pix", "Dinheiro", "Cartão", f.forma])]
-                        .map(
-                          (v) =>
-                            "<option " +
-                            (v === f.forma ? "selected" : "") +
-                            ">" +
-                            escaparOperacao(v) +
-                            "</option>",
-                        )
-                        .join("") +
-                      "</select></label>",
-                  )
-                  .join("")
-              );
+              const formas = formasDoRecebimento(r, n);
+              const semForma = centavosOperacao(r.valor) - somaFormasRecebimentoUI(formas);
+              return `<article class="editor-recebimento-ui"><header>Recebimento <strong>${moedaOperacao(r.valor)}</strong></header><div class="editor-grade-ui">${formas
+                .map(
+                  (f, k) =>
+                    `<label>${moedaOperacao(f.valor)}<select data-recibo="${n}" data-forma="${k}">${[
+                      ...new Set(["Pix", "Dinheiro", "Débito", "Crédito", "Cartão", f.forma]),
+                    ]
+                      .map(
+                        (v) =>
+                          `<option ${v === f.forma ? "selected" : ""}>${escaparOperacao(v)}</option>`,
+                      )
+                      .join("")}</select></label>`,
+                )
+                .join(
+                  "",
+                )}</div>${semForma > 0 ? `<p>Sem forma definida: ${moedaOperacao(semForma / 100)}</p>` : ""}<button type="button" data-corrigir-recebimento="${n}">Dividir / corrigir recebimento</button></article>`;
             })
             .join("");
         f.querySelector("footer").before(detalhes);
@@ -366,31 +373,47 @@ async function abrirEditorPedidoUI(id, opcoes = {}) {
               p.correcaoRecebimentos[n][k].forma = sel.value;
             }),
         );
-        historico.forEach((r, n) => {
-          const b = document.createElement("button");
-          b.type = "button";
-          b.className = "editor-personalizar-ui";
-          b.textContent = "Dividir / corrigir recebimento " + moedaOperacao(r.valor);
+        detalhes.querySelectorAll("[data-corrigir-recebimento]").forEach((b) => {
+          const n = Number(b.dataset.corrigirRecebimento),
+            r = historico[n];
           b.onclick = () => {
+            const usadoEmOutros = historico.reduce((total, outro, i) => {
+              if (i === n) return total;
+              return (
+                total +
+                (p.correcaoRecebimentos?.[i]
+                  ? centavosOperacao(outro.valor) -
+                    somaFormasRecebimentoUI(p.correcaoRecebimentos[i])
+                  : centavosOperacao(outro.valorSemForma))
+              );
+            }, 0);
+            const bruto = centavosOperacao(r.valor);
+            const totalPedido = centavosOperacao(calcularEdicaoPedidoUI(p).valorTotal);
+            const excedente = Math.max(0, centavosOperacao(recebido) - totalPedido - usadoEmOutros);
+            const aDividir = Math.max(0, bruto - excedente) / 100;
+            const formas = formasDoRecebimento(r, n);
             const draft = {
               itens: [],
               tipo: "Retirada",
-              taxaEntrega: 0,
-              ajusteArredondamento: Number(r.valor),
-              pagamento: r.forma,
-              formas: clonarEdicaoPedidoUI(
-                p.correcaoRecebimentos?.[n] || r.formas || [{ forma: r.forma, valor: r.valor }],
-              ),
+              ajusteArredondamento: aDividir,
+              pagamento: formas[0]?.forma || r.forma,
+              formas: clonarEdicaoPedidoUI(formas),
             };
-            abrirPagamentoEditorUI(draft, 0, () => {
-              p.correcaoRecebimentos ||= {};
-              p.correcaoRecebimentos[n] = draft.formas.length
-                ? draft.formas
-                : [{ forma: draft.pagamento, valor: r.valor }];
-              render();
-            });
+            abrirPagamentoEditorUI(
+              draft,
+              0,
+              () => {
+                p.correcaoRecebimentos ||= {};
+                p.correcaoRecebimentos[n] = draft.formas.length
+                  ? draft.formas
+                  : aDividir > 0
+                    ? [{ forma: draft.pagamento, valor: aDividir }]
+                    : [];
+                render();
+              },
+              Number(r.valor),
+            );
           };
-          detalhes.append(b);
         });
         const label = f.elements.pagamento.closest("label");
         label.firstChild.textContent = "Forma do próximo recebimento";
@@ -417,6 +440,8 @@ async function abrirEditorPedidoUI(id, opcoes = {}) {
         const t = calcularEdicaoPedidoUI(p),
           saldo = Math.max(0, t.valorTotal - recebido),
           devolver = Math.max(0, recebido - t.valorTotal);
+        if (historico.length)
+          escolhaPagamento.closest("label").hidden = centavosOperacao(saldo) === 0;
         box.querySelector(".editor-resumo-ui").innerHTML =
           `${Number(p.descontoCreditoEntrega) > 0 ? `<p>Benefícios no frete: -${moedaOperacao(p.descontoCreditoEntrega)}</p>` : ""}<p>Total do pedido <strong>${moedaOperacao(t.valorTotal)}</strong></p><p>Já recebido <strong>${moedaOperacao(recebido)}</strong></p><p>Falta receber <strong>${moedaOperacao(saldo)}</strong></p>${devolver > 0 ? `<p class="editor-alerta-ui">Conferir devolução de ${moedaOperacao(devolver)} ao cliente. Salvar não registra estorno.</p>` : ""}<small>Ao alterar itens, confira a produção no pedido antes de enviar à cozinha.</small>`;
       };
@@ -566,10 +591,11 @@ async function abrirItemEdicaoUI(p, indice, aoMudar, novo = null) {
     ]);
     const produto = ps?.exists ? ps.data() : item,
       tipos = ps?.exists ? tiposCarneProdutoOperacao(produto) : [];
-    item.tipo =
-      tipos.find((t) => t.valor.toLowerCase() === item.tipo.toLowerCase())?.valor ||
-      tipos[0]?.valor ||
-      item.tipo;
+    const tipoSalvo = String(item.tipo)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+    item.tipo = tipos.find((t) => t.valor === tipoSalvo)?.valor || tipos[0]?.valor || item.tipo;
     const qtd = Number(item.quantidade ?? item.qtd ?? 1);
     const extras = item.lanchesCombo?.length
       ? item.lanchesCombo
@@ -624,6 +650,9 @@ async function abrirItemEdicaoUI(p, indice, aoMudar, novo = null) {
       )}</details><details><summary>Molhos grátis</summary><div data-gratis></div></details><p role="status"></p><footer><button type="submit">${novo ? "Adicionar ao pedido" : "Salvar item"}</button></footer></form>`;
     const f = box.querySelector("form"),
       campo = (nome) => f.elements.namedItem(nome);
+    const descricao = document.createElement("p");
+    if (produto.categoria?.toLowerCase() === "lanches")
+      box.querySelector(".editor-produto-resumo-ui").after(descricao);
     const comestivel = !/bebida/i.test(item.categoria || "");
     d.classList.add("editor-item-ui");
     if (!comestivel) box.querySelectorAll("details").forEach((el) => (el.hidden = true));
@@ -658,6 +687,10 @@ async function abrirItemEdicaoUI(p, indice, aoMudar, novo = null) {
     personalizacoes.hidden = !personalizacoes.childElementCount;
     const atualizarTotalItem = () => {
       const escolhido = f.querySelector('input[name="tipo"]:checked') || campo("tipo");
+      if (descricao.parentElement) {
+        descricao.textContent = descricaoProdutoComCarneOperacao(produto, escolhido?.value);
+        descricao.hidden = !descricao.textContent;
+      }
       if (ps?.exists)
         precoBaseAtual = Number(
           tipos.find((t) => t.valor === escolhido?.value)?.preco ?? produto.preco ?? base,

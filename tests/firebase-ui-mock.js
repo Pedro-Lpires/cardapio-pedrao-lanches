@@ -474,7 +474,8 @@
     docs.set("produtos/burrito-real", {
       nome: "Burrito cuiabano",
       categoria: "lanches",
-      descricao: "Pão, hambúrguer triturado, molho vermelho, alface, tomate, presunto e mussarela.",
+      descricao:
+        "Pão, hambúrguer artesanal triturado, molho vermelho, alface, tomate, presunto e mussarela.",
       imagem: "burrito.webp",
       preco: 20,
       precoIndustrial: 18,

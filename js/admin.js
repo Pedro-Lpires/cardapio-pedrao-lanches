@@ -1809,6 +1809,7 @@ async function salvarProdutoAdmin() {
 
   try {
     normalizarProdutoCatalogoUI(produto);
+    salvarDescricaoCarneCatalogoUI(produto, "produto-");
   } catch (erro) {
     return avisoOperacao(erro.message);
   }
@@ -1821,6 +1822,11 @@ async function salvarProdutoAdmin() {
   alert("Produto salvo!");
   document.getElementById("produto-nome").value = "";
   document.getElementById("produto-descricao").value = "";
+  document.getElementById("produto-descricao").dispatchEvent(new Event("input"));
+  for (const tipo of Object.keys(nomesCarneDescricaoOperacao)) {
+    const campo = document.getElementById("produto-descricao-carne-" + tipo);
+    if (campo) campo.value = "";
+  }
   document.getElementById("produto-preco").value = "";
   document.getElementById("produto-preco-industrial").value = "";
   document.getElementById("produto-preco-frango").value = "";
@@ -2020,7 +2026,7 @@ async function editarProdutoAdmin(id) {
 
                 <input id="edit-produto-nome" value="${p.nome || ""}" placeholder="Nome">
 
-                <textarea id="edit-produto-descricao" placeholder="Descrição">${p.descricao || ""}</textarea>
+                <textarea id="edit-produto-descricao" placeholder="Descrição">${p.descricao || escaparOperacao(p.desc || "")}</textarea>
 
                 <div class="linha-form-admin">
                     <select id="edit-produto-categoria">
@@ -2123,7 +2129,7 @@ async function editarProdutoAdmin(id) {
         </div>
     `;
   await carregarAdicionaisEdicaoProduto(p);
-  organizarFormularioProdutoCatalogoUI("edit-produto-", p);
+  organizarFormularioProdutoCatalogoUI("edit-produto-", doc.data());
   box.closest("dialog").scrollTop = 0;
 }
 
@@ -2268,6 +2274,60 @@ async function editarAcrescimosPedidoAdmin(idPedido, pedidoAntigo) {
   }
 }
 
+function deslocarOrdemProdutosAdmin(produtos, destino, origem) {
+  const ordenados = produtos.sort((a, b) => a.ordem - b.ordem || a.id.localeCompare(b.id));
+  const deslocar = (sentido) => {
+    const alteracoes = [];
+    let proxima = destino + sentido;
+    const fila = sentido === 1 ? ordenados : [...ordenados].reverse();
+    for (const produto of fila) {
+      if ((produto.ordem - destino) * sentido < 0) continue;
+      if ((produto.ordem - proxima) * sentido >= 0) break;
+      alteracoes.push({ ...produto, ordem: proxima });
+      proxima += sentido;
+    }
+    return alteracoes;
+  };
+
+  if (origem > 0 && origem < destino) {
+    const anteriores = deslocar(-1);
+    if (anteriores.every((p) => p.ordem >= origem)) return anteriores;
+  }
+  return deslocar(1);
+}
+
+async function atualizarProdutoNaPosicaoAdmin(id, produto, ajustarOrdem) {
+  const colecao = db.collection("produtos");
+  const ref = colecao.doc(id);
+  await db.runTransaction(async (t) => {
+    const atual = await t.get(ref);
+    if (!atual.exists) throw Error("Este produto não existe mais no cardápio.");
+    const anterior = atual.data();
+    const dados = { ...produto };
+    if (anterior.somenteAtendente) {
+      dados.disponivelAtendimento = dados.ativo;
+      dados.ativo = false;
+    }
+
+    if (ajustarOrdem) {
+      const lista = await colecao.get({ source: "server" });
+      const docs = await Promise.all(
+        lista.docs.filter((p) => p.id !== id).map((p) => t.get(p.ref)),
+      );
+      const vizinhos = docs
+        .filter((p) => p.exists && p.data().categoria === dados.categoria)
+        .map((p) => ({ id: p.id, ref: p.ref, ordem: Number(p.data().ordem) }))
+        .filter((p) => Number.isSafeInteger(p.ordem) && p.ordem > 0);
+      const origem = anterior.categoria === dados.categoria ? Number(anterior.ordem) : 0;
+      for (const vizinho of deslocarOrdemProdutosAdmin(vizinhos, dados.ordem, origem)) {
+        if (!Number.isSafeInteger(vizinho.ordem)) throw Error("Escolha uma posição menor.");
+        t.update(vizinho.ref, { ordem: vizinho.ordem });
+      }
+    }
+    t.update(ref, dados);
+  });
+}
+
 async function salvarEdicaoProdutoAdmin(id) {
   const editModoAdicional =
     document.querySelector('input[name="edit-modo-adicional"]:checked')?.value || "todos";
@@ -2278,6 +2338,12 @@ async function salvarEdicaoProdutoAdmin(id) {
     document.querySelectorAll(".edit-check-adicional-item:checked").forEach((check) => {
       editAdicionaisPermitidos.push(check.value);
     });
+  }
+
+  const ordemInformada = document.getElementById("edit-produto-ordem").value.trim();
+  const ordem = ordemInformada ? Number(ordemInformada) : 999;
+  if (!Number.isSafeInteger(ordem) || ordem < 1) {
+    return avisoOperacao("Informe uma posição inteira maior que zero.");
   }
 
   const produto = {
@@ -2296,7 +2362,7 @@ async function salvarEdicaoProdutoAdmin(id) {
     precoFile: Number(document.getElementById("edit-produto-preco-file").value) || 0,
 
     imagem: document.getElementById("edit-produto-imagem").value.trim(),
-    ordem: Number(document.getElementById("edit-produto-ordem").value) || 999,
+    ordem,
     comboQtdLanches: Number(document.getElementById("edit-produto-qtd-lanches-combo").value) || 1,
 
     opcoes: {
@@ -2315,15 +2381,11 @@ async function salvarEdicaoProdutoAdmin(id) {
   if (!produto.nome) return avisoOperacao("Digite o nome do produto.");
   try {
     normalizarProdutoCatalogoUI(produto);
+    salvarDescricaoCarneCatalogoUI(produto, "edit-produto-");
+    await atualizarProdutoNaPosicaoAdmin(id, produto, Boolean(ordemInformada));
   } catch (erro) {
     return avisoOperacao(erro.message);
   }
-  const atualProduto = (await db.collection("produtos").doc(id).get()).data();
-  if (atualProduto.somenteAtendente) {
-    produto.disponivelAtendimento = produto.ativo;
-    produto.ativo = false;
-  }
-  await db.collection("produtos").doc(id).update(produto);
   await concluirProdutoCatalogoUI(true);
   avisoOperacao("Produto atualizado.");
 }

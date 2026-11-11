@@ -49,36 +49,6 @@ async function entrarFinanceiro() {
     status.textContent = "Não foi possível abrir o financeiro: " + e.message;
   }
 }
-async function trocarSenhaFinanceiro() {
-  if (typeof equipeProtegidaAtivaUI === "function" && equipeProtegidaAtivaUI())
-    return avisoOperacao("O financeiro usa o acesso do proprietário no Firebase Authentication.");
-  if (!financeiroLiberado) return;
-  const atual = await solicitarEntradaOperacao("Senha atual do financeiro:", "password");
-  if (!atual) return;
-  const ref = db.collection("config").doc("admin");
-  try {
-    const doc = await ref.get();
-    if (!(await verificarSenhaFinanceiro(atual, doc.data())))
-      return avisoOperacao("Senha atual incorreta.");
-    const senha = await solicitarEntradaOperacao(
-      "Nova senha (pelo menos 8 caracteres):",
-      "password",
-    );
-    if (!senha) return;
-    if (senha.length < 8) return avisoOperacao("Use pelo menos 8 caracteres.");
-    if ((await solicitarEntradaOperacao("Repita a nova senha:", "password")) !== senha)
-      return avisoOperacao("As senhas não coincidem.");
-    const salt = crypto.randomUUID();
-    await ref.update({
-      senhaFinanceiroHash: await hashSenhaFinanceiro(senha, salt),
-      senhaFinanceiroSalt: salt,
-      senhaFinanceiro: firebase.firestore.FieldValue.delete(),
-    });
-    avisoOperacao("Senha do financeiro alterada.");
-  } catch (e) {
-    avisoOperacao("Não foi possível trocar a senha: " + e.message);
-  }
-}
 async function liberarFinanceiroProtegidoUI() {
   financeiroLiberado = true;
   document.getElementById("financeiro-login").hidden = true;
@@ -277,7 +247,7 @@ async function salvarFechamentoFinanceiro() {
         { merge: true },
       );
     document.getElementById("fiscal-status").textContent =
-      "Preparação salva. A nota fiscal ainda precisa ser emitida no emissor integrado.";
+      "Preparação salva. A emissão da nota fiscal é feita à parte, no sistema fiscal da loja.";
   } catch (e) {
     document.getElementById("fiscal-status").textContent = "Não foi possível salvar: " + e.message;
   }

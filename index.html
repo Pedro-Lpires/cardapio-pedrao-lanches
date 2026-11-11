@@ -41,7 +41,7 @@
     <script src="js/avatares-ui.js?v=20261101-1"></script>
     <link rel="icon" href="images/logo-trailer.webp" />
     <!-- Estilos da página: veja GUIA-ESTILOS.md. -->
-    <link rel="stylesheet" href="css/paginas/index.css?v=20261104-4" />
+    <link rel="stylesheet" href="css/paginas/index.css?v=20261111-3" />
     <link rel="stylesheet" href="css/componentes/rank-mensal.css?v=20261102-7" />
     <link rel="stylesheet" href="css/componentes/beneficios.css?v=20261102-7" />
     <link rel="stylesheet" href="css/componentes/privacidade.css?v=20261105-3" />
@@ -130,6 +130,17 @@
             <strong>Pedrão Lanches</strong>
             <p>O melhor da cidade desde 2014</p>
           </div>
+          <address class="rodape-endereco">
+            <a
+              href="https://www.google.com/maps/search/?api=1&amp;query=-15.553076945525193%2C-56.05602240360688"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <strong><span aria-hidden="true">📍</span> Endereço</strong>
+              <span>Rua Óbidos, CPA I · Cuiabá – MT</span>
+              <span>Atrás do Ginásio Verdinho · CEP 78055-205</span>
+            </a>
+          </address>
           <div class="rodape-redes">
             <a href="https://wa.me/5565992386045" target="_blank" rel="noopener"
               >💬 Fale com a gente no WhatsApp</a
@@ -137,10 +148,29 @@
           </div>
           <p class="rodape-parceiros-titulo">Parceiros</p>
           <div class="rodape-parceiros">
-            <div class="rodape-parceiro">🧁 <span>Brownies</span></div>
-            <div class="rodape-parceiro">💍 <span>Pratas</span></div>
+            <a
+              class="rodape-parceiro"
+              href="https://www.instagram.com/elizabethsdoceria/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span aria-hidden="true">🧁</span><span>Elizabeth’s Doceria</span>
+            </a>
+            <a
+              class="rodape-parceiro"
+              href="https://www.instagram.com/pratas_alce/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span aria-hidden="true">💍</span><span>Pratas Alce</span>
+            </a>
           </div>
-          <a class="privacidade-link-ui" href="privacidade.html" data-privacidade-ui>Privacidade</a>
+          <nav class="rodape-documentos" aria-label="Informações do site">
+            <a class="privacidade-link-ui" href="privacidade.html" data-privacidade-ui
+              >Privacidade</a
+            >
+            <a class="privacidade-link-ui" href="termos.html" data-termos-ui>Termos de Uso</a>
+          </nav>
           <p class="rodape-copy">© Pedrão Lanches</p>
         </footer>
       </section>
@@ -719,27 +749,27 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="js/produtos.js?v=20261031-2"></script>
+    <script src="js/produtos.js?v=20261110-1"></script>
     <script src="js/ui-comum.js?v=20261104-4"></script>
     <script src="js/personagens-ui.js?v=20261102-10"></script>
     <script src="js/loja-publica-ui.js?v=20261104-5"></script>
     <script src="js/regras-entrega.js?v=20261104-1"></script>
     <script src="js/ambiente-local-ui.js?v=20261109-1"></script>
-    <script src="js/script.js?v=20261109-2"></script>
+    <script src="js/script.js?v=20261110-2"></script>
     <script src="js/mensagens-tempo-real-ui.js?v=20261025-2"></script>
     <script src="js/beneficios-entrega.js?v=20261104-3"></script>
     <script src="js/rank-mensal.js?v=20261104-3"></script>
     <script src="js/cupons-rank.js?v=20261101-1"></script>
-    <script src="js/operacao.js?v=20261104-4"></script>
+    <script src="js/operacao.js?v=20261110-2"></script>
     <script src="js/cardapio-ui.js?v=20261025-2"></script>
     <script src="js/app-ui.js?v=20261104-3"></script>
     <script src="js/raspadinhas-recuperacao.js?v=20261025-2"></script>
-    <script src="js/raspadinhas.js?v=20261025-2"></script>
+    <script src="js/raspadinhas.js?v=20261111-3"></script>
     <script src="js/fluxos-interface.js?v=20261109-1"></script>
     <script src="js/janelas-fluxos.js?v=20261104-3"></script>
     <script src="js/combos-site-ui.js?v=20261102-6"></script>
-    <script src="js/editor-pedido-ui.js?v=20261102-4"></script>
-    <script src="js/editor-pedido-personalizacao-ui.js?v=20261102-5"></script>
+    <script src="js/editor-pedido-ui.js?v=20261110-2"></script>
+    <script src="js/editor-pedido-personalizacao-ui.js?v=20261110-1"></script>
     <script src="js/carrinho-edicao-ui.js?v=20261031-2"></script>
     <script src="js/whatsapp-pedido-ui.js?v=20261104-4"></script>
     <script src="js/beneficios-pedido.js?v=20261101-2"></script>
@@ -747,6 +777,6 @@
     <link rel="stylesheet" href="css/componentes/acesso-cliente.css?v=20261109-1" />
     <script src="js/acesso-cliente-ui.js?v=20261109-1"></script>
     <script src="js/checkout-protegido-ui.js?v=20261109-1"></script>
-    <script src="js/privacidade-ui.js?v=20261104-1"></script>
+    <script src="js/privacidade-ui.js?v=20261110-1"></script>
   </body>
 </html>

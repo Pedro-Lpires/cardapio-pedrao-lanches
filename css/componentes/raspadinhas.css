@@ -159,6 +159,104 @@ dialog.raspa-ajuda-janela-ui p {
   cursor: pointer;
   padding: 8px 0;
 }
+.raspa-condicoes-ui .raspa-termos,
+.raspa-consulta-atendente .raspa-termos {
+  box-sizing: border-box;
+  margin: 10px 0 0;
+  padding: 16px;
+  border: 1px solid #684147;
+  border-left: 3px solid #ed0017;
+  border-radius: 10px;
+  background: #302326;
+  color: #fff0f0;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+#raspa-codigo .raspa-copiar-codigo-ui {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 14px;
+  border: 1px dashed #a78242;
+  border-radius: 10px;
+  background: #30291c;
+  color: #ffe1a1;
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+.raspa-copiar-codigo-ui small {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #e1d3b8;
+}
+.raspa-copia-status-ui:not(:empty) {
+  display: block;
+  margin-top: 10px;
+  color: #9aefbd;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.raspa-consulta-atendente .raspa-resultado:not(:empty) {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #555;
+  border-radius: 12px;
+  background: #242424;
+  overflow-wrap: anywhere;
+}
+.raspa-consulta-atendente .raspa-resultado > :is(h3, p, label, button) {
+  margin: 0;
+}
+.raspa-consulta-atendente .raspa-resultado .raspa-destinatario-ui {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-weight: 400;
+  font-size: 16px;
+  white-space: normal;
+}
+dialog.raspa-consulta-atendente .raspa-resultado label.raspa-confirmacao-ui {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+}
+dialog.raspa-consulta-atendente .raspa-confirmacao-ui > span {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+.raspa-consulta-atendente #raspa-conferido {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 3px 0 0;
+  accent-color: #ed0017;
+}
+.raspa-consulta-atendente .raspa-entrega-sucesso-ui {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #35875a;
+  border-radius: 10px;
+  background: #183b29;
+  color: #b6f7cc;
+  line-height: 1.5;
+}
+.raspa-entrega-sucesso-ui > span {
+  flex: none;
+  font-size: 28px;
+}
+.raspa-entrega-sucesso-ui p {
+  margin: 4px 0 0;
+}
 .raspa-recompensa-animada-ui .raspa-personagem-ui img {
   animation: raspa-mago-aproxima-ui 650ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -929,6 +1027,27 @@ dialog.ui-caixa.suporte-admin-tela {
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
+}
+.catalogo-ui [data-descricao-carne] {
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 10px;
+}
+.catalogo-ui [data-descricao-carne] p {
+  margin: 10px 0 0;
+  color: #ccc;
+  font-size: 14px;
+}
+.catalogo-ui [data-descricao-carne] details {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #444;
+}
+.catalogo-ui [data-descricao-carne] summary {
+  cursor: pointer;
+}
+.catalogo-ui [data-descricao-carne] .catalogo-campo-ui:last-child {
+  margin-bottom: 0;
 }
 .catalogo-ui input:not([type="checkbox"]):not([type="radio"]),
 .catalogo-ui textarea,

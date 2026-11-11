@@ -1,15 +1,31 @@
 /* Janelas de personalização usam os campos do rascunho sem gravar no banco. */
-function abrirPagamentoEditorUI(p, recebido, aoMudar) {
-  const d = janelaEditorUI("Forma de pagamento"),
+function abrirPagamentoEditorUI(p, recebido, aoMudar, recebimentoOriginal = null) {
+  const corrigindo = recebimentoOriginal !== null;
+  const d = janelaEditorUI(corrigindo ? "Corrigir recebimento" : "Forma de pagamento"),
     box = d.querySelector(".editor-corpo-ui");
   const saldo = Math.max(0, calcularEdicaoPedidoUI(p).valorTotal - recebido);
+  const diferenca = corrigindo
+    ? centavosOperacao(recebimentoOriginal) - centavosOperacao(saldo)
+    : 0;
+  const cabecalho = corrigindo
+    ? `<p>Já recebido <strong>${moedaOperacao(recebimentoOriginal)}</strong></p><p>Valor a distribuir <strong>${moedaOperacao(saldo)}</strong></p>${diferenca > 0 ? `<p class="editor-alerta-ui">${moedaOperacao(diferenca / 100)} ficam separados como valor a devolver. Esta correção não registra estorno.</p>` : ""}`
+    : `<p>Falta receber: <strong>${moedaOperacao(saldo)}</strong></p>`;
+  if (corrigindo && saldo === 0) {
+    box.innerHTML = `${cabecalho}<button type="button">Separar valor a devolver</button>`;
+    box.querySelector("button").onclick = () => {
+      p.formas = [];
+      aoMudar();
+      d.close();
+    };
+    return;
+  }
   let modo = p.formas?.length > 1 ? "misto" : "unico";
   const valores = Object.fromEntries((p.formas || []).map((f) => [f.forma, Number(f.valor)]));
   const opcoes = ["Pix", "Dinheiro", "Débito", "Crédito"];
   if (p.pagamento === "Cartão" || p.formas?.some((f) => f.forma === "Cartão"))
     opcoes.push("Cartão");
   const render = () => {
-    box.innerHTML = `<p>Falta receber: <strong>${moedaOperacao(saldo)}</strong></p><div class="editor-acoes-ui"><button type="button" data-modo="unico">Uma forma</button><button type="button" data-modo="misto">Mais de uma forma</button></div><form>${modo === "unico" ? `<label>Pagamento<select name="forma">${opcoes.map((v) => `<option ${v === p.pagamento ? "selected" : ""}>${v}</option>`).join("")}</select></label>` : opcoes.map((v) => campoEditorUI(v + " (R$)", valores[v] || 0, "number", `data-forma="${v}" min="0" step="0.01"`)).join("")}<p role="status"></p><footer><button type="submit">Usar pagamento</button></footer></form>`;
+    box.innerHTML = `${cabecalho}<div class="editor-acoes-ui"><button type="button" data-modo="unico">Uma forma</button><button type="button" data-modo="misto">Mais de uma forma</button></div><form>${modo === "unico" ? `<label>Pagamento<select name="forma">${opcoes.map((v) => `<option ${v === p.pagamento ? "selected" : ""}>${v}</option>`).join("")}</select></label>` : `<div class="editor-grade-ui">${opcoes.map((v) => campoEditorUI(v + " (R$)", valores[v] || "", "number", `data-forma="${v}" min="0" step="0.01" placeholder="0,00"`)).join("")}</div>`}<p role="status"></p><footer><button type="submit">${corrigindo ? "Usar divisão" : "Usar pagamento"}</button></footer></form>`;
     box.querySelectorAll("[data-modo]").forEach(
       (b) =>
         (b.onclick = () => {
@@ -33,8 +49,9 @@ function abrirPagamentoEditorUI(p, recebido, aoMudar) {
         (formas.length < 2 ||
           centavosOperacao(formas.reduce((n, f) => n + f.valor, 0)) !== centavosOperacao(saldo))
       ) {
-        box.querySelector("[role=status]").textContent =
-          "Informe pelo menos duas formas, somando o saldo que falta receber.";
+        box.querySelector("[role=status]").textContent = corrigindo
+          ? `Informe pelo menos duas formas que somem ${moedaOperacao(saldo)}.`
+          : "Informe pelo menos duas formas, somando o saldo que falta receber.";
         return;
       }
       p.formas = formas;

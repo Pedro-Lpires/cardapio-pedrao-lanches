@@ -196,7 +196,7 @@ async function iniciarAcessoPaginaEquipeUI(pagina = location.pathname.split("/")
     }
     atualizarIdentidadeEquipeUI(perfil);
     if (perfil.admin && typeof adminAvancadoLiberado !== "undefined") adminAvancadoLiberado = true;
-    if (perfil.admin) {
+    if (perfil.admin && pagina !== "financeiro.html") {
       const sair = document.createElement("button");
       sair.type = "button";
       sair.className = "acesso-equipe-sair-ui";

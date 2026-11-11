@@ -3,7 +3,9 @@ const fs = require("node:fs"),
   assert = require("node:assert/strict");
 const dados = new Map(),
   memoria = new Map(),
-  ouvintes = new Map();
+  ouvintes = new Map(),
+  eventos = new Map(),
+  timers = new Map();
 let falhar = false,
   urlAtual = "https://loja.exemplo/autoatendimento.html?mesa=2",
   gravacoes = 0;
@@ -35,6 +37,7 @@ const c = vm.createContext({
   CHAVE_SESSAO_AUTOATENDIMENTO: "sessaoAutoatendimentoId",
   mesaAutoatendimentoId: "mesa2",
   sessaoAutoatendimentoAtual: null,
+  mesaAutoatendimentoAtual: { numero: 2 },
   carrinhoAutoatendimento: [{}],
   document: { getElementById: () => area },
   location: { href: urlAtual },
@@ -43,7 +46,12 @@ const c = vm.createContext({
       urlAtual = u;
     },
   },
-  addEventListener() {},
+  addEventListener: (tipo, fn) => eventos.set(tipo, fn),
+  setTimeout: (fn) => {
+    timers.set(1, fn);
+    return 1;
+  },
+  clearTimeout: (id) => timers.delete(id),
   alert() {},
   obterJanelaDiaOperacional: () => ({ inicioMs: 100, fimMs: 1000 }),
   db: { collection: (n) => ({ doc: (id) => ref(n + "/" + id) }) },
@@ -127,11 +135,27 @@ function preparar() {
   assert.equal((await c.recuperarSessaoDaMesaAutoUI()).id, "s2");
   preparar();
   dados.get("sessoesMesa/s2").pedidoEnviado = false;
-  assert.equal(
-    (await c.recuperarSessaoDaMesaAutoUI()).sessaoEncerrada,
-    true,
-    "Rascunho antigo expira; comanda aberta enviada pode continuar",
-  );
+  const expirado = await c.recuperarSessaoDaMesaAutoUI();
+  assert.equal(expirado.rascunhoExpirado, true);
+  let reinicios = 0;
+  c.iniciarAutoatendimento = async () => reinicios++;
+  c.sessaoAutoatendimentoAtual = { id: "s2", pedidoEnviado: false, criadoEmMs: 10 };
+  await eventos.get("pageshow")();
+  // O evento inicia a conferência assíncrona.
+  await Promise.resolve();
+  assert.equal(reinicios, 1, "Voltar à aba antiga confere o dia antes de retomar o cardápio");
+  memoria.set("clientePedrao", "conta-lembrada");
+  c.limparRascunhoAntigoAutoUI();
+  assert.equal(c.sessaoAutoatendimentoAtual, null);
+  assert.equal(c.carrinhoAutoatendimento.length, 0);
+  assert.equal(memoria.get("clientePedrao"), "conta-lembrada");
+  c.sessaoAutoatendimentoAtual = { pedidoEnviado: false, criadoEmMs: 500 };
+  await c.conferirValidadeRascunhoAutoUI();
+  assert.equal(reinicios, 1, "Visita do mesmo dia continua no cardápio");
+  assert.equal(timers.size, 1, "Aba aberta agenda a conferência na virada");
+  c.sessaoAutoatendimentoAtual = { pedidoEnviado: true, criadoEmMs: 10 };
+  c.agendarExpiracaoRascunhoAutoUI();
+  assert.equal(timers.size, 0, "Pedido enviado depende da comanda aberta");
   preparar();
   c.acompanharSessaoEnviadaAutoUI();
   assert.equal(ouvintes.size, 2);
@@ -149,6 +173,24 @@ function preparar() {
     false,
     "Aba antiga não cria chamados após encerrar",
   );
+  const fonteAuto = fs.readFileSync("js/autoatendimento.js", "utf8");
+  let em = Date.parse("2026-11-11T05:59:59Z");
+  class Relogio extends Date {
+    static now() {
+      return em;
+    }
+  }
+  const horario = vm.createContext({ Date: Relogio, Intl });
+  vm.runInContext(
+    fonteAuto.slice(
+      fonteAuto.indexOf("function obterJanelaDiaOperacional("),
+      fonteAuto.indexOf("function obterNumeroMesaDaUrl("),
+    ),
+    horario,
+  );
+  assert.equal(horario.obterJanelaDiaOperacional().inicioMs, Date.parse("2026-11-10T06:00:00Z"));
+  em += 1000;
+  assert.equal(horario.obterJanelaDiaOperacional().inicioMs, Date.parse("2026-11-11T06:00:00Z"));
   console.log(
     "PASS: retoma por mesa sem reenviar; legado, outra mesa/aparelho, falha temporária, fechamento/cancelamento, mesa livre, assinaturas e aba antiga bloqueada.",
   );

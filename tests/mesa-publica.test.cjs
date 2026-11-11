@@ -123,6 +123,14 @@ const item = { produtoId: "bagunca", quantidade: 1, tipoCarne: "artesanal", prec
     true,
     "Carrinho de outro dia não abre atendimento",
   );
+  assert.equal((await f.mesas.retomar(visita)).rascunhoExpirado, true);
+  const novaVisita = await f.mesas.iniciar({
+    ...visita,
+    segredo: "9".repeat(64),
+    nome: "Nome novo",
+  });
+  assert.equal(novaVisita.sessao.nome, "Nome novo");
+  assert.equal(novaVisita.sessao.pedidoEnviado, false);
   f = montar();
   const conta = { ...visita, authorization: "Bearer cliente" };
   const criada = await f.mesas.iniciar(conta);

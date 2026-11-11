@@ -229,6 +229,73 @@ function tiposCarneProdutoOperacao(produto) {
   const principal = produto.tipoBase === "hamburguer" ? "artesanal" : produto.tipoBase;
   return tipos.sort((a, b) => Number(b.valor === principal) - Number(a.valor === principal));
 }
+const marcadorCarneDescricaoOperacao = "{carne}";
+const nomesCarneDescricaoOperacao = {
+  artesanal: "hambúrguer artesanal",
+  industrial: "hambúrguer industrial",
+  frango: "filé de frango",
+  file: "filé mignon",
+};
+function modeloDescricaoCarneOperacao(produto) {
+  if (String(produto.categoria || "").toLowerCase() !== "lanches") return null;
+  const dados = produto.descricaoModeloCarne?.includes(marcadorCarneDescricaoOperacao)
+    ? { modelo: produto.descricaoModeloCarne, carnes: produto.descricaoCarnes || {} }
+    : inferirModeloDescricaoCarneOperacao(produto);
+  if (!dados || !/^burrito cuiabano$/i.test(produto.nome?.trim())) return dados;
+
+  const carnes = { ...dados.carnes };
+  if (!carnes.frango || /^filé de frango$/i.test(carnes.frango))
+    carnes.frango = "filé de frango triturado";
+  const modelo = dados.modelo
+    .replace(/\s*\*\s*\(opção de substituir o hamb[úu]rguer por filé de frango\)\s*$/i, "")
+    .replace(/\bmolho vermelho\b(?!\s*\()/i, "molho vermelho (picante)");
+  return { modelo, carnes };
+}
+function inferirModeloDescricaoCarneOperacao(produto) {
+  const tipos = tiposCarneProdutoOperacao(produto);
+  if (tipos.length < 2) return null;
+  const principal = tipos[0].valor;
+  const padrao = {
+    artesanal:
+      /\bhamb[úu]rguer(?:es)? (?:artesanal|industrial|artesanais|industriais)(?: triturado)?\b/gi,
+    industrial:
+      /\bhamb[úu]rguer(?:es)? (?:artesanal|industrial|artesanais|industriais)(?: triturado)?\b/gi,
+    frango: /\bfil[ée] de frango\b/gi,
+    file: /\bfil[ée] mignon\b/gi,
+  }[principal];
+  const ingredientes = String(produto.descricao || produto.desc || "").replace(
+    /\s*\*\s*\(opção de substituir o hamb[úu]rguer por filé de frango\)\s*$/i,
+    "",
+  );
+  const partes = [...ingredientes.matchAll(padrao)];
+  if (partes.length !== 1) return null;
+  const [trecho] = partes[0];
+  const carnes = { [principal]: trecho };
+  if (principal === "artesanal" || principal === "industrial") {
+    carnes.artesanal = trecho.replace(/industria(l|is)/i, (_, final) =>
+      final === "is" ? "artesanais" : "artesanal",
+    );
+    carnes.industrial = trecho.replace(/artesana(l|is)/i, (_, plural) =>
+      plural === "is" ? "industriais" : "industrial",
+    );
+  }
+  return { modelo: ingredientes.replace(trecho, marcadorCarneDescricaoOperacao), carnes };
+}
+function descricaoProdutoComCarneOperacao(produto, tipo) {
+  const dados = modeloDescricaoCarneOperacao(produto);
+  if (!dados) return produto.descricao || produto.desc || "";
+  const opcoes = tiposCarneProdutoOperacao(produto);
+  const chave = String(tipo || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  const escolhido = opcoes.find((opcao) => opcao.valor === chave) || opcoes[0];
+  if (!escolhido) return produto.descricao || produto.desc || "";
+  return dados.modelo.replaceAll(
+    marcadorCarneDescricaoOperacao,
+    () => dados.carnes[escolhido.valor] || nomesCarneDescricaoOperacao[escolhido.valor],
+  );
+}
 function aplicarTipoComboOperacao(produto, tipo) {
   const opcoes = tiposCarneProdutoOperacao(produto);
   if (opcoes.length < 2) return produto;
@@ -1438,7 +1505,19 @@ async function carregarCentralOperacao() {
             : valorRecebidoPedidoOperacao(r) > 0
               ? `Falta receber ${moedaOperacao(saldoPedidoOperacao(r))}`
               : "Pagamento ainda não confirmado";
-          return `<article class="registro-operacao">${!idCentralOperacao && r.colecao === "pedidos" && !r.mesa && !r.comandaId && !r.vinculadoComanda ? `<button class="cancelar-pedido-x-ui" type="button" data-cancelar-pedido-ui hidden aria-label="Cancelar pedido de ${escaparOperacao(r.nome || r.cliente || "cliente")}" onclick="cancelarPedidoPerfilUI('${escaparOperacao(r.id)}')">×</button>` : ""}<h3>${escaparOperacao(titulo)} — ${escaparOperacao(r.nome || r.cliente || "")}</h3><div class="pedido-lista-valor-ui"><p>${escaparOperacao(r.tipo || "Consumo no local")} · ${moedaOperacao(r.valorTotal)}</p>${!idCentralOperacao && r.colecao === "pedidos" && /^(Entrega|Retirada)$/i.test(r.tipo || "") && typeof abrirEditorPedidoUI === "function" ? `<button type="button" onclick="editarPedidoOperacao('${escaparOperacao(r.id)}')">Editar</button>` : ""}</div>${Number(r.descontoCreditoEntrega) > 0 ? `<p class="beneficio-pedido-ui">Benefícios: ${moedaOperacao(r.descontoCreditoEntrega)} no frete · taxa integral do motoboy: ${moedaOperacao(r.taxaEntrega)}</p>` : ""}${avisoDistanciaEntregaOperacao(r)}<p class="recebimento-status ${recebido ? "recebido" : ""}">${status}${r.pagamento ? " · " + escaparOperacao(r.pagamento) : ""}</p>${Number(r.valorADevolver || 0) > 0 ? `<p class="recebimento-status">Valor a devolver: ${moedaOperacao(r.valorADevolver)}</p>` : ""}${!idCentralOperacao ? acoesResumoPedidoOperacao(r, recebido) : `${itensHtmlOperacao(r.itens || [])}${r.observacao ? `<section class="molhos-atendente"><h4>Observação do pedido</h4><p>${escaparOperacao(r.observacao).replaceAll("\n", "<br>")}</p></section>` : ""}${acoes}<div class="registro-acoes-secundarias-ui"><button onclick="solicitarDocumentoClienteOperacao(${args})">Dados para nota fiscal</button></div>`}</article>`;
+          const formaExibida =
+            recebido && r.colecao === "pedidos"
+              ? [
+                  ...new Set(
+                    recebimentosPedidoOperacao(r).flatMap((recebimento) =>
+                      (recebimento.formas || [{ forma: recebimento.forma }])
+                        .map((f) => f.forma)
+                        .filter(Boolean),
+                    ),
+                  ),
+                ].join(" + ")
+              : r.pagamento;
+          return `<article class="registro-operacao">${!idCentralOperacao && r.colecao === "pedidos" && !r.mesa && !r.comandaId && !r.vinculadoComanda ? `<button class="cancelar-pedido-x-ui" type="button" data-cancelar-pedido-ui hidden aria-label="Cancelar pedido de ${escaparOperacao(r.nome || r.cliente || "cliente")}" onclick="cancelarPedidoPerfilUI('${escaparOperacao(r.id)}')">×</button>` : ""}<h3>${escaparOperacao(titulo)} — ${escaparOperacao(r.nome || r.cliente || "")}</h3><div class="pedido-lista-valor-ui"><p>${escaparOperacao(r.tipo || "Consumo no local")} · ${moedaOperacao(r.valorTotal)}</p>${!idCentralOperacao && r.colecao === "pedidos" && /^(Entrega|Retirada)$/i.test(r.tipo || "") && typeof abrirEditorPedidoUI === "function" ? `<button type="button" onclick="editarPedidoOperacao('${escaparOperacao(r.id)}')">Editar</button>` : ""}</div>${Number(r.descontoCreditoEntrega) > 0 ? `<p class="beneficio-pedido-ui">Benefícios: ${moedaOperacao(r.descontoCreditoEntrega)} no frete · taxa integral do motoboy: ${moedaOperacao(r.taxaEntrega)}</p>` : ""}${avisoDistanciaEntregaOperacao(r)}<p class="recebimento-status ${recebido ? "recebido" : ""}">${status}${formaExibida ? " · " + escaparOperacao(formaExibida) : ""}</p>${Number(r.valorADevolver || 0) > 0 ? `<p class="recebimento-status">Valor a devolver: ${moedaOperacao(r.valorADevolver)}</p>` : ""}${!idCentralOperacao ? acoesResumoPedidoOperacao(r, recebido) : `${itensHtmlOperacao(r.itens || [])}${r.observacao ? `<section class="molhos-atendente"><h4>Observação do pedido</h4><p>${escaparOperacao(r.observacao).replaceAll("\n", "<br>")}</p></section>` : ""}${acoes}<div class="registro-acoes-secundarias-ui"><button onclick="solicitarDocumentoClienteOperacao(${args})">Dados para nota fiscal</button></div>`}</article>`;
         })
         .join("") || "<p>Nenhum pedido pendente neste período.</p>";
     if (idCentralOperacao && lista.length) {

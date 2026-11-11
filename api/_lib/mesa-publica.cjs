@@ -40,6 +40,8 @@ function criarServicoMesaPublica({ db, auth, pedidos, consumirTentativa, agora =
     const m = await t.get(mr),
       cr = sessao.comandaId ? db.collection("comandas").doc(sessao.comandaId) : null;
     const comanda = cr ? await t.get(cr) : null;
+    const rascunhoExpirado =
+      !sessao.pedidoEnviado && diaPedido(sessao.criadoEmMs) !== diaPedido(agora());
     const encerrada =
       sessao.status !== "ativa" ||
       !m.exists ||
@@ -48,13 +50,23 @@ function criarServicoMesaPublica({ db, auth, pedidos, consumirTentativa, agora =
           comanda.data().status !== "Aberta" ||
           comanda.data().sessaoAutoatendimentoId !== c.id ||
           m.data().ocupada !== true
-        : diaPedido(sessao.criadoEmMs) !== diaPedido(agora()) ||
+        : rascunhoExpirado ||
           (sessao.rodadaAutoatendimento ?? 0) !== (m.data().rodadaAutoatendimento ?? 0));
-    return { sessao, sr, mr, cr, mesa: m.data(), comanda: comanda?.data(), encerrada };
+    return {
+      sessao,
+      sr,
+      mr,
+      cr,
+      mesa: m.data(),
+      comanda: comanda?.data(),
+      encerrada,
+      rascunhoExpirado,
+    };
   }
   async function resposta(v) {
     if (!v) return { sessao: null };
-    if (v.encerrada) return { sessaoEncerrada: true };
+    if (v.encerrada)
+      return { sessaoEncerrada: true, ...(v.rascunhoExpirado ? { rascunhoExpirado: true } : {}) };
     const uid = v.sessao.visitaAuthUid;
     return {
       sessao: v.sessao,

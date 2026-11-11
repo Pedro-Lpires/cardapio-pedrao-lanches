@@ -82,6 +82,9 @@ function resumoEntradasFinanceiro(entradas, catalogo = []) {
     for (const f of e.formas || [])
       r.formas[f.forma || "Não informado"] =
         (r.formas[f.forma || "Não informado"] || 0) + Math.round(Number(f.valor || 0) * 100);
+    const semForma = Math.round(Number(e.valorSemForma || 0) * 100);
+    if (semForma > 0)
+      r.formas["Sem forma definida"] = (r.formas["Sem forma definida"] || 0) + semForma;
     if (e.modo === "valor") {
       r.categorias["Pagamento por valor sem categoria"] += liquido;
       continue;

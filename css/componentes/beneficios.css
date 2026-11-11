@@ -167,6 +167,95 @@
   border-radius: 10px;
   margin: 14px 0;
 }
+#beneficios-cliente-ui {
+  display: grid;
+  gap: 20px;
+}
+#beneficios-cliente-ui form {
+  margin: 0;
+}
+#beneficios-cliente-ui [data-conta]:empty {
+  display: none;
+}
+#beneficios-cliente-ui [data-conta] {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+#beneficios-cliente-ui .beneficios-conta-resumo-ui {
+  margin: 0;
+  padding: 16px;
+  background: #242424;
+}
+.beneficios-conta-resumo-ui > strong {
+  display: block;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.beneficios-conta-resumo-ui dl {
+  display: grid;
+  margin: 12px 0 0;
+}
+.beneficios-conta-resumo-ui dl > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 10px 0;
+  border-top: 1px solid #444;
+}
+.beneficios-conta-resumo-ui dt {
+  color: #d0d0d0;
+  font-size: 14px;
+}
+.beneficios-conta-resumo-ui dd {
+  margin: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.beneficios-disponivel-ui dd {
+  color: #64e58a;
+  font-weight: 700;
+}
+#beneficios-cliente-ui [data-ajuste] {
+  padding: 16px;
+  border: 1px solid #555;
+  border-radius: 12px;
+  background: #1b1b1b;
+  gap: 20px;
+}
+#beneficios-cliente-ui h4 {
+  margin: 0;
+  font-size: 16px;
+}
+#beneficios-cliente-ui .beneficios-check-ui {
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 9px;
+  background: #252525;
+}
+#beneficios-cliente-ui textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+#beneficios-cliente-ui button {
+  margin: 0;
+  min-height: 42px;
+}
+.beneficios-historico-ui {
+  border: 1px solid #555;
+  border-radius: 10px;
+  padding: 14px;
+}
+.beneficios-historico-ui summary {
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.beneficios-historico-ui [data-historico] {
+  margin-top: 14px;
+}
 .beneficios-menu-ui {
   display: flex;
   flex-wrap: wrap;

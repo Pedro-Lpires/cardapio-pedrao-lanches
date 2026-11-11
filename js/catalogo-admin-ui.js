@@ -161,6 +161,60 @@ function organizarFormularioProdutoCatalogoUI(prefixo, produto = null) {
         el.step = id.includes("preco") ? "0.01" : "1";
       }
     }
+    const grupoCarnes = grupo("Opções disponíveis");
+    const tituloCarnes = grupoCarnes.querySelector("h3");
+    tituloCarnes.textContent = "Tipos de carne";
+    tituloCarnes.after(campo("tipo-base").closest("label"));
+
+    const descricao = campo("descricao");
+    const grupoDescricao = document.createElement("div");
+    grupoDescricao.className = "grupo-form-admin";
+    grupoDescricao.append(descricao.closest("label"));
+    grupoCarnes.after(grupoDescricao);
+    const dadosCarne = produto && modeloDescricaoCarneOperacao(produto);
+    if (dadosCarne) descricao.value = dadosCarne.modelo;
+    const opcoesDescricao = document.createElement("div");
+    opcoesDescricao.dataset.descricaoCarne = "";
+    opcoesDescricao.innerHTML = `<button type="button">Inserir carne escolhida</button>
+      <p>Use <strong>{carne}</strong> no lugar do nome completo da carne. Exemplo: <strong>Pão, {carne}, alface e tomate.</strong></p>
+      <details><summary>Personalizar texto de cada carne (opcional)</summary>
+        <p>Deixe em branco para usar o nome em cinza. Se quiser personalizar, escreva o trecho completo, como “hambúrguer industrial triturado”.</p>
+        ${Object.entries({
+          artesanal: "Artesanal",
+          industrial: "Industrial",
+          frango: "Frango",
+          file: "Filé mignon",
+        })
+          .map(
+            ([tipo, nome]) =>
+              `<label class="catalogo-campo-ui"><span>${nome}</span><input type="text" id="${prefixo}descricao-carne-${tipo}" placeholder="${nomesCarneDescricaoOperacao[tipo]}"></label>`,
+          )
+          .join("")}
+      </details>`;
+    descricao.closest("label").after(opcoesDescricao);
+    for (const [tipo, nome] of Object.entries(dadosCarne?.carnes || {})) {
+      const entrada = campo("descricao-carne-" + tipo);
+      if (entrada) entrada.value = nome;
+    }
+    const mostrarOpcoesDescricao = () => {
+      opcoesDescricao.querySelector("details").hidden = !descricao.value.includes(
+        marcadorCarneDescricaoOperacao,
+      );
+    };
+    opcoesDescricao.querySelector("button").onclick = () => {
+      if (!descricao.value.includes(marcadorCarneDescricaoOperacao)) {
+        descricao.setRangeText(
+          marcadorCarneDescricaoOperacao,
+          descricao.selectionStart,
+          descricao.selectionEnd,
+          "end",
+        );
+      }
+      mostrarOpcoesDescricao();
+      descricao.focus();
+    };
+    descricao.addEventListener("input", mostrarOpcoesDescricao);
+    mostrarOpcoesDescricao();
     const qtd = campo("qtd-lanches-combo");
     if (qtd) {
       const anterior = qtd.closest("label").previousElementSibling;
@@ -199,6 +253,8 @@ function atualizarCategoriaProdutoCatalogoUI(prefixo) {
   const categoria = campo("categoria").value,
     carne = ["lanches", "combos"].includes(categoria),
     base = campo("tipo-base").value;
+  const opcoesDescricao = form.querySelector("[data-descricao-carne]");
+  opcoesDescricao.hidden = categoria !== "lanches";
   campo("tipo-base").closest("label").hidden = !carne;
   const grupo = (nome) => form.querySelector('[data-grupo-catalogo="' + nome + '"]');
   grupo("Opções disponíveis").hidden = !carne;
@@ -206,10 +262,7 @@ function atualizarCategoriaProdutoCatalogoUI(prefixo) {
   for (const tipo of ["artesanal", "industrial", "frango", "file"]) {
     const el = campo("op-" + tipo),
       principal = base === "hamburguer" ? "artesanal" : base;
-    if (el.disabled && tipo !== principal) {
-      el.checked = false;
-      el.disabled = false;
-    }
+    if (el.disabled && tipo !== principal) el.disabled = false;
     if (carne && tipo === principal) {
       el.checked = true;
       el.disabled = true;
@@ -221,6 +274,7 @@ function atualizarCategoriaProdutoCatalogoUI(prefixo) {
         : el.checked
       : tipo === "artesanal";
     campo(id).closest(".catalogo-campo-ui").hidden = !visivel;
+    campo("descricao-carne-" + tipo).closest("label").hidden = !el.checked;
   }
   campo("preco").closest("label").querySelector("span").textContent =
     carne && campo("op-artesanal").checked ? "Preço artesanal" : "Preço";
@@ -244,6 +298,26 @@ function atualizarCategoriaProdutoCatalogoUI(prefixo) {
         ? "block"
         : "none";
   }
+}
+function salvarDescricaoCarneCatalogoUI(produto, prefixo) {
+  if (!produto.descricao.includes(marcadorCarneDescricaoOperacao)) {
+    produto.descricaoModeloCarne = "";
+    produto.descricaoCarnes = {};
+    return;
+  }
+  if (produto.categoria !== "lanches" || !tiposCarneProdutoOperacao(produto).length) {
+    throw Error("Escolha uma carne para usar {carne} na descrição do lanche.");
+  }
+  produto.descricaoModeloCarne = produto.descricao;
+  produto.descricaoCarnes = Object.fromEntries(
+    Object.keys(nomesCarneDescricaoOperacao)
+      .map((tipo) => [
+        tipo,
+        document.getElementById(prefixo + "descricao-carne-" + tipo)?.value.trim(),
+      ])
+      .filter(([, texto]) => texto),
+  );
+  produto.descricao = descricaoProdutoComCarneOperacao(produto);
 }
 function normalizarProdutoCatalogoUI(p) {
   const carne = ["lanches", "combos"].includes(p.categoria);

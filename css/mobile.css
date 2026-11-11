@@ -216,6 +216,27 @@ button {
   color: #c9c9c9;
   font-size: 14px;
 }
+.rodape-endereco {
+  width: fit-content;
+  max-width: 100%;
+  margin: 16px auto 8px;
+  font-style: normal;
+  text-align: left;
+}
+.rodape-endereco a {
+  display: grid;
+  gap: 4px;
+  padding: 4px 6px;
+  color: #c9c9c9;
+  font-size: 13px;
+  line-height: 1.4;
+  text-decoration: none;
+}
+.rodape-endereco strong {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .rodape-redes a {
   display: inline-flex;
   justify-content: center;
@@ -231,7 +252,7 @@ button {
   max-width: 430px;
   margin: 12px auto;
 }
-.rodape-parceiro {
+.rodape-parceiros a.rodape-parceiro {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -240,6 +261,25 @@ button {
   background: #202020;
   border: 1px solid #444;
   border-radius: 12px;
+  padding-inline: 8px;
+}
+.rodape-parceiros a.rodape-parceiro:hover {
+  border-color: #e60016;
+}
+.rodape-endereco a:focus-visible,
+.rodape-parceiro:focus-visible {
+  outline: 2px solid #ff6977;
+  outline-offset: 3px;
+}
+.rodape-documentos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 16px;
+  margin-top: 24px;
+}
+.rodape-documentos + .rodape-copy {
+  margin-top: 4px;
 }
 /* section — perfil e acesso */
 .login-atendente {

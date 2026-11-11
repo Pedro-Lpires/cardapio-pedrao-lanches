@@ -68,6 +68,10 @@ function gerarItens(lista, containerId, imagemPadrao) {
       if (containerId.includes("bebidas")) categoria = "Bebidas";
       else if (containerId.includes("batatas")) categoria = "Batatas";
       else if (containerId.includes("combos")) categoria = "Combos";
+      const descricao =
+        categoria === "Lanches"
+          ? descricaoProdutoComCarneOperacao(item.categoria ? item : { ...item, categoria })
+          : item.desc || item.descricao || "";
 
       const card = document.createElement("div");
       card.classList.add("card");
@@ -83,7 +87,7 @@ function gerarItens(lista, containerId, imagemPadrao) {
 
     <div class="card-info">
         <h3>${item.nome}</h3>
-      <p>${item.desc || item.descricao || ""}</p>
+      <p>${escaparOperacao(descricao)}</p>
         <span class="preco">R$ ${item.preco.toFixed(2)}</span>
         ${item.esgotado ? `<span class="tag-esgotado">ESGOTADO</span>` : ""}
     </div>
@@ -194,7 +198,6 @@ function abrirProduto(item, categoria = "Lanches") {
   document.getElementById("modal-img").src = resolverImagemProduto(
     item.imagem || item.img || "lanche.png",
   );
-  document.getElementById("modal-desc").innerText = item.desc || item.descricao || "";
   document.getElementById("modal-nome").innerText = item.nome;
   document.getElementById("obs-produto").value = "";
   const categoriaObs = String(item.categoria || categoria).toLowerCase();
@@ -211,7 +214,7 @@ function abrirProduto(item, categoria = "Lanches") {
 
   const boxAdicionais = document.getElementById("box-adicionais-produto");
 
-  montarOpcoes(item);
+  montarOpcoes(item.categoria ? item : { ...item, categoria });
   if (categoria === "Bebidas" || categoria === "Combos") {
     boxAdicionais.style.display = "none";
   } else {
@@ -239,6 +242,8 @@ function toggleAdicionaisProduto() {
 }
 function montarOpcoes(item) {
   const div = document.getElementById("modal-opcoes-tipo");
+  const descricao = document.getElementById("modal-desc");
+  descricao.textContent = descricaoProdutoComCarneOperacao(item);
   const tipos = tiposCarneProdutoOperacao(item);
   div.dataset.quantidade = String(tipos.length);
   if (tipos.length <= 1) {
@@ -261,6 +266,10 @@ function montarOpcoes(item) {
         "</small></label>",
     )
     .join("");
+  div.onchange = (e) => {
+    if (e.target.name === "tipo-produto" && String(item.categoria).toLowerCase() !== "combos")
+      descricao.textContent = descricaoProdutoComCarneOperacao(item, e.target.value);
+  };
 }
 function montarAdicionais(categoria = "Lanches") {
   const lista = document.getElementById("lista-adicionais");

@@ -30,7 +30,7 @@ window.lanches = [
     preco: 20,
     precoIndustrial: 18,
     precoFrango: 20,
-    desc: "Pão, hambúrguer artesanal triturado, molho vermelho, alface e tomate picado, presunto mussarela. * (opção de substituir o hamburguer por filé de frango)",
+    desc: "Pão, hambúrguer artesanal triturado, molho vermelho (picante), alface e tomate picado, presunto mussarela.",
     img: "images/lanches/burrito-cuiabano.webp",
   },
   {

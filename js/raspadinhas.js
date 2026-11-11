@@ -268,8 +268,23 @@ async function abrirRaspadinhaCliente(codigo) {
   } catch {}
   d.insertAdjacentHTML(
     "beforeend",
-    `<div class="raspa-personagem-ui" hidden></div><div class="raspa-cartao"><div><strong>Você ganhou ${escaparOperacao(r.premio)}!</strong>${r.imagemPremio && /^(https:\/\/|images\/)/i.test(r.imagemPremio) ? `<img class="raspa-premio-imagem" src="${escaparOperacao(r.imagemPremio)}" alt="${escaparOperacao(r.premio)}">` : ""}</div><canvas width="600" height="360" aria-label="Raspe para revelar seu prêmio"></canvas></div><p id="raspa-codigo" hidden>Código do prêmio: <strong>${escaparOperacao(r.codigo)}</strong></p><p id="raspa-revelacao-status" role="status"></p><button type="button" id="revelar-raspa">Revelar prêmio</button><p>${r.status === "usada" ? "Prêmio já utilizado." : r.status === "cancelada" ? "Prêmio cancelado." : Date.now() >= r.expiraEm ? "Prêmio vencido." : "Disponível até " + new Date(r.expiraEm).toLocaleDateString("pt-BR")}</p><p>Próxima compra mínima: ${moedaOperacao(r.minimoResgate)}.</p><details class="raspa-condicoes-ui"><summary>Condições deste prêmio</summary><p class="raspa-termos">${escaparOperacao(r.termos)}</p></details>`,
+    `<div class="raspa-personagem-ui" hidden></div><div class="raspa-cartao"><div><strong>Você ganhou ${escaparOperacao(r.premio)}!</strong>${r.imagemPremio && /^(https:\/\/|images\/)/i.test(r.imagemPremio) ? `<img class="raspa-premio-imagem" src="${escaparOperacao(r.imagemPremio)}" alt="${escaparOperacao(r.premio)}">` : ""}</div><canvas width="600" height="360" aria-label="Raspe para revelar seu prêmio"></canvas></div><p id="raspa-codigo" hidden><button type="button" class="raspa-copiar-codigo-ui" aria-label="Copiar código do prêmio">Código do prêmio<strong>${escaparOperacao(r.codigo)}</strong><small>Toque para copiar</small></button><span class="raspa-copia-status-ui" role="status" aria-live="polite"></span></p><p id="raspa-revelacao-status" role="status"></p><button type="button" id="revelar-raspa">Revelar prêmio</button><p>${r.status === "usada" ? "Prêmio já utilizado." : r.status === "cancelada" ? "Prêmio cancelado." : Date.now() >= r.expiraEm ? "Prêmio vencido." : "Disponível até " + new Date(r.expiraEm).toLocaleDateString("pt-BR")}</p><p>Próxima compra mínima: ${moedaOperacao(r.minimoResgate)}.</p><details class="raspa-condicoes-ui"><summary>Condições deste prêmio</summary><p class="raspa-termos">${escaparOperacao(r.termos)}</p></details>`,
   );
+  const copiarCodigo = d.querySelector(".raspa-copiar-codigo-ui");
+  copiarCodigo.onclick = async () => {
+    const status = d.querySelector(".raspa-copia-status-ui");
+    try {
+      await navigator.clipboard.writeText(String(r.codigo));
+      status.textContent = "Código copiado! Envie ao atendente.";
+    } catch {
+      const selecao = window.getSelection();
+      const trecho = document.createRange();
+      trecho.selectNodeContents(copiarCodigo.querySelector("strong"));
+      selecao.removeAllRanges();
+      selecao.addRange(trecho);
+      status.textContent = "Selecione e copie o código para enviar ao atendente.";
+    }
+  };
   let revelando = false;
   async function revelar(animar = true) {
     if (revelando) return;
@@ -444,6 +459,10 @@ async function abrirResgateRaspadinha(somenteConsultar = false) {
   );
   d.querySelector("form").onsubmit = async (e) => {
     e.preventDefault();
+    const consultar = d.querySelector("form button");
+    if (consultar.disabled) return;
+    consultar.disabled = true;
+    consultar.textContent = "Consultando…";
     const resultado = d.querySelector(".raspa-resultado");
     try {
       const codigo = d.querySelector("[name=codigo]").value.trim().toUpperCase();
@@ -460,13 +479,29 @@ async function abrirResgateRaspadinha(somenteConsultar = false) {
         throw Error("O nome não corresponde ao dono deste prêmio.");
       validarUsoRaspadinha(r);
       if (somenteConsultar) {
-        resultado.innerHTML = `<div class="raspa-destinatario-ui"><strong>${escaparOperacao(r.premio)}</strong><p>${escaparOperacao(r.clienteNome)} · ${escaparOperacao(r.codigo)}</p><p>Prêmio disponível até ${new Date(r.expiraEm).toLocaleDateString("pt-BR")}.</p><p>Compra mínima para usar: ${moedaOperacao(r.minimoResgate)}.</p><p>${escaparOperacao(r.termos)}</p><p>Esta consulta não registra a entrega. Use “Entregar prêmio” quando entregar ao cliente.</p></div>`;
+        resultado.innerHTML = `<div class="raspa-destinatario-ui"><strong>${escaparOperacao(r.premio)}</strong><p>${escaparOperacao(r.clienteNome)} · ${escaparOperacao(r.codigo)}</p><p>Prêmio disponível até ${new Date(r.expiraEm).toLocaleDateString("pt-BR")}.</p><p>Compra mínima para usar: ${moedaOperacao(r.minimoResgate)}.</p><p class="raspa-termos">${escaparOperacao(r.termos)}</p><button type="button" data-entregar-premio>Entregar prêmio</button></div>`;
+        resultado.querySelector("[data-entregar-premio]").onclick = () => {
+          somenteConsultar = false;
+          d.querySelector("form").requestSubmit();
+        };
         return;
       }
       const compras = await comprasParaResgateRaspadinha(r);
-      resultado.innerHTML = `<h3>${escaparOperacao(r.premio)}</h3><p>${escaparOperacao(r.clienteNome)} · ${escaparOperacao(r.codigo)}</p><p>Mínimo da nova compra: ${moedaOperacao(r.minimoResgate)} · Válida até ${new Date(r.expiraEm).toLocaleDateString("pt-BR")}</p><p class="raspa-termos">${escaparOperacao(r.termos)}</p><label>Nova compra confirmada<select id="raspa-referencia"><option value="">Selecione a compra</option>${compras.map((c) => `<option value="${escaparOperacao(c.valor)}">${escaparOperacao(c.texto)}</option>`).join("")}</select></label><label><input id="raspa-conferido" type="checkbox"> Conferi a compra mínima e os termos</label><button id="raspa-usar" disabled>Usou · confirmar entrega do prêmio</button>`;
-      resultado.querySelector("#raspa-conferido").onchange = (e) =>
-        (resultado.querySelector("#raspa-usar").disabled = !e.target.checked);
+      resultado.innerHTML = `<h3>${escaparOperacao(r.premio)}</h3><p>${escaparOperacao(r.clienteNome)} · ${escaparOperacao(r.codigo)}</p><p>Mínimo da nova compra: ${moedaOperacao(r.minimoResgate)} · Válida até ${new Date(r.expiraEm).toLocaleDateString("pt-BR")}</p><p class="raspa-termos">${escaparOperacao(r.termos)}</p><label>Nova compra confirmada<select id="raspa-referencia"><option value="">Selecione a compra</option>${compras.map((c) => `<option value="${escaparOperacao(c.valor)}">${escaparOperacao(c.texto)}</option>`).join("")}</select></label><label class="raspa-confirmacao-ui"><input id="raspa-conferido" type="checkbox"><span>Conferi a compra mínima e os termos</span></label><button id="raspa-usar" type="button" disabled>Confirmar entrega do prêmio</button>`;
+      const atualizarConfirmacao = () => {
+        resultado.querySelector("#raspa-usar").disabled =
+          !resultado.querySelector("#raspa-conferido").checked ||
+          !resultado.querySelector("#raspa-referencia").value;
+      };
+      resultado.querySelector("#raspa-conferido").onchange = atualizarConfirmacao;
+      resultado.querySelector("#raspa-referencia").onchange = atualizarConfirmacao;
+      if (!compras.length) {
+        resultado.querySelector("#raspa-referencia").disabled = true;
+        resultado.insertAdjacentHTML(
+          "beforeend",
+          "<p>Nenhuma nova compra paga atingiu o mínimo deste prêmio. Confirme o pagamento da compra e consulte novamente.</p>",
+        );
+      }
       resultado.querySelector("#raspa-usar").onclick = async () => {
         const b = resultado.querySelector("#raspa-usar");
         b.disabled = true;
@@ -476,13 +511,16 @@ async function abrirResgateRaspadinha(somenteConsultar = false) {
             r.clienteId,
             resultado.querySelector("#raspa-referencia").value.trim(),
           );
-          resultado.textContent = "Uso registrado. Entregue: " + premio;
+          resultado.innerHTML = `<div class="raspa-entrega-sucesso-ui" role="status"><span aria-hidden="true">✓</span><div><strong>Prêmio entregue</strong><p>${escaparOperacao(premio)}</p></div></div>`;
         } catch (err) {
           resultado.textContent = err.message;
         }
       };
     } catch (err) {
       resultado.textContent = err.message;
+    } finally {
+      consultar.disabled = false;
+      consultar.textContent = "Consultar prêmio";
     }
   };
 }
@@ -971,8 +1009,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const menu = document.querySelector(".menu-atendente");
   if (menu) {
     const b = document.createElement("button");
-    b.textContent = "Raspadinha · validar prêmio";
-    b.onclick = abrirResgateRaspadinha;
+    b.textContent = "Raspadinha · entregar prêmio";
+    b.onclick = () => abrirResgateRaspadinha();
     menu.append(b);
   }
   // Somente pagamentos recentes; o histórico completo fica na conferência manual.

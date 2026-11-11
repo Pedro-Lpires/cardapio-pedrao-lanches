@@ -62,37 +62,17 @@ let configuracoesLanchesComboAuto = {};
 const CHAVE_SESSAO_AUTOATENDIMENTO = "sessaoAutoatendimentoId";
 
 function obterJanelaDiaOperacional() {
-  const agora = new Date();
-
-  let inicio;
-  let fim;
-
-  // =========================
-  // ANTES DAS 2H
-  // AINDA É O DIA ANTERIOR
-  // =========================
-
-  if (agora.getHours() < 2) {
-    inicio = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() - 1, 2, 0, 0, 0);
-
-    fim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), 2, 0, 0, 0);
-  }
-
-  // =========================
-  // A PARTIR DAS 2H
-  // NOVO DIA OPERACIONAL
-  // =========================
-  else {
-    inicio = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), 2, 0, 0, 0);
-
-    fim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1, 2, 0, 0, 0);
-  }
-
-  return {
-    inicioMs: inicio.getTime(),
-
-    fimMs: fim.getTime(),
-  };
+  const partes = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Cuiaba",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(Date.now() - 2 * 3600000));
+  const dia = ["year", "month", "day"]
+    .map((tipo) => partes.find((p) => p.type === tipo).value)
+    .join("-");
+  const inicioMs = Date.parse(dia + "T02:00:00-04:00");
+  return { inicioMs, fimMs: inicioMs + 86400000 };
 }
 
 function obterNumeroMesaDaUrl() {
@@ -192,7 +172,11 @@ async function iniciarAutoatendimento() {
   // PROCURAR SESSÃO DO CELULAR
   // =========================
 
-  const sessaoRecuperada = await recuperarSessaoAutoatendimento();
+  let sessaoRecuperada = await recuperarSessaoAutoatendimento();
+  if (sessaoRecuperada?.rascunhoExpirado) {
+    limparRascunhoAntigoAutoUI();
+    sessaoRecuperada = null;
+  }
 
   if (sessaoRecuperada?.sessaoEncerrada) {
     mostrarAtendimentoEncerradoAutoUI();
@@ -434,6 +418,7 @@ async function mostrarSessaoAutoatendimento() {
   if (!area) {
     return;
   }
+  agendarExpiracaoRascunhoAutoUI();
 
   // =========================
   // JÁ ENVIOU O PRIMEIRO PEDIDO
@@ -837,7 +822,7 @@ function renderizarCategoriaAutoatendimento(containerId, produtos) {
   produtos.forEach((produto) => {
     const imagem = produto.imagem || produto.img || "lanche.png";
 
-    const descricao = produto.descricao || produto.desc || "";
+    const descricao = descricaoProdutoComCarneOperacao(produto);
 
     const card = document.createElement("div");
 
@@ -871,7 +856,7 @@ function renderizarCategoriaAutoatendimento(containerId, produtos) {
 
 
                 <p>
-                    ${descricao}
+                    ${escaparOperacao(descricao)}
                 </p>
 
 
@@ -929,8 +914,6 @@ function abrirProdutoAutoatendimento(produtoId) {
   );
 
   document.getElementById("modal-nome-auto").textContent = produto.nome || "";
-
-  document.getElementById("modal-desc-auto").textContent = produto.descricao || produto.desc || "";
 
   document.getElementById("qtd-produto-auto").textContent = "1";
 
@@ -2325,6 +2308,7 @@ function editarItemCarrinhoAuto(index) {
 
     if (radioTipo) {
       radioTipo.checked = true;
+      atualizarDescricaoProdutoAuto();
     }
   }
 
@@ -2995,6 +2979,15 @@ async function confirmarEnvioPedidoAuto() {
   }
 }
 
+function atualizarDescricaoProdutoAuto() {
+  const tipo = document.querySelector(
+    '#modal-opcoes-tipo-auto input[name="tipo-produto-auto"]:checked',
+  );
+  document.getElementById("modal-desc-auto").textContent = descricaoProdutoComCarneOperacao(
+    produtoAutoAtual,
+    tipo?.value,
+  );
+}
 function montarTiposProdutoAuto(produto) {
   const area = document.getElementById("modal-opcoes-tipo-auto");
   if (!area) return;
@@ -3009,6 +3002,8 @@ function montarTiposProdutoAuto(produto) {
               `<label><input type="radio" name="tipo-produto-auto" value="${tipo.valor}" data-preco="${tipo.preco}" ${index === 0 ? "checked" : ""}><span>${tipo.nome}</span><small>${moedaOperacao(tipo.preco)}</small></label>`,
           )
           .join("");
+  area.onchange = atualizarDescricaoProdutoAuto;
+  atualizarDescricaoProdutoAuto();
 }
 function irParaCategoriaAuto(secaoId) {
   const secao = document.getElementById(secaoId);

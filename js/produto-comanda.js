@@ -28,6 +28,7 @@ let itemComandaEmEdicao = null;
 let quantidadeLanchesComboAtual = 0;
 let modoPersonalizacaoCombo = "";
 let contextoPainelProduto = "comanda";
+let produtoPainelAtual = null;
 let adicionaisPainelCacheUI = null;
 let adicionaisPainelBuscaUI = null;
 async function buscarAdicionaisPainelUI() {
@@ -117,6 +118,7 @@ async function abrirPainelProduto(comandaId, produtoId) {
   // =========================
 
   const tipos = tiposCarneProdutoOperacao(produto);
+  produtoPainelAtual = produto;
   const htmlOpcoes =
     tipos.length > 1
       ? '<hr><h3>Escolha o tipo</h3><div class="tipos-carne-ui" data-quantidade="' +
@@ -168,6 +170,7 @@ async function abrirPainelProduto(comandaId, produtoId) {
             ${produto.imagem || produto.img ? `<button type="button" class="foto-produto-atalho-ui" data-imagem="${escaparOperacao(resolverImagemProduto(produto.imagem || produto.img))}" data-nome="${escaparOperacao(produto.nome)}" onclick="abrirFotoProdutoUI(this)">Ver foto</button>` : ""}
         </h2>
 
+        ${produto.categoria === "lanches" ? `<p id="descricao-produto-config">${escaparOperacao(descricaoProdutoComCarneOperacao(produto))}</p>` : ""}
 
         <h3
     id="preco-produto-config"
@@ -274,6 +277,9 @@ function atualizarPrecoProduto() {
   if (!precoTela) {
     return;
   }
+  const descricao = document.getElementById("descricao-produto-config");
+  if (descricao && produtoPainelAtual)
+    descricao.textContent = descricaoProdutoComCarneOperacao(produtoPainelAtual, opcaoTipo?.value);
 
   let precoBase = 0;
 

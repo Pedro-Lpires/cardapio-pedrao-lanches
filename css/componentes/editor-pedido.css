@@ -147,6 +147,37 @@ dialog.editor-pedido-ui .pedido-caixa-ui {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 14px;
 }
+.editor-form-ui > section,
+.editor-recebimento-ui {
+  border: 1px solid #454545;
+  border-radius: 10px;
+  background: #1c1c1c;
+}
+.editor-form-ui > section {
+  margin-bottom: 14px;
+}
+dialog.editor-pedido-ui .editor-form-ui > section h3 {
+  margin-top: 0;
+}
+.editor-form-ui > section > .editor-secao-ui {
+  margin: 0 0 12px;
+}
+.editor-form-ui .editor-grade-ui:empty {
+  display: none;
+}
+.editor-recebimento-ui {
+  margin-top: 12px;
+  padding: 12px;
+}
+.editor-recebimento-ui > header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #454545;
+}
 .editor-secao-ui,
 .editor-acoes-ui,
 .editor-corpo-ui footer {

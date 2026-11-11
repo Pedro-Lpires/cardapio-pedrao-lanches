@@ -1,5 +1,53 @@
 /* Retoma somente a sessão que este aparelho criou para esta mesa. */
 let observadoresSessaoAutoUI = [];
+let timerRascunhoAutoUI = null;
+let conferindoRascunhoAutoUI = false;
+
+function pararExpiracaoRascunhoAutoUI() {
+  if (timerRascunhoAutoUI !== null) clearTimeout(timerRascunhoAutoUI);
+  timerRascunhoAutoUI = null;
+}
+function limparRascunhoAntigoAutoUI() {
+  pararExpiracaoRascunhoAutoUI();
+  const id = sessaoAutoatendimentoAtual?.id || lerIdentificacaoSessaoAutoUI();
+  if (id) apagarIdentificacaoSessaoAutoUI(id);
+  if (typeof mesaProtegidaUI !== "undefined")
+    mesaProtegidaUI.apagar(mesaAutoatendimentoAtual?.numero);
+  sessaoAutoatendimentoAtual = null;
+  carrinhoAutoatendimento = [];
+  if (typeof indiceItemAutoEmEdicao !== "undefined") indiceItemAutoEmEdicao = null;
+  if (typeof voltarResumoDepoisEdicaoAuto !== "undefined") voltarResumoDepoisEdicaoAuto = false;
+  for (const idModal of ["modal-produto-auto", "modal-combo-auto", "modal-resumo-auto"]) {
+    const modal = document.getElementById(idModal);
+    if (modal?.style) modal.style.display = "none";
+  }
+}
+function agendarExpiracaoRascunhoAutoUI() {
+  pararExpiracaoRascunhoAutoUI();
+  if (!sessaoAutoatendimentoAtual || sessaoAutoatendimentoAtual.pedidoEnviado) return;
+  const janela = obterJanelaDiaOperacional();
+  timerRascunhoAutoUI = setTimeout(
+    conferirValidadeRascunhoAutoUI,
+    Math.max(0, janela.fimMs - Date.now()) + 50,
+  );
+}
+async function conferirValidadeRascunhoAutoUI() {
+  const sessao = sessaoAutoatendimentoAtual;
+  if (!sessao || sessao.pedidoEnviado || conferindoRascunhoAutoUI) return;
+  const { inicioMs, fimMs } = obterJanelaDiaOperacional();
+  if (Number(sessao.criadoEmMs || 0) >= inicioMs && Number(sessao.criadoEmMs) < fimMs) {
+    agendarExpiracaoRascunhoAutoUI();
+    return;
+  }
+  conferindoRascunhoAutoUI = true;
+  try {
+    await iniciarAutoatendimento();
+  } catch (erro) {
+    console.warn("Não foi possível conferir a visita ao voltar para a mesa:", erro);
+  } finally {
+    conferindoRascunhoAutoUI = false;
+  }
+}
 
 async function recuperarContaSalvaAutoUI() {
   if (typeof acessoClienteSenhaUI !== "undefined") {
@@ -85,6 +133,7 @@ function pararAcompanhamentoSessaoAutoUI() {
   parar.forEach((fn) => fn());
 }
 function mostrarAtendimentoEncerradoAutoUI() {
+  pararExpiracaoRascunhoAutoUI();
   if (typeof mesaProtegidaUI !== "undefined")
     mesaProtegidaUI.apagar(mesaAutoatendimentoAtual?.numero);
   if (typeof appVisitaMesaProtegidaUI !== "undefined" && appVisitaMesaProtegidaUI)
@@ -132,7 +181,10 @@ async function recuperarSessaoDaMesaAutoUI() {
         console.error("Não foi possível atualizar a sessão encerrada:", erro);
       }
     }
-    return { sessaoEncerrada: true };
+    return {
+      sessaoEncerrada: true,
+      ...(motivo === "fim_dia_operacional" ? { rascunhoExpirado: true } : {}),
+    };
   };
   if (!sessao || sessao.status !== "ativa") return encerrar("sessao_inativa");
   if (sessao.pedidoEnviado) {
@@ -209,11 +261,19 @@ async function validarAcaoSessaoEnviadaAutoUI() {
     return false;
   }
 }
-window.addEventListener("pagehide", pararAcompanhamentoSessaoAutoUI);
+window.addEventListener("pagehide", () => {
+  pararAcompanhamentoSessaoAutoUI();
+  pararExpiracaoRascunhoAutoUI();
+});
 window.addEventListener("pageshow", () => {
   if (
     typeof sessaoAutoatendimentoAtual !== "undefined" &&
     sessaoAutoatendimentoAtual?.pedidoEnviado
   )
     acompanharSessaoEnviadaAutoUI();
+  else return conferirValidadeRascunhoAutoUI();
+});
+window.addEventListener("focus", conferirValidadeRascunhoAutoUI);
+document.addEventListener?.("visibilitychange", () => {
+  if (!document.hidden) conferirValidadeRascunhoAutoUI();
 });

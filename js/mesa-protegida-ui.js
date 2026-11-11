@@ -90,7 +90,11 @@ async function iniciarMesaProtegidaUI(numero) {
   const dados = await mesaProtegidaUI.estado(numero);
   mesaAutoatendimentoAtual = dados.mesa;
   mesaAutoatendimentoId = dados.mesa.id;
-  const anterior = await mesaProtegidaUI.retomar(numero);
+  let anterior = await mesaProtegidaUI.retomar(numero);
+  if (anterior.rascunhoExpirado) {
+    limparRascunhoAntigoAutoUI();
+    anterior = { sessao: null };
+  }
   if (anterior.sessaoEncerrada) return mostrarAtendimentoEncerradoAutoUI();
   if (anterior.sessao) {
     sessaoAutoatendimentoAtual = anterior.sessao;

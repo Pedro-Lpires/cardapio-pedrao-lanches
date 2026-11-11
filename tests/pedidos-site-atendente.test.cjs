@@ -429,6 +429,43 @@ async function testar() {
   assert.equal(financeiro.categorias.Bebidas, 10);
   assert.equal(financeiro.formas.Pix, 60);
   assert.equal(financeiro.formas.Dinheiro, 10);
+  const entregaPaga = pedido("Entrega", {
+    pagamento: "Pix",
+    pagamentoConfirmado: true,
+    valorTotal: 33,
+    taxaEntrega: 7,
+    itens: [{ ...clone(item), quantidade: 1, subtotal: 26 }],
+  });
+  registros.set("pedidos/corrigir-com-excedente", clone(entregaPaga));
+  const dividir28 = [
+    { forma: "Dinheiro", valor: 8 },
+    { forma: "Crédito", valor: 20 },
+  ];
+  await assert.rejects(
+    ctx.salvarEdicaoPedidoTransacaoUI("corrigir-com-excedente", entregaPaga, {
+      ...entregaPaga,
+      correcaoRecebimentos: { 0: dividir28 },
+    }),
+    /Só o valor a devolver/,
+  );
+  const corrigido28 = await ctx.salvarEdicaoPedidoTransacaoUI(
+    "corrigir-com-excedente",
+    entregaPaga,
+    {
+      ...entregaPaga,
+      descontoFidelidade: 5,
+      correcaoRecebimentos: { 0: dividir28 },
+    },
+  );
+  assert.equal(corrigido28.valorTotal, 28);
+  assert.equal(corrigido28.valorPago, 33);
+  assert.equal(corrigido28.valorADevolver, 5);
+  assert.equal(corrigido28.recebimentosPedido.length, 1);
+  assert.equal(corrigido28.recebimentosPedido[0].valorSemForma, 5);
+  const financeiro28 = resumoEntradasFinanceiro(corrigido28.recebimentosPedido);
+  assert.equal(financeiro28.recebido, 33);
+  assert.deepEqual(financeiro28.formas, { Dinheiro: 8, Crédito: 20, "Sem forma definida": 5 });
+  registros.delete("pedidos/corrigir-com-excedente");
   const conferido = clone(acrescido);
   acrescido.valorTotal = 80;
   await assert.rejects(

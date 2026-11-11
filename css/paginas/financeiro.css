@@ -8,3 +8,12 @@
 @import url("../mobile.css?v=20261025-2");
 @import url("../navegacao.css?v=20261102-4");
 @import url("../componentes.css?v=20261104-4");
+
+.financeiro-voltar {
+  display: inline-block;
+  margin-bottom: 16px;
+}
+.financeiro-acoes-acesso {
+  display: flex;
+  margin-bottom: 20px;
+}
